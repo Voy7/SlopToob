@@ -1,0 +1,22 @@
+.header {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 0;
+  width: 100%;
+  padding: 0.5rem;
+  background: var(--bg-color-2);
+  border-bottom: 1px solid black;
+  box-shadow: 0 0 5px 0 black;
+
+  button {
+    padding: 0.5rem 1rem;
+    font-size: 1.1rem;
+    border: none;
+    background: none;
+    color: var(--text-color-1);
+    cursor: pointer;
+
+    &:hover { background: var(--bg-color-2); }
+  }
+}

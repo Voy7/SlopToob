@@ -1,0 +1,89 @@
+.button {
+  position: relative;
+  padding: 0.4em 0.8em;
+  font-size: 1rem;
+  color: white;
+  background: rgb(127, 127, 127);
+  border: none;
+  border-radius: 0.5em;
+  transition: 300ms;
+  cursor: pointer;
+
+  &.disabled {
+    opacity: 0.75;
+    cursor: not-allowed;
+  }
+
+  &.loading {
+    opacity: 0.75;
+    cursor: default;
+    .text { opacity: 0; }
+    .loadingContainer { display: flex; }
+  }
+
+  .text {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 3px;
+    font-size: inherit;
+    color: inherit;
+  }
+
+  .loadingContainer {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    width: 1.5em;
+    height: 1.5em;
+    animation: loading 2s linear infinite;
+    
+    @keyframes loading {
+      0% { rotate: 0deg; }
+      100% { rotate: 360deg; }
+    }
+  }
+}
+
+// Type-specific button styles:
+.main {
+  color: white;
+  background: rgb(199, 137, 194);
+  border: 2px solid transparent;
+  &:hover { background: rgb(196, 94, 190); }
+  &:active { translate: 0 2px; }
+  &.disabled {
+    background: none;
+    border-color: rgb(199, 137, 194);
+    scale: 0.9;
+  }
+}
+
+.normal {
+  color: rgb(220, 220, 220);
+  background: var(--bg-color-2);
+  border: 1px solid var(--border-color-1);
+  &:hover { color: white; background: rgb(50, 50, 50); }
+}
+
+.danger {
+  color: rgb(255, 95, 95);
+  background: var(--bg-color-2);
+  border: 1px solid var(--border-color-1);
+  &:hover { color: white; background: rgb(255, 95, 95); }
+}
+
+.action-normal,
+.action-danger {
+  padding: 3px;
+  color: var(--text-color-1);
+  background: var(--bg-color-2);
+  border: 1px solid var(--border-color-2);
+  border-radius: 5px;
+}
+.action-normal:hover { background: rgb(115, 99, 168); }
+.action-danger:hover { background: rgb(255, 127, 127); }

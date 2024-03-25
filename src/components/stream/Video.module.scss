@@ -1,0 +1,41 @@
+// Fixed 9x16 aspect ratio
+.videoContainer {
+  width: calc(100% - var(--chat-width));
+  height: 100%;
+  // background: red;
+  background: rgb(0, 40, 00);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  video {
+    width: 100%;
+    height: 100%;
+  }
+
+  .loading {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    font-size: 1.2rem;
+    color: var(--text-color-3);
+    cursor: default;
+
+    svg { font-size: 3rem; }
+  }
+
+  .error {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    font-size: 1.2rem;
+    color: var(--error-color);
+    cursor: default;
+
+    svg { font-size: 3rem; }
+  }
+}

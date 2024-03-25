@@ -1,0 +1,50 @@
+:root {
+  --text-color-1: rgb(255, 255, 255);
+  --text-color-2: rgb(200, 200, 200);
+  --text-color-3: rgb(150, 150, 150);
+
+  --bg-color-1: rgb(16, 16, 16);
+  --bg-color-2: rgb(32, 32, 32);
+  --bg-color-3: rgb(70, 70, 70);
+
+  --border-color-1: rgb(60, 60, 60);
+  --border-color-2: rgb(100, 100, 100);
+  --border-color-3: rgb(150, 150, 150);
+
+  --theme-color-1: #AF9DD3;
+
+  --error-color: rgb(255, 95, 95);
+
+  --chat-width: 350px;
+}
+
+html, body {
+  background: var(--bg-color-1);
+  color: var(--text-color-1);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+// Global thin scrollbars for all browsers
+::-webkit-scrollbar {
+  width: 8px; height: 8px;
+  &-track { background: var(--bg-color-1); }
+}
+::-webkit-scrollbar-thumb { background: var(--border-color-1); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-color-2); }
+* { scrollbar-width: thin; scrollbar-color: var(--border-color-1) var(--bg-color-1); }
+
+// Loading icon animation
+[data-loading-icon] {
+  animation: loading 1s linear infinite;
+  @keyframes loading {
+    0% { rotate: 0deg; }
+    100% { rotate: 360deg; }
+  }
+}
