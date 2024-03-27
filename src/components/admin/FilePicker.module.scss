@@ -1,0 +1,41 @@
+.filePicker {
+  margin: 1rem;
+  border: 1px solid var(--border-color-1);
+}
+
+.treeItem {
+  margin-left: 1rem;
+
+  .item {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+
+    input[type="checkbox"] {
+      appearance: none;
+      width: 1rem;
+      height: 1rem;
+      border: 1px solid var(--border-color-1);
+      border-radius: 0.25rem;
+      cursor: pointer;
+
+      &:hover { background: var(--bg-color-3); }
+
+      &:checked {
+        background: rgb(95, 95, 255);
+        border-color: rgb(95, 95, 255);
+
+        &:after {
+          content: "✔";
+          display: block;
+          width: 1rem;
+          height: 1rem;
+          text-align: center;
+          line-height: 1rem;
+          font-size: 0.75rem;
+          color: var(--text-color-1);
+        }
+      }
+    }
+  }
+}

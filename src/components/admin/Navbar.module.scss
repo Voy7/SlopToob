@@ -1,0 +1,26 @@
+.navbar {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border-color-1);
+  overflow-y: auto;
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.5rem 1rem 0.5rem calc(1rem - 3px);
+    font-size: 1.2rem;
+    color: rgb(127, 127, 255);
+    background: none;
+    border: none;
+    border-left: 3px solid transparent;
+    transition: 150ms ease-in-out;
+    cursor: pointer;
+
+    &:hover { background: var(--bg-color-2); }
+
+    &.active { color: var(--text-color-1); background: var(--bg-color-3); border-color: rgb(127, 127, 255); }
+
+    svg { font-size: 1rem; }
+  }
+}

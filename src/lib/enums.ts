@@ -10,6 +10,11 @@ export enum SocketEvent {
   SendChatMessage = 'send-chat-message',
   NewChatMessage = 'new-chat-message',
   StreamInfo = 'stream-info',
+
+  // Admin events
+  AdminRequestFileTree = 'admin-request-file-tree',
+  AdminRequestPlaylists = 'admin-request-playlists',
+  AdminAddPlaylist = 'admin-add-playlist',
 }
 
 export enum ServerEvent {

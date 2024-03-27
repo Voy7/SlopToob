@@ -17,6 +17,8 @@ type ContextProps = {
   timeSeconds: number,
   showUsernameModal: boolean,
   setShowUsernameModal: React.Dispatch<React.SetStateAction<boolean>>,
+  showAdminModal: boolean,
+  setShowAdminModal: React.Dispatch<React.SetStateAction<boolean>>,
   chatMessages: (ChatMessage | { error: string })[],
   setChatMessages: React.Dispatch<React.SetStateAction<(ChatMessage | { error: string })[]>>,
   streamInfo: StreamInfo,
@@ -37,6 +39,7 @@ export function StreamProvider({ authUser, cookieUsername, children }:Props) {
   const [timeSeconds, setTimeSeconds] = useState<number>(0)
   const [username, setUsername] = useState<string>(cookieUsername)
   const [showUsernameModal, setShowUsernameModal] = useState<boolean>(username === 'Anonymous')
+  const [showAdminModal, setShowAdminModal] = useState<boolean>(false)
   const [chatMessages, setChatMessages] = useState<(ChatMessage | { error: string })[]>([])
   const [socket, setSocket] = useState<Socket | null>(null)
 
@@ -85,6 +88,8 @@ export function StreamProvider({ authUser, cookieUsername, children }:Props) {
     timeSeconds,
     showUsernameModal,
     setShowUsernameModal,
+    showAdminModal,
+    setShowAdminModal,
     chatMessages,
     setChatMessages,
     streamInfo,
