@@ -12,6 +12,10 @@ export default function SectionStream() {
   const { playlists, selectedPlaylist, setSelectedPlaylist } = useAdminContext()
   const { socket } = useStreamContext()
 
+  function setActivePlaylist(playlistID: string) {
+    socket?.emit(SocketEvent.AdminSetActivePlaylist, playlistID)
+  }
+
   return (
     <div className={styles.sectionStream}>
       <h2>STREAM SETTINGS</h2>
@@ -20,14 +24,12 @@ export default function SectionStream() {
         {/* Radial button list */}
         <div className={styles.playlistList}>
           {playlists.map(playlist => (
-            <input
+            <Button
               key={playlist.id}
-              type="radio"
-              id={playlist.id}
-              name="playlist"
-              checked={selectedPlaylist === playlist.id}
-              onChange={() => setSelectedPlaylist(playlist.id)}
-            />
+              style="normal"
+              icon="playlist"
+              onClick={() => setActivePlaylist(playlist.id)}
+            >{playlist.name}</Button>
           ))}
         </div>
       </div>

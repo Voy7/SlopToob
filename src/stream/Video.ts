@@ -120,17 +120,23 @@ export default class Video {
   }
 
   get inputPath(): string {
-    return path.join(Env.VIDEOS_PATH, this.path).replace(/\\/g, '/')
+    // return path.join(Env.VIDEOS_PATH, this.path).replace(/\\/g, '/')
+    return this.path
   }
 
   get outputPath(): string {
-    let newPath = path.join(Env.OUTPUT_PATH, this.path).replace(/\\/g, '/')
-    newPath = newPath.substring(0, newPath.lastIndexOf('.'))
+    // let newPath = path.join(Env.OUTPUT_PATH, this.path).replace(/\\/g, '/')
+    // newPath = newPath.substring(0, newPath.lastIndexOf('.'))
+    // return newPath
+    
+    const a = path.resolve(this.path)
+    const filePath = a.split(Env.VIDEOS_PATH)[1]
+    const newPath = path.join(Env.OUTPUT_PATH, filePath).replace(/\\/g, '/')
     return newPath
   }
 
   get name() {
-    return ''
+    return path.basename(this.path)
   }
 
   get title() {

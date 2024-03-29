@@ -4,7 +4,7 @@ import { useState, useContext, createContext, useEffect } from 'react'
 import { sections, type SectionName } from '@/components/admin/AdminModal'
 import { useStreamContext } from './StreamContext'
 import { SocketEvent } from '@/lib/enums'
-import { ClientPlaylist, FileTree } from '@/typings/types'
+import { ClientPlaylist, ClientVideo, FileTree } from '@/typings/types'
 
 // Stream page context
 type ContextProps = {
@@ -14,6 +14,7 @@ type ContextProps = {
   playlists: ClientPlaylist[],
   selectedPlaylist: string | null,
   setSelectedPlaylist: (id: string | null) => void,
+  bumpers: ClientVideo[]
 }
 
 type Props =  {
@@ -32,6 +33,7 @@ export function AdminProvider({ children }:Props) {
   const [fileTree, setFileTree] = useState<FileTree | null>(null)
   const [playlists, setPlaylists] = useState<ClientPlaylist[]>([])
   const [selectedPlaylist, setSelectedPlaylist] = useState<string | null>(null)
+  const [bumpers, setBumpers] = useState<ClientVideo[]>([])
 
   function setSection(sectionName: SectionName) {
     const sec = sections.find(s => s.name === sectionName)
@@ -53,6 +55,11 @@ export function AdminProvider({ children }:Props) {
       setPlaylists(playlists)
       // if (!selectedPlaylist && playlists[0]) setSelectedPlaylist(playlists[0].id)
     })
+
+    socket.on(SocketEvent.AdminBumpersList, (bumpers: ClientVideo[]) => {
+      console.log('Bumpers:', bumpers)
+      setBumpers(bumpers)
+    })
   }, [])
 
   useEffect(() => {
@@ -66,6 +73,7 @@ export function AdminProvider({ children }:Props) {
     playlists,
     selectedPlaylist,
     setSelectedPlaylist,
+    bumpers
   }
 
   return <AdminContext.Provider value={context}>{children}</AdminContext.Provider>

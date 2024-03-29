@@ -9,7 +9,7 @@ import Settings from '@/stream/Settings'
   console.log(settings)
 })()
 
-// import Player from '@/stream/Player'
+import Player from '@/stream/Player'
 // import Video from '@/stream/Video'
 
 // Player.addVideo(new Video('1.mp4'))

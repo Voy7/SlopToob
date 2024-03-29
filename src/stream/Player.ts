@@ -1,12 +1,14 @@
 import fs from 'fs/promises'
 import prisma from '@/lib/prisma'
 import Env from '@/EnvVariables'
-import Video from '@/stream/Video'
-// import { broadcastStreamInfo } from '@/server/socket'
-import { PlayerState } from '@/lib/enums'
-import type { StreamInfo, StreamPlaying, StreamLoading, StreamError } from '@/typings/socket'
-import { RichPlaylist, FileTree, ClientPlaylist } from '@/typings/types'
 import Logger from '@/lib/Logger'
+import Video from '@/stream/Video'
+import { PlayerState } from '@/lib/enums'
+import type { StreamInfo } from '@/typings/socket'
+import type { RichPlaylist, FileTree, ClientPlaylist } from '@/typings/types'
+
+import { bumpers } from '@/stream/bumpers'
+import Settings from './Settings'
 
 const VALID_EXTENSIONS = ['.mp4', '.mkv', '.avi', '.mov', '.flv', '.wmv', '.webm']
 
@@ -16,10 +18,50 @@ export default new class Player {
   queue: Video[] = []
   isPaused: boolean = false
   playlists: RichPlaylist[] = []
+  private _activePlaylistID: string = 'None'
 
   constructor() {
     // Get all playlists on startup
-    this.getPlaylists()
+    (async () => {
+      Logger.debug('Player initialized')
+      await this.getPlaylists()
+      const settings = await Settings.getSettings()
+      this.activePlaylistID = settings.activePlaylist
+    })()
+  }
+
+  set activePlaylistID(playlistID: string) {
+    this._activePlaylistID = playlistID
+    Logger.debug('Active playlist set:', playlistID)
+
+    this.queue = [] // Clear queue when playlist changes
+    for (let i = 0; i < 10; i++) {
+      this.addRandomToQueue()
+    }
+  }
+
+  get activePlaylistID(): string {
+    return this._activePlaylistID
+  }
+
+  addRandomToQueue() {
+    const playlist = this.playlists.find(playlist => playlist.id === this.activePlaylistID)
+    if (!playlist) return
+
+    const randomVideo = playlist.videos[Math.floor(Math.random() * playlist.videos.length)]
+    if (!randomVideo) return
+
+    this.addVideo(new Video(randomVideo.path))
+  }
+
+  async setActivePlaylist(playlistID: string) {
+    // Verify playlist exists
+    const playlist = this.playlists.find(playlist => playlist.id === playlistID)
+    console.log(playlistID, playlist)
+    if (!playlist) return
+
+    await Settings.setSetting('activePlaylist', playlistID)
+    this.activePlaylistID = playlistID
   }
 
   get clientPlaylists(): ClientPlaylist[] {
@@ -179,8 +221,7 @@ export default new class Player {
 
   // Set new videos for playlist
   async setPlaylistVideos(playlistID: string, newVideoPaths: string[]) {
-    // Remove duplicate paths
-    newVideoPaths = Array.from(new Set(newVideoPaths))
+    newVideoPaths = Array.from(new Set(newVideoPaths)) // Remove duplicate paths
 
     // Overwrite all videos in playlist with new ones
     await prisma.video.deleteMany({

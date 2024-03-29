@@ -3,6 +3,7 @@ import path from 'path'
 import { Server, type Socket } from 'socket.io'
 import { httpServer } from '@/server/httpServer'
 import { AuthRole, SocketEvent } from '@/lib/enums'
+import { getClientBumpers } from '@/stream/bumpers'
 import authRoleFromPassword from '@/lib/authRoleFromPassword'
 import Env from '@/EnvVariables'
 import Player from '@/stream/Player'
@@ -58,6 +59,7 @@ export function initializeSocketServer() {
       const playlists = Player.clientPlaylists
       socket.emit(SocketEvent.AdminRequestFileTree, tree)
       socket.emit(SocketEvent.AdminRequestPlaylists, playlists)
+      socket.emit(SocketEvent.AdminBumpersList, getClientBumpers())
     })
 
     // Add new playlist, send event code back to confirm success, and globally broadcast new playlists list
@@ -88,6 +90,12 @@ export function initializeSocketServer() {
       broadcastAdmin(SocketEvent.AdminRequestPlaylists, Player.clientPlaylists)
     })
 
+    // Set active playlist
+    socket.on(SocketEvent.AdminSetActivePlaylist, async (playlistID: string) => {
+      await Player.setActivePlaylist(playlistID)
+      broadcastAdmin(SocketEvent.AdminRequestPlaylists, Player.clientPlaylists)
+    })
+
     // Upload bumper video, response is error or success message
     socket.on(SocketEvent.AdminUploadBumper, async (payload: unknown) => {
       try {
@@ -110,6 +118,18 @@ export function initializeSocketServer() {
       }
       catch (error: any) { socket.emit(SocketEvent.AdminUploadBumper, { error: error.message }) }
     })
+
+    // Delete bumper video, response is error or success message
+    socket.on(SocketEvent.AdminDeleteBumper, async (filePath: string) => {
+      try {
+        if (!filePath.startsWith(Env.BUMPERS_PATH)) throw new Error('File is not in bumpers directory.')
+        await fs.rm(filePath)
+        Logger.debug(`Admin requested deleted bumper: ${filePath}`)
+        socket.emit(SocketEvent.AdminDeleteBumper, { success: true })
+        broadcastAdmin(SocketEvent.AdminBumpersList, getClientBumpers())
+      }
+      catch (error: any) { socket.emit(SocketEvent.AdminDeleteBumper, { error: error.message }) }
+    })
   })
 }
 
@@ -121,10 +141,12 @@ export function broadcast(event: SocketEvent, payload: any) {
 }
 
 export function broadcastAdmin(event: SocketEvent, payload: any) {
-  for (const client of clients) {
-    if (client.role < AuthRole.Admin) continue
-    client.socket.emit(event, payload)
-  }
+  try {
+    for (const client of clients) {
+      if (client.role < AuthRole.Admin) continue
+      client.socket.emit(event, payload)
+    }
+  } catch (e) {}
 }
 
 export function broadcastViewersList() {

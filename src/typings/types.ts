@@ -1,5 +1,6 @@
 import { AuthRole } from '@/lib/enums'
 import type { Playlist, Video } from '@prisma/client'
+import path from 'path';
 
 export type ActionResponse = { error: string } | { success: boolean }
 
@@ -49,4 +50,9 @@ export type ClientPlaylist = {
   id: string,
   name: string,
   videoPaths: string[]
+}
+
+export type ClientVideo = {
+  path: string,
+  name: string
 }

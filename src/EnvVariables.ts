@@ -24,4 +24,5 @@ export default new class EnvVariables {
   readonly ADMIN_PASSWORD: string = parsed?.ADMIN_PASSWORD || 'admin'
   readonly OUTPUT_PATH: string = parsePath(parsed?.OUTPUT_PATH, 'default_output')
   readonly VIDEOS_PATH: string = parsePath(parsed?.VIDEOS_PATH, 'default_videos')
+  readonly BUMPERS_PATH: string = parsePath(parsed?.OUTPUT_PATH + '/bumpers', 'default_videos')
 }

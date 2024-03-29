@@ -8,6 +8,40 @@
     margin-bottom: 1rem;
     font-size: 1.5rem;
   }
+
+  .options {
+    display: flex;
+    margin: 1rem 0;
+  }
+
+  .bumpersList {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border-color-1);
+
+    .bumper {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.2rem 0.5rem;
+      font-size: 1rem;
+      color: var(--text-color-2);
+
+      &:hover { color: var(--text-color-1); background-color: var(--bg-color-2); }
+
+      .left {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        cursor: default;
+
+        svg { color: var(--select-color); }
+      }
+
+      button { font-size: 0.85rem; }
+    }
+  }
 }
 
 .addBumperModal {
@@ -18,5 +52,42 @@
     justify-content: flex-end;
     align-items: center;
     gap: 0.5rem;
+  }
+
+  .error {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 1rem 0 0 0;
+    color: var(--error-color);
+  }
+}
+
+.deleteBumperModal {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+
+  p {
+    padding: 1rem;
+    color: var(--text-color-2);
+  }
+  
+  .buttons {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .error {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 1rem 0 0 0;
+    color: var(--error-color);
   }
 }

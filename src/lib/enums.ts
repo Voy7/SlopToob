@@ -19,7 +19,10 @@ export enum SocketEvent {
   AdminDeletePlaylist = 'admin-delete-playlist',
   AdminEditPlaylistName = 'admin-edit-playlist-name',
   AdminEditPlaylistVideos = 'admin-edit-playlist-videos',
+  AdminSetActivePlaylist = 'admin-set-active-playlist',
   AdminUploadBumper = 'admin-upload-bumper',
+  AdminDeleteBumper = 'admin-delete-bumper',
+  AdminBumpersList = 'admin-bumpers-list',
 }
 
 export enum ServerEvent {
