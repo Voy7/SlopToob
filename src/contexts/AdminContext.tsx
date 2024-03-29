@@ -13,7 +13,7 @@ type ContextProps = {
   fileTree: FileTree | null,
   playlists: ClientPlaylist[],
   selectedPlaylist: string | null,
-  setSelectedPlaylist: React.Dispatch<React.SetStateAction<string | null>>
+  setSelectedPlaylist: (id: string | null) => void,
 }
 
 type Props =  {
@@ -39,21 +39,25 @@ export function AdminProvider({ children }:Props) {
   }
 
   useEffect(() => {
-    socket.emit(SocketEvent.AdminRequestFileTree)
+    // Request data from server, expect a bunch of socket messages
+    socket.emit(SocketEvent.AdminRequestAllData)
 
     socket.on(SocketEvent.AdminRequestFileTree, (tree: FileTree) => {
       console.log('File tree:', tree)
       setFileTree(tree)
     })
 
-    socket.emit(SocketEvent.AdminRequestPlaylists)
 
     socket.on(SocketEvent.AdminRequestPlaylists, (playlists: ClientPlaylist[]) => {
-      console.log('Playlists:', playlists)
+      console.log('Playlists:', selectedPlaylist, playlists)
       setPlaylists(playlists)
-      setSelectedPlaylist(playlists[0].id)
+      // if (!selectedPlaylist && playlists[0]) setSelectedPlaylist(playlists[0].id)
     })
   }, [])
+
+  useEffect(() => {
+    if (!selectedPlaylist && playlists[0]) setSelectedPlaylist(playlists[0].id)
+  }, [playlists])
 
   const context: ContextProps = {
     section,
@@ -61,7 +65,7 @@ export function AdminProvider({ children }:Props) {
     fileTree,
     playlists,
     selectedPlaylist,
-    setSelectedPlaylist
+    setSelectedPlaylist,
   }
 
   return <AdminContext.Provider value={context}>{children}</AdminContext.Provider>

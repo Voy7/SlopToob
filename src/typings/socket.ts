@@ -50,3 +50,13 @@ export type JoinStreamPayload = {
   secret: string,
   password: string
 }
+
+export type EditPlaylistNamePayload = {
+  playlistID: string,
+  newName: string
+}
+
+export type EditPlaylistVideosPayload = {
+  playlistID: string,
+  newVideoPaths: string[]
+}

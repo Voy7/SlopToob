@@ -1,15 +1,25 @@
 .filePicker {
-  margin: 1rem;
   border: 1px solid var(--border-color-1);
 }
 
 .treeItem {
-  margin-left: 1rem;
+  &.selected {
+    background: var(--bg-color-3);
+    .item { color: var(--text-color-1) !important; background: var(--bg-color-3) !important; }
+  }
+  
+  label.item { cursor: pointer !important; }
 
   .item {
     display: flex;
     align-items: center;
     gap: 0.3rem;
+    padding: 2px;
+    color: var(--text-color-2);
+    cursor: -webkit-grab;
+    cursor: -moz-grab;
+
+    &:hover { background: var(--bg-color-2); }
 
     input[type="checkbox"] {
       appearance: none;
@@ -19,7 +29,7 @@
       border-radius: 0.25rem;
       cursor: pointer;
 
-      &:hover { background: var(--bg-color-3); }
+      &:hover { background: var(--bg-color-1); }
 
       &:checked {
         background: rgb(95, 95, 255);

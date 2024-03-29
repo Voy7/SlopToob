@@ -42,7 +42,7 @@ export default function Modal({ title, isOpen, setClose, canEscapeKeyClose = tru
   }, [])
 
   function backgroundClick() {
-    if (canEscapeKeyClose) setClose()
+    setClose()
   }
 
   if (!show) return null

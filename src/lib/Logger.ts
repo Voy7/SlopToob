@@ -11,13 +11,13 @@ export default new class Logger {
   public error(message: any) { // Error messages
     this.send(message, 'ERROR'.red)
   }
-  public debug(message: any) { // Debug messages, only sent in development mode
+  public debug(message: any, ...args: any[]) { // Debug messages
     if (Env.PROJECT_MODE != 'development') return
-    this.send(message, 'DEBUG'.magenta)
+    this.send(message, 'DEBUG'.magenta, ...args)
   }
 
   // Private method that sends the message with fancy styling
-  private send(message: any, label: string) {
+  private send(message: any, label: string, ...args: any[]) {
     console.log(
       `[`.white +
       `${new Date().toLocaleString().split(' ')[1]}`.white +
@@ -25,7 +25,8 @@ export default new class Logger {
       `[`.gray +
       label +
       `] `.gray +
-      message
+      message,
+      ...args
     )
   }
 }
