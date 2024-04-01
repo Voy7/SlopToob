@@ -3,14 +3,16 @@ import prisma from '@/lib/prisma'
 import Env from '@/EnvVariables'
 import Logger from '@/lib/Logger'
 import Video from '@/stream/Video'
-import { PlayerState } from '@/lib/enums'
+import { PlayerState, SocketEvent } from '@/lib/enums'
 import type { StreamInfo } from '@/typings/socket'
 import type { RichPlaylist, FileTree, ClientPlaylist } from '@/typings/types'
 
 import { bumpers } from '@/stream/bumpers'
 import Settings from './Settings'
+import { broadcastAdmin } from '@/server/socket'
 
 const VALID_EXTENSIONS = ['.mp4', '.mkv', '.avi', '.mov', '.flv', '.wmv', '.webm']
+const QUEUE_LENGTH = 4
 
 // Main player (video) handler, singleton
 export default new class Player {
@@ -35,23 +37,27 @@ export default new class Player {
     Logger.debug('Active playlist set:', playlistID)
 
     this.queue = [] // Clear queue when playlist changes
-    for (let i = 0; i < 10; i++) {
-      this.addRandomToQueue()
-    }
+    this.populateRandomToQueue()
   }
 
   get activePlaylistID(): string {
     return this._activePlaylistID
   }
 
-  addRandomToQueue() {
+  private populateRandomToQueue() {
     const playlist = this.playlists.find(playlist => playlist.id === this.activePlaylistID)
     if (!playlist) return
+
+    if (this.queue.length >= QUEUE_LENGTH) return
 
     const randomVideo = playlist.videos[Math.floor(Math.random() * playlist.videos.length)]
     if (!randomVideo) return
 
     this.addVideo(new Video(randomVideo.path))
+
+    if (this.queue.length < QUEUE_LENGTH) {
+      this.populateRandomToQueue()
+    }
   }
 
   async setActivePlaylist(playlistID: string) {
@@ -75,6 +81,7 @@ export default new class Player {
   addVideo(video: Video) {
     this.queue.push(video)
     if (!this.playing) this.playNext()
+    broadcastAdmin(SocketEvent.AdminQueueList, this.queue.map(video => video.clientVideo))
   }
 
   async playNext() {
@@ -88,6 +95,7 @@ export default new class Player {
       this.playing = next
       const x = await this.playing.download()
       await this.playing.play()
+      this.populateRandomToQueue()
     }
     // Start downloading next video in queue
     if (this.queue[0]) {

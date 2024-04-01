@@ -47,5 +47,5 @@ function syncCheckBumper(pathName: string) {
 
 // Utility function to get all bumpers as ClientVideo[] for client side
 export function getClientBumpers(): ClientVideo[] {
-  return bumpers.map(bumper => ({ path: bumper.path, name: bumper.name }))
+  return bumpers.map(bumper => bumper.clientVideo)
 }

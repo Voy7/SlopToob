@@ -60,6 +60,7 @@ export function initializeSocketServer() {
       socket.emit(SocketEvent.AdminRequestFileTree, tree)
       socket.emit(SocketEvent.AdminRequestPlaylists, playlists)
       socket.emit(SocketEvent.AdminBumpersList, getClientBumpers())
+      socket.emit(SocketEvent.AdminQueueList, Player.queue.map(video => video.clientVideo))
     })
 
     // Add new playlist, send event code back to confirm success, and globally broadcast new playlists list

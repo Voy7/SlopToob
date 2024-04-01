@@ -14,7 +14,7 @@ const roleColors = {
 }
 
 export default function Chat() {
-  const { chatMessages, setChatMessages, viewers, socketSecret } = useStreamContext()
+  const { chatMessages, setChatMessages, viewers, socketSecret, nickname, setShowNicknameModal } = useStreamContext()
 
   const [message, setMessage] = useState<string>('')
 
@@ -52,10 +52,15 @@ export default function Chat() {
   return (
     <div className={styles.chat}>
       <div className={styles.header}>
-        <Icon name="users" />{viewers.length}
+        <div className={styles.viewerCount} title={`${viewers.length} Viewers`}>
+          <Icon name="users" />{viewers.length}
+        </div>
+        <button className={styles.usernameButton} onClick={() => setShowNicknameModal(true)} title="Change Nickname">
+          {nickname}<Icon name="edit" />
+      </button>
       </div>
       <div className={styles.messages} ref={messagesRef}>
-        {chatMessages.map((message, index) => {
+        {chatMessages.length > 0 ? chatMessages.map((message, index) => {
           if ('error' in message) {
             return <p key={chatMessages.length - index} className={styles.error}>{message.error}</p>
           }
@@ -67,7 +72,12 @@ export default function Chat() {
               <span style={{ color: nameColor }}>{message.username}:</span> {message.message}
             </p>
           )
-        })}
+        }) : (
+          <div className={styles.noMessages}>
+            <Icon name="chat" />
+            <p>No messages, end a chat.</p>
+          </div>
+        )}
       </div>
       <form onSubmit={submitMessage} className={styles.inputContainer}>
         <input type="text" value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Type a message..." />

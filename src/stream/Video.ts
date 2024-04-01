@@ -2,13 +2,10 @@ import fs from 'fs'
 import path from 'path'
 import Player from '@/stream/Player'
 import Env from '@/EnvVariables'
+import ffmpeg from '@/lib/ffmpeg'
 import generateSecret from '@/lib/generateSecret'
 import { broadcastStreamInfo } from '@/server/socket'
-
-import ffmpegStatic from 'ffmpeg-static'
-import ffmpeg from 'fluent-ffmpeg'
-
-ffmpeg.setFfmpegPath(ffmpegStatic!)
+import type { ClientVideo } from '@/typings/types'
 
 export default class Video {
   id: string = generateSecret()
@@ -24,6 +21,13 @@ export default class Video {
   constructor(path: string, isBumper?: boolean) {
     this.path = path
     this.isBumper = isBumper || false
+  }
+
+  get clientVideo(): ClientVideo {
+    return {
+      path: this.path,
+      name: this.name
+    }
   }
 
   get currentSeconds(): number {

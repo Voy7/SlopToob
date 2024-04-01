@@ -11,26 +11,25 @@ import { getServerSession } from 'next-auth'
 import authOptions from '@/lib/authOptions'
 import type { ActionResponse } from '@/typings/types'
 
-export async function changeUsername(username: string, socketSecret: string): Promise<ActionResponse> {
+export async function changeNickname(nickname: string, socketSecret: string): Promise<ActionResponse> {
   try {
     const session = await getServerSession(authOptions)
     const authUser = session?.user
     if (!authUser) throw new Error('You are not authenticated.')
 
     // Username can only have alphanumeric characters, spaces, and underscores
-    if (!/^[a-zA-Z0-9_ ]+$/.test(username)) {
+    if (!/^[a-zA-Z0-9_ ]+$/.test(nickname)) {
       throw new Error('Username can only contain alphanumeric characters.')
     }
     
-    console.log('changeUsername:', username)
-    cookies().set('username', username, {
+    cookies().set('nickname', nickname, {
       path: '/',
       maxAge: 60 * 60 * 24 * 365, // 1 year
       sameSite: 'strict',
       secure: false
     })
 
-    return doServerEvent(ServerEvent.ChangeUsername, { username, socketSecret })
+    return doServerEvent(ServerEvent.ChangeUsername, { username: nickname, socketSecret })
   }
   catch (error: any) {
     return { error: error.message }

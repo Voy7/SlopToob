@@ -7,7 +7,7 @@ import styles from './Header.module.scss'
 
 // Stream header component
 export default function Header() {
-  const { username, setShowUsernameModal, setShowAdminModal, viewers } = useStreamContext()
+  const { viewers, setShowAdminModal } = useStreamContext()
 
   return (
     <div className={styles.header}>
@@ -16,9 +16,6 @@ export default function Header() {
       </button>
       <button onClick={() => signOut()}>
         Sign Out
-      </button>
-      <button onClick={() => setShowUsernameModal(true)}>
-        <Icon name="user" /> {username}
       </button>
       <button onClick={() => setShowAdminModal(true)}>
         <Icon name="admin-panel" /> Admin Panel

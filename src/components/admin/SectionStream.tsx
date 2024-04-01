@@ -9,7 +9,7 @@ import Button from '@/components/ui/Button'
 import styles from './SectionStream.module.scss'
 
 export default function SectionStream() {
-  const { playlists, selectedPlaylist, setSelectedPlaylist } = useAdminContext()
+  const { playlists, queue } = useAdminContext()
   const { socket } = useStreamContext()
 
   function setActivePlaylist(playlistID: string) {
@@ -32,6 +32,15 @@ export default function SectionStream() {
             >{playlist.name}</Button>
           ))}
         </div>
+      </div>
+      <h3>Queue ({queue.length})</h3>
+      <div className={styles.queueList}>
+        {queue.map((video, index) => (
+          <div key={video.path} className={styles.queueItem}>
+            <span>{index + 1}.</span>
+            <p>{video.name}</p>
+          </div>
+        ))}
       </div>
     </div>
   )

@@ -11,12 +11,12 @@ import type { JoinStreamPayload, Viewer, ChatMessage, StreamInfo } from '@/typin
 // Stream page context
 type ContextProps = {
   viewers: Viewer[],
-  username: string,
-  setUsername: (newUsername: string) => void,
+  nickname: string,
+  setNickname: (newNickname: string) => void,
   isReady: boolean,
   timeSeconds: number,
-  showUsernameModal: boolean,
-  setShowUsernameModal: React.Dispatch<React.SetStateAction<boolean>>,
+  showNicknameModal: boolean,
+  setShowNicknameModal: React.Dispatch<React.SetStateAction<boolean>>,
   showAdminModal: boolean,
   setShowAdminModal: React.Dispatch<React.SetStateAction<boolean>>,
   chatMessages: (ChatMessage | { error: string })[],
@@ -38,7 +38,7 @@ export function StreamProvider({ authUser, cookieUsername, children }:Props) {
   const [isReady, setIsReady] = useState<boolean>(false)
   const [timeSeconds, setTimeSeconds] = useState<number>(0)
   const [username, setUsername] = useState<string>(cookieUsername)
-  const [showUsernameModal, setShowUsernameModal] = useState<boolean>(username === 'Anonymous')
+  const [showNicknameModal, setShowNicknameModal] = useState<boolean>(username === 'Anonymous')
   const [showAdminModal, setShowAdminModal] = useState<boolean>(false)
   const [chatMessages, setChatMessages] = useState<(ChatMessage | { error: string })[]>([])
   const [socket, setSocket] = useState<Socket | null>(null)
@@ -82,12 +82,12 @@ export function StreamProvider({ authUser, cookieUsername, children }:Props) {
 
   const context: ContextProps = {
     viewers,
-    username,
-    setUsername,
+    nickname: username,
+    setNickname: setUsername,
     isReady,
     timeSeconds,
-    showUsernameModal,
-    setShowUsernameModal,
+    showNicknameModal: showNicknameModal,
+    setShowNicknameModal: setShowNicknameModal,
     showAdminModal,
     setShowAdminModal,
     chatMessages,

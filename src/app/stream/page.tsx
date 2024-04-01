@@ -10,7 +10,7 @@ import Video from '@/components/stream/Video'
 import Chat from '@/components/stream/Chat'
 import styles from './Stream.module.scss'
 
-const UsernameModal = dynamic(() => import('@/components/stream/UsernameModal'), { ssr: false })
+const NicknameModal = dynamic(() => import('@/components/stream/NicknameModal'), { ssr: false })
 const AdminModal = dynamic(() => import('@/components/admin/AdminModal'), { ssr: true })
 
 export default async function StreamPage() {
@@ -19,12 +19,12 @@ export default async function StreamPage() {
   if (!authUser) return null
 
   const cookieStore = cookies()
-  const username = cookieStore.get('username')?.value
+  const username = cookieStore.get('nickname')?.value
   const cookieUsername = username || 'Anonymous'
 
   return (
     <StreamProvider authUser={authUser} cookieUsername={cookieUsername}>
-      <UsernameModal />
+      <NicknameModal />
       {authUser.role >= AuthRole.Admin && (
         <AdminProvider>
           <AdminModal />

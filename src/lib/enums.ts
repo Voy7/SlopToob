@@ -23,6 +23,7 @@ export enum SocketEvent {
   AdminUploadBumper = 'admin-upload-bumper',
   AdminDeleteBumper = 'admin-delete-bumper',
   AdminBumpersList = 'admin-bumpers-list',
+  AdminQueueList = 'admin-queue-list',
 }
 
 export enum ServerEvent {

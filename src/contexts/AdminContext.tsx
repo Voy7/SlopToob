@@ -14,7 +14,8 @@ type ContextProps = {
   playlists: ClientPlaylist[],
   selectedPlaylist: string | null,
   setSelectedPlaylist: (id: string | null) => void,
-  bumpers: ClientVideo[]
+  bumpers: ClientVideo[],
+  queue: ClientVideo[]
 }
 
 type Props =  {
@@ -34,6 +35,7 @@ export function AdminProvider({ children }:Props) {
   const [playlists, setPlaylists] = useState<ClientPlaylist[]>([])
   const [selectedPlaylist, setSelectedPlaylist] = useState<string | null>(null)
   const [bumpers, setBumpers] = useState<ClientVideo[]>([])
+  const [queue, setQueue] = useState<ClientVideo[]>([])
 
   function setSection(sectionName: SectionName) {
     const sec = sections.find(s => s.name === sectionName)
@@ -60,6 +62,11 @@ export function AdminProvider({ children }:Props) {
       console.log('Bumpers:', bumpers)
       setBumpers(bumpers)
     })
+
+    socket.on(SocketEvent.AdminQueueList, (queue: ClientVideo[]) => {
+      console.log('Queue:', queue)
+      setQueue(queue)
+    })
   }, [])
 
   useEffect(() => {
@@ -73,7 +80,8 @@ export function AdminProvider({ children }:Props) {
     playlists,
     selectedPlaylist,
     setSelectedPlaylist,
-    bumpers
+    bumpers,
+    queue
   }
 
   return <AdminContext.Provider value={context}>{children}</AdminContext.Provider>

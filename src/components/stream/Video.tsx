@@ -1,7 +1,7 @@
 'use client'
 
 import Hls from 'hls.js'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useStreamContext } from '@/contexts/StreamContext'
 import { PlayerState } from '@/lib/enums'
 import Icon from '@/components/ui/Icon'
@@ -9,6 +9,10 @@ import styles from './Video.module.scss'
 
 export default function Video() {
   const { streamInfo } = useStreamContext()
+
+  const [isPaused, setIsPaused] = useState<boolean>(true)
+  const [currentSeconds, setCurrentSeconds] = useState<number>(0)
+  // const [totalSeconds, setTotalSeconds] = useState<number>(0)
 
   const videoRef = useRef<HTMLVideoElement | null>(null)
 
@@ -34,10 +38,14 @@ export default function Video() {
         // seek to
         video.currentTime = streamInfo.currentSeconds
         try {
-          video.play()
+          // video.play()
         }
         catch (e) {}
     })
+
+    // Sync isPaused state with video
+    video.onplay = () => setIsPaused(false)
+    video.onpause = () => setIsPaused(true)
   }, [streamInfo])
 
   // Video is playing
@@ -47,6 +55,11 @@ export default function Video() {
         <video ref={videoRef} autoPlay controls>
           Your browser does not support the video tag.
         </video>
+        {isPaused && (
+          <div className={styles.overlay}>
+            <Icon name="play" className={styles.playButton} onClick={() => videoRef.current?.play()} />
+          </div>
+        )}
       </div>
     )
   }

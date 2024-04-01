@@ -1,0 +1,41 @@
+.nicknameModal {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem;
+
+  p {
+    font-size: 1rem;
+    color: var(--text-color-2);
+    cursor: default;
+  }
+
+  input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+    color: var(--text-color-1);
+    background: var(--bg-color-2);
+    border: 1px solid var(--border-color-1);
+    border-radius: 0.5rem;
+
+    &:focus {
+      outline: none;
+      border-color: var(--select-color);
+    }
+  }
+
+  .buttons {
+    button { width: 100% }
+  }
+
+  .error {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--error-color);
+    cursor: default;
+  }
+}
