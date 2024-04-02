@@ -37,9 +37,6 @@ export default class Video {
     if (!this.playingDate) return 0
     if (this.isPaused) return this.passedDurationSeconds
     return ((new Date().getTime() - this.playingDate.getTime()) / 1000) + this.passedDurationSeconds
-    // if (!this.isPlaying || !this.playingDate) return 0
-    // if (this.isPaused) return this.passedDurationSeconds
-    // return (new Date().getTime() - this.playingDate.getTime()) / 1000
   }
 
   // Pause video

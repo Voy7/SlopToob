@@ -12,6 +12,15 @@ export type StreamPlaying = {
   totalSeconds: number
 }
 
+export type StreamPaused = {
+  state: PlayerState.Paused,
+  id: string,
+  name: string,
+  path: string,
+  currentSeconds: number,
+  totalSeconds: number
+}
+
 export type StreamLoading = {
   state: PlayerState.Loading,
 }
@@ -23,6 +32,7 @@ export type StreamError = {
 
 export type StreamInfo =
   | StreamPlaying
+  | StreamPaused
   | StreamLoading
   | StreamError
 

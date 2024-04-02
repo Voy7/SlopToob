@@ -46,6 +46,7 @@ export default new class Player {
 
   skipVideo() {
     if (this.playing) {
+      this.unpause()
       this.playing.forceFinish()
     }
   }
@@ -53,15 +54,14 @@ export default new class Player {
   async playNext() {
     // Play bumper if enough time has passed
     const { bumperIntervalSeconds } = await Settings.getSettings()
-    // if (nextBumper && this.lastBumperDate.getTime() + bumperIntervalSeconds * 1000 < Date.now()) {
-    // if (nextBumper) {
-    //   this.lastBumperDate = new Date()
-    //   this.playing = nextBumper
-    //   // await this.playing.download()
-    //   await this.playing.play()
-    //   queueNextBumper()
-    //   return
-    // }
+    if (nextBumper && this.lastBumperDate.getTime() + bumperIntervalSeconds * 1000 < Date.now()) {
+      this.lastBumperDate = new Date()
+      this.playing = nextBumper
+      await this.playing.prepare()
+      await this.playing.play()
+      queueNextBumper()
+      return
+    }
 
     if (this.queue.length === 0) {
       this.playing = null
@@ -146,6 +146,17 @@ export default new class Player {
       return {
         state: PlayerState.Error,
         error: this.playing.error
+      }
+    }
+
+    if (this.isPaused) {
+      return {
+        state: PlayerState.Paused,
+        id: this.playing.id,
+        name: this.playing.path,
+        path: `/stream-data/${this.playing.id}/video.m3u8`,
+        currentSeconds: this.playing.currentSeconds,
+        totalSeconds: this.playing.durationSeconds
       }
     }
 

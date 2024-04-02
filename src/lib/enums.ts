@@ -36,7 +36,7 @@ export enum ServerEvent {
 
 export enum PlayerState {
   Playing,
-  // Paused,
+  Paused,
   Loading,
   Error
 }

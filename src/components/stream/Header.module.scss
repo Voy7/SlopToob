@@ -1,6 +1,6 @@
 .header {
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
   gap: 0;
   width: 100%;
@@ -9,14 +9,40 @@
   border-bottom: 1px solid black;
   box-shadow: 0 0 5px 0 black;
 
-  button {
-    padding: 0.5rem 1rem;
-    font-size: 1.1rem;
-    border: none;
-    background: none;
-    color: var(--text-color-1);
-    cursor: pointer;
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 
-    &:hover { background: var(--bg-color-2); }
+    img { border-radius: 50%; }
+
+    h1 {
+      font-size: 1.2rem;
+      color: var(--text-color-1);
+    }
+  }
+
+  .right {
+    display: flex;
+    align-items: center;
+
+    button {
+      padding: 0.5rem 1rem;
+      font-size: 1.1rem;
+      border: none;
+      background: none;
+      color: var(--text-color-1);
+      border-radius: 0.5rem;
+      transition: 150ms ease-in-out;
+      cursor: pointer;
+  
+      &.signOutButton {
+        &:hover { background: var(--error-color); }
+      }
+
+      &.adminPanelButton {
+        &:hover { background: var(--select-color); }
+      }
+    }
   }
 }

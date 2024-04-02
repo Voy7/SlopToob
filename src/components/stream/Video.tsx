@@ -8,7 +8,7 @@ import Icon from '@/components/ui/Icon'
 import styles from './Video.module.scss'
 
 export default function Video() {
-  const { streamInfo } = useStreamContext()
+  const { streamInfo, lastStreamUpdateTimestamp } = useStreamContext()
 
   const [isPaused, setIsPaused] = useState<boolean>(true)
   const [currentSeconds, setCurrentSeconds] = useState<number>(0)
@@ -17,7 +17,7 @@ export default function Video() {
   const videoRef = useRef<HTMLVideoElement | null>(null)
 
   useEffect(() => {
-    if (streamInfo.state !== PlayerState.Playing) return
+    if (streamInfo.state !== PlayerState.Playing && streamInfo.state !== PlayerState.Paused) return
 
     const video = videoRef.current!
 
@@ -44,22 +44,57 @@ export default function Video() {
     })
 
     // Sync isPaused state with video
-    video.onplay = () => setIsPaused(false)
+    video.onplay = (event) => {
+      if (streamInfo.state !== PlayerState.Playing) {
+        event.preventDefault()
+        video.pause()
+        return
+      }
+      setIsPaused(false)
+
+      // Seek to current time
+      if (!lastStreamUpdateTimestamp) return
+      const diff = ((Date.now() - lastStreamUpdateTimestamp) / 1000) + streamInfo.currentSeconds
+      console.log('diff', diff, streamInfo.currentSeconds)
+      video.currentTime = diff
+    }
     video.onpause = () => setIsPaused(true)
+  }, [streamInfo, lastStreamUpdateTimestamp])
+
+  useEffect(() => {
+    if (streamInfo.state !== PlayerState.Paused) return
+    const video = videoRef.current!
+    video.pause()
   }, [streamInfo])
+
+  const videoElement = (
+    <video ref={videoRef} autoPlay>
+      Your browser does not support the video tag.
+    </video>
+  )
 
   // Video is playing
   if (streamInfo.state === PlayerState.Playing) {
     return (
       <div className={styles.videoContainer}>
-        <video ref={videoRef} autoPlay controls>
-          Your browser does not support the video tag.
-        </video>
+        {videoElement}
         {isPaused && (
           <div className={styles.overlay}>
             <Icon name="play" className={styles.playButton} onClick={() => videoRef.current?.play()} />
           </div>
         )}
+      </div>
+    )
+  }
+
+  // Video is paused (server side)
+  if (streamInfo.state === PlayerState.Paused) {
+    return (
+      <div className={styles.videoContainer}>
+        {videoElement}
+        <div className={styles.overlay}>
+          <Icon name="pause" className={styles.pauseIcon} />
+        </div>
       </div>
     )
   }

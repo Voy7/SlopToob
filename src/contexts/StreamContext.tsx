@@ -22,6 +22,7 @@ type ContextProps = {
   chatMessages: (ChatMessage | { error: string })[],
   setChatMessages: React.Dispatch<React.SetStateAction<(ChatMessage | { error: string })[]>>,
   streamInfo: StreamInfo,
+  lastStreamUpdateTimestamp: number | null,
   socket: Socket | null,
   socketSecret: string
 }
@@ -48,6 +49,7 @@ export function StreamProvider({ authUser, cookieUsername, children }:Props) {
   const [streamInfo, setStreamInfo] = useState<StreamInfo>({
     state: PlayerState.Loading
   })
+  const [lastStreamUpdateTimestamp, setLastStreamUpdateTimestamp] = useState<number | null>(null)
 
   useEffect(() => {
     const socket = io()
@@ -71,6 +73,7 @@ export function StreamProvider({ authUser, cookieUsername, children }:Props) {
     socket.on(SocketEvent.StreamInfo, (info: StreamInfo) => {
       console.log('Stream info:', info)
       setStreamInfo(info)
+      setLastStreamUpdateTimestamp(Date.now())
     })
 
     socket.on(SocketEvent.NewChatMessage, (message: ChatMessage) => {
@@ -93,6 +96,7 @@ export function StreamProvider({ authUser, cookieUsername, children }:Props) {
     chatMessages,
     setChatMessages,
     streamInfo,
+    lastStreamUpdateTimestamp,
     socket,
     socketSecret
   }
