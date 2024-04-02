@@ -7,7 +7,7 @@ import { PlayerState, SocketEvent } from '@/lib/enums'
 import type { StreamInfo } from '@/typings/socket'
 import type { RichPlaylist, FileTree, ClientPlaylist } from '@/typings/types'
 
-import { bumpers } from '@/stream/bumpers'
+import { bumpers, nextBumper, queueNextBumper } from '@/stream/bumpers'
 import Settings from './Settings'
 import { broadcastAdmin } from '@/server/socket'
 
@@ -20,37 +20,87 @@ export default new class Player {
   queue: Video[] = []
   isPaused: boolean = false
   playlists: RichPlaylist[] = []
-  private _activePlaylistID: string = 'None'
+  private activePlaylist: RichPlaylist | null = null
+  private lastBumperDate: Date = new Date()
 
   constructor() {
     // Get all playlists on startup
     (async () => {
-      Logger.debug('Player initialized')
+      Logger.debug('Initializing player handler...')
       await this.getPlaylists()
       const settings = await Settings.getSettings()
-      this.activePlaylistID = settings.activePlaylist
+      const playlist = this.playlists.find(playlist => playlist.id === settings.activePlaylistID) || null
+      await this.setActivePlaylist(playlist)
     })()
   }
 
-  set activePlaylistID(playlistID: string) {
-    this._activePlaylistID = playlistID
-    Logger.debug('Active playlist set:', playlistID)
-
-    this.queue = [] // Clear queue when playlist changes
-    this.populateRandomToQueue()
+  pause() {
+    this.isPaused = true
+    if (this.playing) this.playing.pause()
   }
 
-  get activePlaylistID(): string {
-    return this._activePlaylistID
+  unpause() {
+    this.isPaused = false
+    if (this.playing) this.playing.unpause()
+  }
+
+  skipVideo() {
+    if (this.playing) {
+      this.playing.forceFinish()
+    }
+  }
+
+  async playNext() {
+    // Play bumper if enough time has passed
+    const { bumperIntervalSeconds } = await Settings.getSettings()
+    // if (nextBumper && this.lastBumperDate.getTime() + bumperIntervalSeconds * 1000 < Date.now()) {
+    // if (nextBumper) {
+    //   this.lastBumperDate = new Date()
+    //   this.playing = nextBumper
+    //   // await this.playing.download()
+    //   await this.playing.play()
+    //   queueNextBumper()
+    //   return
+    // }
+
+    if (this.queue.length === 0) {
+      this.playing = null
+      return
+    }
+
+    if (this.playing) {
+      Logger.warn('Tried to play next video while one is already playing:', this.playing.name)
+      return
+    }
+
+    const next = this.queue.shift()
+    if (next) {
+      this.playing = next
+      const x = await this.playing.prepare()
+      try {
+        await this.playing.play()
+        console.log('VIDEO ENDED'.yellow)
+        this.playing = null
+        this.populateRandomToQueue()
+        this.playNext()
+
+      }
+      catch (error) {
+        // Handle error
+      }
+    }
+    // Start downloading next video in queue
+    if (this.queue[0]) {
+      this.queue[0].prepare()
+    }
   }
 
   private populateRandomToQueue() {
-    const playlist = this.playlists.find(playlist => playlist.id === this.activePlaylistID)
-    if (!playlist) return
+    if (!this.activePlaylist) return
 
     if (this.queue.length >= QUEUE_LENGTH) return
 
-    const randomVideo = playlist.videos[Math.floor(Math.random() * playlist.videos.length)]
+    const randomVideo = this.activePlaylist.videos[Math.floor(Math.random() * this.activePlaylist.videos.length)]
     if (!randomVideo) return
 
     this.addVideo(new Video(randomVideo.path))
@@ -60,14 +110,14 @@ export default new class Player {
     }
   }
 
-  async setActivePlaylist(playlistID: string) {
-    // Verify playlist exists
-    const playlist = this.playlists.find(playlist => playlist.id === playlistID)
-    console.log(playlistID, playlist)
-    if (!playlist) return
+  // Set playlist as active, and start playing it
+  async setActivePlaylist(playlist: RichPlaylist | null) {
+    Logger.debug('Setting active playlist:', playlist?.name || 'None')
+    await Settings.setSetting('activePlaylistID', playlist?.id || 'None')
+    this.activePlaylist = playlist
 
-    await Settings.setSetting('activePlaylist', playlistID)
-    this.activePlaylistID = playlistID
+    this.queue = [] // Clear queue when playlist changes
+    this.populateRandomToQueue()
   }
 
   get clientPlaylists(): ClientPlaylist[] {
@@ -79,28 +129,10 @@ export default new class Player {
   }
 
   addVideo(video: Video) {
+    Logger.debug('Adding video to queue:', video.name)
     this.queue.push(video)
     if (!this.playing) this.playNext()
     broadcastAdmin(SocketEvent.AdminQueueList, this.queue.map(video => video.clientVideo))
-  }
-
-  async playNext() {
-    if (this.queue.length === 0) {
-      this.playing = null
-      return
-    }
-
-    const next = this.queue.shift()
-    if (next) {
-      this.playing = next
-      const x = await this.playing.download()
-      await this.playing.play()
-      this.populateRandomToQueue()
-    }
-    // Start downloading next video in queue
-    if (this.queue[0]) {
-      this.queue[0].download()
-    }
   }
 
   getStreamInfo(): StreamInfo {

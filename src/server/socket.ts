@@ -93,7 +93,8 @@ export function initializeSocketServer() {
 
     // Set active playlist
     socket.on(SocketEvent.AdminSetActivePlaylist, async (playlistID: string) => {
-      await Player.setActivePlaylist(playlistID)
+      const playlist = Player.playlists.find(p => p.id === playlistID) || null
+      await Player.setActivePlaylist(playlist)
       broadcastAdmin(SocketEvent.AdminRequestPlaylists, Player.clientPlaylists)
     })
 
@@ -130,6 +131,21 @@ export function initializeSocketServer() {
         broadcastAdmin(SocketEvent.AdminBumpersList, getClientBumpers())
       }
       catch (error: any) { socket.emit(SocketEvent.AdminDeleteBumper, { error: error.message }) }
+    })
+
+    // Pause stream
+    socket.on(SocketEvent.AdminPauseStream, () => {
+      Player.pause()
+    })
+
+    // Unpause stream
+    socket.on(SocketEvent.AdminUnpauseStream, () => {
+      Player.unpause()
+    })
+
+    // Skip current video
+    socket.on(SocketEvent.AdminSkipVideo, () => {
+      Player.skipVideo()
     })
   })
 }

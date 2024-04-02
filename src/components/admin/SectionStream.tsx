@@ -12,13 +12,28 @@ export default function SectionStream() {
   const { playlists, queue } = useAdminContext()
   const { socket } = useStreamContext()
 
+  function pauseStream() {
+    socket?.emit(SocketEvent.AdminPauseStream)
+  }
+
+  function unpauseStream() {
+    socket?.emit(SocketEvent.AdminUnpauseStream)
+  }
+
   function setActivePlaylist(playlistID: string) {
     socket?.emit(SocketEvent.AdminSetActivePlaylist, playlistID)
+  }
+
+  function skipVideo() {
+    socket?.emit(SocketEvent.AdminSkipVideo)
   }
 
   return (
     <div className={styles.sectionStream}>
       <h2>STREAM SETTINGS</h2>
+      <Button style="normal" icon="pause" onClick={pauseStream}>Pause</Button>
+      <Button style="normal" icon="play" onClick={unpauseStream}>Unpause</Button>
+      <Button style="normal" icon="folder-open" onClick={skipVideo}>Skip</Button>
       <div className={styles.activePlaylist}>
         <h3>Select Active Playlist</h3>
         {/* Radial button list */}

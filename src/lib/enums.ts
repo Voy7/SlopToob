@@ -24,6 +24,9 @@ export enum SocketEvent {
   AdminDeleteBumper = 'admin-delete-bumper',
   AdminBumpersList = 'admin-bumpers-list',
   AdminQueueList = 'admin-queue-list',
+  AdminPauseStream = 'admin-pause-stream',
+  AdminUnpauseStream = 'admin-unpause-stream',
+  AdminSkipVideo = 'admin-skip-video',
 }
 
 export enum ServerEvent {

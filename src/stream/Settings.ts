@@ -9,9 +9,10 @@ enum StreamMode {
 // All settings and their types
 type SettingsList = {
   streamMode: StreamMode,
-  activePlaylist: string,
+  activePlaylistID: string,
   allowVoteSkip: boolean,
-  voteSkipPercentage: number
+  voteSkipPercentage: number,
+  bumperIntervalSeconds: number,
 }
 
 type DefaultSettings = {
@@ -24,9 +25,10 @@ const defaultSettings: DefaultSettings = {
     enum: StreamMode,
     default: StreamMode.Queue
   },
-  activePlaylist: 'None',
+  activePlaylistID: 'None',
   allowVoteSkip: true,
-  voteSkipPercentage: 0.5
+  voteSkipPercentage: 0.5,
+  bumperIntervalSeconds: 1800, // 30 minutes
 } as const
 
 

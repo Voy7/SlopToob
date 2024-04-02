@@ -8,19 +8,22 @@ import { SocketEvent } from '@/lib/enums'
 import type { ClientVideo } from '@/typings/types'
 
 export const bumpers: Video[] = []
+export let nextBumper: Video | null = null
 
 // Watch bumpers directory for changes
-fs.watch(Env.BUMPERS_PATH, { recursive: true }, (event, filename) => {
+fs.watch(Env.BUMPERS_PATH, { recursive: true }, (_, filename) => {
   if (!filename) return
   syncCheckBumper(path.join(Env.BUMPERS_PATH, filename))
 })
 
-// Add all files in bumpers directory on startup
+// Add all files in bumpers directory, and populate nextBumper on startup
 fs.readdir(Env.BUMPERS_PATH, { recursive: true }, (error, files) => {
   if (error) return Logger.error(`Error reading bumpers directory: ${error.message}`)
   for (const file of files) { syncCheckBumper(path.join(Env.BUMPERS_PATH, file.toString())) }
+  queueNextBumper()
 })
 
+// Handle changes to bumpers directory
 function syncCheckBumper(pathName: string) {
   const existingBumper = bumpers.find(bumper => bumper.path === pathName)
   const fileExists = fs.existsSync(pathName)
@@ -48,4 +51,14 @@ function syncCheckBumper(pathName: string) {
 // Utility function to get all bumpers as ClientVideo[] for client side
 export function getClientBumpers(): ClientVideo[] {
   return bumpers.map(bumper => bumper.clientVideo)
+}
+
+// Prepare the next bumper to be played
+export function queueNextBumper(): Video | null {
+  if (!bumpers.length) return null // No bumpers available
+
+  // Randomly select a bumper
+  nextBumper = bumpers[Math.floor(Math.random() * bumpers.length)]
+  nextBumper.prepare()
+  return nextBumper
 }

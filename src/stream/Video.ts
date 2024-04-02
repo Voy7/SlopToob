@@ -6,17 +6,23 @@ import ffmpeg from '@/lib/ffmpeg'
 import generateSecret from '@/lib/generateSecret'
 import { broadcastStreamInfo } from '@/server/socket'
 import type { ClientVideo } from '@/typings/types'
+import Logger from '@/lib/Logger'
 
 export default class Video {
   id: string = generateSecret()
   isReady: boolean = false
-  error: string | null = null
   path: string
   isBumper: boolean
-  isDownloading: boolean = false
-  downloadCallbacks: ((isSuccess: boolean) => void)[] = []
   durationSeconds: number = 0
-  startPlayingDate: Date | null = null
+  error: string | null = null
+  private isDownloading: boolean = false
+  private downloadCallbacks: ((isSuccess: boolean) => void)[] = []
+  private isPlaying: boolean = false
+  private isPaused: boolean = false
+  private playingDate: Date | null = null
+  private passedDurationSeconds: number = 0
+  private finishedCallbacks: (() => void)[] = []
+  private finishedTimeout: NodeJS.Timeout | null = null
 
   constructor(path: string, isBumper?: boolean) {
     this.path = path
@@ -24,35 +30,77 @@ export default class Video {
   }
 
   get clientVideo(): ClientVideo {
-    return {
-      path: this.path,
-      name: this.name
-    }
+    return { path: this.path, name: this.name }
   }
 
   get currentSeconds(): number {
-    if (!this.startPlayingDate) return 0
-    const diff = new Date().getTime() - this.startPlayingDate.getTime()
-    return diff / 1000
+    if (!this.playingDate) return 0
+    if (this.isPaused) return this.passedDurationSeconds
+    return ((new Date().getTime() - this.playingDate.getTime()) / 1000) + this.passedDurationSeconds
+    // if (!this.isPlaying || !this.playingDate) return 0
+    // if (this.isPaused) return this.passedDurationSeconds
+    // return (new Date().getTime() - this.playingDate.getTime()) / 1000
+  }
+
+  // Pause video
+  pause() {
+    if (!this.isPlaying || this.isPaused || !this.playingDate) return
+    if (this.finishedTimeout) {
+      clearTimeout(this.finishedTimeout)
+    }
+    this.passedDurationSeconds += (new Date().getTime() - this.playingDate.getTime()) / 1000
+    this.isPaused = true
+    broadcastStreamInfo()
+  }
+
+  // Unpause video
+  unpause() {
+    if (!this.isPlaying || !this.isPaused) return
+    this.isPaused = false
+    this.playingDate = new Date()
+    this.finishedTimeout = setTimeout(() => this.finishPlaying(), (this.durationSeconds - this.passedDurationSeconds) * 1000)
+    broadcastStreamInfo()
+  }
+
+  forceFinish() {
+    if (!this.isPlaying) return
+    this.finishPlaying()
+  }
+
+  private finishPlaying() {
+    if (!this.isPlaying) return
+    this.finishedCallbacks.forEach(cb => cb())
+    this.finishedCallbacks = []
+
+    if (this.finishedTimeout) {
+      clearTimeout(this.finishedTimeout)
+    }
+
+    this.isPlaying = false
+    this.playingDate = null
+    this.passedDurationSeconds = 0
+
+    Logger.debug(`[Video] Finished playing in ${this.durationSeconds}s: ${this.name}`)
+    broadcastStreamInfo()
   }
 
   async play() {
-    this.startPlayingDate = new Date()
+    // Callback when finished playing
+    return new Promise<void>(resolve => {
+      this.finishedCallbacks.push(resolve)
 
-    broadcastStreamInfo()
+      if (this.isPlaying) return
 
-    // Wait for video time to finish
-    await new Promise(resolve => setTimeout(resolve, this.durationSeconds * 1000))
-
-    Player.playNext()
-
-    // Once finished
-    // Player.playNext()
+      this.isPlaying = true
+      this.playingDate = new Date()
+      this.finishedTimeout = setTimeout(() => this.finishPlaying(), this.durationSeconds * 1000)
+      broadcastStreamInfo()
+    })
   }
 
-  // Returns true when downloaded (or already ready), returns false if error
-  async download(): Promise<boolean> {
-    return await new Promise<boolean>(resolve => {
+  // Returns true when transcoded (or already ready), returns false if error
+  async prepare(): Promise<boolean> {
+    return new Promise<boolean>(resolve => {
       this.downloadCallbacks.push((isSuccess: boolean) => resolve(isSuccess))
 
       if (this.isDownloading) return
@@ -71,7 +119,7 @@ export default class Video {
 
         if (duration > 0) {
           this.durationSeconds = duration
-          console.log('Duration:', duration)
+          // console.log('Duration:', duration)
           this.isReady = true
           this.resolveDownloadCallbacks(true)
           return
@@ -92,6 +140,7 @@ export default class Video {
         fs.mkdirSync(this.outputPath, { recursive: true })
       }
 
+      Logger.debug('[Video] Transcoding video:', this.path)
       const ffmpegCommand = ffmpeg(this.inputPath, { timeout: 432000 }).addOptions([
         '-profile:v baseline',
         '-level 3.0',
@@ -104,13 +153,12 @@ export default class Video {
       ffmpegCommand.output(this.outputPath + '/video.m3u8')
     
       ffmpegCommand.on('end', () => {
-        console.log('ffmpeg finished'.green)
-
+        Logger.debug('[Video] Transcoding finished:', this.outputPath)
         getTotalDuration()
       })
-      ffmpegCommand.on('error', (err) => {
-        this.error = err.message
-        console.error('Error:', err)
+      ffmpegCommand.on('error', (error) => {
+        this.error = error.message
+        Logger.error('[Video] Transcoding error:', error)
         this.resolveDownloadCallbacks(false)
       })
       
@@ -133,8 +181,17 @@ export default class Video {
     // newPath = newPath.substring(0, newPath.lastIndexOf('.'))
     // return newPath
     
+    if (this.isBumper) {
+      const a = path.resolve(this.path)
+      const filePath = a.split(Env.BUMPERS_PATH)[1]
+      // console.log('get outputPath'.cyan, filePath)
+      const newPath = path.join(Env.BUMPERS_OUTPUT_PATH, filePath).replace(/\\/g, '/')
+      return newPath
+    }
+
     const a = path.resolve(this.path)
     const filePath = a.split(Env.VIDEOS_PATH)[1]
+    // console.log('get outputPath'.cyan, filePath, a)
     const newPath = path.join(Env.OUTPUT_PATH, filePath).replace(/\\/g, '/')
     return newPath
   }

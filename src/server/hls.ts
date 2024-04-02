@@ -3,6 +3,7 @@ import Hls from 'hls-server'
 import fs from 'fs'
 import { httpServer } from '@/server/httpServer'
 import Player from '@/stream/Player'
+import Logger from '@/lib/Logger'
 
 // HLS server must be initialized after Next.js is ready
 export function initializeHlsServer() {
@@ -39,12 +40,12 @@ export function initializeHlsServer() {
         })
       },
       getManifestStream: (req: any, cb: any) => {
-        console.log('Requesting manifest', req.url)
+        // console.log('Requesting manifest', req.url)
         const stream = getFile(req)
         cb(null, stream)
       },
       getSegmentStream: (req: any, cb: any) => {
-        console.log('Requesting segment', req.url)
+        // console.log('Requesting segment', req.url)
         const stream = getFile(req)
         cb(null, stream)
       }
@@ -59,12 +60,12 @@ function getFile(req: any) {
 
   const video = Player.playing
   if (!video || video.id !== id) {
-    console.log('No video playing with ID:', id)
+    Logger.warn('No video playing with ID:', id)
     return null
   }
 
   const filePath = `${video.outputPath}/${filename}`
-  console.log(`Reading file: ${filePath}`.yellow)
+  // console.log(`Reading file: ${filePath}`.yellow)
   
   const stream = fs.createReadStream(filePath)
 
