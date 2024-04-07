@@ -1,12 +1,12 @@
 import fs from 'fs'
 import path from 'path'
+import generateSecret from '@/lib/generateSecret'
+import ffmpeg from '@/lib/ffmpeg'
 import Player from '@/stream/Player'
 import Env from '@/EnvVariables'
-import ffmpeg from '@/lib/ffmpeg'
-import generateSecret from '@/lib/generateSecret'
-import { broadcastStreamInfo } from '@/server/socket'
-import type { ClientVideo } from '@/typings/types'
 import Logger from '@/lib/Logger'
+import SocketUtils from '@/lib/SocketUtils'
+import type { ClientVideo } from '@/typings/types'
 
 export default class Video {
   id: string = generateSecret()
@@ -30,7 +30,7 @@ export default class Video {
   }
 
   get clientVideo(): ClientVideo {
-    return { path: this.path, name: this.name }
+    return { id: this.id, path: this.path, name: this.name }
   }
 
   get currentSeconds(): number {
@@ -47,7 +47,7 @@ export default class Video {
     }
     this.passedDurationSeconds += (new Date().getTime() - this.playingDate.getTime()) / 1000
     this.isPaused = true
-    broadcastStreamInfo()
+    SocketUtils.broadcastStreamInfo()
   }
 
   // Unpause video
@@ -56,7 +56,7 @@ export default class Video {
     this.isPaused = false
     this.playingDate = new Date()
     this.finishedTimeout = setTimeout(() => this.finishPlaying(), (this.durationSeconds - this.passedDurationSeconds) * 1000)
-    broadcastStreamInfo()
+    SocketUtils.broadcastStreamInfo()
   }
 
   forceFinish() {
@@ -78,7 +78,7 @@ export default class Video {
     this.passedDurationSeconds = 0
 
     Logger.debug(`[Video] Finished playing in ${this.durationSeconds}s: ${this.name}`)
-    broadcastStreamInfo()
+    SocketUtils.broadcastStreamInfo()
   }
 
   async play() {
@@ -91,7 +91,7 @@ export default class Video {
       this.isPlaying = true
       this.playingDate = new Date()
       this.finishedTimeout = setTimeout(() => this.finishPlaying(), this.durationSeconds * 1000)
-      broadcastStreamInfo()
+      SocketUtils.broadcastStreamInfo()
     })
   }
 

@@ -51,7 +51,7 @@ export default function SectionStream() {
       <h3>Queue ({queue.length})</h3>
       <div className={styles.queueList}>
         {queue.map((video, index) => (
-          <div key={video.path} className={styles.queueItem}>
+          <div key={video.id} className={styles.queueItem}>
             <span>{index + 1}.</span>
             <p>{video.name}</p>
           </div>

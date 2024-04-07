@@ -3,7 +3,7 @@ import path from 'path'
 import Env from '@/EnvVariables'
 import Logger from '@/lib/Logger'
 import Video from '@/stream/Video'
-import { broadcastAdmin } from '@/server/socket'
+import SocketUtils from '@/lib/SocketUtils'
 import { SocketEvent } from '@/lib/enums'
 import type { ClientVideo } from '@/typings/types'
 
@@ -32,7 +32,7 @@ function syncCheckBumper(pathName: string) {
   if (!fileExists && existingBumper) {
     bumpers.splice(bumpers.indexOf(existingBumper), 1)
     Logger.debug(`Bumper deleted: ${pathName}`)
-    broadcastAdmin(SocketEvent.AdminBumpersList, getClientBumpers())
+    SocketUtils.broadcastAdmin(SocketEvent.AdminBumpersList, getClientBumpers())
     return
   }
 
@@ -41,7 +41,7 @@ function syncCheckBumper(pathName: string) {
     const video = new Video(pathName, true)
     bumpers.push(video)
     Logger.debug(`Bumper added: ${pathName}`)
-    broadcastAdmin(SocketEvent.AdminBumpersList, getClientBumpers())
+    SocketUtils.broadcastAdmin(SocketEvent.AdminBumpersList, getClientBumpers())
     return
   }
 

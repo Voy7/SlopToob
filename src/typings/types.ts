@@ -53,6 +53,7 @@ export type ClientPlaylist = {
 }
 
 export type ClientVideo = {
+  id: string,
   path: string,
   name: string
 }

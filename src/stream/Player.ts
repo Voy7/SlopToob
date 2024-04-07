@@ -9,7 +9,7 @@ import type { RichPlaylist, FileTree, ClientPlaylist } from '@/typings/types'
 
 import { bumpers, nextBumper, queueNextBumper } from '@/stream/bumpers'
 import Settings from './Settings'
-import { broadcastAdmin } from '@/server/socket'
+import SocketUtils from '@/lib/SocketUtils'
 
 const VALID_EXTENSIONS = ['.mp4', '.mkv', '.avi', '.mov', '.flv', '.wmv', '.webm']
 const QUEUE_LENGTH = 4
@@ -27,7 +27,7 @@ export default new class Player {
     // Get all playlists on startup
     (async () => {
       Logger.debug('Initializing player handler...')
-      await this.getPlaylists()
+      await this.syncUpdatePlaylists()
       const settings = await Settings.getSettings()
       const playlist = this.playlists.find(playlist => playlist.id === settings.activePlaylistID) || null
       await this.setActivePlaylist(playlist)
@@ -118,6 +118,8 @@ export default new class Player {
 
     this.queue = [] // Clear queue when playlist changes
     this.populateRandomToQueue()
+
+    SocketUtils.broadcastAdmin(SocketEvent.AdminRequestPlaylists, this.clientPlaylists)
   }
 
   get clientPlaylists(): ClientPlaylist[] {
@@ -132,7 +134,7 @@ export default new class Player {
     Logger.debug('Adding video to queue:', video.name)
     this.queue.push(video)
     if (!this.playing) this.playNext()
-    broadcastAdmin(SocketEvent.AdminQueueList, this.queue.map(video => video.clientVideo))
+    SocketUtils.broadcastAdmin(SocketEvent.AdminQueueList, this.queue.map(video => video.clientVideo))
   }
 
   getStreamInfo(): StreamInfo {
@@ -186,7 +188,7 @@ export default new class Player {
     async function getChildren(path: string, parent: FileTree): Promise<number> {
       const files = await fs.readdir(path, { withFileTypes: true })
       for (const file of files) {
-        const isDirectory = file.isDirectory()
+        const isDirectory: boolean = file.isDirectory()
         if (!isDirectory) {
           const ext = file.name.slice(file.name.lastIndexOf('.')).toLowerCase()
           if (!VALID_EXTENSIONS.includes(ext)) continue
@@ -221,12 +223,13 @@ export default new class Player {
     return tree
   }
 
-  async getPlaylists(): Promise<RichPlaylist[]> {
+  async syncUpdatePlaylists(): Promise<RichPlaylist[]> {
     const playlists = await prisma.playlist.findMany({
       include: { videos: true }
     })
 
     this.playlists = playlists
+    SocketUtils.broadcastAdmin(SocketEvent.AdminRequestPlaylists, this.clientPlaylists)
     return playlists
   }
 
@@ -235,8 +238,8 @@ export default new class Player {
     const playlist = await prisma.playlist.create({
       data: { name }
     })
-    await this.getPlaylists()
     Logger.debug('Playlist added:', name)
+    await this.syncUpdatePlaylists()
     return playlist.id
   }
 
@@ -245,8 +248,8 @@ export default new class Player {
     await prisma.playlist.delete({
       where: { id: playlistID }
     })
-    await this.getPlaylists()
     Logger.debug('Playlist deleted:', playlistID)
+    await this.syncUpdatePlaylists()
   }
 
   // Change playlist name, return error as string if failed
@@ -264,8 +267,8 @@ export default new class Player {
         where: { id: playlistID },
         data: { name: newName }
       })
-      await this.getPlaylists()
       Logger.debug(`Playlist (${playlistID}) name updated:`, newName)
+      await this.syncUpdatePlaylists()
     }
     catch (error: any) { return error.message }
   }
@@ -285,7 +288,7 @@ export default new class Player {
         data: { path, playlistID }
       })
     }
-    await this.getPlaylists()
     Logger.debug(`Playlist (${playlistID}) videos updated:`, newVideoPaths)
+    await this.syncUpdatePlaylists()
   }
 }

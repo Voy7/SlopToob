@@ -53,7 +53,7 @@ export function StreamProvider({ authUser, cookieUsername, children }:Props) {
 
   useEffect(() => {
     const socket = io()
-    setSocket(socket)
+    // setSocket(socket)
 
     // On connect, send join stream payload to receive all other events
     socket.on('connect', () => {
@@ -63,6 +63,15 @@ export function StreamProvider({ authUser, cookieUsername, children }:Props) {
         password: authUser.password
       }
       socket.emit(SocketEvent.JoinStream, joinStreamPayload)
+
+      // Server responds with boolean once authenticated
+      socket.on(SocketEvent.JoinStream, (isAuthenticated: boolean) => {
+        if (isAuthenticated) setSocket(socket)
+      })
+    })
+
+    socket.on('disconnect', () => {
+      setSocket(null)
     })
 
     socket.on(SocketEvent.ViewersList, (viewers: Viewer[]) => {

@@ -14,24 +14,36 @@
     height: 100%;
   }
 
-  .overlay {
+  .controlsOverlay {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    background: rgba(0, 0, 0, 0.5);
+    flex-direction: column;
+    justify-content: space-between;
+    // align-items: center;
+    // background: rgba(0, 0, 0, 0.5);
     color: white;
     font-size: 2rem;
+    transition: 150ms ease-in-out;
+    opacity: 0;
+    cursor: none;
 
+    &.show { opacity: 1; cursor: auto; }
+
+    // Big play button overlay
     .playButton {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: auto;
       padding: 0.5rem;
       font-size: 5rem;
       color: var(--text-color-2);
       background: var(--bg-color-2);
+      border: none;
       border-radius: 1rem;
       cursor: pointer;
 
@@ -40,6 +52,61 @@
         background: var(--bg-color-3);
       }
     }
+
+    .controlsBar {
+      display: flex;
+      flex-direction: column;
+      background: rgba(0, 0, 0, 0.5);
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.5);
+
+      progress {
+        width: 100%;
+        height: 5px;
+        background: rgba(136, 136, 136, 0.5);
+        border: none;
+        appearance: none;
+        transition: 150ms;
+
+        &::-webkit-progress-bar { background: transparent; }
+        &::-webkit-progress-value { background: var(--select-color); }
+        &::-moz-progress-bar { background: var(--select-color); }
+      }
+
+      .controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem;
+
+        .group {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+        }
+
+        .actionButton {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 0.5rem;
+          font-size: 2rem;
+          color: white;
+          background: none;
+          border: none;
+          cursor: pointer;
+        }
+
+        p {
+          font-size: 1.2rem;
+        }
+      }
+    }
+
+
+
+
+
+    
   }
 
   .loading {

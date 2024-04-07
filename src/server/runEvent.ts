@@ -1,8 +1,9 @@
 import { ServerEvent } from '@/lib/enums'
 import Logger from '@/lib/Logger'
-import { broadcast, broadcastViewersList, clients } from '@/server/socket'
+import { clients } from '@/server/socket'
 import { SocketEvent } from '@/lib/enums'
 import parseBody from '@/lib/parseBody'
+import SocketUtils from '@/lib/SocketUtils'
 import type { IncomingMessage, ServerResponse } from 'http'
 import type { ChatMessage } from '@/typings/socket'
 
@@ -16,7 +17,7 @@ export default async function runEvent(event: ServerEvent, req: IncomingMessage,
     // Update username in clients list and broadcast new viewers list
     const client = clients.find(c => c.secret === socketSecret)
     if (client) client.username = username
-    broadcastViewersList()
+    SocketUtils.broadcastViewersList()
 
     return res.end(JSON.stringify({ success: true }))
   }
@@ -38,7 +39,7 @@ export default async function runEvent(event: ServerEvent, req: IncomingMessage,
       role: client.role,
       message: message
     }
-    broadcast(SocketEvent.NewChatMessage, chatMessage)
+    SocketUtils.broadcast(SocketEvent.NewChatMessage, chatMessage)
 
     return res.end(JSON.stringify({ success: true }))
   }
