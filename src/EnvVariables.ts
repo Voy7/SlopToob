@@ -26,4 +26,5 @@ export default new class EnvVariables {
   readonly VIDEOS_PATH: string = parsePath(parsed?.VIDEOS_PATH, 'default_videos')
   readonly BUMPERS_PATH: string = parsePath(parsed?.OUTPUT_PATH + '/bumpers', 'default_videos')
   readonly BUMPERS_OUTPUT_PATH: string = parsePath(parsed?.OUTPUT_PATH + '/bumpers-transcoded', 'default_output')
+  readonly FFMPEG_PATH: string | null = parsed?.FFMPEG_PATH || null
 }
