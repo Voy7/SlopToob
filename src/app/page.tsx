@@ -34,7 +34,7 @@ export default function Home() {
   }
 
   return (
-    <div>
+    <div className={styles.home}>
       <form onSubmit={submit}>
         <label>
           Password

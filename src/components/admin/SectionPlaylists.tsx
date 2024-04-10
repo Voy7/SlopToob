@@ -1,14 +1,13 @@
 'use client'
 
+import { useState } from 'react'
+import { useStreamContext } from '@/contexts/StreamContext'
 import { useAdminContext } from '@/contexts/AdminContext'
+import { SocketEvent } from '@/lib/enums'
 import Icon from '@/components/ui/Icon'
 import Button from '@/components/ui/Button'
 import PlaylistEditor from '@/components/admin/PlaylistEditor'
 import styles from './SectionPlaylists.module.scss'
-import { useStreamContext } from '@/contexts/StreamContext'
-import { SocketEvent } from '@/lib/enums'
-import { useEffect, useState } from 'react'
-import { ClientPlaylist, FileTree } from '@/typings/types'
 
 export default function SectionPlaylists() {
   const { playlists, selectedPlaylist, setSelectedPlaylist, fileTree } = useAdminContext()

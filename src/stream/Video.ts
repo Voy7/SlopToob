@@ -9,7 +9,7 @@ import SocketUtils from '@/lib/SocketUtils'
 import type { ClientVideo } from '@/typings/types'
 
 export default class Video {
-  id: string = generateSecret()
+  readonly id: string = generateSecret()
   isReady: boolean = false
   path: string
   isBumper: boolean
@@ -101,6 +101,7 @@ export default class Video {
       this.downloadCallbacks.push((isSuccess: boolean) => resolve(isSuccess))
 
       if (this.isDownloading) return
+      this.isDownloading = true
 
       const getTotalDuration = () => {
         const m3u8Path = this.outputPath + '/video.m3u8'
@@ -139,8 +140,17 @@ export default class Video {
 
       Logger.debug('[Video] Transcoding video:', this.path)
       const ffmpegCommand = ffmpeg(this.inputPath, { timeout: 432000 }).addOptions([
-        '-profile:v baseline',
-        '-level 3.0',
+        // -preset veryfast -vf "scale='min(1920,iw)':-2" -c:v libx264 -crf 23 -pix_fmt yuv420p -map 0:v:0 -c:a aac -ac 2 -b:a 192k -map 0:a:0 -start_number 0 -hls_time 10 -hls_list_size 0 -f hls output.m3u8
+        '-preset veryfast',
+        // `-vf "scale='min(1920,iw)':-2"`,
+        '-c:v libx264',
+        '-crf 23',
+        '-pix_fmt yuv420p',
+        '-map 0:v:0',
+        '-c:a aac',
+        '-ac 2',
+        '-b:a 192k',
+        '-map 0:a:0',
         '-start_number 0',
         '-hls_time 10',
         '-hls_list_size 0',
@@ -153,6 +163,7 @@ export default class Video {
         Logger.debug('[Video] Transcoding finished:', this.outputPath)
         getTotalDuration()
       })
+      
       ffmpegCommand.on('error', (error) => {
         this.error = error.message
         Logger.error('[Video] Transcoding error:', error)
@@ -163,9 +174,10 @@ export default class Video {
     })
   }
 
-  resolveDownloadCallbacks(isSuccess: boolean) {
+  private resolveDownloadCallbacks(isSuccess: boolean) {
     this.downloadCallbacks.forEach(cb => cb(isSuccess))
     this.downloadCallbacks = []
+    this.isDownloading = false
   }
 
   get inputPath(): string {

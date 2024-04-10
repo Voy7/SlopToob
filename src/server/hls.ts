@@ -10,7 +10,7 @@ export function initializeHlsServer() {
   new Hls(httpServer, {
     provider: {
       exists: (req: any, cb: any) => {
-        // console.log('Requesting', req.url)
+        // console.log('Requesting', req.url.cyan)
         const segments = req.url.split('/')
         if (segments[1] !== 'stream-data') {
           return cb(null, true)

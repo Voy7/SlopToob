@@ -112,7 +112,7 @@ export const socketEvents: Record<string, EventOptions> = {
       !payload || typeof payload !== 'object' ||
       !('name' in payload) || typeof payload.name !== 'string' ||
       !('videoFile' in payload) || typeof payload.videoFile !== 'string'
-      ) {
+    ) {
       socket.emit(SocketEvent.AdminUploadBumper, 'Invalid payload.')
       return
     }

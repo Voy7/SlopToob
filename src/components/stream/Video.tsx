@@ -11,6 +11,7 @@ export default function Video() {
   const { streamInfo, lastStreamUpdateTimestamp } = useStreamContext()
 
   const [isPaused, setIsPaused] = useState<boolean>(true)
+  const [volume, setVolume] = useState<number>(100)
   const [currentSeconds, setCurrentSeconds] = useState<number>(0)
   const [showControls, setShowControls] = useState<boolean>(false)
   // const [totalSeconds, setTotalSeconds] = useState<number>(0)
@@ -104,6 +105,10 @@ export default function Video() {
     video.ontimeupdate = () => {
       setCurrentSeconds(video.currentTime)
     }
+
+    video.onvolumechange = () => {
+      setVolume(video.volume * 100)
+    }
   }, [])
 
   function toggleFullscreen() {
@@ -150,6 +155,12 @@ export default function Video() {
                   <p>{currentSeconds.toFixed(0)} / {streamInfo.totalSeconds.toFixed(0)}</p>
                 </>
               )}
+              <button className={`${styles.actionButton} ${styles.volumeButton}`}>
+                {volume === 0 ? <Icon name="no-volume" /> : <Icon name="volume" />}
+                <div className={styles.volumeContainer}>
+                  <input type="range" value={volume} onChange={event => videoRef.current!.volume = parseInt(event.target.value) / 100} />
+                </div>
+              </button>
             </div>
             <div className={styles.group}>
               <button className={styles.actionButton} onClick={toggleFullscreen}>

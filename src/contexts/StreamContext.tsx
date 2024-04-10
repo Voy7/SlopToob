@@ -112,6 +112,7 @@ export function StreamProvider({ authUser, cookieUsername, children }:Props) {
 
   return (
     <StreamContext.Provider value={context}>
+      {/* {children} */}
       {socket ? children : <SocketLoading />}
     </StreamContext.Provider>
   )
