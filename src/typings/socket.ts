@@ -1,10 +1,10 @@
 import type { AuthRole } from '@/lib/enums'
 import type { Socket } from 'socket.io'
-import { PlayerState } from '@/lib/enums'
+import { StreamState } from '@/lib/enums'
 import path from 'path';
 
 export type StreamPlaying = {
-  state: PlayerState.Playing,
+  state: StreamState.Playing,
   id: string,
   name: string,
   path: string,
@@ -13,7 +13,7 @@ export type StreamPlaying = {
 }
 
 export type StreamPaused = {
-  state: PlayerState.Paused,
+  state: StreamState.Paused,
   id: string,
   name: string,
   path: string,
@@ -22,11 +22,11 @@ export type StreamPaused = {
 }
 
 export type StreamLoading = {
-  state: PlayerState.Loading,
+  state: StreamState.Loading,
 }
 
 export type StreamError = {
-  state: PlayerState.Error,
+  state: StreamState.Error,
   error: string
 }
 
@@ -69,4 +69,11 @@ export type EditPlaylistNamePayload = {
 export type EditPlaylistVideosPayload = {
   playlistID: string,
   newVideoPaths: string[]
+}
+
+export type TranscodeClientVideo = {
+  name: string,
+  inputPath: string,
+  isTranscoding: boolean,
+  progressPercentage: number
 }

@@ -7,6 +7,7 @@ import Env from '@/EnvVariables'
 import Logger from '@/lib/Logger'
 import SocketUtils from '@/lib/SocketUtils'
 import type { ClientVideo } from '@/typings/types'
+import TranscoderQueue from './TranscoderQueue'
 
 export default class Video {
   readonly id: string = generateSecret()
@@ -16,7 +17,7 @@ export default class Video {
   durationSeconds: number = 0
   error: string | null = null
   private isDownloading: boolean = false
-  private downloadCallbacks: ((isSuccess: boolean) => void)[] = []
+  private readyCallbacks: ((isSuccess: boolean) => void)[] = []
   private isPlaying: boolean = false
   private isPaused: boolean = false
   private playingDate: Date | null = null
@@ -98,91 +99,55 @@ export default class Video {
   // Returns true when transcoded (or already ready), returns false if error
   async prepare(): Promise<boolean> {
     return new Promise<boolean>(resolve => {
-      this.downloadCallbacks.push((isSuccess: boolean) => resolve(isSuccess))
+      this.readyCallbacks.push((isSuccess: boolean) => resolve(isSuccess))
+      // console.log(this)
 
+      if (this.isReady) {
+        resolve(true)
+        return
+      }
       if (this.isDownloading) return
       this.isDownloading = true
 
-      const getTotalDuration = () => {
-        const m3u8Path = this.outputPath + '/video.m3u8'
-        const m3u8 = fs.readFileSync(m3u8Path, 'utf8')
-        let duration: number = 0
-        const lines = m3u8.split('\n')
-        for (let i = 0; i < lines.length; i++) {
-          // Sample line: #EXTINF:12.345,
-          if (lines[i].includes('#EXTINF:')) {
-            duration += parseFloat(lines[i].split(':')[1].split(',')[0])
-          }
-        }
-
-        if (duration > 0) {
-          this.durationSeconds = duration
-          // console.log('Duration:', duration)
-          this.isReady = true
-          this.resolveDownloadCallbacks(true)
-          return
-        }
-
-        this.error = 'Failed to get video duration.'
-        this.resolveDownloadCallbacks(false)
-      }
-
-      // check if already downloaded (see if .m3u8 file exists)
-      if (fs.existsSync(this.outputPath + '/video.m3u8')) {
-        getTotalDuration()
-        return
-      }
-
-      // Create output file path
-      if (!fs.existsSync(this.outputPath)) {
-        fs.mkdirSync(this.outputPath, { recursive: true })
-      }
-
-      Logger.debug('[Video] Transcoding video:', this.path)
-      const ffmpegCommand = ffmpeg(this.inputPath, { timeout: 432000 }).addOptions([
-        // -preset veryfast -vf "scale='min(1920,iw)':-2" -c:v libx264 -crf 23 -pix_fmt yuv420p -map 0:v:0 -c:a aac -ac 2 -b:a 192k -map 0:a:0 -start_number 0 -hls_time 10 -hls_list_size 0 -f hls output.m3u8
-        '-preset veryfast',
-        // `-vf "scale='min(1920,iw)':-2"`,
-        '-c:v libx264',
-        '-crf 23',
-        '-pix_fmt yuv420p',
-        '-map 0:v:0',
-        '-c:a aac',
-        '-ac 2',
-        '-b:a 192k',
-        '-map 0:a:0',
-        '-start_number 0',
-        '-hls_time 10',
-        '-hls_list_size 0',
-        '-f hls'
-      ])
+      Logger.debug(`[Video] Preparing video: ${this.name}`)
+      const job = TranscoderQueue.newJob(this.inputPath, this.outputPath)
+      console.log(job)
       
-      ffmpegCommand.output(this.outputPath + '/video.m3u8')
-    
-      ffmpegCommand.on('end', () => {
-        Logger.debug('[Video] Transcoding finished:', this.outputPath)
-        getTotalDuration()
+      job.onFinishedSuccess(() => {
+        console.log(`onFinishedSuccess ${this.name}`.cyan)
+        this.isReady = true
+        this.durationSeconds = job.duration
+        this.resolveReadyCallbacks(true)
+        // resolve(true)
       })
-      
-      ffmpegCommand.on('error', (error) => {
-        this.error = error.message
-        Logger.error('[Video] Transcoding error:', error)
-        this.resolveDownloadCallbacks(false)
+
+      job.onError(error => {
+        console.log('onError'.cyan, error)
+        this.error = error
+        this.resolveReadyCallbacks(false)
       })
-      
-      ffmpegCommand.run()
+
+      job.onProgress(percentage => {
+        // ...
+      })
+
+      job.run()
     })
   }
 
-  private resolveDownloadCallbacks(isSuccess: boolean) {
-    this.downloadCallbacks.forEach(cb => cb(isSuccess))
-    this.downloadCallbacks = []
+  private resolveReadyCallbacks(isSuccess: boolean) {
     this.isDownloading = false
+    console.log(`resolveReadyCallbacks (${this.readyCallbacks.length})`.cyan, isSuccess)
+    for (const callback of this.readyCallbacks) {
+      callback(isSuccess)
+    }
+    this.readyCallbacks = []
   }
 
   get inputPath(): string {
     // return path.join(Env.VIDEOS_PATH, this.path).replace(/\\/g, '/')
-    return this.path
+    // return this.path
+    return path.resolve(this.path).replace(/\\/g, '/')
   }
 
   get outputPath(): string {

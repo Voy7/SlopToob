@@ -10,6 +10,7 @@ import Logger from '@/lib/Logger'
 import SocketUtils from '@/lib/SocketUtils'
 import type { Socket } from 'socket.io'
 import type { JoinStreamPayload, Client, Viewer, EditPlaylistNamePayload, EditPlaylistVideosPayload } from '@/typings/socket'
+import TranscoderQueue from '@/stream/TranscoderQueue'
 
 type EventOptions = {
   allowUnauthenticated?: boolean, // Allow unauthenticated users to run this event (default: false)
@@ -62,6 +63,7 @@ export const socketEvents: Record<string, EventOptions> = {
     socket.emit(SocketEvent.AdminRequestFileTree, tree)
     socket.emit(SocketEvent.AdminRequestPlaylists, playlists)
     socket.emit(SocketEvent.AdminBumpersList, bumpers)
+    SocketUtils.broadcastAdmin(SocketEvent.AdminTranscodeQueueList, TranscoderQueue.clientTranscodeList)
     SocketUtils.broadcastStreamInfo()
   }},
 

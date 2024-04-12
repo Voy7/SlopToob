@@ -13,6 +13,8 @@ type SettingsList = {
   allowVoteSkip: boolean,
   voteSkipPercentage: number,
   bumperIntervalSeconds: number,
+  cacheTranscodedVideos: boolean,
+  cacheTranscodedBumpers: boolean,
 }
 
 type DefaultSettings = {
@@ -29,6 +31,8 @@ const defaultSettings: DefaultSettings = {
   allowVoteSkip: true,
   voteSkipPercentage: 0.5,
   bumperIntervalSeconds: 1800, // 30 minutes
+  cacheTranscodedVideos: true,
+  cacheTranscodedBumpers: true,
 } as const
 
 

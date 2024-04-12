@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma'
 import Env from '@/EnvVariables'
 import Logger from '@/lib/Logger'
 import Video from '@/stream/Video'
-import { PlayerState, SocketEvent } from '@/lib/enums'
+import { StreamState, SocketEvent } from '@/lib/enums'
 import type { StreamInfo } from '@/typings/socket'
 import type { RichPlaylist, FileTree, ClientPlaylist } from '@/typings/types'
 
@@ -54,17 +54,19 @@ export default new class Player {
   async playNext() {
     // Play bumper if enough time has passed
     const { bumperIntervalSeconds } = await Settings.getSettings()
-    if (nextBumper && this.lastBumperDate.getTime() + bumperIntervalSeconds * 1000 < Date.now()) {
-      this.lastBumperDate = new Date()
-      this.playing = nextBumper
-      await this.playing.prepare()
-      await this.playing.play()
-      queueNextBumper()
-      return
-    }
+    // if (nextBumper && this.lastBumperDate.getTime() + bumperIntervalSeconds * 1000 < Date.now()) {
+    //   this.lastBumperDate = new Date()
+    //   this.playing = nextBumper
+    //   await this.playing.prepare()
+    //   await this.playing.play()
+    //   queueNextBumper()
+    //   return
+    // }
 
     if (this.queue.length === 0) {
       this.playing = null
+      // Display 'no videos' error
+      SocketUtils.broadcastStreamInfo()
       return
     }
 
@@ -72,12 +74,15 @@ export default new class Player {
       Logger.warn('Tried to play next video while one is already playing:', this.playing.name)
       return
     }
-
+    
     const next = this.queue.shift()
     if (next) {
       this.playing = next
+      console.log('e1')
       const x = await this.playing.prepare()
+      console.log('e2')
       try {
+        console.log(`Calling .play() - ${this.playing.path}`.green)
         await this.playing.play()
         console.log('VIDEO ENDED'.yellow)
         this.playing = null
@@ -91,7 +96,8 @@ export default new class Player {
     }
     // Start downloading next video in queue
     if (this.queue[0]) {
-      this.queue[0].prepare()
+      // reenable later
+      // this.queue[0].prepare()
     }
   }
 
@@ -138,22 +144,29 @@ export default new class Player {
   }
 
   getStreamInfo(): StreamInfo {
+    if (!this.playing && this.queue.length === 0) {
+      return {
+        state: StreamState.Error,
+        error: 'No videos in queue.'
+      }
+    }
+
     if (!this.playing || !this.playing.isReady) {
       return {
-        state: PlayerState.Loading
+        state: StreamState.Loading
       }
     }
 
     if (this.playing.error) {
       return {
-        state: PlayerState.Error,
+        state: StreamState.Error,
         error: this.playing.error
       }
     }
 
     if (this.isPaused) {
       return {
-        state: PlayerState.Paused,
+        state: StreamState.Paused,
         id: this.playing.id,
         name: this.playing.path,
         path: `/stream-data/${this.playing.id}/video.m3u8`,
@@ -163,7 +176,7 @@ export default new class Player {
     }
 
     return {
-      state: PlayerState.Playing,
+      state: StreamState.Playing,
       id: this.playing.id,
       name: this.playing.path,
       path: `/stream-data/${this.playing.id}/video.m3u8`,

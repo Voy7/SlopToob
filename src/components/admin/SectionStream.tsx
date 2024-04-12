@@ -9,7 +9,7 @@ import Button from '@/components/ui/Button'
 import styles from './SectionStream.module.scss'
 
 export default function SectionStream() {
-  const { playlists, queue } = useAdminContext()
+  const { playlists, queue, transcodeQueue } = useAdminContext()
   const { socket } = useStreamContext()
 
   function pauseStream() {
@@ -54,6 +54,15 @@ export default function SectionStream() {
           <div key={video.id} className={styles.queueItem}>
             <span>{index + 1}.</span>
             <p>{video.name}</p>
+          </div>
+        ))}
+      </div>
+      <h3>Transcoding ({transcodeQueue.length})</h3>
+      <div className={styles.queueList}>
+        {transcodeQueue.map((video, index) => (
+          <div key={index} className={styles.queueItem}>
+            <span>{index + 1}.</span>
+            <p>{video.name} - {video.inputPath}</p>
           </div>
         ))}
       </div>

@@ -5,6 +5,7 @@ import { sections, type SectionName } from '@/components/admin/AdminModal'
 import { useStreamContext } from './StreamContext'
 import { SocketEvent } from '@/lib/enums'
 import { ClientPlaylist, ClientVideo, FileTree } from '@/typings/types'
+import { TranscodeClientVideo } from '@/typings/socket'
 
 // Stream page context
 type ContextProps = {
@@ -15,7 +16,8 @@ type ContextProps = {
   selectedPlaylist: string | null,
   setSelectedPlaylist: (id: string | null) => void,
   bumpers: ClientVideo[],
-  queue: ClientVideo[]
+  queue: ClientVideo[],
+  transcodeQueue: TranscodeClientVideo[]
 }
 
 type Props =  {
@@ -36,6 +38,7 @@ export function AdminProvider({ children }:Props) {
   const [selectedPlaylist, setSelectedPlaylist] = useState<string | null>(null)
   const [bumpers, setBumpers] = useState<ClientVideo[]>([])
   const [queue, setQueue] = useState<ClientVideo[]>([])
+  const [transcodeQueue, setTranscodeQueue] = useState<TranscodeClientVideo[]>([])
 
   function setSection(sectionName: SectionName) {
     const sec = sections.find(s => s.name === sectionName)
@@ -67,6 +70,11 @@ export function AdminProvider({ children }:Props) {
       console.log('Queue:', queue)
       setQueue(queue)
     })
+
+    socket.on(SocketEvent.AdminTranscodeQueueList, (queue: TranscodeClientVideo[]) => {
+      console.log('Transcode queue:', queue)
+      setTranscodeQueue(queue)
+    })
   }, [])
 
   useEffect(() => {
@@ -81,7 +89,8 @@ export function AdminProvider({ children }:Props) {
     selectedPlaylist,
     setSelectedPlaylist,
     bumpers,
-    queue
+    queue,
+    transcodeQueue
   }
 
   return <AdminContext.Provider value={context}>{children}</AdminContext.Provider>
