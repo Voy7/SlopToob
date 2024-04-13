@@ -13,8 +13,8 @@ type SettingsList = {
   allowVoteSkip: boolean,
   voteSkipPercentage: number,
   bumperIntervalSeconds: number,
-  cacheTranscodedVideos: boolean,
-  cacheTranscodedBumpers: boolean,
+  cacheVideos: boolean,
+  cacheBumpers: boolean,
 }
 
 type DefaultSettings = {
@@ -31,26 +31,21 @@ const defaultSettings: DefaultSettings = {
   allowVoteSkip: true,
   voteSkipPercentage: 0.5,
   bumperIntervalSeconds: 1800, // 30 minutes
-  cacheTranscodedVideos: true,
-  cacheTranscodedBumpers: true,
+  cacheVideos: true,
+  cacheBumpers: true,
 } as const
 
 
 export default new class Settings {
-  private getSettingsCallbacks: Array<(settings: SettingsList) => void> = []
   private settings: SettingsList | null = null
+  private onReadyCallback: (() => void) | null = null
 
   constructor() {
     this.createDefaultSettings()
   }
 
-  async getSettings(): Promise<SettingsList> {
-    if (!this.settings) {
-      return new Promise<SettingsList>((resolve) => {
-        this.getSettingsCallbacks.push(resolve)
-      })
-    }
-
+  getSettings(): SettingsList {
+    if (!this.settings) throw new Error('Tried to get settings before they were initialized.')
     return this.settings
   }
 
@@ -74,6 +69,11 @@ export default new class Settings {
       where: { key },
       data: { value: value.toString() }
     })
+  }
+
+  onReady(callback: () => void) {
+    if (this.settings) return callback()
+    this.onReadyCallback = callback
   }
 
   private async createDefaultSettings() {
@@ -124,9 +124,7 @@ export default new class Settings {
 
     this.settings = vars as unknown as SettingsList
 
-    for (const callback of this.getSettingsCallbacks) {
-      callback(this.settings)
-    }
+    this.onReadyCallback?.()
   }
 
   private isValidValue(key: keyof SettingsList, value: any): boolean {

@@ -17,7 +17,7 @@ type ContextProps = {
   chatMessages: (ChatMessage | { error: string })[], setChatMessages: React.Dispatch<React.SetStateAction<(ChatMessage | { error: string })[]>>,
   streamInfo: StreamInfo,
   lastStreamUpdateTimestamp: number | null,
-  socket: Socket | null,
+  socket: Socket,
   socketSecret: string
 }
 
@@ -92,13 +92,12 @@ export function StreamProvider({ authUser, cookieUsername, children }:Props) {
     chatMessages, setChatMessages,
     streamInfo,
     lastStreamUpdateTimestamp,
-    socket,
+    socket: socket!,
     socketSecret
   }
 
   return (
     <StreamContext.Provider value={context}>
-      {/* {children} */}
       {socket ? children : <SocketLoading />}
     </StreamContext.Provider>
   )

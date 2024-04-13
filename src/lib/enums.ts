@@ -28,6 +28,9 @@ export enum SocketEvent {
   AdminPauseStream = 'admin-pause-stream',
   AdminUnpauseStream = 'admin-unpause-stream',
   AdminSkipVideo = 'admin-skip-video',
+  AdminActivePlaylist = 'admin-active-playlist',
+  AdminCacheVideos = 'admin-cache-videos',
+  AdminCacheBumpers = 'admin-cache-bumpers',
 }
 
 export enum ServerEvent {

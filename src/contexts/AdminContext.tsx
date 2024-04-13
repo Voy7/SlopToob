@@ -20,17 +20,11 @@ type ContextProps = {
   transcodeQueue: TranscodeClientVideo[]
 }
 
-type Props =  {
-  // authUser: AuthUser,
-  // cookieUsername: string,
-  children: React.ReactNode
-}
-
 // Context provider wrapper component
-export function AdminProvider({ children }:Props) {
+export function AdminProvider({ children }: { children: React.ReactNode }) {
   const { socket } = useStreamContext()
 
-  if (!socket) return null
+  // if (!socket) return null
 
   const [section, setSectionState] = useState<typeof sections[number]>(sections[0])
   const [fileTree, setFileTree] = useState<FileTree | null>(null)
@@ -79,7 +73,7 @@ export function AdminProvider({ children }:Props) {
 
   useEffect(() => {
     if (!selectedPlaylist && playlists[0]) setSelectedPlaylist(playlists[0].id)
-  }, [playlists])
+  }, [selectedPlaylist, playlists])
 
   const context: ContextProps = {
     section,

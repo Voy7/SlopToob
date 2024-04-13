@@ -11,6 +11,7 @@ import SocketUtils from '@/lib/SocketUtils'
 import type { Socket } from 'socket.io'
 import type { JoinStreamPayload, Client, Viewer, EditPlaylistNamePayload, EditPlaylistVideosPayload } from '@/typings/socket'
 import TranscoderQueue from '@/stream/TranscoderQueue'
+import Settings from '@/stream/Settings'
 
 type EventOptions = {
   allowUnauthenticated?: boolean, // Allow unauthenticated users to run this event (default: false)
@@ -102,10 +103,10 @@ export const socketEvents: Record<string, EventOptions> = {
   }},
 
   // Admin sets the active playlist
-  [SocketEvent.AdminSetActivePlaylist]: { adminOnly: true, run: async (socket, playlistID: string) => {
-    const playlist = Player.playlists.find(p => p.id === playlistID) || null
-    await Player.setActivePlaylist(playlist)
-  }},
+  // [SocketEvent.AdminSetActivePlaylist]: { adminOnly: true, run: async (socket, playlistID: string) => {
+  //   const playlist = Player.playlists.find(p => p.id === playlistID) || null
+  //   await Player.setActivePlaylist(playlist)
+  // }},
 
   // Admin uploads a bumper
   [SocketEvent.AdminUploadBumper]: { adminOnly: true, run: async (socket, payload: any) => {
@@ -163,5 +164,22 @@ export const socketEvents: Record<string, EventOptions> = {
   //   broadcastAdmin(SocketEvent.AdminQueueList, Player.getQueue())
   // }},
 
-  //
+  [SocketEvent.AdminActivePlaylist]: { adminOnly: true, run: (socket, value?: string) => {
+    if (value === undefined) {
+      socket.emit(SocketEvent.AdminActivePlaylist, Player.listOptionPlaylists)
+      return
+    }
+    const playlist = Player.playlists.find(p => p.id === value) || null
+    Player.setActivePlaylist(playlist)
+  }},
+  
+  [SocketEvent.AdminCacheVideos]: { adminOnly: true, run: (socket, value?: boolean) => {
+    if (value === undefined) return socket.emit(SocketEvent.AdminCacheVideos, Settings.getSettings().cacheVideos)
+    Player.setCacheVideos(value)
+  }},
+
+  [SocketEvent.AdminCacheBumpers]: { adminOnly: true, run: (socket, value?: boolean) => {
+    if (value === undefined) return socket.emit(SocketEvent.AdminCacheBumpers, Settings.getSettings().cacheBumpers)
+    Player.setCacheBumpers(value)
+  }},
 }

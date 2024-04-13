@@ -5,7 +5,7 @@ import Logger from '@/lib/Logger'
 import Video from '@/stream/Video'
 import { StreamState, SocketEvent } from '@/lib/enums'
 import type { StreamInfo } from '@/typings/socket'
-import type { RichPlaylist, FileTree, ClientPlaylist } from '@/typings/types'
+import type { RichPlaylist, FileTree, ClientPlaylist, ListOption } from '@/typings/types'
 
 import { bumpers, nextBumper, queueNextBumper } from '@/stream/bumpers'
 import Settings from './Settings'
@@ -126,6 +126,7 @@ export default new class Player {
     this.populateRandomToQueue()
 
     SocketUtils.broadcastAdmin(SocketEvent.AdminRequestPlaylists, this.clientPlaylists)
+    SocketUtils.broadcastAdmin(SocketEvent.AdminActivePlaylist, this.listOptionPlaylists)
   }
 
   get clientPlaylists(): ClientPlaylist[] {
@@ -134,6 +135,13 @@ export default new class Player {
       name: playlist.name,
       videoPaths: playlist.videos.map(video => video.path)
     }))
+  }
+
+  get listOptionPlaylists(): ListOption {
+    return {
+      list: this.playlists.map(playlist => ({ name: playlist.name, id: playlist.id })),
+      selectedID: this.activePlaylist?.id || 'None'
+    }
   }
 
   addVideo(video: Video) {
@@ -303,5 +311,15 @@ export default new class Player {
     }
     Logger.debug(`Playlist (${playlistID}) videos updated:`, newVideoPaths)
     await this.syncUpdatePlaylists()
+  }
+
+  setCacheVideos(value: boolean) {
+    Settings.setSetting('cacheVideos', value)
+    SocketUtils.broadcastAdmin(SocketEvent.AdminCacheVideos, value)
+  }
+
+  setCacheBumpers(value: boolean) {
+    Settings.setSetting('cacheBumpers', value)
+    SocketUtils.broadcastAdmin(SocketEvent.AdminCacheBumpers, value)
   }
 }

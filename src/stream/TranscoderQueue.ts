@@ -44,11 +44,20 @@ export default new class TranscoderQueue {
     const nextJob = this.queue.find(item => !item.isTranscoding)
     if (!nextJob) return
 
+    console.log(1)
     await nextJob.transcode()
+    // await new Promise<void>(resolve => {
+    //   nextJob.onFinishedSuccess(() => resolve())
+    //   nextJob.onError(() => resolve())
+    //   nextJob.transcode()
+    // })
+    console.log(2)
     SocketUtils.broadcastAdmin(SocketEvent.AdminTranscodeQueueList, this.clientTranscodeList)
 
     const nextJobIndex = this.queue.findIndex(item => item === nextJob)
+    console.log('Job stack 0', nextJobIndex, this.queue.length)
     this.queue.splice(nextJobIndex, 1)
+    console.log('Job stack', nextJobIndex, this.queue.length)
     this.processQueue()
   }
 

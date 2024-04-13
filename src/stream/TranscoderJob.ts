@@ -15,6 +15,7 @@ export default class TranscoderJob {
   private onFinishedSuccessCallbacks: Array<() => void> = []
   private onErrorCallbacks: Array<(error: string) => void> = []
   private onProgressCallbacks: Array<(percentage: number) => void> = []
+  private onStreamableCallbacks: Array<() => void> = []
 
   // Running completeJob() will see if the transcoded files already exist, if so the job is already done
   // If an error is thrown, that means we need to start transcoding logic
@@ -40,12 +41,6 @@ export default class TranscoderJob {
       ])
       
       this.ffmpegCommand.output(path.join(this.outputPath, '/video.m3u8'))
-      // console.log(this.inputPath.green)
-      // console.log(path.join(this.outputPath, '/video.m3u8').yellow)
-
-      // this.ffmpegCommand.on('stderr', (stderrLine) => {
-      //   console.log(stderrLine)
-      // })
     
       this.ffmpegCommand.on('end', () => {
         Logger.debug('[Video] Transcoding finished:', this.outputPath)
@@ -60,6 +55,7 @@ export default class TranscoderJob {
         }
       })
       
+      // If ffmpeg error occurs, Note this gets called after 'end' event
       this.ffmpegCommand.on('error', (error) => {
         Logger.error('[Video] Transcoding error:', error)
         this.isFinished = true
@@ -72,8 +68,8 @@ export default class TranscoderJob {
     }
   }
 
-  run() {
-    if (this.isTranscoding) return
+  // Add this job to the queue
+  activate() {
     if (this.isFinished) {
       for (const callback of this.onFinishedSuccessCallbacks) callback()
       return
@@ -82,19 +78,18 @@ export default class TranscoderJob {
     TranscoderQueue.processQueue()
   }
 
-  async transcode() {
-    return new Promise<void>(resolve => {
+  // Actually start the transcoding process
+  // Should only be called once
+  async transcode(): Promise<void>{
+    if (this.isFinished) return
+
+    return new Promise<void>((resolve: any) => {
+      this.onFinishedSuccess(resolve)
+      this.onError(resolve)
+
       if (this.isTranscoding) return
       this.isTranscoding = true
-      this.onFinishedSuccess(() => resolve)
-      this.onError(() => resolve)
-      console.log(1)
-      if (this.isFinished) {
-        this.isTranscoding = false
-        for (const callback of this.onFinishedSuccessCallbacks) callback()
-        return
-      }
-      console.log(2)
+      
       fs.mkdirSync(this.outputPath, { recursive: true })
       this.ffmpegCommand?.run()
     })
@@ -119,6 +114,10 @@ export default class TranscoderJob {
     this.onProgressCallbacks.push(callback)
   }
 
+  onStreamable(callback: () => void) {
+    this.onStreamableCallbacks.push(callback)
+  }
+
   // Get additional info about a completed job
   // Currently only used for getting duration, can be expanded in the future
   private completeJob() {
@@ -137,6 +136,7 @@ export default class TranscoderJob {
     if (duration <= 0) throw new Error('Failed to get video duration.')
     this.duration = duration
     this.isFinished = true
+    console.log('transcode finished', this.onFinishedSuccessCallbacks.length)
     for (const callback of this.onFinishedSuccessCallbacks) callback()
   }
 }

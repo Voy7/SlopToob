@@ -111,7 +111,7 @@ export default class Video {
 
       Logger.debug(`[Video] Preparing video: ${this.name}`)
       const job = TranscoderQueue.newJob(this.inputPath, this.outputPath)
-      console.log(job)
+      // console.log(job)
       
       job.onFinishedSuccess(() => {
         console.log(`onFinishedSuccess ${this.name}`.cyan)
@@ -131,7 +131,7 @@ export default class Video {
         // ...
       })
 
-      job.run()
+      job.activate()
     })
   }
 

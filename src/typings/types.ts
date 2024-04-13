@@ -57,3 +57,16 @@ export type ClientVideo = {
   path: string,
   name: string
 }
+
+// export type ListOption0 = {
+//   name: string,
+//   id: string
+// }
+
+export type ListOption = {
+  list: {
+    name: string,
+    id: string
+  }[],
+  selectedID: string
+}

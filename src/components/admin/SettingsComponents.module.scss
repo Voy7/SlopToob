@@ -1,0 +1,36 @@
+.settingGroup {
+  margin-bottom: 1rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 0.25em;
+  margin-bottom: 0.3rem;
+  font-weight: normal;
+  font-size: 1rem;
+  color: var(--text-color-3);
+  cursor: default;
+}
+
+.description {
+  margin-top: 0.3rem;
+  font-size: 0.9rem;
+  color: var(--text-color-3);
+}
+
+.option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  background: var(--bg-color-2);
+  padding: 0.35rem;
+  border-left: 2px solid;
+  border-color: var(--bg-color-3);
+  cursor: pointer;
+  transition: border-color 150ms ease-in-out;
+
+  &:hover { background: var(--bg-color-3); }
+  &.active { border-color: var(--select-color); }
+}
