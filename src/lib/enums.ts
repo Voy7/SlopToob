@@ -28,9 +28,14 @@ export enum SocketEvent {
   AdminPauseStream = 'admin-pause-stream',
   AdminUnpauseStream = 'admin-unpause-stream',
   AdminSkipVideo = 'admin-skip-video',
-  AdminActivePlaylist = 'admin-active-playlist',
-  AdminCacheVideos = 'admin-cache-videos',
-  AdminCacheBumpers = 'admin-cache-bumpers',
+  SettingActivePlaylist = 'admin-active-playlist',
+  SettingAllowVoteSkip = 'admin-allow-vote-skip',
+  SettingVoteSkipPercentage = 'admin-vote-skip-percentage',
+  SettingBumperIntervalMinutes = 'admin-bumper-interval-minutes',
+  SettingTargetQueueSize = 'admin-target-queue-size',
+  SettingCacheVideos = 'admin-cache-videos',
+  SettingCacheBumpers = 'admin-cache-bumpers',
+  SettingFinishTranscode = 'admin-finish-transcode',
 }
 
 export enum ServerEvent {

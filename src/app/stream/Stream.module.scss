@@ -3,4 +3,9 @@
   // height: 100%;
   // fixed height for 16x9 aspect ratio + chat
   height: calc((100vw - var(--chat-width)) * 9 / 16);
+
+  @media (max-width: 767px) {
+    flex-direction: column;
+    height: auto;
+  }
 }

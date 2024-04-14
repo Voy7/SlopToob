@@ -164,22 +164,54 @@ export const socketEvents: Record<string, EventOptions> = {
   //   broadcastAdmin(SocketEvent.AdminQueueList, Player.getQueue())
   // }},
 
-  [SocketEvent.AdminActivePlaylist]: { adminOnly: true, run: (socket, value?: string) => {
+  [SocketEvent.SettingActivePlaylist]: { adminOnly: true, run: (socket, value?: string) => {
     if (value === undefined) {
-      socket.emit(SocketEvent.AdminActivePlaylist, Player.listOptionPlaylists)
+      socket.emit(SocketEvent.SettingActivePlaylist, Player.listOptionPlaylists)
       return
     }
     const playlist = Player.playlists.find(p => p.id === value) || null
     Player.setActivePlaylist(playlist)
   }},
-  
-  [SocketEvent.AdminCacheVideos]: { adminOnly: true, run: (socket, value?: boolean) => {
-    if (value === undefined) return socket.emit(SocketEvent.AdminCacheVideos, Settings.getSettings().cacheVideos)
-    Player.setCacheVideos(value)
+
+  [SocketEvent.SettingAllowVoteSkip]: { adminOnly: true, run: (socket, value?: boolean) => {
+    if (value === undefined) return socket.emit(SocketEvent.SettingCacheVideos, Settings.getSettings().allowVoteSkip)
+    Settings.setSetting('allowVoteSkip', value)
+    SocketUtils.broadcastAdmin(SocketEvent.SettingAllowVoteSkip, value)
   }},
 
-  [SocketEvent.AdminCacheBumpers]: { adminOnly: true, run: (socket, value?: boolean) => {
-    if (value === undefined) return socket.emit(SocketEvent.AdminCacheBumpers, Settings.getSettings().cacheBumpers)
-    Player.setCacheBumpers(value)
+  [SocketEvent.SettingVoteSkipPercentage]: { adminOnly: true, run: (socket, value?: number) => {
+    if (value === undefined) return socket.emit(SocketEvent.SettingVoteSkipPercentage, Settings.getSettings().voteSkipPercentage)
+    Settings.setSetting('voteSkipPercentage', value)
+    SocketUtils.broadcastAdmin(SocketEvent.SettingVoteSkipPercentage, value)
+  }},
+
+  [SocketEvent.SettingBumperIntervalMinutes]: { adminOnly: true, run: (socket, value?: number) => {
+    if (value === undefined) return socket.emit(SocketEvent.SettingBumperIntervalMinutes, Settings.getSettings().bumperIntervalMinutes)
+    Settings.setSetting('bumperIntervalMinutes', value)
+    SocketUtils.broadcastAdmin(SocketEvent.SettingBumperIntervalMinutes, value)
+  }},
+
+  [SocketEvent.SettingTargetQueueSize]: { adminOnly: true, run: (socket, value?: number) => {
+    if (value === undefined) return socket.emit(SocketEvent.SettingTargetQueueSize, Settings.getSettings().targetQueueSize)
+    Settings.setSetting('targetQueueSize', value)
+    SocketUtils.broadcastAdmin(SocketEvent.SettingTargetQueueSize, value)
+  }},
+  
+  [SocketEvent.SettingCacheVideos]: { adminOnly: true, run: (socket, value?: boolean) => {
+    if (value === undefined) return socket.emit(SocketEvent.SettingCacheVideos, Settings.getSettings().cacheVideos)
+    Settings.setSetting('cacheVideos', value)
+    SocketUtils.broadcastAdmin(SocketEvent.SettingCacheVideos, value)
+  }},
+
+  [SocketEvent.SettingCacheBumpers]: { adminOnly: true, run: (socket, value?: boolean) => {
+    if (value === undefined) return socket.emit(SocketEvent.SettingCacheBumpers, Settings.getSettings().cacheBumpers)
+    Settings.setSetting('cacheBumpers', value)
+    SocketUtils.broadcastAdmin(SocketEvent.SettingCacheBumpers, value)
+  }},
+
+  [SocketEvent.SettingFinishTranscode]: { adminOnly: true, run: (socket, value?: boolean) => {
+    if (value === undefined) return socket.emit(SocketEvent.SettingFinishTranscode, Settings.getSettings().finishTranscodeIfSkipped)
+    Settings.setSetting('finishTranscodeIfSkipped', value)
+    SocketUtils.broadcastAdmin(SocketEvent.SettingFinishTranscode, value)
   }},
 }

@@ -5,6 +5,14 @@
   overflow-y: auto;
   flex-shrink: 0;
 
+  @media (max-width: 767px) {
+    flex-direction: row;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color-1);
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
   button {
     display: flex;
     align-items: center;

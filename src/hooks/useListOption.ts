@@ -19,8 +19,8 @@ export default function useListOption(event: SocketEvent) {
   }, [socket])
 
   function setValue(selectedID: string) {
-    // setValueState(value)
     socket.emit(event, selectedID)
+    if (value) setValueState({ ...value, selectedID })
   }
 
   return { value, setValue } as const

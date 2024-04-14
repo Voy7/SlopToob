@@ -53,7 +53,7 @@ export default new class Player {
 
   async playNext() {
     // Play bumper if enough time has passed
-    const { bumperIntervalSeconds } = await Settings.getSettings()
+    // const { bumperIntervalSeconds } = await Settings.getSettings()
     // if (nextBumper && this.lastBumperDate.getTime() + bumperIntervalSeconds * 1000 < Date.now()) {
     //   this.lastBumperDate = new Date()
     //   this.playing = nextBumper
@@ -126,7 +126,7 @@ export default new class Player {
     this.populateRandomToQueue()
 
     SocketUtils.broadcastAdmin(SocketEvent.AdminRequestPlaylists, this.clientPlaylists)
-    SocketUtils.broadcastAdmin(SocketEvent.AdminActivePlaylist, this.listOptionPlaylists)
+    SocketUtils.broadcastAdmin(SocketEvent.SettingActivePlaylist, this.listOptionPlaylists)
   }
 
   get clientPlaylists(): ClientPlaylist[] {
@@ -176,7 +176,7 @@ export default new class Player {
       return {
         state: StreamState.Paused,
         id: this.playing.id,
-        name: this.playing.path,
+        name: this.playing.name,
         path: `/stream-data/${this.playing.id}/video.m3u8`,
         currentSeconds: this.playing.currentSeconds,
         totalSeconds: this.playing.durationSeconds
@@ -186,7 +186,7 @@ export default new class Player {
     return {
       state: StreamState.Playing,
       id: this.playing.id,
-      name: this.playing.path,
+      name: this.playing.name,
       path: `/stream-data/${this.playing.id}/video.m3u8`,
       currentSeconds: this.playing.currentSeconds,
       totalSeconds: this.playing.durationSeconds
@@ -313,13 +313,13 @@ export default new class Player {
     await this.syncUpdatePlaylists()
   }
 
-  setCacheVideos(value: boolean) {
-    Settings.setSetting('cacheVideos', value)
-    SocketUtils.broadcastAdmin(SocketEvent.AdminCacheVideos, value)
-  }
+  // setCacheVideos(value: boolean) {
+  //   Settings.setSetting('cacheVideos', value)
+  //   SocketUtils.broadcastAdmin(SocketEvent.AdminCacheVideos, value)
+  // }
 
-  setCacheBumpers(value: boolean) {
-    Settings.setSetting('cacheBumpers', value)
-    SocketUtils.broadcastAdmin(SocketEvent.AdminCacheBumpers, value)
-  }
+  // setCacheBumpers(value: boolean) {
+  //   Settings.setSetting('cacheBumpers', value)
+  //   SocketUtils.broadcastAdmin(SocketEvent.AdminCacheBumpers, value)
+  // }
 }

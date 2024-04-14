@@ -5,19 +5,19 @@ import type { SocketEvent } from '@/lib/enums'
 export default function useToggleOption(event: SocketEvent) {
   const { socket } = useStreamContext()
   
-  const [value, setValueState] = useState<boolean | null>(null)
+  const [value, setValueState] = useState<number | null>(null)
 
   useEffect(() => {
     socket.emit(event)
 
-    socket.on(event, (value: boolean) => {
+    socket.on(event, (value: number) => {
       setValueState(value)
     })
 
     return () => { socket.off(event) }
   }, [socket])
 
-  function setValue(value: boolean) {
+  function setValue(value: number) {
     socket.emit(event, value)
     setValueState(value)
   }

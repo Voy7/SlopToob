@@ -1,0 +1,49 @@
+.streamControls {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+
+  .actionButton {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.5rem;
+    font-size: 2rem;
+    color: black;
+    background: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+
+    &.error { background: var(--error-color); cursor: not-allowed; }
+    &.loading { cursor: not-allowed; }
+  }
+
+  .text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    margin-left: 0.5rem;
+    overflow: hidden;
+
+    .name {
+      font-weight: 400;
+      font-size: 1rem;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+      color: var(--text-color-2);
+      cursor: default;
+
+      &.error { color: var(--error-color); }
+    }
+
+    .timestamp {
+      font-size: 0.9rem;
+      color: var(--text-color-3);
+      cursor: default;
+    }
+  }
+}

@@ -113,7 +113,7 @@ export default class Video {
       const job = TranscoderQueue.newJob(this.inputPath, this.outputPath)
       // console.log(job)
       
-      job.onFinishedSuccess(() => {
+      job.onStreamableReady(() => {
         console.log(`onFinishedSuccess ${this.name}`.cyan)
         this.isReady = true
         this.durationSeconds = job.duration
@@ -166,12 +166,16 @@ export default class Video {
     const a = path.resolve(this.path)
     const filePath = a.split(Env.VIDEOS_PATH)[1]
     // console.log('get outputPath'.cyan, filePath, a)
-    const newPath = path.join(Env.OUTPUT_PATH, filePath).replace(/\\/g, '/')
+    const newPath = path.join(Env.VIDEOS_OUTPUT_PATH, filePath).replace(/\\/g, '/')
     return newPath
   }
 
   get name() {
-    return path.basename(this.path)
+    let name = path.basename(this.path) // File name
+    name = name.substring(0, name.lastIndexOf('.')) // Remove extension
+    name = name.replace(/_/g, ' ') // Underscores to spaces
+    name = name.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()) // Capatalize every word
+    return name
   }
 
   get title() {

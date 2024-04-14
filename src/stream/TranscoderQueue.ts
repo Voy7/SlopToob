@@ -10,11 +10,6 @@ import { SocketEvent } from '@/lib/enums'
 
 const MAX_TRANSCODING_JOBS = 2
 
-type QueueItem = {
-  job: TranscoderJob,
-  callback: Function
-}
-
 // Handles all transcoding operations
 // The reason why this logic is not in the Video class is because there can be
 // multiple of the same video, videos that are deleted while transcoding, etc.

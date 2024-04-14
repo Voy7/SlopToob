@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { useVideoContext } from '@/contexts/VideoContext'
 import { useStreamContext } from '@/contexts/StreamContext'
 import { StreamState } from '@/lib/enums'
+import parseTimestamp from '@/lib/parseTimestamp'
 import Icon from '@/components/ui/Icon'
 import styles from './VideoControls.module.scss'
 
@@ -64,7 +65,7 @@ export default function VideoControls() {
                   <Icon name="pause" />
                 </button>
               )}
-              <p>{currentSeconds.toFixed(0)} / {streamInfo.totalSeconds.toFixed(0)}</p>
+              <p>{parseTimestamp(currentSeconds)} / {parseTimestamp(streamInfo.totalSeconds)}</p>
             </>
           )}
           <button className={`${styles.actionButton} ${styles.volumeButton}`}>

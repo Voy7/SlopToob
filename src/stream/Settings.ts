@@ -12,9 +12,11 @@ type SettingsList = {
   activePlaylistID: string,
   allowVoteSkip: boolean,
   voteSkipPercentage: number,
-  bumperIntervalSeconds: number,
+  bumperIntervalMinutes: number,
+  targetQueueSize: number,
   cacheVideos: boolean,
   cacheBumpers: boolean,
+  finishTranscodeIfSkipped: boolean,
 }
 
 type DefaultSettings = {
@@ -30,9 +32,11 @@ const defaultSettings: DefaultSettings = {
   activePlaylistID: 'None',
   allowVoteSkip: true,
   voteSkipPercentage: 0.5,
-  bumperIntervalSeconds: 1800, // 30 minutes
+  bumperIntervalMinutes: 1800, // 30 minutes
+  targetQueueSize: 5,
   cacheVideos: true,
   cacheBumpers: true,
+  finishTranscodeIfSkipped: true,
 } as const
 
 

@@ -1,9 +1,10 @@
 import ffmpeg from 'fluent-ffmpeg'
-import ffmpegStatic from 'ffmpeg-static'
-import Env from '@/EnvVariables'
+import ffmpegPath from 'ffmpeg-static'
+// import ffmpegPath from '@ffmpeg-installer/ffmpeg'
+import ffprobePath from '@ffprobe-installer/ffprobe'
 
-// if (Env.FFMPEG_PATH) ffmpeg.setFfmpegPath(Env.FFMPEG_PATH)
-// else ffmpeg.setFfmpegPath(ffmpegStatic!)
-ffmpeg.setFfmpegPath(ffmpegStatic!)
+ffmpeg.setFfmpegPath(ffmpegPath!)
+// ffmpeg.setFfmpegPath(ffmpegPath.path)
+ffmpeg.setFfprobePath(ffprobePath.path)
 
 export default ffmpeg

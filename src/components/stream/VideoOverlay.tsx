@@ -19,6 +19,14 @@ export default function VideoOverlay() {
     )
   }
 
+  if (streamInfo.state === StreamState.Paused) {
+    return <p className={styles.paused}><Icon name="pause" />STREAM PAUSED</p>
+  }
+
+  if (streamInfo.state === StreamState.Loading) {
+    return <p className={styles.loading}><Icon name="loading" />LOADING...</p>
+  }
+
   if (streamInfo.state === StreamState.Error) {
     return (
       <div className={styles.error}>

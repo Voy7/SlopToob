@@ -22,9 +22,8 @@ export default new class EnvVariables {
   readonly SERVER_PORT: number = parseInt(parsed?.SERVER_PORT || '3000') || 3000
   readonly USER_PASSWORD: string = parsed?.USER_PASSWORD || 'user'
   readonly ADMIN_PASSWORD: string = parsed?.ADMIN_PASSWORD || 'admin'
-  readonly OUTPUT_PATH: string = parsePath(parsed?.OUTPUT_PATH, 'default_output')
   readonly VIDEOS_PATH: string = parsePath(parsed?.VIDEOS_PATH, 'default_videos')
+  readonly VIDEOS_OUTPUT_PATH: string = parsePath(parsed?.OUTPUT_PATH, 'default_output')
   readonly BUMPERS_PATH: string = parsePath(parsed?.OUTPUT_PATH + '/bumpers', 'default_videos')
   readonly BUMPERS_OUTPUT_PATH: string = parsePath(parsed?.OUTPUT_PATH + '/bumpers-transcoded', 'default_output')
-  readonly FFMPEG_PATH: string | null = parsed?.FFMPEG_PATH || null
 }

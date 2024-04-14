@@ -19,18 +19,66 @@
   color: var(--text-color-3);
 }
 
-.option {
+// Universal option styles
+@mixin option {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
   background: var(--bg-color-2);
   padding: 0.35rem;
-  border-left: 2px solid;
+  border-left: 1px solid;
   border-color: var(--bg-color-3);
   cursor: pointer;
   transition: border-color 150ms ease-in-out;
 
   &:hover { background: var(--bg-color-3); }
   &.active { border-color: var(--select-color); }
+}
+
+.toggleOption {
+  @include option;
+  svg { color: var(--text-color-3); }
+}
+
+.numberOption {
+  @include option;
+  
+  svg { color: var(--text-color-3); }
+
+  input {
+    width: 3rem;
+    padding: 0.25rem;
+    border: 1px solid var(--bg-color-3);
+    border-radius: 0.25rem;
+    background: var(--bg-color-2);
+    color: var(--text-color-3);
+    text-align: center;
+    transition: border-color 150ms ease-in-out;
+
+    &:focus { border-color: var(--select-color); }
+  }
+}
+
+.listOption {
+  @include option;
+
+  &.active {
+    border-color: var(--select-color);
+    svg { color: var(--select-color); }
+  }
+
+  p {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-color-3);
+
+    span {
+      font-size: 0.8em;
+      @media (max-width: 768px) { display: none; }
+    }
+  }
+
+  svg { color: var(--text-color-3); }
 }
