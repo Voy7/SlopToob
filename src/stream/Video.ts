@@ -1,4 +1,5 @@
 import fs from 'fs'
+import fsAsync from 'fs/promises'
 import path from 'path'
 import generateSecret from '@/lib/generateSecret'
 import ffmpeg from '@/lib/ffmpeg'
@@ -8,6 +9,8 @@ import Logger from '@/lib/Logger'
 import SocketUtils from '@/lib/SocketUtils'
 import type { ClientVideo } from '@/typings/types'
 import TranscoderQueue from './TranscoderQueue'
+import Settings from './Settings'
+import TranscoderJob from './TranscoderJob'
 
 export default class Video {
   readonly id: string = generateSecret()
@@ -24,6 +27,7 @@ export default class Video {
   private passedDurationSeconds: number = 0
   private finishedCallbacks: (() => void)[] = []
   private finishedTimeout: NodeJS.Timeout | null = null
+  private job: TranscoderJob | null = null
 
   constructor(path: string, isBumper?: boolean) {
     this.path = path
@@ -56,16 +60,16 @@ export default class Video {
     if (!this.isPlaying || !this.isPaused) return
     this.isPaused = false
     this.playingDate = new Date()
-    this.finishedTimeout = setTimeout(() => this.finishPlaying(), (this.durationSeconds - this.passedDurationSeconds) * 1000)
+    this.finishedTimeout = setTimeout(async () => await this.finishPlaying(), (this.durationSeconds - this.passedDurationSeconds) * 1000)
     SocketUtils.broadcastStreamInfo()
   }
 
-  forceFinish() {
+  async forceFinish() {
     if (!this.isPlaying) return
-    this.finishPlaying()
+    await this.finishPlaying()
   }
 
-  private finishPlaying() {
+  private async finishPlaying() {
     if (!this.isPlaying) return
     this.finishedCallbacks.forEach(cb => cb())
     this.finishedCallbacks = []
@@ -80,6 +84,17 @@ export default class Video {
 
     Logger.debug(`[Video] Finished playing in ${this.durationSeconds}s: ${this.name}`)
     SocketUtils.broadcastStreamInfo()
+
+    //
+    this.job?.kill()
+
+    const { cacheVideos, cacheBumpers } = Settings.getSettings()
+    const keepCache = this.isBumper ? cacheBumpers : cacheVideos
+
+    if (!keepCache) {
+      try { await fsAsync.rmdir(this.outputPath, { recursive: true }) }
+      catch (error) { Logger.warn(`[Video] Error deleting video cache: ${this.name}`) }
+    }
   }
 
   async play() {
@@ -91,7 +106,7 @@ export default class Video {
 
       this.isPlaying = true
       this.playingDate = new Date()
-      this.finishedTimeout = setTimeout(() => this.finishPlaying(), this.durationSeconds * 1000)
+      this.finishedTimeout = setTimeout(async () => await this.finishPlaying(), this.durationSeconds * 1000)
       SocketUtils.broadcastStreamInfo()
     })
   }
@@ -100,7 +115,6 @@ export default class Video {
   async prepare(): Promise<boolean> {
     return new Promise<boolean>(resolve => {
       this.readyCallbacks.push((isSuccess: boolean) => resolve(isSuccess))
-      // console.log(this)
 
       if (this.isReady) {
         resolve(true)
@@ -111,19 +125,18 @@ export default class Video {
 
       Logger.debug(`[Video] Preparing video: ${this.name}`)
       const job = TranscoderQueue.newJob(this.inputPath, this.outputPath)
-      // console.log(job)
+      this.job = job
       
       job.onStreamableReady(() => {
-        console.log(`onFinishedSuccess ${this.name}`.cyan)
         this.isReady = true
         this.durationSeconds = job.duration
         this.resolveReadyCallbacks(true)
-        // resolve(true)
       })
 
-      job.onError(error => {
-        console.log('onError'.cyan, error)
+      job.onError(async error => {
         this.error = error
+        // Wait 3 seconds
+        await new Promise(resolve => setTimeout(resolve, 3000))
         this.resolveReadyCallbacks(false)
       })
 
@@ -137,42 +150,26 @@ export default class Video {
 
   private resolveReadyCallbacks(isSuccess: boolean) {
     this.isDownloading = false
-    console.log(`resolveReadyCallbacks (${this.readyCallbacks.length})`.cyan, isSuccess)
-    for (const callback of this.readyCallbacks) {
-      callback(isSuccess)
-    }
+    for (const callback of this.readyCallbacks) callback(isSuccess)
     this.readyCallbacks = []
   }
 
   get inputPath(): string {
-    // return path.join(Env.VIDEOS_PATH, this.path).replace(/\\/g, '/')
-    // return this.path
     return path.resolve(this.path).replace(/\\/g, '/')
   }
 
   get outputPath(): string {
-    // let newPath = path.join(Env.OUTPUT_PATH, this.path).replace(/\\/g, '/')
-    // newPath = newPath.substring(0, newPath.lastIndexOf('.'))
-    // return newPath
-    
-    if (this.isBumper) {
-      const a = path.resolve(this.path)
-      const filePath = a.split(Env.BUMPERS_PATH)[1]
-      // console.log('get outputPath'.cyan, filePath)
-      const newPath = path.join(Env.BUMPERS_OUTPUT_PATH, filePath).replace(/\\/g, '/')
-      return newPath
-    }
-
-    const a = path.resolve(this.path)
-    const filePath = a.split(Env.VIDEOS_PATH)[1]
-    // console.log('get outputPath'.cyan, filePath, a)
-    const newPath = path.join(Env.VIDEOS_OUTPUT_PATH, filePath).replace(/\\/g, '/')
+    const basePath = this.isBumper ? Env.BUMPERS_PATH : Env.VIDEOS_PATH
+    const outputBasePath = this.isBumper ? Env.BUMPERS_OUTPUT_PATH : Env.VIDEOS_OUTPUT_PATH
+    let newPath = path.resolve(this.path)
+    newPath = newPath.split(basePath)[1]
+    newPath = path.join(outputBasePath, newPath).replace(/\\/g, '/')
     return newPath
   }
 
   get name() {
     let name = path.basename(this.path) // File name
-    name = name.substring(0, name.lastIndexOf('.')) // Remove extension
+    if (name.includes('.')) name = name.substring(0, name.lastIndexOf('.')) // Remove extension if it exists
     name = name.replace(/_/g, ' ') // Underscores to spaces
     name = name.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()) // Capatalize every word
     return name

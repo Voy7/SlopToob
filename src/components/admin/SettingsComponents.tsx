@@ -27,74 +27,101 @@ type ToggleProps = {
   setValue: (value: boolean) => void
 }
 
-export function Toggle({ label, value, setValue }: ToggleProps) {
+export function ToggleOption({ label, value, setValue }: ToggleProps) {
   return (
     <label className={value ? `${styles.toggleOption} ${styles.active}` : styles.toggleOption}>
       {label}
       {value !== null ? (
-        <Slider value={value} onChange={event => setValue(event.target.checked)} />
-      ) : (
-        <Icon name="loading" />
-      )}
+        <div className={styles.right}>
+          <div className={styles.valueLabel}>
+            <p key={`${value}`}>{value ? 'Enabled' : 'Disabled'}</p>
+            <Slider value={value} onChange={event => setValue(event.target.checked)} />
+          </div>
+        </div>
+      ) : <Icon name="loading" className={styles.loadingIcon} /> }
     </label>
   )
 }
 
 type NumberOptionProps = {
   label: string,
-  allowFloat?: boolean,
+  type: 'integer' | 'float' | 'percentage',
   value: number | null,
   setValue: (value: number) => void
 }
 
-export function NumberOption({ label, allowFloat, value, setValue }: NumberOptionProps) {
+export function NumberOption({ label, type, value, setValue }: NumberOptionProps) {
   const [input, setInput] = useState<string | null>(null)
-  const [isValid, setIsValid] = useState<boolean | null>(null)
+  const [isValid, setIsValid] = useState<true | null | string>(null)
+  const [isEditing, setIsEditing] = useState<boolean>(false)
 
   const inputRef = useRef<HTMLInputElement>(null)
 
+  // Update input when value changes from server
   useEffect(() => {
     setInput(value !== null ? `${value}` : null)
     setIsValid(value !== null ? checkIsValid(`${value}`) : null)
   }, [value])
 
   // Submit when input loses focus
+  // useEffect(() => {
+  //   if (!inputRef.current) return
+  //   const element = inputRef.current
+  //   const onBlur = () => {
+  //     if (element !== document.activeElement) onSubmit()
+  //   }
+  //   element.addEventListener('blur', onBlur)
+  //   return () => element.removeEventListener('blur', onBlur)
+  // }, [inputRef.current, input, value])
+
+  // Update width of input based on value
   useEffect(() => {
-    if (inputRef.current) {
-      const input = inputRef.current
-      const onBlur = () => {
-        if (input !== document.activeElement) onSubmit()
-      }
-      input.addEventListener('blur', onBlur)
-      return () => input.removeEventListener('blur', onBlur)
-    }
-  }, [inputRef.current, value])
+    if (!inputRef.current) return
+    const input = inputRef.current
+    input.style.width = `calc(${input.value.length}ch + 1em)`
+  }, [input])
 
   function onSubmit(event?: React.FormEvent) {
     event?.preventDefault()
     const isValid = checkIsValid(input)
     setIsValid(isValid)
-    if (isValid) setValue(Number(input))
+    if (isValid === true) {
+      setValue(Number(input))
+      inputRef.current?.blur()
+    }
   }
 
-  function checkIsValid(value: string | null) {
-    if (value === null) return false
-    if (allowFloat) return !isNaN(Number(value))
-    return Number.isInteger(Number(value))
+  function checkIsValid(value: string | null): true | null | string {
+    if (value === null) return null
+    if (value === '') return 'Empty value.'
+    if (type === 'float') return !isNaN(Number(value)) || 'Not a number.'
+    if (type === 'integer') return Number.isInteger(Number(value)) || 'Not an integer.'
+    if (type === 'percentage') { // Is integer between 0 and 100
+      const number = Number(value)
+      return (Number.isInteger(number) && number >= 0 && number <= 100) || 'Not between 0 - 100.'
+    }
+    return null
   }
 
   return (
     <form onSubmit={onSubmit}>
-      <label className={value ? `${styles.numberOption} ${styles.active}` : styles.numberOption}>
+      <label className={isEditing ? `${styles.numberOption} ${styles.isEditing}` : styles.numberOption}>
         {label}
         {value !== null && input !== null ? (
-          <span>
-            {!isValid && <p><Icon name="warning" />Invalid value</p>}
-            <input ref={inputRef} type="text" value={`${input}`} onChange={event => setInput(event.target.value)} />
-          </span>
-        ) : (
-          <Icon name="loading" />
-        )}
+          <div className={styles.right}>
+            <div className={styles.valueLabel}>
+              <p key={`${isValid}`} className={typeof isValid ==='string' ? styles.show : undefined}><Icon name="warning" />{isValid}</p>
+              <input
+                ref={inputRef}
+                type="text"
+                value={`${input}`}
+                onChange={event => setInput(event.target.value)}
+                onFocus={() => setIsEditing(true)}
+                onBlur={() => { setIsEditing(false); onSubmit() }}
+              />
+            </div>
+          </div>
+        ) : <Icon name="loading" className={styles.loadingIcon} /> }
       </label>
     </form>
   )
@@ -109,7 +136,7 @@ export function ListOption({ value, setValue }: ListOptionProps) {
   if (!value) return (
     <label className={styles.listOption}>
       Loading options...
-      <Icon name="loading" />
+      <Icon name="loading" className={styles.loadingIcon} />
     </label>
   )
 
@@ -122,11 +149,14 @@ export function ListOption({ value, setValue }: ListOptionProps) {
           onClick={() => setValue(option.id)}
         >
           {option.name}
-          {option.id === value.selectedID ? (
-            <p><span>Selected</span><Icon name="radio-checked" /></p>
-          ) : (
-            <Icon name="radio-unchecked" />
-          )}
+          <div className={styles.right}>
+            {option.id === value.selectedID ? (
+              <div className={styles.valueLabel}>
+                <p>Selected</p>
+                <Icon name="radio-checked" />
+              </div>
+            ) : <Icon name="radio-unchecked" /> }
+          </div>
         </label>
       ))}
     </>

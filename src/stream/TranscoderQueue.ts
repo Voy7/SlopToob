@@ -20,18 +20,11 @@ export default new class TranscoderQueue {
   // Create a new job if it doesn't exist, otherwise return the existing job
   newJob(inputPath: string, outputPath: string): TranscoderJob {
     const existingJob = this.queue.find(item => item.inputPath === inputPath)
-    if (existingJob) {
-      console.log('RETURNING EXISTING JOB - ', inputPath)
-      return existingJob
-    }
-    const job = new TranscoderJob(inputPath, outputPath)
-    // this.queue.push(job)
-    // this.processQueue()
-    return job
+    if (existingJob) return existingJob
+    return new TranscoderJob(inputPath, outputPath)
   }
 
   async processQueue() {
-    // console.log('transcode queue:', this.queue)
     SocketUtils.broadcastAdmin(SocketEvent.AdminTranscodeQueueList, this.clientTranscodeList)
     const transcodingJobs = this.queue.filter(item => item.isTranscoding)
     if (transcodingJobs.length >= MAX_TRANSCODING_JOBS) return
@@ -39,20 +32,11 @@ export default new class TranscoderQueue {
     const nextJob = this.queue.find(item => !item.isTranscoding)
     if (!nextJob) return
 
-    console.log(1)
     await nextJob.transcode()
-    // await new Promise<void>(resolve => {
-    //   nextJob.onFinishedSuccess(() => resolve())
-    //   nextJob.onError(() => resolve())
-    //   nextJob.transcode()
-    // })
-    console.log(2)
     SocketUtils.broadcastAdmin(SocketEvent.AdminTranscodeQueueList, this.clientTranscodeList)
 
     const nextJobIndex = this.queue.findIndex(item => item === nextJob)
-    console.log('Job stack 0', nextJobIndex, this.queue.length)
     this.queue.splice(nextJobIndex, 1)
-    console.log('Job stack', nextJobIndex, this.queue.length)
     this.processQueue()
   }
 

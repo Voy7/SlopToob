@@ -101,7 +101,7 @@ export default new class Settings {
       const key = settingKey as keyof SettingsList
       const existingSetting = allSettings.find((s) => s.key === key)
 
-      if (!existingSetting) {
+      if (existingSetting === undefined) {
         Logger.info(`Setting ${key} not found, creating with default value`)
         const defaultValue = getDefaultValue(key)
         vars[key] = defaultValue
@@ -123,7 +123,16 @@ export default new class Settings {
         continue
       }
 
-      vars[key] = existingSetting.value
+      // Parse value to correct type
+      const expectedType = typeof defaultSettings[key]
+      let value
+      if (expectedType === 'boolean') value = existingSetting.value === 'true'
+      else if (expectedType === 'number') value = Number(existingSetting.value)
+      // enums
+      else if (typeof defaultSettings[key] === 'object') value = defaultSettings[key].enum[existingSetting.value]
+      else value = existingSetting.value
+
+      vars[key] = value as any
     }
 
     this.settings = vars as unknown as SettingsList

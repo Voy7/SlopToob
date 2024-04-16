@@ -10,6 +10,11 @@ import type { ClientVideo } from '@/typings/types'
 export const bumpers: Video[] = []
 export let nextBumper: Video | null = null
 
+// Create bumpers directory if it doesn't exist
+if (!fs.existsSync(Env.BUMPERS_PATH)) {
+  fs.mkdirSync(Env.BUMPERS_PATH, { recursive: true })
+}
+
 // Watch bumpers directory for changes
 fs.watch(Env.BUMPERS_PATH, { recursive: true }, (_, filename) => {
   if (!filename) return

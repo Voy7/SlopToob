@@ -20,43 +20,96 @@
 }
 
 // Universal option styles
+$optionPadding: 0.35rem;
+
 @mixin option {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
   background: var(--bg-color-2);
-  padding: 0.35rem;
+  padding: $optionPadding;
   border-left: 1px solid;
   border-color: var(--bg-color-3);
   cursor: pointer;
   transition: border-color 150ms ease-in-out;
 
   &:hover { background: var(--bg-color-3); }
-  &.active { border-color: var(--select-color); }
+  // &.active { border-color: var(--select-color); }
+
+  .loadingIcon { color: var(--text-color-3); }
+
+  .right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  
+    .valueLabel {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      p {
+        font-size: 0.9em;
+        color: var(--text-color-3);
+        animation: valueFade 150ms ease-in-out;
+
+        @keyframes valueFade {
+          0% { opacity: 0; }
+          100% { opacity: 1; }
+        }
+      }
+    }
+  }
 }
 
 .toggleOption {
   @include option;
-  svg { color: var(--text-color-3); }
 }
 
 .numberOption {
   @include option;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-right: 0;
+
+  &.isEditing { transition: background 150ms; background: var(--bg-color-4); }
   
   svg { color: var(--text-color-3); }
 
-  input {
-    width: 3rem;
-    padding: 0.25rem;
-    border: 1px solid var(--bg-color-3);
-    border-radius: 0.25rem;
-    background: var(--bg-color-2);
-    color: var(--text-color-3);
-    text-align: center;
-    transition: border-color 150ms ease-in-out;
+  p { // Error
+    display: flex;
+    align-items: center;
+    gap: 0.2em;
+    color: var(--error-color) !important;
+    transform: translateX(1.5em);
+    opacity: 0;
+    scale: 0.9;
+    transition: 150ms ease-in-out;
 
-    &:focus { border-color: var(--select-color); }
+    &.show { transform: translateX(0); opacity: 1; scale: 1; }
+    svg { color: inherit; }
+  }
+
+  input {
+    text-align: right;
+    padding: $optionPadding 0.2rem;
+    padding-right: 0.5em;
+    color: var(--text-color-3);
+    // background: var(--bg-color-2);
+    background: none;
+    // border: 1px solid var(--bg-color-3);
+    // border-radius: 0.25rem;
+    border: 1px solid transparent;
+    transition: border-color 150ms ease-in-out;
+    cursor: inherit;
+
+    &:focus {
+      color: var(--text-color-1);
+      border-color: var(--select-color);
+      outline: none;
+      cursor: text;
+    }
   }
 }
 
@@ -64,20 +117,8 @@
   @include option;
 
   &.active {
-    border-color: var(--select-color);
+    // border-color: var(--select-color);
     svg { color: var(--select-color); }
-  }
-
-  p {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--text-color-3);
-
-    span {
-      font-size: 0.8em;
-      @media (max-width: 768px) { display: none; }
-    }
   }
 
   svg { color: var(--text-color-3); }

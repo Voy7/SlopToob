@@ -12,7 +12,7 @@ import Settings from './Settings'
 import SocketUtils from '@/lib/SocketUtils'
 
 const VALID_EXTENSIONS = ['.mp4', '.mkv', '.avi', '.mov', '.flv', '.wmv', '.webm']
-const QUEUE_LENGTH = 4
+// const QUEUE_LENGTH = 4
 
 // Main player (video) handler, singleton
 export default new class Player {
@@ -53,7 +53,12 @@ export default new class Player {
 
   async playNext() {
     // Play bumper if enough time has passed
-    // const { bumperIntervalSeconds } = await Settings.getSettings()
+    const { bumperIntervalMinutes } = Settings.getSettings()
+    if (nextBumper && this.lastBumperDate.getTime() + bumperIntervalMinutes * 60 * 1000 < Date.now()) {
+      this.queue.unshift(nextBumper)
+      this.lastBumperDate = new Date()
+      queueNextBumper()
+    }
     // if (nextBumper && this.lastBumperDate.getTime() + bumperIntervalSeconds * 1000 < Date.now()) {
     //   this.lastBumperDate = new Date()
     //   this.playing = nextBumper
@@ -78,13 +83,9 @@ export default new class Player {
     const next = this.queue.shift()
     if (next) {
       this.playing = next
-      console.log('e1')
-      const x = await this.playing.prepare()
-      console.log('e2')
+      await this.playing.prepare()
       try {
-        console.log(`Calling .play() - ${this.playing.path}`.green)
         await this.playing.play()
-        console.log('VIDEO ENDED'.yellow)
         this.playing = null
         this.populateRandomToQueue()
         this.playNext()
@@ -94,24 +95,23 @@ export default new class Player {
         // Handle error
       }
     }
-    // Start downloading next video in queue
-    if (this.queue[0]) {
-      // reenable later
-      // this.queue[0].prepare()
-    }
+
+    // Starttranscoding next video in queue
+    this.queue[0]?.prepare()
   }
 
   private populateRandomToQueue() {
     if (!this.activePlaylist) return
 
-    if (this.queue.length >= QUEUE_LENGTH) return
+    const { targetQueueSize } = Settings.getSettings()
+    if (this.queue.length >= targetQueueSize) return
 
     const randomVideo = this.activePlaylist.videos[Math.floor(Math.random() * this.activePlaylist.videos.length)]
     if (!randomVideo) return
 
     this.addVideo(new Video(randomVideo.path))
 
-    if (this.queue.length < QUEUE_LENGTH) {
+    if (this.queue.length < targetQueueSize) {
       this.populateRandomToQueue()
     }
   }

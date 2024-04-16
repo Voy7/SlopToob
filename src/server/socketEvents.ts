@@ -120,7 +120,8 @@ export const socketEvents: Record<string, EventOptions> = {
       return
     }
 
-    const bumperName = payload.name
+    const bumperExt = payload.videoFile.split(';base64,')[0].split('/')[1]
+    const bumperName = `${payload.name}.${bumperExt}`
     const bumperPath = path.join(Env.BUMPERS_PATH, bumperName)
     const bumperExists = await fs.access(bumperPath).then(() => true).catch(() => false)
     if (bumperExists) {
@@ -128,7 +129,8 @@ export const socketEvents: Record<string, EventOptions> = {
       return
     }
 
-    await fs.writeFile(bumperPath, payload.videoFile)
+    const base64 = payload.videoFile.split(';base64,').pop()
+    await fs.writeFile(bumperPath, base64, { encoding: 'base64' })
     SocketUtils.broadcastAdmin(SocketEvent.AdminBumpersList, getClientBumpers())
   }},
 
@@ -194,6 +196,10 @@ export const socketEvents: Record<string, EventOptions> = {
   [SocketEvent.SettingTargetQueueSize]: { adminOnly: true, run: (socket, value?: number) => {
     if (value === undefined) return socket.emit(SocketEvent.SettingTargetQueueSize, Settings.getSettings().targetQueueSize)
     Settings.setSetting('targetQueueSize', value)
+    if (Player.queue.length > value) { // Trim queue if new size is smaller
+      Player.queue.splice(value)
+      SocketUtils.broadcastStreamInfo()
+    }
     SocketUtils.broadcastAdmin(SocketEvent.SettingTargetQueueSize, value)
   }},
   

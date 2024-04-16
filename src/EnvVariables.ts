@@ -5,14 +5,14 @@ const { parsed } = dotenv.config()
 const dirname = path.resolve()
 
 // Properly parse path variables, and return default if undefined
-function parsePath(envPath: string | undefined, defaultPath: string): string {
+function parsePath(envPath: string | undefined, defaultPath: string, additional?: string): string {
   if (!envPath) {
-    return path.resolve(path.join(dirname, defaultPath))
+    return path.resolve(path.join(dirname, defaultPath, additional || ''))
   }
   if (path.isAbsolute(envPath) || envPath.match(/^[a-zA-Z]:/)) {
-    return path.resolve(envPath)
+    return path.resolve(path.join(envPath, additional || ''))
   }
-  return path.resolve(path.join(dirname, envPath))
+  return path.resolve(path.join(dirname, envPath, additional || ''))
 }
 
 // All project's environment variables
@@ -22,8 +22,8 @@ export default new class EnvVariables {
   readonly SERVER_PORT: number = parseInt(parsed?.SERVER_PORT || '3000') || 3000
   readonly USER_PASSWORD: string = parsed?.USER_PASSWORD || 'user'
   readonly ADMIN_PASSWORD: string = parsed?.ADMIN_PASSWORD || 'admin'
-  readonly VIDEOS_PATH: string = parsePath(parsed?.VIDEOS_PATH, 'default_videos')
-  readonly VIDEOS_OUTPUT_PATH: string = parsePath(parsed?.OUTPUT_PATH, 'default_output')
-  readonly BUMPERS_PATH: string = parsePath(parsed?.OUTPUT_PATH + '/bumpers', 'default_videos')
-  readonly BUMPERS_OUTPUT_PATH: string = parsePath(parsed?.OUTPUT_PATH + '/bumpers-transcoded', 'default_output')
+  readonly VIDEOS_PATH: string = parsePath(parsed?.VIDEOS_PATH, '/videos')
+  readonly VIDEOS_OUTPUT_PATH: string = parsePath(parsed?.OUTPUT_PATH, 'output', 'videos-transcoded')
+  readonly BUMPERS_PATH: string = parsePath(parsed?.OUTPUT_PATH, 'output', 'bumpers')
+  readonly BUMPERS_OUTPUT_PATH: string = parsePath(parsed?.OUTPUT_PATH, 'output', 'bumpers-transcoded')
 }
