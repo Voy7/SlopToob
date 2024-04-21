@@ -127,11 +127,12 @@ export default new class Settings {
 
       // Parse value to correct type
       const expectedType = typeof defaultSettings[key]
+      const defaultSetting = defaultSettings[key]
       let value
       if (expectedType === 'boolean') value = existingSetting.value === 'true'
       else if (expectedType === 'number') value = Number(existingSetting.value)
       // enums
-      else if (typeof defaultSettings[key] === 'object') value = defaultSettings[key].enum[existingSetting.value]
+      else if (expectedType === 'object' && typeof defaultSetting === 'object' && 'enum' in defaultSetting) value = defaultSetting.enum[existingSetting.value]
       else value = existingSetting.value
 
       vars[key] = value as any
