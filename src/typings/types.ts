@@ -1,4 +1,4 @@
-import { AuthRole } from '@/lib/enums'
+import { AuthRole, VideoState } from '@/lib/enums'
 import type { Playlist, Video } from '@prisma/client'
 import path from 'path';
 
@@ -54,8 +54,9 @@ export type ClientPlaylist = {
 
 export type ClientVideo = {
   id: string,
-  path: string,
-  name: string
+  state: VideoState
+  name: string,
+  path: string
 }
 
 // export type ListOption0 = {

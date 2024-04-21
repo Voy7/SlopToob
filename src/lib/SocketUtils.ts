@@ -6,9 +6,11 @@ import type { Viewer } from '@/typings/socket'
 // Server-side socket utilities
 export default new class SocketUtils {
   broadcast(event: SocketEvent, payload: any) {
-    for (const client of clients) {
-      client.socket.emit(event, payload)
-    }
+    try {
+      for (const client of clients) {
+        client.socket.emit(event, payload)
+      }
+    } catch (error) {}
   }
 
   broadcastAdmin(event: SocketEvent, payload: any) {

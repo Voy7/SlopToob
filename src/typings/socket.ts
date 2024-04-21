@@ -1,4 +1,4 @@
-import type { AuthRole } from '@/lib/enums'
+import type { AuthRole, JobState } from '@/lib/enums'
 import type { Socket } from 'socket.io'
 import { StreamState } from '@/lib/enums'
 import path from 'path';
@@ -72,8 +72,9 @@ export type EditPlaylistVideosPayload = {
 }
 
 export type TranscodeClientVideo = {
+  id: string,
+  state: JobState,
   name: string,
   inputPath: string,
-  isTranscoding: boolean,
   progressPercentage: number
 }

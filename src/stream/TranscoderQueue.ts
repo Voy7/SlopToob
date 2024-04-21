@@ -6,7 +6,8 @@ import type { FfmpegCommand } from 'fluent-ffmpeg'
 import TranscoderJob from '@/stream/TranscoderJob'
 import { TranscodeClientVideo } from '@/typings/socket'
 import SocketUtils from '@/lib/SocketUtils'
-import { SocketEvent } from '@/lib/enums'
+import { JobState, SocketEvent } from '@/lib/enums'
+import type Video from '@/stream/Video'
 
 const MAX_TRANSCODING_JOBS = 2
 
@@ -15,37 +16,49 @@ const MAX_TRANSCODING_JOBS = 2
 // multiple of the same video, videos that are deleted while transcoding, etc.
 // Also allows for a queue system to prevent multiple transcodes of the same video
 export default new class TranscoderQueue {
-  queue: TranscoderJob[] = []
+  jobs: TranscoderJob[] = []
 
   // Create a new job if it doesn't exist, otherwise return the existing job
-  newJob(inputPath: string, outputPath: string): TranscoderJob {
-    const existingJob = this.queue.find(item => item.inputPath === inputPath)
-    if (existingJob) return existingJob
-    return new TranscoderJob(inputPath, outputPath)
+  newJob(video: Video): TranscoderJob {
+    const existingJob = this.jobs.find(item => item.video.inputPath === video.inputPath)
+    if (existingJob) {
+      existingJob.videos.push(video)
+      return existingJob
+    }
+    const job = new TranscoderJob(video)
+    this.jobs.push(job)
+    return job
   }
 
   async processQueue() {
     SocketUtils.broadcastAdmin(SocketEvent.AdminTranscodeQueueList, this.clientTranscodeList)
-    const transcodingJobs = this.queue.filter(item => item.isTranscoding)
+    const transcodingJobs = this.jobs.filter(item => item.state === JobState.Transcoding)
+    // console.log(`job1 `, transcodingJobs)
     if (transcodingJobs.length >= MAX_TRANSCODING_JOBS) return
 
-    const nextJob = this.queue.find(item => !item.isTranscoding)
+    const nextJob = this.jobs.find(item => item.state === JobState.AwaitingTranscode)
     if (!nextJob) return
 
     await nextJob.transcode()
     SocketUtils.broadcastAdmin(SocketEvent.AdminTranscodeQueueList, this.clientTranscodeList)
 
-    const nextJobIndex = this.queue.findIndex(item => item === nextJob)
-    this.queue.splice(nextJobIndex, 1)
+    // const nextJobIndex = this.jobs.findIndex(item => item === nextJob)
+    // this.jobs.splice(nextJobIndex, 1)
     this.processQueue()
   }
 
   get clientTranscodeList(): TranscodeClientVideo[] {
-    return this.queue.map(job => ({
-      name: job.inputPath.split('/').pop() || 'Name WIP',
-      inputPath: job.inputPath,
-      isTranscoding: job.isTranscoding,
-      progressPercentage: job.progressPercentage
-    }))
+    const jobs: TranscodeClientVideo[] = []
+    for (const job of this.jobs) {
+      // if (job.state !== JobState.AwaitingTranscode && job.state !== JobState.Transcoding) continue
+      jobs.push({
+        id: job.id,
+        state: job.state,
+        name: job.video.name,
+        inputPath: job.video.inputPath,
+        progressPercentage: job.progressPercentage
+      })
+    }
+    return jobs
   }
 }

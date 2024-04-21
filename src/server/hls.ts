@@ -25,7 +25,7 @@ export function initializeHlsServer() {
 
         const video = Player.playing
         if (!video || video.id !== id) {
-          console.log('No video playing with ID:', id)
+          // console.log('No video playing with ID:', id)
           return cb(null, false)
         }
 
@@ -33,7 +33,7 @@ export function initializeHlsServer() {
   
         fs.access(filePath, fs.constants.F_OK, function (err) {
           if (err) {
-            console.log('File not exist')
+            // console.log('File not exist')
             return cb(null, false)
           }
           cb(null, true)

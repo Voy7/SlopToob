@@ -8,6 +8,7 @@ import SectionStream from '@/components/admin/SectionStream'
 import SectionPlaylists from '@/components/admin/SectionPlaylists'
 import SectionBumpers from '@/components/admin/SectionBumpers'
 import SectionCaching from '@/components/admin/SectionCaching'
+import SectionMonitor from '@/components/admin/SectionMonitor'
 import Modal from '@/components/ui/Modal'
 import styles from './AdminModal.module.scss'
 
@@ -17,6 +18,7 @@ export const sections = [
   { name: 'Playlists', icon: <Icon name="playlist" />, component: <SectionPlaylists /> },
   { name: 'Bumpers', icon: <Icon name="video-file" />, component: <SectionBumpers /> },
   { name: 'Caching', icon: <Icon name="cache" />, component: <SectionCaching /> },
+  { name: 'Monitor', icon: <Icon name="chat" />, component: <SectionMonitor /> },
 ] as const
 
 export type SectionName = typeof sections[number]['name']

@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma'
 import Env from '@/EnvVariables'
 import Logger from '@/lib/Logger'
 import Video from '@/stream/Video'
-import { StreamState, SocketEvent } from '@/lib/enums'
+import { StreamState, SocketEvent, VideoState } from '@/lib/enums'
 import type { StreamInfo } from '@/typings/socket'
 import type { RichPlaylist, FileTree, ClientPlaylist, ListOption } from '@/typings/types'
 
@@ -41,13 +41,13 @@ export default new class Player {
 
   unpause() {
     this.isPaused = false
-    if (this.playing) this.playing.unpause()
+    // if (this.playing) this.playing.unpause()
   }
 
   skipVideo() {
     if (this.playing) {
       this.unpause()
-      this.playing.forceFinish()
+      this.playing.end()
     }
   }
 
@@ -80,20 +80,12 @@ export default new class Player {
       return
     }
     
-    const next = this.queue.shift()
-    if (next) {
-      this.playing = next
-      await this.playing.prepare()
-      try {
-        await this.playing.play()
-        this.playing = null
-        this.populateRandomToQueue()
-        this.playNext()
-
-      }
-      catch (error) {
-        // Handle error
-      }
+    this.playing = this.queue.shift() || null
+    if (this.playing) {
+      this.populateRandomToQueue()
+      await this.playing.play()
+      this.playing = null
+      this.playNext()
     }
 
     // Starttranscoding next video in queue
@@ -122,6 +114,7 @@ export default new class Player {
     await Settings.setSetting('activePlaylistID', playlist?.id || 'None')
     this.activePlaylist = playlist
 
+    for (const video of this.queue) video.end()
     this.queue = [] // Clear queue when playlist changes
     this.populateRandomToQueue()
 
@@ -159,16 +152,16 @@ export default new class Player {
       }
     }
 
-    if (!this.playing || !this.playing.isReady) {
+    if (!this.playing || this.playing.state === VideoState.NotReady || this.playing.state === VideoState.Preparing) {
       return {
         state: StreamState.Loading
       }
     }
 
-    if (this.playing.error) {
+    if (this.playing.state === VideoState.Errored) {
       return {
         state: StreamState.Error,
-        error: this.playing.error
+        error: this.playing.error || 'Unknown error occurred.' // Should never be null, but just in case
       }
     }
 

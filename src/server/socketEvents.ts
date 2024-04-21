@@ -64,7 +64,8 @@ export const socketEvents: Record<string, EventOptions> = {
     socket.emit(SocketEvent.AdminRequestFileTree, tree)
     socket.emit(SocketEvent.AdminRequestPlaylists, playlists)
     socket.emit(SocketEvent.AdminBumpersList, bumpers)
-    SocketUtils.broadcastAdmin(SocketEvent.AdminTranscodeQueueList, TranscoderQueue.clientTranscodeList)
+    socket.emit(SocketEvent.AdminQueueList, Player.queue.map(video => video.clientVideo))
+    socket.emit(SocketEvent.AdminTranscodeQueueList, TranscoderQueue.clientTranscodeList)
     SocketUtils.broadcastStreamInfo()
   }},
 
@@ -198,7 +199,8 @@ export const socketEvents: Record<string, EventOptions> = {
     Settings.setSetting('targetQueueSize', value)
     if (Player.queue.length > value) { // Trim queue if new size is smaller
       Player.queue.splice(value)
-      SocketUtils.broadcastStreamInfo()
+      SocketUtils.broadcastAdmin(SocketEvent.AdminQueueList, Player.queue.map(video => video.clientVideo))
+      // SocketUtils.broadcastStreamInfo()
     }
     SocketUtils.broadcastAdmin(SocketEvent.SettingTargetQueueSize, value)
   }},

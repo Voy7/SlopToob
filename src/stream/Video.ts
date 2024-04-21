@@ -6,152 +6,159 @@ import ffmpeg from '@/lib/ffmpeg'
 import Player from '@/stream/Player'
 import Env from '@/EnvVariables'
 import Logger from '@/lib/Logger'
+import TranscoderQueue from '@/stream/TranscoderQueue'
+import TranscoderJob from '@/stream/TranscoderJob'
+import Settings from '@/stream/Settings'
 import SocketUtils from '@/lib/SocketUtils'
+import { SocketEvent, VideoState as State } from '@/lib/enums'
 import type { ClientVideo } from '@/typings/types'
-import TranscoderQueue from './TranscoderQueue'
-import Settings from './Settings'
-import TranscoderJob from './TranscoderJob'
 
 export default class Video {
   readonly id: string = generateSecret()
-  isReady: boolean = false
-  path: string
-  isBumper: boolean
-  durationSeconds: number = 0
+  private _state: State = State.NotReady
   error: string | null = null
-  private isDownloading: boolean = false
-  private readyCallbacks: ((isSuccess: boolean) => void)[] = []
-  private isPlaying: boolean = false
-  private isPaused: boolean = false
+  durationSeconds: number = 0
+  private readyCallbacks: (() => void)[] = []
   private playingDate: Date | null = null
   private passedDurationSeconds: number = 0
   private finishedCallbacks: (() => void)[] = []
   private finishedTimeout: NodeJS.Timeout | null = null
-  private job: TranscoderJob | null = null
+  private job: TranscoderJob
 
-  constructor(path: string, isBumper?: boolean) {
-    this.path = path
-    this.isBumper = isBumper || false
+  constructor(public path: string, public isBumper: boolean = false) {
+    this.job = TranscoderQueue.newJob(this)
+      
+    this.job.onStreamableReady(() => {
+      console.log(`onStreamableReady() - ${this.name}`.cyan)
+      this.durationSeconds = this.job.duration
+      this.state = State.Ready
+      this.resolveReadyCallbacks()
+    })
+
+    this.job.onError(async error => {
+      this.error = error
+      this.state = State.Errored
+    })
+
+    this.job.onProgress(percentage => {
+      // ...
+    })
   }
 
-  get clientVideo(): ClientVideo {
-    return { id: this.id, path: this.path, name: this.name }
+  get state() { return this._state }
+  private set state(newState: State) {
+    this._state = newState
+    if (Player.playing === this) SocketUtils.broadcastStreamInfo()
+    else SocketUtils.broadcastAdmin(SocketEvent.AdminQueueList, Player.queue.map(video => video.clientVideo))
   }
 
-  get currentSeconds(): number {
-    if (!this.playingDate) return 0
-    if (this.isPaused) return this.passedDurationSeconds
-    return ((new Date().getTime() - this.playingDate.getTime()) / 1000) + this.passedDurationSeconds
+  // Returns true when transcoded (or already ready), returns false if error
+  async prepare(): Promise<void> {
+    console.log(`video.prepare() ${this.name}`.green, this.state , this.error)
+    if (this.state !== State.NotReady && this.state !== State.Preparing) return
+
+    return new Promise<void>(resolve => {
+      this.readyCallbacks.push(resolve)
+      this.finishedCallbacks.push(resolve)
+
+      if (this.state === State.Preparing) return
+      this.state = State.Preparing
+
+      Logger.debug(`[Video] Preparing video: ${this.name}`)
+      this.job.activate()
+    })
+  }
+
+  async play() {
+    await this.prepare()
+    console.log(`video.play() ${this.name}`.magenta, this.state)
+    // if (this.state === State.Finished) throw new Error(`Tried to play video that has already been played: ${this.name}`)
+      if (this.state === State.Finished) return
+    
+    // Callback when finished playing
+    return new Promise<void>(resolve => {
+      this.finishedCallbacks.push(resolve)
+
+      if (this.state === State.Playing) return
+      Logger.debug(`[Video] Playing video: ${this.name}`, this.state)
+
+      if (this.state === State.Errored) {
+        const { errorDisplaySeconds } = Settings.getSettings()
+        this.finishedTimeout = setTimeout(() => this.end(), errorDisplaySeconds * 1000)
+        SocketUtils.broadcastStreamInfo()
+        return
+      }
+
+      this.state = State.Playing
+      this.playingDate = new Date()
+      this.finishedTimeout = setTimeout(() => this.end(), this.durationSeconds * 1000)
+      SocketUtils.broadcastStreamInfo()
+    })
+  }
+
+  // Must be called before being removed from the queue or Player
+  // This is primarily so the Transcoder Handler can clean up shared jobs properly
+  end() {
+    //
+
+    if (this.finishedTimeout) {
+      clearTimeout(this.finishedTimeout)
+    }
+    
+    console.log(`.end() ${this.name}`.red, this.state)
+    Logger.debug(`[Video] Finished playing in ${this.durationSeconds}s: ${this.name}`)
+    this.error = null
+    this.playingDate = null
+    this.durationSeconds = 0
+    this.passedDurationSeconds = 0
+    this.state = State.Finished
+    this.resolveFinishedCallbacks()
+
+    SocketUtils.broadcastStreamInfo()
+
+    this.job.unlink(this)
   }
 
   // Pause video
   pause() {
-    if (!this.isPlaying || this.isPaused || !this.playingDate) return
+    if (this.state !== State.Playing || !this.playingDate) return
+
     if (this.finishedTimeout) {
       clearTimeout(this.finishedTimeout)
     }
     this.passedDurationSeconds += (new Date().getTime() - this.playingDate.getTime()) / 1000
-    this.isPaused = true
+    this.state = State.Paused
     SocketUtils.broadcastStreamInfo()
   }
 
   // Unpause video
   unpause() {
-    if (!this.isPlaying || !this.isPaused) return
-    this.isPaused = false
+    if (this.state !== State.Paused) return
+
     this.playingDate = new Date()
-    this.finishedTimeout = setTimeout(async () => await this.finishPlaying(), (this.durationSeconds - this.passedDurationSeconds) * 1000)
+    this.finishedTimeout = setTimeout(() => this.end(), (this.durationSeconds - this.passedDurationSeconds) * 1000)
+    this.state = State.Playing
     SocketUtils.broadcastStreamInfo()
   }
 
-  async forceFinish() {
-    if (!this.isPlaying) return
-    await this.finishPlaying()
-  }
-
-  private async finishPlaying() {
-    if (!this.isPlaying) return
-    this.finishedCallbacks.forEach(cb => cb())
-    this.finishedCallbacks = []
-
-    if (this.finishedTimeout) {
-      clearTimeout(this.finishedTimeout)
-    }
-
-    this.isPlaying = false
-    this.playingDate = null
-    this.passedDurationSeconds = 0
-
-    Logger.debug(`[Video] Finished playing in ${this.durationSeconds}s: ${this.name}`)
-    SocketUtils.broadcastStreamInfo()
-
-    //
-    this.job?.kill()
-
-    const { cacheVideos, cacheBumpers } = Settings.getSettings()
-    const keepCache = this.isBumper ? cacheBumpers : cacheVideos
-
-    if (!keepCache) {
-      try { await fsAsync.rmdir(this.outputPath, { recursive: true }) }
-      catch (error) { Logger.warn(`[Video] Error deleting video cache: ${this.name}`) }
-    }
-  }
-
-  async play() {
-    // Callback when finished playing
-    return new Promise<void>(resolve => {
-      this.finishedCallbacks.push(resolve)
-
-      if (this.isPlaying) return
-
-      this.isPlaying = true
-      this.playingDate = new Date()
-      this.finishedTimeout = setTimeout(async () => await this.finishPlaying(), this.durationSeconds * 1000)
-      SocketUtils.broadcastStreamInfo()
-    })
-  }
-
-  // Returns true when transcoded (or already ready), returns false if error
-  async prepare(): Promise<boolean> {
-    return new Promise<boolean>(resolve => {
-      this.readyCallbacks.push((isSuccess: boolean) => resolve(isSuccess))
-
-      if (this.isReady) {
-        resolve(true)
-        return
-      }
-      if (this.isDownloading) return
-      this.isDownloading = true
-
-      Logger.debug(`[Video] Preparing video: ${this.name}`)
-      const job = TranscoderQueue.newJob(this.inputPath, this.outputPath)
-      this.job = job
-      
-      job.onStreamableReady(() => {
-        this.isReady = true
-        this.durationSeconds = job.duration
-        this.resolveReadyCallbacks(true)
-      })
-
-      job.onError(async error => {
-        this.error = error
-        // Wait 3 seconds
-        await new Promise(resolve => setTimeout(resolve, 3000))
-        this.resolveReadyCallbacks(false)
-      })
-
-      job.onProgress(percentage => {
-        // ...
-      })
-
-      job.activate()
-    })
-  }
-
-  private resolveReadyCallbacks(isSuccess: boolean) {
-    this.isDownloading = false
-    for (const callback of this.readyCallbacks) callback(isSuccess)
+  private resolveReadyCallbacks() {
+    for (const callback of this.readyCallbacks) callback()
     this.readyCallbacks = []
+  }
+
+  private resolveFinishedCallbacks() {
+    for (const callback of this.finishedCallbacks) callback()
+    this.finishedCallbacks = []
+  }
+
+  get clientVideo(): ClientVideo {
+    return { id: this.id, state: this.state, name: this.name, path: this.path }
+  }
+
+  get currentSeconds(): number {
+    if (!this.playingDate) return 0
+    if (this.state === State.Paused) return this.passedDurationSeconds
+    return ((new Date().getTime() - this.playingDate.getTime()) / 1000) + this.passedDurationSeconds
   }
 
   get inputPath(): string {

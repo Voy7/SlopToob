@@ -17,6 +17,7 @@ type SettingsList = {
   cacheVideos: boolean,
   cacheBumpers: boolean,
   finishTranscodeIfSkipped: boolean,
+  errorDisplaySeconds: number,
 }
 
 type DefaultSettings = {
@@ -37,6 +38,7 @@ const defaultSettings: DefaultSettings = {
   cacheVideos: true,
   cacheBumpers: true,
   finishTranscodeIfSkipped: true,
+  errorDisplaySeconds: 5,
 } as const
 
 

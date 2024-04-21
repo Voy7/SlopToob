@@ -13,7 +13,7 @@ export default function SectionBumpers() {
       <h2>BUMPERS</h2>
       <SettingGroup>
         <Header icon="bumper">BUMPER SETTINGS</Header>
-        <NumberOption label="Bumper Interval in Minutes" type="integer" {...bumperInterval} />
+        <NumberOption label="Bumper Interval in Minutes" type="float" {...bumperInterval} />
         <Description>Minimum time between bumpers in minutes.</Description>
       </SettingGroup>
       <BumpersList />

@@ -49,3 +49,23 @@ export enum StreamState {
   Loading,
   Error
 }
+
+export enum VideoState {
+  NotReady,
+  Preparing,
+  Ready,
+  Playing,
+  Paused,
+  Finished,
+  Errored
+}
+
+export enum JobState {
+  Initializing,
+  Idle,
+  AwaitingTranscode,
+  Transcoding,
+  CleaningUp,
+  Finished,
+  Errored
+}
