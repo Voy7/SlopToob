@@ -12,7 +12,7 @@ const mainFont = Ubuntu({
 
 export const metadata: Metadata = {
   title: 'SlopToob',
-  description: 'WIP by Voy.',
+  description: '(Work in progress)',
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
@@ -20,6 +20,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="en">
+      <head>
+        <meta property="og:image" content="/logo.png" />
+        <meta name="theme-color" content="#5496ff" />
+      </head>
       <body className={mainFont.className}>
         <SessionProvider session={session}>
           {children}

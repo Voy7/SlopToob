@@ -19,7 +19,7 @@ export default function QueueList() {
 
   return (
     <div className={styles.queueList}>
-      <h3 className={styles.queueHeader}>Transcoder Jobs ({transcodeQueue.length}):</h3>
+      <h3 className={styles.queueHeader}>Transcoding Jobs ({transcodeQueue.length}):</h3>
       <div className={styles.items}>
         {transcodeQueue.map((video, index) => (
           <div key={video.name} className={styles.queueItem}>

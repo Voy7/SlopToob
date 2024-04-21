@@ -21,11 +21,11 @@
   --chat-width: 350px;
 }
 
-html, body {
-  background: var(--bg-color-1);
+body {
   color: var(--text-color-1);
-  min-height: 100vh;
-  overflow-x: hidden;
+  background: var(--bg-color-1);
+  // min-height: 100vh;
+  // overflow-x: hidden;
 }
 
 *, *::before, *::after {

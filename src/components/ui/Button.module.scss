@@ -52,14 +52,12 @@
 // Type-specific button styles:
 .main {
   color: white;
-  background: rgb(199, 137, 194);
+  background: rgb(100, 100, 255);
   border: 2px solid transparent;
-  &:hover { background: rgb(196, 94, 190); }
+  &:hover { background: rgb(80, 80, 255); }
   &:active { translate: 0 2px; }
   &.disabled {
-    background: none;
-    border-color: rgb(199, 137, 194);
-    scale: 0.9;
+    opacity: 0.75;
   }
 }
 

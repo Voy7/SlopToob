@@ -1,5 +1,92 @@
 .home {
   display: flex;
-  // flex-direction: column;
-  //
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(90deg,
+    rgba(25, 25, 35, 0.1) 0%,
+    rgba(95, 35, 55, 0.95) 50%,
+    rgba(25, 25, 35, 0.1) 100%
+  );
+
+  &.fadeOutAnimation {
+    animation: fadeOut 1000ms ease-in-out forwards;
+    animation-delay: 500ms;
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+
+    form {
+      animation: fadeOut2 500ms ease-out forwards;
+      @keyframes fadeOut2 {
+        from { opacity: 1; scale: 1; }
+        to { opacity: 0; scale: 1.5; }
+      }
+    }
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin: 1rem;
+    padding: 1.5rem;
+    background: var(--bg-color-2);
+    border: 1px solid var(--border-color-1);
+    border-radius: 0.5rem;
+    animation: fadeIn 500ms ease-out forwards;
+
+    @keyframes fadeIn {
+      from { opacity: 0; scale: 0.9; }
+      to { opacity: 1; scale: 1; }
+    }
+
+    img { border-radius: 50%; }
+
+    .blurb {
+      margin: 0.5rem 0;
+      font-size: 1rem;
+      color: var(--text-color-2);
+    }
+
+    .password {
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+
+      input {
+        padding: 0.5rem;
+        font-size: 1rem;
+        color: var(--text-color-1);
+        background: var(--bg-color-3);
+        border: 1px solid var(--border-color-2);
+        border-radius: 0.5rem 0 0 0.5rem;
+        border-right: none;
+
+        &:focus { outline: none; border-color: var(--select-color); }
+
+        // Remove autofill styles
+        &:-webkit-autofill, &:-webkit-autofill:hover, &:-webkit-autofill:focus, &:-webkit-autofill:active {
+          color: var(--text-color-1);
+          -webkit-text-fill-color: var(--text-color-1);
+          -webkit-box-shadow: 0 0 0 30px var(--bg-color-3) inset;
+        }
+      }
+
+      button { // Overrite fancy button styles
+        border-radius: 0 0.5rem 0.5rem 0;
+        border-left: none;
+      }
+    }
+
+    .error {
+      display: flex;
+      align-items: center;
+      gap: 0.25pem;
+      font-size: 0.9rem;
+      color: var(--error-color);
+    }
+  }
 }
