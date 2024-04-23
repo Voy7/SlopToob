@@ -27,11 +27,11 @@ export default class Video {
 
   constructor(public path: string, public isBumper: boolean = false) {
     this.job = TranscoderQueue.newJob(this)
-      
+    
     this.job.onStreamableReady(() => {
       console.log(`onStreamableReady() - ${this.name}`.cyan)
       this.durationSeconds = this.job.duration
-      this.state = State.Ready
+      if (this.state === State.Preparing) this.state = State.Ready
       this.resolveReadyCallbacks()
     })
 
@@ -74,7 +74,7 @@ export default class Video {
     await this.prepare()
     console.log(`video.play() ${this.name}`.magenta, this.state)
     // if (this.state === State.Finished) throw new Error(`Tried to play video that has already been played: ${this.name}`)
-      if (this.state === State.Finished) return
+    if (this.state === State.Finished) return
     
     // Callback when finished playing
     return new Promise<void>(resolve => {

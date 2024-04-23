@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { useVideoContext } from '@/contexts/VideoContext'
 import { useStreamContext } from '@/contexts/StreamContext'
 import { StreamState } from '@/lib/enums'
-import parseTimestamp from '@/lib/parseTimestamp'
+import useStreamTimestamp from '@/hooks/useStreamTimestamp'
 import Icon from '@/components/ui/Icon'
 import styles from './VideoControls.module.scss'
 
@@ -12,8 +12,10 @@ const OVERLAY_MOUSE_TIMEOUT = 3000
 
 // Video bottom controls
 export default function VideoControls() {
-  const { isPaused, currentSeconds, volume, showControls, setShowControls, videoElement, containerElement } = useVideoContext()
+  const { isPaused, volume, showControls, setShowControls, videoElement, containerElement } = useVideoContext()
   const { streamInfo } = useStreamContext()
+
+  const { currentTimestamp, totalTimestamp, currentSeconds, totalSeconds } = useStreamTimestamp()
 
   // Show overlay when mouse is moved on it, keep it visible for 3 seconds
   // when mouse is moved out or stops moving, hide it after 3 seconds
@@ -51,7 +53,7 @@ export default function VideoControls() {
 
   return (
     <div className={showControls ? `${styles.controlsBar} ${styles.show}` : styles.controlsBar} onClick={event => event.stopPropagation()}>
-      <progress value={currentSeconds} max={'totalSeconds' in streamInfo ? streamInfo.totalSeconds : currentSeconds}></progress>
+      <progress value={currentSeconds} max={totalSeconds || 1}></progress>
       <div className={styles.controls}>
         <div className={styles.group}>
           {streamInfo.state === StreamState.Playing && (
@@ -65,9 +67,9 @@ export default function VideoControls() {
                   <Icon name="pause" />
                 </button>
               )}
-              <p>{parseTimestamp(currentSeconds)} / {parseTimestamp(streamInfo.totalSeconds)}</p>
             </>
           )}
+          <p>{currentTimestamp} / {totalTimestamp}</p>
           <button className={`${styles.actionButton} ${styles.volumeButton}`}>
             {volume === 0 ? <Icon name="no-volume" /> : <Icon name="volume" />}
             <div className={styles.volumeContainer}>

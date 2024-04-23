@@ -229,6 +229,12 @@ export default class TranscoderJob {
     // wait 1 second for files to delete
     await new Promise(resolve => setTimeout(resolve, 1000))
 
+    if (this.videos.length > 0) {
+      this.initialize()
+      this.activate()
+      return
+    }
+
     // Remove job from queue
     const index = TranscoderQueue.jobs.findIndex(item => item === this)
     if (index !== -1) TranscoderQueue.jobs.splice(index, 1)

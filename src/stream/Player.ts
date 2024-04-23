@@ -139,13 +139,6 @@ export default new class Player {
       }
     }
 
-    if (this.playing.state === VideoState.NotReady || this.playing.state === VideoState.Preparing) {
-      return {
-        state: StreamState.Loading,
-        name: this.playing.name,
-      }
-    }
-
     if (this.playing.state === VideoState.Errored) {
       return {
         state: StreamState.Error,
@@ -153,9 +146,9 @@ export default new class Player {
       }
     }
 
-    if (this.playing.state === VideoState.Paused) {
+    if (this.playing.state === VideoState.Playing || this.playing.state === VideoState.Paused) {
       return {
-        state: StreamState.Paused,
+        state: this.playing.state === VideoState.Playing ? StreamState.Playing : StreamState.Paused,
         id: this.playing.id,
         name: this.playing.name,
         path: `/stream-data/${this.playing.id}/video.m3u8`,
@@ -165,12 +158,8 @@ export default new class Player {
     }
 
     return {
-      state: StreamState.Playing,
-      id: this.playing.id,
+      state: StreamState.Loading,
       name: this.playing.name,
-      path: `/stream-data/${this.playing.id}/video.m3u8`,
-      currentSeconds: this.playing.currentSeconds,
-      totalSeconds: this.playing.durationSeconds
     }
   }
 

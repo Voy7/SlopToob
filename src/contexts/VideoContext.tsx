@@ -10,50 +10,55 @@ import styles from '@/components/stream/Video.module.scss'
 type ContextProps = {
   isPaused: boolean, setIsPaused: React.Dispatch<React.SetStateAction<boolean>>,
   volume: number, setVolume: React.Dispatch<React.SetStateAction<number>>,
-  currentSeconds: number, setCurrentSeconds: React.Dispatch<React.SetStateAction<number>>,
   showControls: boolean, setShowControls: React.Dispatch<React.SetStateAction<boolean>>,
   videoElement: HTMLVideoElement,
   containerElement: HTMLDivElement
 }
 
-type Props =  {
-  children: React.ReactNode
-}
-
 // Context provider wrapper component
-export function VideoProvider({ children }:Props) {
+export function VideoProvider({ children }: { children: React.ReactNode }) {
   const { streamInfo, lastStreamUpdateTimestamp } = useStreamContext()
 
   const [isPaused, setIsPaused] = useState<boolean>(true)
   const [volume, setVolume] = useState<number>(100)
-  const [currentSeconds, setCurrentSeconds] = useState<number>(0)
   const [showControls, setShowControls] = useState<boolean>(false)
 
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
 
+  const [hls, setHls] = useState<Hls>(new Hls())
+  const [sourceURL, setSourceURL] = useState<string>('')
+
+  // Initialize HLS
   useEffect(() => {
-    if (streamInfo.state !== StreamState.Playing && streamInfo.state !== StreamState.Paused) return
-
     const video = videoRef.current!
-
-    // called when video is unpaused
-    // video.onplay = () => {
-    //   streamInfo.
-    // }
-    
     if (!Hls.isSupported()) {
       alert('HLS is not supported.')
       return
     }
-
-    const hls = new Hls()
-    hls.loadSource(streamInfo.path)
     hls.attachMedia(video)
+  }, [])
+
+  // Handle stream state/url changes
+  useEffect(() => {
+    if (streamInfo.state !== StreamState.Playing && streamInfo.state !== StreamState.Paused) return
+    
+    // If hls's current source is the same as the new source, don't reload (avoids flickering)
+    if (sourceURL === streamInfo.path) return
+    setSourceURL(streamInfo.path)
+    hls.loadSource(streamInfo.path)
+
+    const video = videoRef.current!
+
     hls.on(Hls.Events.MANIFEST_PARSED, () => {
       video.currentTime = streamInfo.currentSeconds
     })
+  }, [streamInfo, sourceURL])
 
+  // Handle video element events
+  useEffect(() => {
+    const video = videoRef.current!
+    
     // Sync isPaused state with video
     video.onplay = (event) => {
       if (streamInfo.state !== StreamState.Playing) {
@@ -66,39 +71,26 @@ export function VideoProvider({ children }:Props) {
       // Seek to current time
       if (!lastStreamUpdateTimestamp) return
       const diff = ((Date.now() - lastStreamUpdateTimestamp) / 1000) + streamInfo.currentSeconds
-      console.log('diff', diff, streamInfo.currentSeconds)
       video.currentTime = diff
     }
-    video.onpause = () => {
-      setIsPaused(true)
-      // setShowControls(true)
-    }
-  }, [streamInfo, lastStreamUpdateTimestamp])
 
-  useEffect(() => {
-    if (streamInfo.state !== StreamState.Paused) {
-      return
-    }
-    const video = videoRef.current!
-    video.pause()
-  }, [streamInfo])
-
-  
-
-  
-
-  useEffect(() => {
-    // Update current time when video time changes
-    const video = videoRef.current!
-
-    video.ontimeupdate = () => {
-      setCurrentSeconds(video.currentTime)
-    }
+    video.onpause = () => { setIsPaused(true) }
 
     video.onvolumechange = () => {
       setVolume(video.volume * 100)
     }
-  }, [])
+  }, [streamInfo, lastStreamUpdateTimestamp])
+
+  // Play/pause video based on stream state
+  useEffect(() => {
+    const video = videoRef.current!
+
+    if (streamInfo.state === StreamState.Playing) {
+      video.play().catch(() => {})
+      return
+    }
+    video.pause()
+  }, [streamInfo, lastStreamUpdateTimestamp])
 
   // Pause/unpause video when background is clicked
   function backgroundClick() {
@@ -113,7 +105,6 @@ export function VideoProvider({ children }:Props) {
   const context: ContextProps = {
     isPaused, setIsPaused,
     volume, setVolume,
-    currentSeconds, setCurrentSeconds,
     showControls, setShowControls,
     videoElement: videoRef.current!,
     containerElement: containerRef.current!

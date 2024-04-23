@@ -2,7 +2,7 @@
 
 import { useStreamContext } from '@/contexts/StreamContext'
 import { SocketEvent, StreamState } from '@/lib/enums'
-import parseTimestamp from '@/lib/parseTimestamp'
+import useStreamTimestamp from '@/hooks/useStreamTimestamp'
 import Icon from '@/components/ui/Icon'
 import styles from './StreamControls.module.scss'
 
@@ -10,12 +10,11 @@ import styles from './StreamControls.module.scss'
 export default function StreamControls() {
   const { socket, streamInfo } = useStreamContext()
 
+  const { currentTimestamp, totalTimestamp } = useStreamTimestamp()
+
   let name = 'Unknown State'
   if ('name' in streamInfo) name = streamInfo.name
   if (streamInfo.state === StreamState.Error) name = streamInfo.error
-
-  let timestamp = null
-  if ('totalSeconds' in streamInfo) timestamp = `${parseTimestamp(streamInfo.currentSeconds)} / ${parseTimestamp(streamInfo.totalSeconds)}`
 
   const isError = streamInfo.state === StreamState.Error
 
@@ -27,7 +26,7 @@ export default function StreamControls() {
       </button>
       <div className={styles.text}>
         <h6 className={isError ? `${styles.name} ${styles.error}` : styles.name} title={name}>{name}</h6>
-        {timestamp && <p className={styles.timestamp}>{timestamp}</p>}
+        <p className={styles.timestamp}>{currentTimestamp} / {totalTimestamp}</p>
       </div>
     </div>
   )
