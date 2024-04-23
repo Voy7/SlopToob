@@ -3,10 +3,10 @@
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background: linear-gradient(90deg,
-    rgba(25, 25, 35, 0.1) 0%,
-    rgba(95, 35, 55, 0.95) 50%,
-    rgba(25, 25, 35, 0.1) 100%
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(35, 95, 85, 0.65) 30%,
+    rgba(25, 25, 35, 0.1) 90%,
   );
 
   &.fadeOutAnimation {

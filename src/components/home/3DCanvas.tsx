@@ -10,10 +10,10 @@ export default function Canvas3D() {
   const STARS_COUNT = 500
 
   const styles = {
-    position: 'fixed',
+    position: 'absolute',
     top: 0,
     left: 0,
-    width: '100vw',
+    width: '100%',
     height: '100vh',
     zIndex: -1,
     transition: '0.5s ease-in-out'

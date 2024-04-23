@@ -74,12 +74,12 @@ export default function BumpersList() {
         </div>
         <div className={styles.bumpersList}>
           {bumpers.map(bumper => (
-            <div key={bumper.path} className={styles.bumper}>
+            <div key={bumper} className={styles.bumper}>
               <div className={styles.left}>
                 <Icon name="video-file" />
-                <p>{bumper.name}</p>
+                <p>{bumper}</p>
               </div>
-              <Button style="danger" icon="delete" onClick={() => { setShowDeleteModal(true); setDeleteBumperSelected(bumper) }}>Delete</Button>
+              {/* <Button style="danger" icon="delete" onClick={() => { setShowDeleteModal(true); setDeleteBumperSelected(bumper) }}>Delete</Button> */}
             </div>
           ))}
         </div>

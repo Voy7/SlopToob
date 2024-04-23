@@ -48,10 +48,10 @@ export default new class TranscoderQueue {
   }
 
   get clientTranscodeList(): TranscodeClientVideo[] {
-    const jobs: TranscodeClientVideo[] = []
+    const list: TranscodeClientVideo[] = []
     for (const job of this.jobs) {
       // if (job.state !== JobState.AwaitingTranscode && job.state !== JobState.Transcoding) continue
-      jobs.push({
+      list.push({
         id: job.id,
         state: job.state,
         name: job.video.name,
@@ -59,6 +59,6 @@ export default new class TranscoderQueue {
         progressPercentage: job.progressPercentage
       })
     }
-    return jobs
+    return list
   }
 }

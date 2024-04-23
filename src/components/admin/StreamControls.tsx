@@ -11,9 +11,7 @@ export default function StreamControls() {
   const { socket, streamInfo } = useStreamContext()
 
   let name = 'Unknown State'
-  if (streamInfo.state === StreamState.Playing) name = streamInfo.name
-  if (streamInfo.state === StreamState.Paused) name = streamInfo.name
-  if (streamInfo.state === StreamState.Loading) name = 'Loading...'
+  if ('name' in streamInfo) name = streamInfo.name
   if (streamInfo.state === StreamState.Error) name = streamInfo.error
 
   let timestamp = null

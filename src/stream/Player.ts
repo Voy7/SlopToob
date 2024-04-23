@@ -3,74 +3,51 @@ import prisma from '@/lib/prisma'
 import Env from '@/EnvVariables'
 import Logger from '@/lib/Logger'
 import Video from '@/stream/Video'
-import { StreamState, SocketEvent, VideoState } from '@/lib/enums'
-import type { StreamInfo } from '@/typings/socket'
-import type { RichPlaylist, FileTree, ClientPlaylist, ListOption } from '@/typings/types'
-
-import { bumpers, nextBumper, queueNextBumper } from '@/stream/bumpers'
-import Settings from './Settings'
+import Settings from '@/stream/Settings'
 import SocketUtils from '@/lib/SocketUtils'
+import { getNextBumper } from '@/stream/bumpers'
+import { StreamState, SocketEvent, VideoState } from '@/lib/enums'
+import type { RichPlaylist, FileTree, ClientPlaylist, ListOption } from '@/typings/types'
+import type { StreamInfo } from '@/typings/socket'
+
 
 const VALID_EXTENSIONS = ['.mp4', '.mkv', '.avi', '.mov', '.flv', '.wmv', '.webm']
-// const QUEUE_LENGTH = 4
 
 // Main player (video) handler, singleton
 export default new class Player {
   playing: Video | null = null
   queue: Video[] = []
-  isPaused: boolean = false
   playlists: RichPlaylist[] = []
   private activePlaylist: RichPlaylist | null = null
   private lastBumperDate: Date = new Date()
 
-  constructor() {
-    // Get all playlists on startup
-    (async () => {
-      Logger.debug('Initializing player handler...')
-      await this.syncUpdatePlaylists()
-      const settings = await Settings.getSettings()
-      const playlist = this.playlists.find(playlist => playlist.id === settings.activePlaylistID) || null
-      await this.setActivePlaylist(playlist)
-    })()
+  constructor() { this.initialize() }
+  
+  // Get all playlists on startup
+  private async initialize() {
+    Logger.debug('Initializing player handler...')
+    await this.syncUpdatePlaylists()
+    const settings = await Settings.getSettings()
+    const playlist = this.playlists.find(playlist => playlist.id === settings.activePlaylistID) || null
+    await this.setActivePlaylist(playlist)
   }
 
-  pause() {
-    this.isPaused = true
-    if (this.playing) this.playing.pause()
-  }
-
-  unpause() {
-    this.isPaused = false
-    // if (this.playing) this.playing.unpause()
-  }
-
-  skipVideo() {
-    if (this.playing) {
-      this.unpause()
-      this.playing.end()
-    }
-  }
+  pause() { this.playing?.pause() }
+  unpause() { this.playing?.unpause() }
+  skip() { this.playing?.end() }
 
   async playNext() {
     // Play bumper if enough time has passed
     const { bumperIntervalMinutes } = Settings.getSettings()
-    if (nextBumper && this.lastBumperDate.getTime() + bumperIntervalMinutes * 60 * 1000 < Date.now()) {
-      this.queue.unshift(nextBumper)
-      this.lastBumperDate = new Date()
-      queueNextBumper()
+    if (this.lastBumperDate.getTime() + bumperIntervalMinutes * 60 * 1000 < Date.now()) {
+      const nextBumper = getNextBumper()
+      if (nextBumper) {
+        this.queue.unshift(nextBumper)
+        this.lastBumperDate = new Date()
+      }
     }
-    // if (nextBumper && this.lastBumperDate.getTime() + bumperIntervalSeconds * 1000 < Date.now()) {
-    //   this.lastBumperDate = new Date()
-    //   this.playing = nextBumper
-    //   await this.playing.prepare()
-    //   await this.playing.play()
-    //   queueNextBumper()
-    //   return
-    // }
 
-    if (this.queue.length === 0) {
-      this.playing = null
-      // Display 'no videos' error
+    if (this.queue.length === 0) { // Display 'no videos' error
       SocketUtils.broadcastStreamInfo()
       return
     }
@@ -81,17 +58,20 @@ export default new class Player {
     }
     
     this.playing = this.queue.shift() || null
-    if (this.playing) {
-      this.populateRandomToQueue()
-      await this.playing.play()
-      this.playing = null
-      this.playNext()
-    }
-
-    // Starttranscoding next video in queue
+    if (!this.playing) return
+    
+    this.populateRandomToQueue()
+    this.playing.prepare()
+    
+    // Start transcoding next video in queue
     this.queue[0]?.prepare()
+
+    await this.playing.play()
+    this.playing = null
+    this.playNext()
   }
 
+  // Fill queue with random videos from active playlist
   private populateRandomToQueue() {
     if (!this.activePlaylist) return
 
@@ -110,7 +90,7 @@ export default new class Player {
 
   // Set playlist as active, and start playing it
   async setActivePlaylist(playlist: RichPlaylist | null) {
-    Logger.debug('Setting active playlist:', playlist?.name || 'None')
+    Logger.info('Setting active playlist:', playlist?.name || 'None')
     await Settings.setSetting('activePlaylistID', playlist?.id || 'None')
     this.activePlaylist = playlist
 
@@ -152,9 +132,17 @@ export default new class Player {
       }
     }
 
-    if (!this.playing || this.playing.state === VideoState.NotReady || this.playing.state === VideoState.Preparing) {
+    if (!this.playing) {
       return {
-        state: StreamState.Loading
+        state: StreamState.Error,
+        error: 'No video playing.'
+      }
+    }
+
+    if (this.playing.state === VideoState.NotReady || this.playing.state === VideoState.Preparing) {
+      return {
+        state: StreamState.Loading,
+        name: this.playing.name,
       }
     }
 
@@ -165,7 +153,7 @@ export default new class Player {
       }
     }
 
-    if (this.isPaused) {
+    if (this.playing.state === VideoState.Paused) {
       return {
         state: StreamState.Paused,
         id: this.playing.id,
@@ -305,14 +293,4 @@ export default new class Player {
     Logger.debug(`Playlist (${playlistID}) videos updated:`, newVideoPaths)
     await this.syncUpdatePlaylists()
   }
-
-  // setCacheVideos(value: boolean) {
-  //   Settings.setSetting('cacheVideos', value)
-  //   SocketUtils.broadcastAdmin(SocketEvent.AdminCacheVideos, value)
-  // }
-
-  // setCacheBumpers(value: boolean) {
-  //   Settings.setSetting('cacheBumpers', value)
-  //   SocketUtils.broadcastAdmin(SocketEvent.AdminCacheBumpers, value)
-  // }
 }

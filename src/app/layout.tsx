@@ -1,6 +1,7 @@
 import { getServerSession } from 'next-auth'
 import SessionProvider from '@/contexts/SessionProvider'
 import authOptions from '@/lib/authOptions'
+import Footer from '@/components/layout/Footer'
 import type { Metadata } from 'next'
 import '@/app/globals.scss'
 
@@ -27,6 +28,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className={mainFont.className}>
         <SessionProvider session={session}>
           {children}
+          <Footer />
         </SessionProvider>
       </body>
     </html>

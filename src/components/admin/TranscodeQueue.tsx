@@ -6,11 +6,11 @@ import styles from './QueueList.module.scss'
 
 const states: Record<JobState, { name: string, color: string }> = {
   [JobState.Initializing]: { name: 'Initializing', color: 'gray' },
-  [JobState.Idle]: { name: 'Idle', color: 'lime' },
-  [JobState.AwaitingTranscode]: { name: 'Awaiting Transcode', color: 'aqua' },
-  [JobState.Transcoding]: { name: 'Transcoding', color: 'cyan' },
-  [JobState.CleaningUp]: { name: 'Cleaning Up', color: 'magenta' },
-  [JobState.Finished]: { name: 'Finished', color: 'white' },
+  [JobState.Idle]: { name: 'Idle', color: 'gray' },
+  [JobState.AwaitingTranscode]: { name: 'Awaiting Transcode', color: 'magenta' },
+  [JobState.Transcoding]: { name: 'Transcoding', color: 'aqua' },
+  [JobState.CleaningUp]: { name: 'Cleaning Up', color: 'orange' },
+  [JobState.Finished]: { name: 'Finished', color: 'lime' },
   [JobState.Errored]: { name: 'Errored', color: 'red' }
 }
 

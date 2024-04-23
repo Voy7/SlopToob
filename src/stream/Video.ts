@@ -38,6 +38,7 @@ export default class Video {
     this.job.onError(async error => {
       this.error = error
       this.state = State.Errored
+      this.resolveFinishedCallbacks()
     })
 
     this.job.onProgress(percentage => {
@@ -79,7 +80,7 @@ export default class Video {
     return new Promise<void>(resolve => {
       this.finishedCallbacks.push(resolve)
 
-      if (this.state === State.Playing) return
+      if (this.state === State.Playing || this.state === State.Paused) return
       Logger.debug(`[Video] Playing video: ${this.name}`, this.state)
 
       if (this.state === State.Errored) {
@@ -121,24 +122,19 @@ export default class Video {
 
   // Pause video
   pause() {
+    console.log(this)
     if (this.state !== State.Playing || !this.playingDate) return
-
-    if (this.finishedTimeout) {
-      clearTimeout(this.finishedTimeout)
-    }
+    if (this.finishedTimeout) clearTimeout(this.finishedTimeout)
     this.passedDurationSeconds += (new Date().getTime() - this.playingDate.getTime()) / 1000
     this.state = State.Paused
-    SocketUtils.broadcastStreamInfo()
   }
 
   // Unpause video
   unpause() {
     if (this.state !== State.Paused) return
-
     this.playingDate = new Date()
     this.finishedTimeout = setTimeout(() => this.end(), (this.durationSeconds - this.passedDurationSeconds) * 1000)
     this.state = State.Playing
-    SocketUtils.broadcastStreamInfo()
   }
 
   private resolveReadyCallbacks() {
@@ -182,19 +178,9 @@ export default class Video {
     return name
   }
 
-  get title() {
-    return ''
-  }
-
-  get show() {
-    return ''
-  }
-
-  get season() {
-    return 0
-  }
-
-  get episode() {
-    return 0
-  }
+  // TODO: Implement these
+  get title() { return '' }
+  get show() { return '' }
+  get season() { return 0 }
+  get episode() { return 0 }
 }

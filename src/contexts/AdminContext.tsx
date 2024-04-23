@@ -15,7 +15,7 @@ type ContextProps = {
   playlists: ClientPlaylist[],
   selectedPlaylist: string | null,
   setSelectedPlaylist: (id: string | null) => void,
-  bumpers: ClientVideo[],
+  bumpers: string[],
   queue: ClientVideo[],
   transcodeQueue: TranscodeClientVideo[]
 }
@@ -30,7 +30,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [fileTree, setFileTree] = useState<FileTree | null>(null)
   const [playlists, setPlaylists] = useState<ClientPlaylist[]>([])
   const [selectedPlaylist, setSelectedPlaylist] = useState<string | null>(null)
-  const [bumpers, setBumpers] = useState<ClientVideo[]>([])
+  const [bumpers, setBumpers] = useState<string[]>([])
   const [queue, setQueue] = useState<ClientVideo[]>([])
   const [transcodeQueue, setTranscodeQueue] = useState<TranscodeClientVideo[]>([])
 
@@ -55,7 +55,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       // if (!selectedPlaylist && playlists[0]) setSelectedPlaylist(playlists[0].id)
     })
 
-    socket.on(SocketEvent.AdminBumpersList, (bumpers: ClientVideo[]) => {
+    socket.on(SocketEvent.AdminBumpersList, (bumpers: string[]) => {
       console.log('Bumpers:', bumpers)
       setBumpers(bumpers)
     })

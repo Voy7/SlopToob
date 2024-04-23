@@ -23,6 +23,7 @@ export type StreamPaused = {
 
 export type StreamLoading = {
   state: StreamState.Loading,
+  name: string
 }
 
 export type StreamError = {

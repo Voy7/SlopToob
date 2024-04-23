@@ -138,6 +138,7 @@ export default class TranscoderJob {
       try { await this.checkIfComplete() }
       catch (error) {}
 
+      // if (this.state !== JobState.Finished) this.state = JobState.Idle
       this.state = JobState.Idle
       if (this.initializedCallback) this.initializedCallback()
     }

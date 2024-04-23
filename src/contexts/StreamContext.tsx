@@ -39,7 +39,8 @@ export function StreamProvider({ authUser, cookieUsername, children }:Props) {
   const [socketSecret] = useState(generateSecret())
 
   const [streamInfo, setStreamInfo] = useState<StreamInfo>({
-    state: StreamState.Loading
+    state: StreamState.Loading,
+    name: 'Loading...'
   })
   const [lastStreamUpdateTimestamp, setLastStreamUpdateTimestamp] = useState<number | null>(null)
 

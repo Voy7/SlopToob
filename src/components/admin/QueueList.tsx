@@ -8,8 +8,8 @@ const states: Record<VideoState, { name: string, color: string }> = {
   [VideoState.NotReady]: { name: 'Not Ready', color: 'gray' },
   [VideoState.Ready]: { name: 'Ready', color: 'lime' },
   [VideoState.Preparing]: { name: 'Transcoding', color: 'aqua' },
-  [VideoState.Playing]: { name: 'Playing', color: 'cyan' },
-  [VideoState.Paused]: { name: 'Paused', color: 'orange' },
+  [VideoState.Playing]: { name: 'Playing', color: 'lime' },
+  [VideoState.Paused]: { name: 'Paused', color: 'white' },
   [VideoState.Finished]: { name: 'Finished', color: 'white' },
   [VideoState.Errored]: { name: 'Errored', color: 'red' }
 }

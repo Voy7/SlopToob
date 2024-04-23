@@ -159,7 +159,7 @@ export const socketEvents: Record<string, EventOptions> = {
 
   // Admin skips the current video
   [SocketEvent.AdminSkipVideo]: { adminOnly: true, run: () => {
-    Player.skipVideo()
+    Player.skip()
   }},
 
   // Admin requests the queue list
