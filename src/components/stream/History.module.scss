@@ -1,0 +1,22 @@
+.history {
+  // width: 100%;
+  margin: 1rem;
+  padding: 1rem;
+  background: var(--bg-color-2);
+  border-radius: 1rem;
+
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 0.3em;
+    font-weight: 400;
+    font-size: 1.2rem;
+  }
+
+  p {
+    margin: 1.5rem 0;
+    text-transform: uppercase;
+    font-size: 1rem;
+    color: var(--text-color-3);
+  }
+}

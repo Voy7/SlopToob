@@ -2,8 +2,10 @@
 
 import { signOut } from 'next-auth/react'
 import { useStreamContext } from '@/contexts/StreamContext'
+import Link from 'next/link'
 import Image from 'next/image'
 import Icon from '@/components/ui/Icon'
+import Button from '@/components/ui/Button'
 import styles from './Header.module.scss'
 
 // Stream header component
@@ -12,17 +14,13 @@ export default function Header() {
 
   return (
     <div className={styles.header}>
-      <div className={styles.logo}>
+      <Link className={styles.logo} href="/">
         <Image src="/logo.png" alt="Logo" width={30} height={30} />
-        <h1>SlopToob</h1>
-      </div>
+        <h1><span>Slop</span>Toob</h1>
+      </Link>
       <div className={styles.right}>
-        <button onClick={() => signOut()} className={styles.signOutButton}>
-        <Icon name="user" />Sign Out
-        </button>
-        <button onClick={() => setShowAdminModal(true)} className={styles.adminPanelButton}>
-          <Icon name="admin-panel" />Admin Panel
-        </button>
+        <Button style="normal" icon="logout" onClick={() => signOut()} className={styles.signOutButton}>Sign Out</Button>
+        <Button style="main" icon="admin-panel" onClick={() => setShowAdminModal(true)} className={styles.adminPanelButton}>Admin Panel</Button>
       </div>
     </div>
   )

@@ -1,7 +1,38 @@
 .footer {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  height: 100px;
-  background: var(--bg-color-2);
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--bg-color-1);
+  border-top: 1px solid var(--border-color-1);
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    .github { flex-direction: row-reverse; }
+  }
+
+  .createdBy {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 0.5rem;
+    font-size: 1rem;
+    color: var(--text-color-3);
+
+    img { border-radius: 50%; }
+  }
+
+  .github {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 0.5rem;
+    text-decoration: none;
+    color: var(--select-color);
+
+    &:hover { text-decoration: underline; }
+
+    img { border-radius: 50%; }
+  }
 }

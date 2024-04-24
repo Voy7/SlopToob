@@ -2,47 +2,35 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 0;
+  gap: 1rem;
   width: 100%;
-  padding: 0.5rem;
+  height: var(--header-height);
+  padding: 0 0.5rem;
   background: var(--bg-color-2);
   border-bottom: 1px solid black;
   box-shadow: 0 0 5px 0 black;
+  overflow-x: auto;
 
   .logo {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    text-decoration: none;
 
     img { border-radius: 50%; }
 
     h1 {
-      font-size: 1.2rem;
+      font-weight: 700;
+      font-size: 1.3rem;
       color: var(--text-color-1);
+      span { color: var(--logo-color-1); }
     }
   }
 
   .right {
+    flex-shrink: 0;
     display: flex;
     align-items: center;
-
-    button {
-      padding: 0.5rem 1rem;
-      font-size: 1.1rem;
-      border: none;
-      background: none;
-      color: var(--text-color-1);
-      border-radius: 0.5rem;
-      transition: 150ms ease-in-out;
-      cursor: pointer;
-  
-      &.signOutButton {
-        &:hover { background: var(--error-color); }
-      }
-
-      &.adminPanelButton {
-        &:hover { background: var(--select-color); }
-      }
-    }
+    gap: 1rem;
   }
 }

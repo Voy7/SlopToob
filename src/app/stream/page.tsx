@@ -9,6 +9,7 @@ import Header from '@/components/stream/Header'
 import Video from '@/components/stream/Video'
 import Chat from '@/components/stream/Chat'
 import InfoBody from '@/components/stream/InfoBody'
+import History from '@/components/stream/History'
 import styles from './Stream.module.scss'
 
 const NicknameModal = dynamic(() => import('@/components/stream/NicknameModal'), { ssr: false })
@@ -32,11 +33,12 @@ export default async function StreamPage() {
         </AdminProvider>
       )}
       <Header />
-      <div className={styles.center}>
+      <div className={styles.videoAndChat}>
         <Video />
         <Chat />
       </div>
       <InfoBody />
+      <History />
     </StreamProvider>
   )
 }

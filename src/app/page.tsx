@@ -51,7 +51,7 @@ export default function Home() {
       <Canvas3D />
       <form onSubmit={submit}>
         <Image src="/logo.png" alt="Logo" width={100} height={100} />
-        <h1>SlopToob</h1>
+        <h1><span>Slop</span>Toob</h1>
         <p className={styles.blurb}>
           Enter the password to access infinite slop!
         </p>

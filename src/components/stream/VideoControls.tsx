@@ -56,19 +56,7 @@ export default function VideoControls() {
       <progress value={currentSeconds} max={totalSeconds || 1}></progress>
       <div className={styles.controls}>
         <div className={styles.group}>
-          {streamInfo.state === StreamState.Playing && (
-            <>
-              {isPaused ? (
-                <button className={styles.actionButton} onClick={() => videoElement.play()}>
-                  <Icon name="play" />
-                </button>
-              ): (
-                <button className={styles.actionButton} onClick={() => videoElement.pause()}>
-                  <Icon name="pause" />
-                </button>
-              )}
-            </>
-          )}
+          <PausePlayButton />
           <p>{currentTimestamp} / {totalTimestamp}</p>
           <button className={`${styles.actionButton} ${styles.volumeButton}`}>
             {volume === 0 ? <Icon name="no-volume" /> : <Icon name="volume" />}
@@ -84,5 +72,32 @@ export default function VideoControls() {
         </div>
       </div>
     </div>
+  )
+}
+
+function PausePlayButton() {
+  const { isPaused, videoElement } = useVideoContext()
+  const { streamInfo } = useStreamContext()
+
+  if (streamInfo.state === StreamState.Playing) {
+    if (isPaused) {
+      return (
+        <button className={styles.actionButton} onClick={() => videoElement.play()}>
+          <Icon name="play" />
+        </button>
+      )
+    }
+
+    return (
+      <button className={styles.actionButton} onClick={() => videoElement.pause()}>
+        <Icon name="pause" />
+      </button>
+    )
+  }
+
+  return (
+    <button className={`${styles.actionButton} ${styles.disabled}`}>
+      <Icon name="pause" />
+    </button>
   )
 }

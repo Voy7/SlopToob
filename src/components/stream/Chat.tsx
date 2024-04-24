@@ -75,7 +75,7 @@ export default function Chat() {
         }) : (
           <div className={styles.noMessages}>
             <Icon name="chat" />
-            <p>No messages, end a chat.</p>
+            <p>No messages, send one below.</p>
           </div>
         )}
       </div>
