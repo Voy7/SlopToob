@@ -3,7 +3,6 @@ import { parse } from 'url'
 import { httpServer } from '@/server/httpServer'
 import { initializeSocketServer } from '@/server/socket'
 import { initializeHlsServer } from '@/server/hls'
-import { eventRequestHandler } from '@/server/serverEvents'
 import Env from '@/EnvVariables'
 import type { IncomingMessage, ServerResponse } from 'http'
 
@@ -26,10 +25,6 @@ async function nextRequestHandler(req: IncomingMessage, res: ServerResponse) {
   try {
     if (!req.url) throw new Error('No url')
     const parsedUrl = parse(req.url, true)
-
-    const wasHandled = await eventRequestHandler(req, res, parsedUrl)
-    if (wasHandled) return
-
     await handle(req, res, parsedUrl)
   }
   catch (error: any) {

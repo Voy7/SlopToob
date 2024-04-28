@@ -1,16 +1,17 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useStreamContext } from '@/contexts/StreamContext'
-import { changeNickname } from '@/app/actions'
+import { setNicknameCookie } from '@/app/actions'
 import Modal from '@/components/ui/Modal'
 import Button from '@/components/ui/Button'
 import Icon from '@/components/ui/Icon'
 import styles from './NicknameModal.module.scss'
+import { SocketEvent } from '@/lib/enums'
 
 // Change username modal prompt
 export default function NicknameModal() {
-  const { nickname, setNickname, showNicknameModal, setShowNicknameModal, socketSecret } = useStreamContext()
+  const { socket, setNickname, showNicknameModal, setShowNicknameModal, socketSecret } = useStreamContext()
 
   const [name, setName] = useState<string>('')
   const [error, setError] = useState<string | null>(null)
@@ -23,18 +24,27 @@ export default function NicknameModal() {
     setLoading(true)
     setError(null)
 
-    const result = await changeNickname(name, socketSecret)
-
-    setLoading(false)
-
-    if ('error' in result) {
-      setError(result.error)
-      return
-    }
-    
-    setNickname(name)
-    setShowNicknameModal(false)
+    socket.emit(SocketEvent.ChangeNickname, name)
   }
+
+  useEffect(() => {
+    // Response is 'true' if successful, string if error
+    socket.on(SocketEvent.ChangeNickname, async (result: true | string) => {
+      setLoading(false)
+      if (result !== true) {
+        setError(result)
+        return
+      }
+
+      setNickname(name)
+      setShowNicknameModal(false)
+
+      // Set cookie for future visits
+      await setNicknameCookie(name)
+    })
+
+    return () => { socket.off(SocketEvent.ChangeNickname) }
+  }, [name])
 
   return (
     <Modal title="Set Nickname" isOpen={showNicknameModal} setClose={() => setShowNicknameModal(false)}>

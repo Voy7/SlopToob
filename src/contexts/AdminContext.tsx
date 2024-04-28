@@ -4,7 +4,7 @@ import { useState, useContext, createContext, useEffect } from 'react'
 import { sections, type SectionName } from '@/components/admin/AdminModal'
 import { useStreamContext } from './StreamContext'
 import { SocketEvent } from '@/lib/enums'
-import { ClientPlaylist, ClientVideo, FileTree } from '@/typings/types'
+import { ClientBumper, ClientPlaylist, ClientVideo, FileTree } from '@/typings/types'
 import { TranscodeClientVideo } from '@/typings/socket'
 
 // Stream page context
@@ -15,7 +15,7 @@ type ContextProps = {
   playlists: ClientPlaylist[],
   selectedPlaylist: string | null,
   setSelectedPlaylist: (id: string | null) => void,
-  bumpers: string[],
+  bumpers: ClientBumper[],
   queue: ClientVideo[],
   transcodeQueue: TranscodeClientVideo[]
 }
@@ -24,13 +24,11 @@ type ContextProps = {
 export function AdminProvider({ children }: { children: React.ReactNode }) {
   const { socket } = useStreamContext()
 
-  // if (!socket) return null
-
   const [section, setSectionState] = useState<typeof sections[number]>(sections[0])
   const [fileTree, setFileTree] = useState<FileTree | null>(null)
   const [playlists, setPlaylists] = useState<ClientPlaylist[]>([])
   const [selectedPlaylist, setSelectedPlaylist] = useState<string | null>(null)
-  const [bumpers, setBumpers] = useState<string[]>([])
+  const [bumpers, setBumpers] = useState<ClientBumper[]>([])
   const [queue, setQueue] = useState<ClientVideo[]>([])
   const [transcodeQueue, setTranscodeQueue] = useState<TranscodeClientVideo[]>([])
 
@@ -55,8 +53,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       // if (!selectedPlaylist && playlists[0]) setSelectedPlaylist(playlists[0].id)
     })
 
-    socket.on(SocketEvent.AdminBumpersList, (bumpers: string[]) => {
-      console.log('Bumpers:', bumpers)
+    socket.on(SocketEvent.AdminBumpersList, (bumpers: ClientBumper[]) => {
       setBumpers(bumpers)
     })
 
@@ -72,7 +69,8 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   useEffect(() => {
-    if (!selectedPlaylist && playlists[0]) setSelectedPlaylist(playlists[0].id)
+    const isPlaylistSelected = playlists.some(playlist => playlist.id === selectedPlaylist)
+    if (!isPlaylistSelected && playlists[0]) setSelectedPlaylist(playlists[0].id)
   }, [selectedPlaylist, playlists])
 
   const context: ContextProps = {

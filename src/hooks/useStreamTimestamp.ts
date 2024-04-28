@@ -37,7 +37,7 @@ export default function useStreamTimestamp(): Return {
   return {
     currentTimestamp: parseTimestamp(timestamp),
     totalTimestamp: ('totalSeconds' in streamInfo) ? parseTimestamp(streamInfo.totalSeconds) : '0:00',
-    currentSeconds: ('currentSeconds' in streamInfo) ? streamInfo.currentSeconds : 0,
+    currentSeconds: timestamp,
     totalSeconds: ('totalSeconds' in streamInfo) ? streamInfo.totalSeconds : 0
   }
 }

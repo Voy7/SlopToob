@@ -7,12 +7,12 @@ const dirname = path.resolve()
 // Properly parse path variables, and return default if undefined
 function parsePath(envPath: string | undefined, defaultPath: string, additional?: string): string {
   if (!envPath) {
-    return path.resolve(path.join(dirname, defaultPath, additional || ''))
+    return path.resolve(path.join(dirname, defaultPath, additional || '')).replace(/\\/g, '/')
   }
   if (path.isAbsolute(envPath) || envPath.match(/^[a-zA-Z]:/)) {
-    return path.resolve(path.join(envPath, additional || ''))
+    return path.resolve(path.join(envPath, additional || '')).replace(/\\/g, '/')
   }
-  return path.resolve(path.join(dirname, envPath, additional || ''))
+  return path.resolve(path.join(dirname, envPath, additional || '')).replace(/\\/g, '/')
 }
 
 // All project's environment variables

@@ -1,122 +1,61 @@
 import prisma from '@/lib/prisma'
 import Logger from '@/lib/Logger'
+import SocketUtils from '@/lib/SocketUtils'
+import { settingsList } from '@/stream/settingsList'
 
-enum StreamMode {
-  Queue = 'Queue',
-  Movie = 'Movie',
+export { settingsList }
+
+export type SettingsList = {
+  [key in keyof typeof settingsList]: typeof settingsList[key]['default'] extends boolean ? boolean : typeof settingsList[key]['default']
 }
-
-// All settings and their types
-type SettingsList = {
-  streamMode: StreamMode,
-  activePlaylistID: string,
-  allowVoteSkip: boolean,
-  voteSkipPercentage: number,
-  bumperIntervalMinutes: number,
-  targetQueueSize: number,
-  cacheVideos: boolean,
-  cacheBumpers: boolean,
-  finishTranscodeIfSkipped: boolean,
-  errorDisplaySeconds: number,
-}
-
-type DefaultSettings = {
-  [key in keyof SettingsList]: string | boolean | number | { enum: any, default: any }
-}
-
-/// Default settings, and their default values
-const defaultSettings: DefaultSettings = {
-  streamMode: {
-    enum: StreamMode,
-    default: StreamMode.Queue
-  },
-  activePlaylistID: 'None',
-  allowVoteSkip: true,
-  voteSkipPercentage: 0.5,
-  bumperIntervalMinutes: 1800, // 30 minutes
-  targetQueueSize: 5,
-  cacheVideos: true,
-  cacheBumpers: true,
-  finishTranscodeIfSkipped: true,
-  errorDisplaySeconds: 5,
-} as const
-
 
 export default new class Settings {
   private settings: SettingsList | null = null
   private onReadyCallback: (() => void) | null = null
 
-  constructor() {
-    this.createDefaultSettings()
-  }
-
-  getSettings(): SettingsList {
-    if (!this.settings) throw new Error('Tried to get settings before they were initialized.')
-    return this.settings
-  }
-
-  // value is any type in SettingsList
-  async setSetting(key: keyof SettingsList, value: any) {
-    // If settings are not loaded yet, wait for them and re-run the function
-    if (!this.settings) {
-      await this.getSettings()
-      await this.setSetting(key, value)
-      return
-    }
-
-    const valueIsValid = this.isValidValue(key, value)
-    if (!valueIsValid) {
-      Logger.error(`Failed to update setting. Invalid value for settings.${key}: ${value}`)
-      return
-    }
-
-    this.settings[key] = value as never // This is a hack to make TS happy, because it doesn't understand that value is valid
-    await prisma.settings.update({
-      where: { key },
-      data: { value: value.toString() }
-    })
-  }
-
-  onReady(callback: () => void) {
-    if (this.settings) return callback()
-    this.onReadyCallback = callback
-  }
+  constructor() { this.createDefaultSettings() }
 
   private async createDefaultSettings() {
     const allSettings = await prisma.settings.findMany()
+    // console.log(allSettings)
 
-    function getDefaultValue(key: keyof SettingsList): any {
-      const defaultValue = defaultSettings[key]
+    const vars: { [key: string]: SettingsList[keyof SettingsList] } = {}
 
-      if (typeof defaultValue === 'object' && 'default' in defaultValue) {
-        return defaultValue.default
-      }
-
-      return defaultValue
-    }
-
-    const vars: {
-      [key: string]: string | boolean
-    } = {}
-
-    for (const settingKey in defaultSettings) {
+    for (const settingKey in settingsList) {
       const key = settingKey as keyof SettingsList
-      const existingSetting = allSettings.find((s) => s.key === key)
+      const existingSetting = allSettings.find(s => s.key === key)
+      const defaultValue = settingsList[key].default
 
       if (existingSetting === undefined) {
-        Logger.info(`Setting ${key} not found, creating with default value`)
-        const defaultValue = getDefaultValue(key)
+        Logger.debug(`Setting ${key} not found, creating with default value: ${defaultValue}`)
         vars[key] = defaultValue
-        await prisma.settings.create({
-          data: { key, value: defaultValue.toString() }
-        })
+        await prisma.settings.create({ data: { key, value: defaultValue.toString() } })
         continue
       }
 
-      if (!this.isValidValue(key, existingSetting.value)) {
-        Logger.warn(`Invalid value for settings.${key}: ${existingSetting.value}, resetting to default.`)
+      // if (!this.isValidValue(key, existingSetting.value)) {
+      //   Logger.warn(`Invalid value for settings.${key}: ${existingSetting.value}, resetting to default.`)
 
-        const defaultValue = getDefaultValue(key)
+      //   vars[key] = defaultValue
+      //   await prisma.settings.update({
+      //     where: { key },
+      //     data: { value: defaultValue.toString() }
+      //   })
+      //   continue
+      // }
+
+      // Parse value to correct type
+      // const defaultSetting = settingsList[key]
+      // const expectedType = settingsList[key].type
+      const type = typeof defaultValue
+      let value
+      if (type === 'string') value = existingSetting.value.toString()
+      else if (type === 'number') value = Number(existingSetting.value)
+      else if (type === 'boolean') value = existingSetting.value === 'true'
+
+      if (type !== typeof value) {
+        Logger.warn(`Invalid value for setting.${key}: ${existingSetting.value}, resetting to default.`)
+
         vars[key] = defaultValue
         await prisma.settings.update({
           where: { key },
@@ -125,39 +64,72 @@ export default new class Settings {
         continue
       }
 
-      // Parse value to correct type
-      const expectedType = typeof defaultSettings[key]
-      const defaultSetting = defaultSettings[key]
-      let value
-      if (expectedType === 'boolean') value = existingSetting.value === 'true'
-      else if (expectedType === 'number') value = Number(existingSetting.value)
-      // enums
-      else if (expectedType === 'object' && typeof defaultSetting === 'object' && 'enum' in defaultSetting) value = defaultSetting.enum[existingSetting.value]
-      else value = existingSetting.value
-
-      vars[key] = value as any
+      vars[key] = value as never
     }
 
-    this.settings = vars as unknown as SettingsList
+    this.settings = vars as SettingsList
 
     this.onReadyCallback?.()
   }
 
-  private isValidValue(key: keyof SettingsList, value: any): boolean {
-    const defaultValue = defaultSettings[key]
+  getSettings(): SettingsList {
+    if (!this.settings) throw new Error('Tried to get settings before they were initialized.')
+    return this.settings
+  }
 
-    // Is enum checker
-    if (typeof defaultValue === 'object' && 'enum' in defaultValue) {
-      const enumValues = Object.values(defaultValue.enum)
-      if (enumValues.includes(value)) return true
+  // Update a setting, returns true if value is valid & successful
+  async setSetting(key: keyof SettingsList, value: string | number | boolean): Promise<boolean> {
+    if (value === undefined) return false
+
+    if (!this.settings) {
+      Logger.error('Failed to update setting. Settings not initialized.')
+      return false
     }
 
-    if (typeof defaultValue === 'boolean') value = Boolean(value)
-    if (typeof defaultValue === 'number') value = Number(value)
+    const valueIsValid = typeof value === typeof this.settings[key]
+    if (!valueIsValid) {
+      Logger.error(`Failed to update setting. Invalid value for settings.${key}: ${value}`)
+      return false
+    }
 
-    // Is primitive type checker
-    if (typeof value === typeof defaultValue) return true
+    const setting = settingsList[key]
 
-    return false
+    if ('onChange' in setting) await setting.onChange(value as never)
+
+    const clientValue = ('clientValue' in setting) ? await setting.clientValue() : value
+    SocketUtils.broadcastAdmin(`setting.${key}` as any, clientValue)
+
+    console.log(`Updating setting ${key} to ${value}`)
+    this.settings[key] = value as never // This is a hack to make TS happy, because it doesn't understand that value is valid
+    await prisma.settings.update({
+      where: { key },
+      data: { value: value.toString() }
+    })
+
+    return true
   }
+
+  onReady(callback: () => void) {
+    if (this.settings) return callback()
+    this.onReadyCallback = callback
+  }
+
+  // private isValidValue(key: keyof SettingsList, value: any): boolean {
+  //   const setting = settingsList[key]
+  //   if (!setting) return false
+
+  //   // Is enum checker
+  //   if (setting.type === 'enum') {
+  //     const enumValues = Object.values(setting.enum)
+  //     if (enumValues.includes(value)) return true
+  //   }
+
+  //   if (setting.type === 'number') value = Number(value)
+  //   if (setting.type === 'boolean') value = Boolean(value)
+
+  //   // Is primitive type checker
+  //   if (typeof value === setting.type) return true
+
+  //   return false
+  // }
 }

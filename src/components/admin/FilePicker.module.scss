@@ -16,6 +16,7 @@
     gap: 0.3rem;
     padding: 2px;
     color: var(--text-color-2);
+    overflow: hidden;
     cursor: -webkit-grab;
     cursor: -moz-grab;
 
@@ -46,6 +47,13 @@
           color: var(--text-color-1);
         }
       }
+    }
+
+    span {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 }

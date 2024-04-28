@@ -1,17 +1,20 @@
-export enum AuthRole {
+export const enum AuthRole {
   Normal,
   Admin
 }
 
-export enum SocketEvent {
+export const enum SocketEvent {
   JoinStream = 'join-stream',
-  ChangeUsername = 'change-username',
+  ChangeNickname = 'change-nickname',
   ViewersList = 'viewers-list',
   SendChatMessage = 'send-chat-message',
   NewChatMessage = 'new-chat-message',
   StreamInfo = 'stream-info',
+  VoteSkipAdd = 'vote-skip-add',
+  VoteSkipRemove = 'vote-skip-remove',
+  VoteSkipStatus = 'vote-skip-status',
 
-  // Admin event
+  // Admin events
   AdminRequestAllData = 'admin-request-all-data',
   AdminRequestFileTree = 'admin-request-file-tree',
   AdminRequestPlaylists = 'admin-request-playlists',
@@ -28,29 +31,16 @@ export enum SocketEvent {
   AdminPauseStream = 'admin-pause-stream',
   AdminUnpauseStream = 'admin-unpause-stream',
   AdminSkipVideo = 'admin-skip-video',
-  SettingActivePlaylist = 'admin-active-playlist',
-  SettingAllowVoteSkip = 'admin-allow-vote-skip',
-  SettingVoteSkipPercentage = 'admin-vote-skip-percentage',
-  SettingBumperIntervalMinutes = 'admin-bumper-interval-minutes',
-  SettingTargetQueueSize = 'admin-target-queue-size',
-  SettingCacheVideos = 'admin-cache-videos',
-  SettingCacheBumpers = 'admin-cache-bumpers',
-  SettingFinishTranscode = 'admin-finish-transcode',
 }
 
-export enum ServerEvent {
-  ChangeUsername,
-  SendChatMessage,
-}
-
-export enum StreamState {
+export const enum StreamState {
   Playing,
   Paused,
   Loading,
   Error
 }
 
-export enum VideoState {
+export const enum VideoState {
   NotReady,
   Preparing,
   Ready,
@@ -60,7 +50,7 @@ export enum VideoState {
   Errored
 }
 
-export enum JobState {
+export const enum JobState {
   Initializing,
   Idle,
   AwaitingTranscode,

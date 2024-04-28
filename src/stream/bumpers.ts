@@ -5,7 +5,7 @@ import Logger from '@/lib/Logger'
 import Video from '@/stream/Video'
 import SocketUtils from '@/lib/SocketUtils'
 import { SocketEvent } from '@/lib/enums'
-import type { ClientVideo } from '@/typings/types'
+import type { ClientBumper, ClientVideo } from '@/typings/types'
 
 // export const bumpers: Video[] = []
 const bumperPaths: string[] = []
@@ -19,13 +19,13 @@ if (!fs.existsSync(Env.BUMPERS_PATH)) {
 // Watch bumpers directory for changes
 fs.watch(Env.BUMPERS_PATH, { recursive: true }, (_, filename) => {
   if (!filename) return
-  syncCheckBumper(path.join(Env.BUMPERS_PATH, filename))
+  syncCheckBumper(path.join(Env.BUMPERS_PATH, filename).replace(/\\/g, '/'))
 })
 
 // Add all files in bumpers directory, and populate nextBumper on startup
 fs.readdir(Env.BUMPERS_PATH, { recursive: true }, (error, files) => {
   if (error) return Logger.error(`Error reading bumpers directory: ${error.message}`)
-  for (const file of files) { syncCheckBumper(path.join(Env.BUMPERS_PATH, file.toString())) }
+  for (const file of files) { syncCheckBumper(path.join(Env.BUMPERS_PATH, file.toString()).replace(/\\/g, '/')) }
   nextBumper = getRandomBumper()
 })
 
@@ -38,7 +38,7 @@ function syncCheckBumper(pathName: string) {
   if (!fileExists && existingBumper) {
     bumperPaths.splice(bumperPaths.indexOf(pathName), 1)
     Logger.debug(`Bumper deleted: ${pathName}`)
-    // SocketUtils.broadcastAdmin(SocketEvent.AdminBumpersList, getClientBumpers())
+    SocketUtils.broadcastAdmin(SocketEvent.AdminBumpersList, getClientBumpers())
     return
   }
 
@@ -46,7 +46,7 @@ function syncCheckBumper(pathName: string) {
   if (fileExists && !existingBumper) {
     bumperPaths.push(pathName)
     Logger.debug(`Bumper added: ${pathName}`)
-    // SocketUtils.broadcastAdmin(SocketEvent.AdminBumpersList, getClientBumpers())
+    SocketUtils.broadcastAdmin(SocketEvent.AdminBumpersList, getClientBumpers())
     return
   }
 
@@ -58,8 +58,11 @@ function syncCheckBumper(pathName: string) {
 //   return bumpers.map(bumper => bumper.clientVideo)
 // }
 
-export function getClientBumpers(): string[] {
-  return bumperPaths
+export function getClientBumpers():ClientBumper[] {
+  return bumperPaths.map(path => {
+    const name = (path.split('/').pop() || 'Unknown').split('.')[0]
+    return { path, name }
+  })
 }
 
 // Prepare the next bumper to be played
@@ -98,3 +101,10 @@ function getRandomBumper(): Video | null {
   console.log(video)
   return video
 }
+
+const messages = [
+  'A quicky message from our sponsor',
+  'Slop brought to you by..."',
+  'Endorsed by the one and only',
+  'We need money',
+]

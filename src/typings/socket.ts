@@ -8,6 +8,7 @@ export type StreamPlaying = {
   id: string,
   name: string,
   path: string,
+  isBumper: boolean,
   currentSeconds: number,
   totalSeconds: number
 }
@@ -17,6 +18,7 @@ export type StreamPaused = {
   id: string,
   name: string,
   path: string,
+  isBumper: boolean,
   currentSeconds: number,
   totalSeconds: number
 }
@@ -31,13 +33,24 @@ export type StreamError = {
   error: string
 }
 
-export type StreamInfo =
+export type StreamOptions = {
+  voteSkip: {
+    isEnabled: boolean,
+    isAllowed: boolean,
+    allowedInSeconds: number,
+    currentCount: number,
+    requiredCount: number
+  }
+}
+
+export type StreamInfo = (
   | StreamPlaying
   | StreamPaused
   | StreamLoading
   | StreamError
+) & StreamOptions
 
-export type Client = {
+export type SocketClient = {
   socket: Socket
   secret: string,
   username: string,

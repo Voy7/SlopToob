@@ -40,7 +40,7 @@ type TreeItemProps = {
 }
 
 function TreeItem({ item, depth, openFolders, setOpenFolders, allPaths, activePaths, setActivePaths }: TreeItemProps) {
-  const childrenPaths = allPaths.filter(path => path.startsWith(item.path))
+  const childrenPaths = allPaths.filter(path => path.startsWith(item.path + '/'))
 
   const isActive = item.isDirectory
     ? childrenPaths.every(path => activePaths.includes(path))
@@ -75,13 +75,13 @@ function TreeItem({ item, depth, openFolders, setOpenFolders, allPaths, activePa
         <div className={isActive ? `${styles.item} ${styles.selected}` : styles.item} onClick={toggleOpen}>
           <input type="checkbox" checked={isActive} onChange={toggleActive} onClick={event => event.stopPropagation()} />
           <Icon name={isFolderOpen ? 'folder-open' : 'folder'} />
-          <span>{item.name}</span>
+          <span title={item.name}>{item.name}</span>
         </div>
       ) : (
         <label className={isActive ? `${styles.item} ${styles.selected}` : styles.item}>
           <input type="checkbox" checked={isActive} onChange={toggleActive} />
           <Icon name="video-file" />
-          <span>{item.name}</span>
+          <span title={item.name}>{item.name}</span>
         </label>
       )}
       {isFolderOpen && item.children && item.children.map(child => (

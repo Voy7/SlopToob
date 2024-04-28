@@ -1,6 +1,5 @@
 'use client'
 
-import { SocketEvent } from '@/lib/enums'
 import useToggleOption from '@/hooks/useToggleOption'
 import useNumberOption from '@/hooks/useNumberOption'
 import useListOption from '@/hooks/useListOption'
@@ -9,10 +8,10 @@ import StreamControls from '@/components/admin/StreamControls'
 import QueueList from '@/components/admin/QueueList'
 
 export default function SectionStream() {
-  const activePlaylist = useListOption(SocketEvent.SettingActivePlaylist)
-  const voteSkipEnabled = useToggleOption(SocketEvent.SettingAllowVoteSkip)
-  const voteSkipPercentage = useNumberOption(SocketEvent.SettingVoteSkipPercentage)
-  const targetQueueSize = useNumberOption(SocketEvent.SettingTargetQueueSize)
+  const activePlaylist = useListOption('activePlaylistID')
+  const voteSkipEnabled = useToggleOption('allowVoteSkip')
+  const voteSkipPercentage = useNumberOption('voteSkipPercentage')
+  const targetQueueSize = useNumberOption('targetQueueSize')
 
   return (
     <>

@@ -12,6 +12,7 @@ import Settings from '@/stream/Settings'
 import SocketUtils from '@/lib/SocketUtils'
 import { SocketEvent, VideoState as State } from '@/lib/enums'
 import type { ClientVideo } from '@/typings/types'
+import VoteSkipHandler from './VoteSkipHandler'
 
 export default class Video {
   readonly id: string = generateSecret()
@@ -26,6 +27,7 @@ export default class Video {
   private job: TranscoderJob
 
   constructor(public path: string, public isBumper: boolean = false) {
+    // console.log('new video', this.path)
     this.job = TranscoderQueue.newJob(this)
     
     this.job.onStreamableReady(() => {
@@ -49,7 +51,7 @@ export default class Video {
   get state() { return this._state }
   private set state(newState: State) {
     this._state = newState
-    if (Player.playing === this) SocketUtils.broadcastStreamInfo()
+    if (Player.playing === this) SocketUtils.broadcast(SocketEvent.StreamInfo, Player.clientStreamInfo)
     else SocketUtils.broadcastAdmin(SocketEvent.AdminQueueList, Player.queue.map(video => video.clientVideo))
   }
 
@@ -78,6 +80,7 @@ export default class Video {
     
     // Callback when finished playing
     return new Promise<void>(resolve => {
+      this.finishedCallbacks.push(() => VoteSkipHandler.disable())
       this.finishedCallbacks.push(resolve)
 
       if (this.state === State.Playing || this.state === State.Paused) return
@@ -86,14 +89,14 @@ export default class Video {
       if (this.state === State.Errored) {
         const { errorDisplaySeconds } = Settings.getSettings()
         this.finishedTimeout = setTimeout(() => this.end(), errorDisplaySeconds * 1000)
-        SocketUtils.broadcastStreamInfo()
+        SocketUtils.broadcast(SocketEvent.StreamInfo, Player.clientStreamInfo)
         return
       }
 
+      VoteSkipHandler.enable()
       this.state = State.Playing
       this.playingDate = new Date()
       this.finishedTimeout = setTimeout(() => this.end(), this.durationSeconds * 1000)
-      SocketUtils.broadcastStreamInfo()
     })
   }
 
@@ -114,8 +117,6 @@ export default class Video {
     this.passedDurationSeconds = 0
     this.state = State.Finished
     this.resolveFinishedCallbacks()
-
-    SocketUtils.broadcastStreamInfo()
 
     this.job.unlink(this)
   }
@@ -164,8 +165,8 @@ export default class Video {
   get outputPath(): string {
     const basePath = this.isBumper ? Env.BUMPERS_PATH : Env.VIDEOS_PATH
     const outputBasePath = this.isBumper ? Env.BUMPERS_OUTPUT_PATH : Env.VIDEOS_OUTPUT_PATH
-    let newPath = path.resolve(this.path)
-    newPath = newPath.split(basePath)[1]
+    // let newPath = path.resolve(this.path)
+    let newPath = this.path.replace(basePath, '')
     newPath = path.join(outputBasePath, newPath).replace(/\\/g, '/')
     return newPath
   }

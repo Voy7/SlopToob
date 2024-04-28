@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'react'
 import { useStreamContext } from '@/contexts/StreamContext'
 import { SocketEvent } from '@/lib/enums'
+import { SettingGroup, Header, Description } from '@/components/admin/SettingsComponents'
 import Icon from '@/components/ui/Icon'
 import Button from '@/components/ui/Button'
 import Modal from '@/components/ui/Modal'
@@ -11,9 +12,13 @@ import FilePicker from '@/components/admin/FilePicker'
 import styles from './PlaylistEditor.module.scss'
 import type { ClientPlaylist, FileTree } from '@/typings/types'
 import type { EditPlaylistNamePayload, EditPlaylistVideosPayload } from '@/typings/socket'
+import { useAdminContext } from '@/contexts/AdminContext'
 
-export default function PlaylistEditor({ playlist, fileTree }: { playlist: ClientPlaylist, fileTree: FileTree }) {
+export default function PlaylistEditor({ playlist }: { playlist: ClientPlaylist }) {
   const { socket } = useStreamContext()
+  const { fileTree } = useAdminContext()
+
+  if (!fileTree) return null
 
   const [playlistName, setPlaylistName] = useState<string>(playlist.name)
   const [playlistNameError, setPlaylistNameError] = useState<string | null>(null)
@@ -57,22 +62,25 @@ export default function PlaylistEditor({ playlist, fileTree }: { playlist: Clien
   }
 
   return (
-    <>
-      <div className={styles.playlistEditor}>
-        <div className={styles.seperate}>
-          <label className={styles.playlistName}>
-            <span>Playlist Name</span>
-            <input type="text" value={playlistName} onChange={onNameChange} autoFocus />
-            <p className={playlistNameError ? styles.error : styles.success}>
-              <Icon name={playlistNameError ? 'warning' : 'check'} />
-              {playlistNameError}
-            </p>
-          </label>
+    <div className={styles.playlistEditor}>
+      <label className={styles.playlistName}>
+        <span>Playlist Name</span>
+        <input type="text" value={playlistName} onChange={onNameChange} autoFocus />
+        <p className={playlistNameError ? styles.error : styles.success}>
+          <Icon name={playlistNameError ? 'warning' : 'check'} />
+          {playlistNameError}
+        </p>
+      </label>
+      <SettingGroup>
+        <Header icon="files">Selected Videos ({activePaths.length}):</Header>
+        <FilePicker tree={fileTree} activePaths={activePaths} setActivePaths={setActivePaths} />
+      </SettingGroup>
+      <SettingGroup>
+        <div className={styles.row}>
+          <Description>Permanently delete this playlist.</Description>
           <Button style="danger" icon="delete" onClick={() => setShowDeleteModal(true)}>Delete Playlist</Button>
         </div>
-        <p className={styles.selectedCount}>SELECTED VIDEOS ({activePaths.length}):</p>
-        <FilePicker tree={fileTree} activePaths={activePaths} setActivePaths={setActivePaths} />
-      </div>
+      </SettingGroup>
       <Modal title="Delete Playlist" isOpen={showDeleteModal} setClose={() => setShowDeleteModal(false)}>
         <div className={styles.deletePlaylistModal}>
           <p>Are you sure you want to delete the playlist "{playlist.name}"?</p>
@@ -82,6 +90,6 @@ export default function PlaylistEditor({ playlist, fileTree }: { playlist: Clien
           </div>
         </div>
       </Modal>
-    </>
+    </div>
   )
 }

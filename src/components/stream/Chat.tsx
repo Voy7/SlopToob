@@ -2,8 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useStreamContext } from '@/contexts/StreamContext'
-import { sendChatMessage } from '@/app/actions'
-import { AuthRole } from '@/lib/enums'
+import { AuthRole, SocketEvent } from '@/lib/enums'
 import Icon from '@/components/ui/Icon'
 import styles from './Chat.module.scss'
 
@@ -14,7 +13,7 @@ const roleColors = {
 }
 
 export default function Chat() {
-  const { chatMessages, setChatMessages, viewers, socketSecret, nickname, setShowNicknameModal } = useStreamContext()
+  const { socket, chatMessages, setChatMessages, viewers, nickname, setShowNicknameModal } = useStreamContext()
 
   const [message, setMessage] = useState<string>('')
 
@@ -25,17 +24,16 @@ export default function Chat() {
     if (message.length === 0) return
     setMessage('')
 
-    try {
-      const result = await sendChatMessage(message, socketSecret)
-      
-      if ('error' in result) {
-        throw new Error(result.error)
-      }
-    }
-    catch (error: any) {
-      setChatMessages(messages => [{ error: error.message }, ...messages])
-    }
+    socket.emit(SocketEvent.SendChatMessage, message)
   }
+
+  // If message received, it's an error
+  useEffect(() => {
+    socket.on(SocketEvent.SendChatMessage, (error: string) => {
+      setChatMessages(messages => [{ error }, ...messages])
+    })
+    return () => { socket.off(SocketEvent.SendChatMessage) }
+  }, [])
 
   // When new message is received, scroll to bottom of container if it's already at the bottom
   useEffect(() => {

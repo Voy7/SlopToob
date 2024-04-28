@@ -7,6 +7,7 @@
   align-items: center;
   gap: 0.25em;
   margin-bottom: 0.3rem;
+  text-transform: uppercase;
   font-weight: normal;
   font-size: 1rem;
   color: var(--text-color-3);
@@ -18,6 +19,8 @@
   font-size: 0.9rem;
   color: var(--text-color-3);
 }
+
+.gap { height: 1rem; }
 
 // Universal option styles
 $optionPadding: 0.35rem;

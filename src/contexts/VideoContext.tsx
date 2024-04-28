@@ -77,7 +77,11 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
     video.onpause = () => { setIsPaused(true) }
 
     video.onvolumechange = () => {
-      setVolume(video.volume * 100)
+      if (video.muted) {
+        setVolume(0)
+        if (video.volume === 0) video.volume = 1
+      }
+      else setVolume(video.volume * 100)
     }
   }, [streamInfo, lastStreamUpdateTimestamp])
 

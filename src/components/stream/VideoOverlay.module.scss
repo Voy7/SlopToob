@@ -45,7 +45,6 @@
   border-radius: 1rem;
   animation: fadeIn 300ms ease-in-out;
   cursor: default;
-
 }
 
 .error {
@@ -61,6 +60,7 @@
   gap: 1rem;
   font-size: 1.2rem;
   color: var(--text-color-2);
+  background: black;
   animation: errorFadeIn 500ms ease-in-out;
   cursor: default;
 
@@ -72,5 +72,28 @@
   svg {
     font-size: 5rem;
     color: var(--error-color);
+  }
+}
+
+// Bumper overlays
+.bumperTime {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  padding: 1rem;
+  font-size: 1.15rem;
+  white-space: nowrap;
+  color: white;
+  background: rgba(0, 0, 0, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 0.5rem;
+  cursor: default;
+
+  span {
+    animation: fadeIn 300ms ease-in-out;
+    @keyframes fadeIn {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
   }
 }

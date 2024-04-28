@@ -21,6 +21,10 @@ export function Description({ children }: { children: React.ReactNode }) {
   return <p className={styles.description}>{children}</p>
 }
 
+export function Gap() {
+  return <div className={styles.gap} />
+}
+
 type ToggleProps = {
   label: string,
   value: boolean | null,

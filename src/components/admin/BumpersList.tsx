@@ -1,24 +1,25 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useStreamContext } from '@/contexts/StreamContext'
 import { useAdminContext } from '@/contexts/AdminContext'
 import { SocketEvent } from '@/lib/enums'
+import { SettingGroup, Header } from '@/components/admin/SettingsComponents'
 import Icon from '@/components/ui/Icon'
 import Button from '@/components/ui/Button'
 import Modal from '@/components/ui/Modal'
 import styles from './BumpersList.module.scss'
-import type { ActionResponse, ClientVideo } from '@/typings/types'
+import type { ClientBumper } from '@/typings/types'
 
 export default function BumpersList() {
-  const { bumpers } = useAdminContext()
   const { socket } = useStreamContext()
+  const { bumpers } = useAdminContext()
 
   const [showAddModal, setShowAddModal] = useState<boolean>(false)
   const [addBumperError, setAddBumperError] = useState<string | null>(null)
   const [addBumperLoading, setAddBumperLoading] = useState<boolean>(false)
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false)
-  const [deleteBumperSelected, setDeleteBumperSelected] = useState<ClientVideo | null>(null)
+  const [deleteBumperSelected, setDeleteBumperSelected] = useState<ClientBumper | null>(null)
   const [deleteBumperLoading, setDeleteBumperLoading] = useState<boolean>(false)
   const [deleteBumperError, setDeleteBumperError] = useState<string | null>(null)
 
@@ -40,13 +41,6 @@ export default function BumpersList() {
     })
 
     socket?.emit(SocketEvent.AdminUploadBumper, { name: bumperName, videoFile: videoFileBase64 })
-
-    // Received event will either be an error or success acknowledgment
-    socket?.on(SocketEvent.AdminUploadBumper, (response: ActionResponse) => {
-      setAddBumperLoading(false)
-      if ('error' in response) return setAddBumperError(response.error)
-      setShowAddModal(false)
-    })
   }
 
   async function deleteBumper() {
@@ -54,43 +48,58 @@ export default function BumpersList() {
     setDeleteBumperLoading(true)
     setDeleteBumperError(null)
     socket?.emit(SocketEvent.AdminDeleteBumper, deleteBumperSelected.path)
-
-    // Received event will either be an error or success acknowledgment
-    socket?.on(SocketEvent.AdminDeleteBumper, (response: ActionResponse) => {
-      setDeleteBumperLoading(false)
-      if ('error' in response) {
-        setDeleteBumperError(response.error)
-        return
-      }
-      setShowDeleteModal(false)
-    })
   }
+
+  useEffect(() => {
+    // Response will either be true for success or string for error
+    socket?.on(SocketEvent.AdminUploadBumper, (response: true | string) => {
+      setAddBumperLoading(false)
+      if (response === true) return setShowAddModal(false)
+      setAddBumperError(response)
+    })
+
+    
+    // Response will either be true for success or string for error
+    socket?.on(SocketEvent.AdminDeleteBumper, (response: true | string) => {
+      setDeleteBumperLoading(false)
+      if (response === true) return setShowDeleteModal(false)
+      setDeleteBumperError(response)
+    })
+
+    return () => {
+      socket?.off(SocketEvent.AdminUploadBumper)
+      socket?.off(SocketEvent.AdminDeleteBumper)
+    }
+  }, [])
 
   return (
     <>
-      <div className={styles.sectionBumpers}>
+      <SettingGroup>
         <div className={styles.options}>
-          <Button style="main" icon="video-file" onClick={() => setShowAddModal(true)}>Add Bumper</Button>
+          <Button style="main" icon="add" onClick={() => setShowAddModal(true)}>Upload Bumper</Button>
         </div>
-        <div className={styles.bumpersList}>
-          {bumpers.map(bumper => (
-            <div key={bumper} className={styles.bumper}>
+        <Header icon="files">Bumpers List ({bumpers.length})</Header>
+        <div className={styles.list}>
+          {bumpers.map((bumper, index) => (
+            <div key={bumper.path} className={styles.bumper}>
               <div className={styles.left}>
-                <Icon name="video-file" />
-                <p>{bumper}</p>
+                <span>{index + 1}.</span>
+                <p>{bumper.name}</p>
               </div>
-              {/* <Button style="danger" icon="delete" onClick={() => { setShowDeleteModal(true); setDeleteBumperSelected(bumper) }}>Delete</Button> */}
+              <button onClick={() => { setShowDeleteModal(true); setDeleteBumperSelected(bumper) }}>
+                <Icon name="delete" />
+              </button>
             </div>
           ))}
         </div>
-      </div>
+      </SettingGroup>
 
-      <Modal title="Add Bumper" isOpen={showAddModal} setClose={() => setShowAddModal(false)}>
+      <Modal title="Upload Bumper" isOpen={showAddModal} setClose={() => setShowAddModal(false)}>
         <form onSubmit={addBumperSubmit} className={styles.addBumperModal}>
           <p>Upload a new bumper video.</p>
           <label>
-            Bumper Name
-            <input type="text" name="bumperName" />
+            Bumper Title
+            <input type="text" name="bumperName" placeholder="Enter title..." autoFocus />
           </label>
           <label>
             Video File
@@ -98,7 +107,7 @@ export default function BumpersList() {
           </label>
           <div className={styles.buttons}>
             <Button style="normal" onClick={() => setShowAddModal(false)}>Cancel</Button>
-            <Button style="main" icon="video-file" loading={addBumperLoading} isSubmit>Upload</Button>
+            <Button style="main" icon="add" loading={addBumperLoading} isSubmit>Upload</Button>
           </div>
           {addBumperError && <p className={styles.error}><Icon name="warning" />{addBumperError}</p>}
         </form>

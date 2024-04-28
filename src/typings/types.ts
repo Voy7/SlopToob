@@ -59,6 +59,11 @@ export type ClientVideo = {
   path: string
 }
 
+export type ClientBumper = {
+  name: string,
+  path: string
+}
+
 // export type ListOption0 = {
 //   name: string,
 //   id: string

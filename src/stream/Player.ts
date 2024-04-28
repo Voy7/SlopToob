@@ -1,4 +1,3 @@
-import fs from 'fs/promises'
 import prisma from '@/lib/prisma'
 import Env from '@/EnvVariables'
 import Logger from '@/lib/Logger'
@@ -8,10 +7,8 @@ import SocketUtils from '@/lib/SocketUtils'
 import { getNextBumper } from '@/stream/bumpers'
 import { StreamState, SocketEvent, VideoState } from '@/lib/enums'
 import type { RichPlaylist, FileTree, ClientPlaylist, ListOption } from '@/typings/types'
-import type { StreamInfo } from '@/typings/socket'
-
-
-const VALID_EXTENSIONS = ['.mp4', '.mkv', '.avi', '.mov', '.flv', '.wmv', '.webm']
+import type { StreamInfo, StreamOptions } from '@/typings/socket'
+import VoteSkipHandler from './VoteSkipHandler'
 
 // Main player (video) handler, singleton
 export default new class Player {
@@ -27,9 +24,8 @@ export default new class Player {
   private async initialize() {
     Logger.debug('Initializing player handler...')
     await this.syncUpdatePlaylists()
-    const settings = await Settings.getSettings()
-    const playlist = this.playlists.find(playlist => playlist.id === settings.activePlaylistID) || null
-    await this.setActivePlaylist(playlist)
+    const { activePlaylistID } = Settings.getSettings()
+    await this.setActivePlaylistID(activePlaylistID)
   }
 
   pause() { this.playing?.pause() }
@@ -38,8 +34,8 @@ export default new class Player {
 
   async playNext() {
     // Play bumper if enough time has passed
-    const { bumperIntervalMinutes } = Settings.getSettings()
-    if (this.lastBumperDate.getTime() + bumperIntervalMinutes * 60 * 1000 < Date.now()) {
+    const { bumpersEnabled, bumperIntervalMinutes } = Settings.getSettings()
+    if (bumpersEnabled && this.lastBumperDate.getTime() + bumperIntervalMinutes * 60 * 1000 < Date.now()) {
       const nextBumper = getNextBumper()
       if (nextBumper) {
         this.queue.unshift(nextBumper)
@@ -48,7 +44,7 @@ export default new class Player {
     }
 
     if (this.queue.length === 0) { // Display 'no videos' error
-      SocketUtils.broadcastStreamInfo()
+      SocketUtils.broadcast(SocketEvent.StreamInfo, this.clientStreamInfo)
       return
     }
 
@@ -89,9 +85,10 @@ export default new class Player {
   }
 
   // Set playlist as active, and start playing it
-  async setActivePlaylist(playlist: RichPlaylist | null) {
+  async setActivePlaylistID(playlistID: string) {
+    const playlist = this.playlists.find(playlist => playlist.id === playlistID) || null
+
     Logger.info('Setting active playlist:', playlist?.name || 'None')
-    await Settings.setSetting('activePlaylistID', playlist?.id || 'None')
     this.activePlaylist = playlist
 
     for (const video of this.queue) video.end()
@@ -99,7 +96,7 @@ export default new class Player {
     this.populateRandomToQueue()
 
     SocketUtils.broadcastAdmin(SocketEvent.AdminRequestPlaylists, this.clientPlaylists)
-    SocketUtils.broadcastAdmin(SocketEvent.SettingActivePlaylist, this.listOptionPlaylists)
+    SocketUtils.broadcastAdmin(SocketEvent.AdminQueueList, this.queue.map(video => video.clientVideo))
   }
 
   get clientPlaylists(): ClientPlaylist[] {
@@ -124,25 +121,28 @@ export default new class Player {
     SocketUtils.broadcastAdmin(SocketEvent.AdminQueueList, this.queue.map(video => video.clientVideo))
   }
 
-  getStreamInfo(): StreamInfo {
+  get clientStreamInfo(): StreamInfo {
     if (!this.playing && this.queue.length === 0) {
       return {
         state: StreamState.Error,
-        error: 'No videos in queue.'
+        error: 'No videos in queue.',
+        ...this.clientStreamOptions
       }
     }
 
     if (!this.playing) {
       return {
         state: StreamState.Error,
-        error: 'No video playing.'
+        error: 'No video playing.',
+        ...this.clientStreamOptions
       }
     }
 
     if (this.playing.state === VideoState.Errored) {
       return {
         state: StreamState.Error,
-        error: this.playing.error || 'Unknown error occurred.' // Should never be null, but just in case
+        error: this.playing.error || 'Unknown error occurred.', // Should never be null, but just in case
+        ...this.clientStreamOptions
       }
     }
 
@@ -152,66 +152,32 @@ export default new class Player {
         id: this.playing.id,
         name: this.playing.name,
         path: `/stream-data/${this.playing.id}/video.m3u8`,
+        isBumper: this.playing.isBumper,
         currentSeconds: this.playing.currentSeconds,
-        totalSeconds: this.playing.durationSeconds
+        totalSeconds: this.playing.durationSeconds,
+        ...this.clientStreamOptions
       }
     }
 
     return {
       state: StreamState.Loading,
       name: this.playing.name,
+      ...this.clientStreamOptions
     }
   }
 
-  // Get all video files & directories in videos folder as a tree
-  // Files are sorted by name, and are only video files
-  // Tree can be infinite depth, get all files recursively
-  async getVideosFileTree(): Promise<FileTree> {
-    const rootPath = Env.VIDEOS_PATH
-    
-    const tree: FileTree = {
-      isDirectory: true,
-      name: 'Videos Root',
-      path: rootPath,
-      children: []
-    }
+  get clientStreamOptions(): StreamOptions {
+    const { allowVoteSkip } = Settings.getSettings()
 
-    async function getChildren(path: string, parent: FileTree): Promise<number> {
-      const files = await fs.readdir(path, { withFileTypes: true })
-      for (const file of files) {
-        const isDirectory: boolean = file.isDirectory()
-        if (!isDirectory) {
-          const ext = file.name.slice(file.name.lastIndexOf('.')).toLowerCase()
-          if (!VALID_EXTENSIONS.includes(ext)) continue
-        }
-
-        const item: FileTree = {
-          isDirectory: isDirectory,
-          name: file.name,
-          path: `${path}/${file.name}`
-        }
-
-        if (isDirectory) {
-          item.children = []
-          const childrenCount = await getChildren(item.path, item)
-          if (childrenCount === 0) continue
-        }
-
-        parent.children?.push(item)
+    return {
+      voteSkip: {
+        isEnabled: allowVoteSkip,
+        isAllowed: VoteSkipHandler.isAllowed,
+        allowedInSeconds: VoteSkipHandler.allowedInSeconds,
+        currentCount: VoteSkipHandler.currentCount,
+        requiredCount: VoteSkipHandler.requiredCount,
       }
-
-      parent.children?.sort((a, b) => {
-        if (a.isDirectory && !b.isDirectory) return -1
-        if (!a.isDirectory && b.isDirectory) return 1
-        return a.name.localeCompare(b.name)
-      })
-
-      return parent.children?.length || 0
     }
-
-    await getChildren(rootPath, tree)
-
-    return tree
   }
 
   async syncUpdatePlaylists(): Promise<RichPlaylist[]> {

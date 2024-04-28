@@ -59,7 +59,8 @@ export default function VideoControls() {
           <PausePlayButton />
           <p>{currentTimestamp} / {totalTimestamp}</p>
           <button className={`${styles.actionButton} ${styles.volumeButton}`}>
-            {volume === 0 ? <Icon name="no-volume" /> : <Icon name="volume" />}
+            <Icon name={volume === 0 ? 'no-volume' : 'volume'} onClick={() => videoElement.muted = !videoElement.muted} />
+            {/* {volume === 0 ? <Icon name="no-volume" /> : <Icon name="volume" />} */}
             <div className={styles.volumeContainer}>
               <input type="range" value={volume} onChange={event => videoElement.volume = parseInt(event.target.value) / 100} />
             </div>
@@ -96,7 +97,7 @@ function PausePlayButton() {
   }
 
   return (
-    <button className={`${styles.actionButton} ${styles.disabled}`}>
+    <button className={`${styles.actionButton} ${styles.disabled}`} title="Stream Paused">
       <Icon name="pause" />
     </button>
   )

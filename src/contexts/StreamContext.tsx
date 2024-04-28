@@ -38,10 +38,7 @@ export function StreamProvider({ authUser, cookieUsername, children }:Props) {
 
   const [socketSecret] = useState(generateSecret())
 
-  const [streamInfo, setStreamInfo] = useState<StreamInfo>({
-    state: StreamState.Loading,
-    name: 'Loading...'
-  })
+  const [streamInfo, setStreamInfo] = useState<StreamInfo | null>(null)
   const [lastStreamUpdateTimestamp, setLastStreamUpdateTimestamp] = useState<number | null>(null)
 
   useEffect(() => {
@@ -91,7 +88,7 @@ export function StreamProvider({ authUser, cookieUsername, children }:Props) {
     showNicknameModal, setShowNicknameModal,
     showAdminModal, setShowAdminModal,
     chatMessages, setChatMessages,
-    streamInfo,
+    streamInfo: streamInfo!,
     lastStreamUpdateTimestamp,
     socket: socket!,
     socketSecret
@@ -99,7 +96,7 @@ export function StreamProvider({ authUser, cookieUsername, children }:Props) {
 
   return (
     <StreamContext.Provider value={context}>
-      {socket ? children : <SocketLoading />}
+      {socket && streamInfo ? children : <SocketLoading />}
     </StreamContext.Provider>
   )
 }

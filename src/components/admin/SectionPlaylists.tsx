@@ -10,11 +10,11 @@ import PlaylistEditor from '@/components/admin/PlaylistEditor'
 import styles from './SectionPlaylists.module.scss'
 
 export default function SectionPlaylists() {
-  const { playlists, selectedPlaylist, setSelectedPlaylist, fileTree } = useAdminContext()
+  const { playlists, selectedPlaylist, setSelectedPlaylist } = useAdminContext()
   const { socket } = useStreamContext()
 
   const [addLoading, setAddLoading] = useState<boolean>(false)
-  const [deleteLoading, setDeleteLoading] = useState<boolean>(false)
+  // const [deleteLoading, setDeleteLoading] = useState<boolean>(false)
 
   // No playlists exist, show add first playlist button
   if (!playlists || !selectedPlaylist) {
@@ -42,9 +42,9 @@ export default function SectionPlaylists() {
   const activePlaylist = playlists.find(playlist => playlist.id === selectedPlaylist)
 
   return (
-    <div className={styles.sectionPlaylists}>
+    <>
       <h2>PLAYLISTS ({playlists.length})</h2>
-      <div className={styles.top}>
+      <div className={styles.playlistNavbar}>
         <div className={styles.playlists}>
           {playlists.map(playlist => (
             <button
@@ -56,9 +56,9 @@ export default function SectionPlaylists() {
         </div>
         <Button style="main" icon="playlist-add" loading={addLoading} onClick={addPlaylist}>Add Playlist</Button>
       </div>
-      {fileTree && activePlaylist && (
-        <PlaylistEditor key={activePlaylist.id} playlist={activePlaylist} fileTree={fileTree} />
+      {activePlaylist && (
+        <PlaylistEditor key={activePlaylist.id} playlist={activePlaylist} />
       )}
-    </div>
+    </>
   )
 }

@@ -219,7 +219,7 @@ export default class TranscoderJob {
     this.isReady = false
     console.log(`CleaningUp - ${this.video.name}`)
 
-    const { cacheVideos, cacheBumpers, finishTranscodeIfSkipped } = Settings.getSettings()
+    const { cacheVideos, cacheBumpers } = Settings.getSettings()
     const keepCache = this.video.isBumper ? cacheBumpers : cacheVideos
 
     if (!keepCache) {

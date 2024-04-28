@@ -1,17 +1,21 @@
 import fs from 'fs/promises'
 import path from 'path'
-import { clients } from '@/server/socket'
+import { socketClients } from '@/server/socketClients'
 import { SocketEvent } from '@/lib/enums'
 import { getClientBumpers } from '@/stream/bumpers'
 import authRoleFromPassword from '@/lib/authRoleFromPassword'
+import isNicknameValid from '@/lib/isNicknameValid'
 import Env from '@/EnvVariables'
-import Player from '@/stream/Player'
 import Logger from '@/lib/Logger'
+import Player from '@/stream/Player'
+import TranscoderQueue from '@/stream/TranscoderQueue'
 import SocketUtils from '@/lib/SocketUtils'
 import type { Socket } from 'socket.io'
-import type { JoinStreamPayload, Client, Viewer, EditPlaylistNamePayload, EditPlaylistVideosPayload } from '@/typings/socket'
-import TranscoderQueue from '@/stream/TranscoderQueue'
+import type { JoinStreamPayload, SocketClient, Viewer, EditPlaylistNamePayload, EditPlaylistVideosPayload, ChatMessage } from '@/typings/socket'
 import Settings from '@/stream/Settings'
+// import Settings from '@/stream/Settings'
+import FileTreeHandler from '@/stream/FileTreeHandler'
+import VoteSkipHandler from '@/stream/VoteSkipHandler'
 
 type EventOptions = {
   allowUnauthenticated?: boolean, // Allow unauthenticated users to run this event (default: false)
@@ -22,64 +26,112 @@ type EventOptions = {
 export const socketEvents: Record<string, EventOptions> = {
   // If client disconnects, remove them from the viewers list and broadcast new list
   'disconnect': { run: (socket) => {
-    const index = clients.findIndex(c => c.socket === socket)
-    if (index !== -1) clients.splice(index, 1)
+    const index = socketClients.findIndex(c => c.socket === socket)
+    if (index === -1) return
+    socketClients.splice(index, 1)
+    VoteSkipHandler.removeVote(socket.id)
     SocketUtils.broadcastViewersList()
   }},
 
   // Message sent from client on first connection, adds them to the viewers list
   [SocketEvent.JoinStream]: { allowUnauthenticated: true, run: (socket, payload: JoinStreamPayload) => {
-    const existingClient = clients.find(c => c.socket === socket)
+    const existingClient = socketClients.find(c => c.socket === socket)
     if (existingClient) return
 
     const authRole = authRoleFromPassword(payload.password)
     if (authRole === null) return
 
-    clients.push({
+    socketClients.push({
       socket: socket,
       secret: payload.secret,
-      username: payload.username,
+      username: isNicknameValid(payload.username) === true ? payload.username : 'Anonymous',
       role: authRole
     })
     SocketUtils.broadcastViewersList()
 
-    const streamInfo = Player.getStreamInfo()
-    socket.emit(SocketEvent.StreamInfo, streamInfo)
+    socket.emit(SocketEvent.StreamInfo, Player.clientStreamInfo)
     socket.emit(SocketEvent.JoinStream, true)
   }},
 
-  // Client changed their username, update the viewers list
-  [SocketEvent.ChangeUsername]: { run: (socket, newUsername: string) => {
-    const client = clients.find(c => c.socket === socket)
-    if (client) client.username = newUsername
-    SocketUtils.broadcastViewersList()
+  // Client changed their nickname
+  // Respond true if successful, string if error
+  [SocketEvent.ChangeNickname]: { run: (socket, newName: unknown) => {
+    try {
+      if (typeof newName !== 'string') throw new Error('Invalid payload.')
+
+      const isValid = isNicknameValid(newName)
+      if (typeof isValid === 'string') throw new Error(isValid)
+
+      const client = socketClients.find(c => c.socket === socket)
+      if (client) client.username = newName
+
+      socket.emit(SocketEvent.ChangeNickname, true)
+      SocketUtils.broadcastViewersList()
+    }
+
+    catch (error: any) {
+      socket.emit(SocketEvent.ChangeNickname, error.message)
+    }
+  }},
+
+  // Client sent a chat message, respond with string if error
+  [SocketEvent.SendChatMessage]: { run: (socket, message: unknown) => {
+    try {
+      if (typeof message !== 'string') throw new Error('Invalid payload.')
+
+      const { chatMaxLength } = Settings.getSettings()
+      if (message.length === 0) throw new Error('Message cannot be empty.')
+      if (message.length > chatMaxLength) throw new Error(`Max message length is ${chatMaxLength} characters.`)
+
+      const client = socketClients.find(c => c.socket === socket)
+      if (!client) throw new Error('Socket not found.') // Should never happen
+
+      const chatMessage: ChatMessage = {
+        username: client.username,
+        role: client.role,
+        message: message
+      }
+      SocketUtils.broadcast(SocketEvent.NewChatMessage, chatMessage)
+    }
+    catch (error: any) {
+      socket.emit(SocketEvent.SendChatMessage, error.message)
+    }
+  }},
+
+  // User votes to skip current video
+  [SocketEvent.VoteSkipAdd]: { run: (socket) => {
+    VoteSkipHandler.addVote(socket.id)
+    socket.emit(SocketEvent.VoteSkipStatus, VoteSkipHandler.hasVoted(socket.id))
+  }},
+
+  // User removes their vote to skip current video
+  [SocketEvent.VoteSkipRemove]: { run: (socket) => {
+    VoteSkipHandler.removeVote(socket.id)
+    socket.emit(SocketEvent.VoteSkipStatus, VoteSkipHandler.hasVoted(socket.id))
   }},
 
   // Admin first admin panel load, send all needed data
-  [SocketEvent.AdminRequestAllData]: { adminOnly: true, run: async (socket) => {
-    const tree = await Player.getVideosFileTree()
+  [SocketEvent.AdminRequestAllData]: { adminOnly: true, run: (socket) => {
     const playlists = Player.clientPlaylists
     const bumpers = getClientBumpers()
 
-    socket.emit(SocketEvent.AdminRequestFileTree, tree)
+    socket.emit(SocketEvent.AdminRequestFileTree, FileTreeHandler.tree)
     socket.emit(SocketEvent.AdminRequestPlaylists, playlists)
     socket.emit(SocketEvent.AdminBumpersList, bumpers)
     socket.emit(SocketEvent.AdminQueueList, Player.queue.map(video => video.clientVideo))
     socket.emit(SocketEvent.AdminTranscodeQueueList, TranscoderQueue.clientTranscodeList)
-    SocketUtils.broadcastStreamInfo()
   }},
 
   // Admin request for the file tree
-  [SocketEvent.AdminRequestFileTree]: { adminOnly: true, run: async (socket) => {
-    const tree = await Player.getVideosFileTree()
-    socket.emit(SocketEvent.AdminRequestFileTree, tree)
+  [SocketEvent.AdminRequestFileTree]: { adminOnly: true, run: (socket) => {
+    socket.emit(SocketEvent.AdminRequestFileTree, FileTreeHandler.tree)
   }},
 
   // Admin request for the playlists
-  [SocketEvent.AdminRequestPlaylists]: { adminOnly: true, run: async (socket) => {
-    const playlists = Player.clientPlaylists
-    socket.emit(SocketEvent.AdminRequestPlaylists, playlists)
-  }},
+  // [SocketEvent.AdminRequestPlaylists]: { adminOnly: true, run: async (socket) => {
+  //   const playlists = Player.clientPlaylists
+  //   socket.emit(SocketEvent.AdminRequestPlaylists, playlists)
+  // }},
 
   // Admin adds a new playlist
   [SocketEvent.AdminAddPlaylist]: { adminOnly: true, run: async (socket, newPlaylistName: string) => {
@@ -103,48 +155,38 @@ export const socketEvents: Record<string, EventOptions> = {
     await Player.setPlaylistVideos(payload.playlistID, payload.newVideoPaths)
   }},
 
-  // Admin sets the active playlist
-  // [SocketEvent.AdminSetActivePlaylist]: { adminOnly: true, run: async (socket, playlistID: string) => {
-  //   const playlist = Player.playlists.find(p => p.id === playlistID) || null
-  //   await Player.setActivePlaylist(playlist)
-  // }},
-
   // Admin uploads a bumper
-  [SocketEvent.AdminUploadBumper]: { adminOnly: true, run: async (socket, payload: any) => {
-    // console.log('AdminUploadBumper:', payload)
-    if (
-      !payload || typeof payload !== 'object' ||
-      !('name' in payload) || typeof payload.name !== 'string' ||
-      !('videoFile' in payload) || typeof payload.videoFile !== 'string'
-    ) {
-      socket.emit(SocketEvent.AdminUploadBumper, 'Invalid payload.')
-      return
-    }
+  // Respond true if successful, string if error
+  [SocketEvent.AdminUploadBumper]: { adminOnly: true, run: async (socket, payload: unknown) => {
+    try {
+      if (!payload || typeof payload !== 'object') throw new Error('Invalid payload.')
+      if (!('name' in payload) || typeof payload.name !== 'string') throw new Error('Invalid payload.')
+      if (!('videoFile' in payload) || typeof payload.videoFile !== 'string') throw new Error('No video selected.')
+      if (payload.name.length <= 0) throw new Error('Bumper title cannot be empty.')
 
-    const bumperExt = payload.videoFile.split(';base64,')[0].split('/')[1]
-    const bumperName = `${payload.name}.${bumperExt}`
-    const bumperPath = path.join(Env.BUMPERS_PATH, bumperName)
-    const bumperExists = await fs.access(bumperPath).then(() => true).catch(() => false)
-    if (bumperExists) {
-      socket.emit(SocketEvent.AdminUploadBumper, 'Bumper already exists.')
-      return
+      const bumperExt = payload.videoFile.split(';base64,')[0].split('/')[1]
+      const bumperName = `${payload.name}.${bumperExt}`
+      const bumperPath = path.join(Env.BUMPERS_PATH, bumperName)
+      const bumperExists = await fs.access(bumperPath).then(() => true).catch(() => false)
+      if (bumperExists) throw new Error('Bumper with that name already exists.')
+  
+      const base64 = payload.videoFile.split(';base64,').pop()
+      if (!base64) throw new Error('Invalid base64 data.')
+      await fs.writeFile(bumperPath, base64, { encoding: 'base64' })
     }
-
-    const base64 = payload.videoFile.split(';base64,').pop()
-    await fs.writeFile(bumperPath, base64, { encoding: 'base64' })
-    SocketUtils.broadcastAdmin(SocketEvent.AdminBumpersList, getClientBumpers())
+    catch (error: any) { socket.emit(SocketEvent.AdminUploadBumper, error.message) }
   }},
 
   // Admin deletes a bumper
+  // Respond true if successful, string if error
   [SocketEvent.AdminDeleteBumper]: { adminOnly: true, run: async (socket, filePath: string) => {
     try {
       if (!filePath.startsWith(Env.BUMPERS_PATH)) throw new Error('File is not in bumpers directory.')
       await fs.rm(filePath)
       Logger.debug(`Admin requested deleted bumper: ${filePath}`)
-      socket.emit(SocketEvent.AdminDeleteBumper, { success: true })
-      SocketUtils.broadcastAdmin(SocketEvent.AdminBumpersList, getClientBumpers())
+      socket.emit(SocketEvent.AdminDeleteBumper, true)
     }
-    catch (error: any) { socket.emit(SocketEvent.AdminDeleteBumper, { error: error.message }) }
+    catch (error: any) { socket.emit(SocketEvent.AdminDeleteBumper, error.message) }
   }},
 
   // Admin pauses the stream
@@ -160,66 +202,5 @@ export const socketEvents: Record<string, EventOptions> = {
   // Admin skips the current video
   [SocketEvent.AdminSkipVideo]: { adminOnly: true, run: () => {
     Player.skip()
-  }},
-
-  // Admin requests the queue list
-  // [SocketEvent.AdminQueueList]: { adminOnly: true, run: () => {
-  //   broadcastAdmin(SocketEvent.AdminQueueList, Player.getQueue())
-  // }},
-
-  [SocketEvent.SettingActivePlaylist]: { adminOnly: true, run: (socket, value?: string) => {
-    if (value === undefined) {
-      socket.emit(SocketEvent.SettingActivePlaylist, Player.listOptionPlaylists)
-      return
-    }
-    const playlist = Player.playlists.find(p => p.id === value) || null
-    Player.setActivePlaylist(playlist)
-  }},
-
-  [SocketEvent.SettingAllowVoteSkip]: { adminOnly: true, run: (socket, value?: boolean) => {
-    if (value === undefined) return socket.emit(SocketEvent.SettingCacheVideos, Settings.getSettings().allowVoteSkip)
-    Settings.setSetting('allowVoteSkip', value)
-    SocketUtils.broadcastAdmin(SocketEvent.SettingAllowVoteSkip, value)
-  }},
-
-  [SocketEvent.SettingVoteSkipPercentage]: { adminOnly: true, run: (socket, value?: number) => {
-    if (value === undefined) return socket.emit(SocketEvent.SettingVoteSkipPercentage, Settings.getSettings().voteSkipPercentage)
-    Settings.setSetting('voteSkipPercentage', value)
-    SocketUtils.broadcastAdmin(SocketEvent.SettingVoteSkipPercentage, value)
-  }},
-
-  [SocketEvent.SettingBumperIntervalMinutes]: { adminOnly: true, run: (socket, value?: number) => {
-    if (value === undefined) return socket.emit(SocketEvent.SettingBumperIntervalMinutes, Settings.getSettings().bumperIntervalMinutes)
-    Settings.setSetting('bumperIntervalMinutes', value)
-    SocketUtils.broadcastAdmin(SocketEvent.SettingBumperIntervalMinutes, value)
-  }},
-
-  [SocketEvent.SettingTargetQueueSize]: { adminOnly: true, run: (socket, value?: number) => {
-    if (value === undefined) return socket.emit(SocketEvent.SettingTargetQueueSize, Settings.getSettings().targetQueueSize)
-    Settings.setSetting('targetQueueSize', value)
-    if (Player.queue.length > value) { // Trim queue if new size is smaller
-      Player.queue.splice(value)
-      SocketUtils.broadcastAdmin(SocketEvent.AdminQueueList, Player.queue.map(video => video.clientVideo))
-      // SocketUtils.broadcastStreamInfo()
-    }
-    SocketUtils.broadcastAdmin(SocketEvent.SettingTargetQueueSize, value)
-  }},
-  
-  [SocketEvent.SettingCacheVideos]: { adminOnly: true, run: (socket, value?: boolean) => {
-    if (value === undefined) return socket.emit(SocketEvent.SettingCacheVideos, Settings.getSettings().cacheVideos)
-    Settings.setSetting('cacheVideos', value)
-    SocketUtils.broadcastAdmin(SocketEvent.SettingCacheVideos, value)
-  }},
-
-  [SocketEvent.SettingCacheBumpers]: { adminOnly: true, run: (socket, value?: boolean) => {
-    if (value === undefined) return socket.emit(SocketEvent.SettingCacheBumpers, Settings.getSettings().cacheBumpers)
-    Settings.setSetting('cacheBumpers', value)
-    SocketUtils.broadcastAdmin(SocketEvent.SettingCacheBumpers, value)
-  }},
-
-  [SocketEvent.SettingFinishTranscode]: { adminOnly: true, run: (socket, value?: boolean) => {
-    if (value === undefined) return socket.emit(SocketEvent.SettingFinishTranscode, Settings.getSettings().finishTranscodeIfSkipped)
-    Settings.setSetting('finishTranscodeIfSkipped', value)
-    SocketUtils.broadcastAdmin(SocketEvent.SettingFinishTranscode, value)
   }},
 }
