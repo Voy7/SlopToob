@@ -1,25 +1,12 @@
-// import { identicon } from 'minidenticons'
-// import WebUtils from '#src/classes/WebUtils'
+import { minidenticon } from 'minidenticons'
 
-// function handler(
-//   request: Request,
-//   { params }: { params: { id: string } }
-// ) {
-//   const { id } = params
+function handler(request: Request, { params }: { params: { id: string } }) {
+  const identiconSVG = minidenticon(params.id)
 
-//   const identiconSVG = identicon(id)
+  const headers = new Headers()
+  headers.set('Content-Type', 'image/svg+xml')
 
-//   const headers = new Headers()
-//   headers.set('Content-Type', 'image/svg+xml')
+  return new Response(identiconSVG, { headers })
+}
 
-//   return new Response(identiconSVG, {
-//     headers: WebUtils.addCORS(headers)
-//   })
-// }
-
-// export { handler as GET, handler as POST }
-
-// // Allow CORS preflight requests
-// export function OPTIONS() {
-//   return WebUtils.sendCORS()
-// }
+export { handler as GET, handler as POST }

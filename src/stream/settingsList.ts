@@ -1,3 +1,6 @@
+import { SocketEvent } from '@/lib/enums'
+import SocketUtils from '@/lib/SocketUtils'
+// import Player from '@/stream/Player'
 import type { ListOption } from '@/typings/types'
 
 type Setting = {
@@ -24,9 +27,11 @@ export const settingsList = {
   },
 
   // Enable vote skipping & percentage of votes needed to skip
-  allowVoteSkip: { default: true },
-  voteSkipPercentage: { default: 0.5 },
-  voteSkipDelaySeconds: { default: 10 },
+  enableVoteSkip: { default: true, onChange: voteSkipChange },
+  voteSkipPercentage: { default: 50, onChange: voteSkipChange },
+  voteSkipDelaySeconds: { default: 10, onChange: voteSkipChange },
+  canVoteSkipIfBumper: { default: false, onChange: voteSkipChange },
+  canVoteSkipIfPaused: { default: false, onChange: voteSkipChange },
 
   // Minimum time between bumpers in minutes
   bumpersEnabled: { default: true },
@@ -44,6 +49,9 @@ export const settingsList = {
   cacheVideos: { default: true },
   cacheBumpers: { default: true },
 
+  // Max transcoding jobs that can run at once
+  maxTranscodingJobs: { default: 2 },
+
   // How long to show video player errors for in seconds
   errorDisplaySeconds: { default: 5 },
 
@@ -55,5 +63,16 @@ export const settingsList = {
   // Chat related settings
   chatMaxLength: { default: 120 },
 
+  // Chat event settings
+  sendJoinedStream: { default: true },
+  sendLeftStream: { default: true },
+  sendChangedNickname: { default: true },
+  sendVoteSkipPassed: { default: true },
+
   // ...
 } satisfies Record<string, Setting>
+
+async function voteSkipChange() {
+  const { default: VoteSkipHandler } = await import('@/stream/VoteSkipHandler')
+  VoteSkipHandler.resyncChanges()
+}

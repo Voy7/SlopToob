@@ -14,7 +14,7 @@ type ContextProps = {
   nickname: string, setNickname: React.Dispatch<React.SetStateAction<string>>,
   showNicknameModal: boolean, setShowNicknameModal: React.Dispatch<React.SetStateAction<boolean>>,
   showAdminModal: boolean, setShowAdminModal: React.Dispatch<React.SetStateAction<boolean>>,
-  chatMessages: (ChatMessage | { error: string })[], setChatMessages: React.Dispatch<React.SetStateAction<(ChatMessage | { error: string })[]>>,
+  chatMessages: (ChatMessage & { time: number })[], setChatMessages: React.Dispatch<React.SetStateAction<(ChatMessage & { time: number })[]>>,
   streamInfo: StreamInfo,
   lastStreamUpdateTimestamp: number | null,
   socket: Socket,
@@ -33,7 +33,7 @@ export function StreamProvider({ authUser, cookieUsername, children }:Props) {
   const [nickname, setNickname] = useState<string>(cookieUsername)
   const [showNicknameModal, setShowNicknameModal] = useState<boolean>(nickname === 'Anonymous')
   const [showAdminModal, setShowAdminModal] = useState<boolean>(false)
-  const [chatMessages, setChatMessages] = useState<(ChatMessage | { error: string })[]>([])
+  const [chatMessages, setChatMessages] = useState<(ChatMessage & { time: number })[]>([])
   const [socket, setSocket] = useState<Socket | null>(null)
 
   const [socketSecret] = useState(generateSecret())
@@ -76,7 +76,7 @@ export function StreamProvider({ authUser, cookieUsername, children }:Props) {
     })
 
     socket.on(SocketEvent.NewChatMessage, (message: ChatMessage) => {
-      setChatMessages(messages => [message, ...messages])
+      setChatMessages(messages => [{ ...message, time: Date.now() }, ...messages])
     })
 
     return () => { socket.disconnect() }

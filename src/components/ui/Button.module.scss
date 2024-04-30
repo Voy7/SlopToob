@@ -28,6 +28,14 @@
     gap: 3px;
     font-size: inherit;
     color: inherit;
+
+    span {
+      animation: fadeIn 300ms ease-in-out;
+      @keyframes fadeIn {
+        0% { opacity: 0; }
+        100% { opacity: 1; }
+      }
+    }
   }
 
   .loadingContainer {
@@ -53,9 +61,8 @@
 .main {
   color: white;
   background: rgb(100, 100, 255);
-  border: 2px solid transparent;
+  border: 1px solid rgb(100, 100, 255);
   &:hover { background: rgb(80, 80, 255); }
-  &:active { translate: 0 2px; }
   &.disabled {
     opacity: 0.75;
   }
@@ -66,6 +73,14 @@
   background: var(--bg-color-2);
   border: 1px solid var(--border-color-1);
   &:hover { color: white; background: rgb(50, 50, 50); }
+  &.disabled { background: var(--bg-color-2); }
+}
+
+.normal-highlight {
+  color: rgb(220, 220, 220);
+  background: var(--bg-color-2);
+  border: 1px solid magenta;
+  &:hover { color: white; background: rgb(50, 50, 50); }
 }
 
 .danger {
@@ -74,14 +89,3 @@
   border: 1px solid var(--border-color-1);
   &:hover { color: white; background: rgb(255, 95, 95); }
 }
-
-.action-normal,
-.action-danger {
-  padding: 3px;
-  color: var(--text-color-1);
-  background: var(--bg-color-2);
-  border: 1px solid var(--border-color-2);
-  border-radius: 5px;
-}
-.action-normal:hover { background: rgb(115, 99, 168); }
-.action-danger:hover { background: rgb(255, 127, 127); }

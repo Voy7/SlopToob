@@ -167,11 +167,11 @@ export default new class Player {
   }
 
   get clientStreamOptions(): StreamOptions {
-    const { allowVoteSkip } = Settings.getSettings()
+    const { enableVoteSkip } = Settings.getSettings()
 
     return {
       voteSkip: {
-        isEnabled: allowVoteSkip,
+        isEnabled: enableVoteSkip,
         isAllowed: VoteSkipHandler.isAllowed,
         allowedInSeconds: VoteSkipHandler.allowedInSeconds,
         currentCount: VoteSkipHandler.currentCount,

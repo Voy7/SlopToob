@@ -1,7 +1,6 @@
 import type { AuthRole, JobState } from '@/lib/enums'
 import type { Socket } from 'socket.io'
-import { StreamState } from '@/lib/enums'
-import path from 'path';
+import { StreamState, ChatType } from '@/lib/enums'
 
 export type StreamPlaying = {
   state: StreamState.Playing,
@@ -64,8 +63,13 @@ export type Viewer = {
 }
 
 export type ChatMessage = {
+  type: ChatType.UserChat,
   username: string,
   role: AuthRole,
+  image: string,
+  message: string
+} | {
+  type: Exclude<ChatType, ChatType.UserChat>,
   message: string
 }
 

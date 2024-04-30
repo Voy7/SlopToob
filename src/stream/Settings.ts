@@ -94,13 +94,13 @@ export default new class Settings {
 
     const setting = settingsList[key]
 
-    if ('onChange' in setting) await setting.onChange(value as never)
-
+    
     const clientValue = ('clientValue' in setting) ? await setting.clientValue() : value
     SocketUtils.broadcastAdmin(`setting.${key}` as any, clientValue)
-
+    
     console.log(`Updating setting ${key} to ${value}`)
     this.settings[key] = value as never // This is a hack to make TS happy, because it doesn't understand that value is valid
+    if ('onChange' in setting) await setting.onChange(value as never)
     await prisma.settings.update({
       where: { key },
       data: { value: value.toString() }

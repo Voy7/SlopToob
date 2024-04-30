@@ -45,14 +45,9 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
     
     // If hls's current source is the same as the new source, don't reload (avoids flickering)
     if (sourceURL === streamInfo.path) return
+    
     setSourceURL(streamInfo.path)
     hls.loadSource(streamInfo.path)
-
-    const video = videoRef.current!
-
-    hls.on(Hls.Events.MANIFEST_PARSED, () => {
-      video.currentTime = streamInfo.currentSeconds
-    })
   }, [streamInfo, sourceURL])
 
   // Handle video element events

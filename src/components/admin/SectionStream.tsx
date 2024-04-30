@@ -9,8 +9,6 @@ import QueueList from '@/components/admin/QueueList'
 
 export default function SectionStream() {
   const activePlaylist = useListOption('activePlaylistID')
-  const voteSkipEnabled = useToggleOption('allowVoteSkip')
-  const voteSkipPercentage = useNumberOption('voteSkipPercentage')
   const targetQueueSize = useNumberOption('targetQueueSize')
 
   return (
@@ -24,12 +22,6 @@ export default function SectionStream() {
         <Description>Playlist that will be used for the stream.</Description>
       </SettingGroup>
       <NumberOption label="Target Queue Size" type="integer" {...targetQueueSize} />
-      <SettingGroup>
-        <Header icon="skip">VOTE SKIPPING</Header>
-        <ToggleOption label="Enable Vote Skipping" {...voteSkipEnabled} />
-        <NumberOption label="Vote Skip Percentage" type="percentage" {...voteSkipPercentage} />
-        <Description>Allow users to vote to skip the current video.</Description>
-      </SettingGroup>
     </>
   )
 }

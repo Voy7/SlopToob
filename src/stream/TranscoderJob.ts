@@ -19,14 +19,12 @@ export default class TranscoderJob {
   duration: number = 0
   progressPercentage: number = 0
   private ffmpegCommand: FfmpegCommand = null as any // Typescript is dumb, this is initialized in constructor
+  private onInitializedCallbacks: Array<() => void> = []
   private onStreamableReadyCallbacks: Array<() => void> = []
   private onTranscodeFinishedCallbacks: Array<() => void> = []
   private onErrorCallbacks: Array<(error: string) => void> = []
   private onProgressCallbacks: Array<(percentage: number) => void> = []
-  private initializedCallback: (() => void) | null = null
   private cleanUpCallback: (() => void) | null = null
-  // private ffmpegCmdReady: boolean = false
-  // private isKilling: boolean = false
   private m3u8Path: string
 
   private _state: JobState = JobState.Initializing
@@ -135,12 +133,14 @@ export default class TranscoderJob {
         return
       }
 
-      try { await this.checkIfComplete() }
-      catch (error) {}
-
-      // if (this.state !== JobState.Finished) this.state = JobState.Idle
-      this.state = JobState.Idle
-      if (this.initializedCallback) this.initializedCallback()
+      try {
+        await this.checkIfComplete()
+        this.resolveInitializedCallbacks()
+      }
+      catch (_) {
+        this.state = JobState.Idle
+        this.resolveInitializedCallbacks()
+      }
     }
     asyncInit()
   }
@@ -173,7 +173,7 @@ export default class TranscoderJob {
     }
 
     if (this.state === JobState.Initializing) {
-      this.initializedCallback = () => this.activate()
+      this.onInitialized(() => this.activate())
     }
 
     if (this.state === JobState.CleaningUp) {
@@ -215,8 +215,8 @@ export default class TranscoderJob {
       return // Cleanup will be called again when ffmpeg command finishes
     }
 
-    this.state = JobState.CleaningUp
     this.isReady = false
+    this.state = JobState.CleaningUp
     console.log(`CleaningUp - ${this.video.name}`)
 
     const { cacheVideos, cacheBumpers } = Settings.getSettings()
@@ -231,7 +231,8 @@ export default class TranscoderJob {
 
     if (this.videos.length > 0) {
       this.initialize()
-      this.activate()
+      // this.activate()
+      this.cleanUpCallback?.()
       return
     }
 
@@ -242,7 +243,7 @@ export default class TranscoderJob {
     // this.state = JobState.
     // console.log(`Finished - ${this.video.name}`)
     this.initialize()
-    this.cleanUpCallback?.()
+    // this.cleanUpCallback?.()
 
     // console.log('cleanup()'.yellow, this.videos.length)
     // if (this.videos.length > 0) {
@@ -251,36 +252,37 @@ export default class TranscoderJob {
     // }
   }
 
+  onInitialized(callback: () => void) {
+    if (this.state !== JobState.Initializing) return callback()
+    this.onInitializedCallbacks.push(callback)
+  }
+
   // Called when the video has been transcoded enough to start playing while the rest is still transcoding
   onStreamableReady(callback: () => void) {
-    if (this.isReady) {
-      callback()
-      return
-    }
+    if (this.isReady) return callback()
     this.onStreamableReadyCallbacks.push(callback)
   }
 
   // Called when the transcode is fully finished, with no errors
   onTranscodeFinished(callback: () => void) {
-    if (this.state === JobState.Finished) {
-      callback()
-      return
-    }
+    if (this.state === JobState.Finished) return callback()
     this.onTranscodeFinishedCallbacks.push(callback)
   }
 
   // Called if an error occurs during transcoding, no other callbacks will be called
   onError(callback: (error: string) => void) {
-    if (this.state === JobState.Errored && this.error) {
-      callback(this.error)
-      return
-    }
+    if (this.state === JobState.Errored && this.error) return callback(this.error)
     this.onErrorCallbacks.push(callback)
   }
 
   // Called when progress is made during transcoding
   onProgress(callback: (percentage: number) => void) {
     this.onProgressCallbacks.push(callback)
+  }
+
+  private resolveInitializedCallbacks() {
+    for (const callback of this.onInitializedCallbacks) callback()
+    this.onInitializedCallbacks = []
   }
 
   private resolveStreamableReadyCallbacks() {
@@ -290,12 +292,12 @@ export default class TranscoderJob {
 
   private resolveTranscodeFinishedCallbacks() {
     for (const callback of this.onTranscodeFinishedCallbacks) callback()
-    this.onTranscodeFinishedCallbacks = []
+    // this.onTranscodeFinishedCallbacks = []
   }
 
   private resolveErrorCallbacks() {
     for (const callback of this.onErrorCallbacks) callback(this.error as string)
-    this.onErrorCallbacks = []
+    // this.onErrorCallbacks = []
   }
 
   // Private callback for when ffmpeg command has been created
@@ -313,8 +315,8 @@ export default class TranscoderJob {
 
     this.state = JobState.Finished
     this.isReady = true
-    for (const callback of this.onStreamableReadyCallbacks) callback()
-    for (const callback of this.onTranscodeFinishedCallbacks) callback()
+    this.resolveStreamableReadyCallbacks()
+    this.resolveTranscodeFinishedCallbacks()
   }
 
 

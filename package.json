@@ -21,6 +21,7 @@
     "fluent-ffmpeg": "^2.1.2",
     "hls-server": "^1.5.0",
     "hls.js": "^1.5.7",
+    "minidenticons": "^4.2.1",
     "next": "^14.1.4",
     "next-auth": "^4.24.7",
     "react": "^18",

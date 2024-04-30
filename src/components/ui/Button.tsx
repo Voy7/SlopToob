@@ -6,9 +6,8 @@ import styles from './Button.module.scss'
 type ButtonStyles =
   | 'main'
   | 'normal'
+  | 'normal-highlight'
   | 'danger'
-  | 'action-normal'
-  | 'action-danger'
 
 type Props = {
   style: ButtonStyles,
@@ -37,8 +36,8 @@ export default function Buttons({ style, onClick, active, loading, isSubmit, ico
     >
       <>
         <div className={styles.text}>
-          { icon && <Icon name={icon} /> }
-          { children }
+          {icon && <Icon name={icon} />}
+          <div>{children}</div>
         </div>
         { loading && (
           <div className={styles.loadingContainer}>

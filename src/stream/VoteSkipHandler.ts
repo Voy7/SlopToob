@@ -1,30 +1,44 @@
+import Logger from '@/lib/Logger'
 import Settings from '@/stream/Settings'
 import Player from '@/stream/Player'
 import SocketUtils from '@/lib/SocketUtils'
 import { socketClients } from '@/server/socketClients'
-import { SocketEvent } from '@/lib/enums'
+import { ChatType, SocketEvent, VideoState } from '@/lib/enums'
+import { ChatMessage } from '@/typings/socket'
 
 export default new class VoteSkipHandler {
-  isAllowed: boolean = false
+  private _isAllowed: boolean = false
   private voterIDs: string[] = []
-  private allowedInTimeout: NodeJS.Timeout | undefined = undefined
+  private allowedInTimeout: NodeJS.Timeout | null = null
   private allowedInDate: Date | null = null
 
+  get isAllowed(): boolean {
+    const { canVoteSkipIfBumper, canVoteSkipIfPaused } = Settings.getSettings()
+    if (Player.playing?.isBumper && !canVoteSkipIfBumper) return false
+    if (Player.playing?.state === VideoState.Paused && !canVoteSkipIfPaused) return false
+    return this._isAllowed
+  }
+
   enable() {
-    if (this.isAllowed || this.allowedInTimeout) return
+    Logger.debug('[VoteSkipHandler] enabled', this._isAllowed, this.allowedInTimeout)
+    if (this._isAllowed || this.allowedInTimeout) return
     const { voteSkipDelaySeconds } = Settings.getSettings()
     this.allowedInDate = new Date()
     this.allowedInTimeout = setTimeout(() => {
-      this.isAllowed = true
+      this._isAllowed = true
       this.allowedInDate = null
       SocketUtils.broadcast(SocketEvent.StreamInfo, Player.clientStreamInfo)
     }, voteSkipDelaySeconds * 1000)
   }
 
   disable() {
-    clearTimeout(this.allowedInTimeout)
+    Logger.debug('[VoteSkipHandler] disabled')
+    if (this.allowedInTimeout) {
+      clearTimeout(this.allowedInTimeout)
+      this.allowedInTimeout = null
+    }
     this.allowedInDate = null
-    this.isAllowed = false
+    this._isAllowed = false
     this.voterIDs = []
   }
 
@@ -49,11 +63,16 @@ export default new class VoteSkipHandler {
 
   get requiredCount(): number {
     const { voteSkipPercentage } = Settings.getSettings()
-    const required = Math.ceil(socketClients.length * (voteSkipPercentage / 100))
+    const required = Math.ceil(socketClients.length * voteSkipPercentage / 100)
+    console.log('required', required)
     return Math.max(1, required)
   }
 
   get allowedInSeconds(): number {
+    const { canVoteSkipIfBumper, canVoteSkipIfPaused } = Settings.getSettings()
+    if (Player.playing?.isBumper && !canVoteSkipIfBumper) return -1
+    if (Player.playing?.state === VideoState.Paused && !canVoteSkipIfPaused) return -1
+
     if (!this.allowedInDate) return -1
     const { voteSkipDelaySeconds } = Settings.getSettings()
     const passedSeconds = (Date.now() - this.allowedInDate.getTime()) / 1000
@@ -63,7 +82,28 @@ export default new class VoteSkipHandler {
   private processVotes() {
     SocketUtils.broadcast(SocketEvent.StreamInfo, Player.clientStreamInfo)
     if (this.currentCount < this.requiredCount) return
+    this.passVote()
+  }
+
+  private passVote() {
+    const { sendVoteSkipPassed } = Settings.getSettings()
+    if (sendVoteSkipPassed) {
+      const chatMessage: ChatMessage = {
+        type: ChatType.VoteSkipPassed,
+        message: `Vote skip passed! Skipping video... (${this.currentCount}/${this.requiredCount})`,
+      }
+      SocketUtils.broadcast(SocketEvent.NewChatMessage, chatMessage)
+    }
+
     this.voterIDs = []
     Player.skip()
+
+  }
+
+  // Called when settings change, client join/leaves, etc
+  resyncChanges() {
+    SocketUtils.broadcast(SocketEvent.StreamInfo, Player.clientStreamInfo)
+    if (this.currentCount < this.requiredCount) return
+    this.passVote()
   }
 }

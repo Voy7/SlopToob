@@ -59,3 +59,12 @@ export const enum JobState {
   Finished,
   Errored
 }
+
+export const enum ChatType {
+  UserChat,
+  Error,
+  Joined,
+  Left,
+  NicknameChange,
+  VoteSkipPassed
+}

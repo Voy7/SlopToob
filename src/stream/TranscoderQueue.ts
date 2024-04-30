@@ -1,15 +1,10 @@
-import fs from 'fs'
-import path from 'path'
-import ffmpeg from 'fluent-ffmpeg'
 import Logger from '@/lib/Logger'
-import type { FfmpegCommand } from 'fluent-ffmpeg'
+import Settings from '@/stream/Settings'
 import TranscoderJob from '@/stream/TranscoderJob'
-import { TranscodeClientVideo } from '@/typings/socket'
 import SocketUtils from '@/lib/SocketUtils'
 import { JobState, SocketEvent } from '@/lib/enums'
+import type { TranscodeClientVideo } from '@/typings/socket'
 import type Video from '@/stream/Video'
-
-const MAX_TRANSCODING_JOBS = 2
 
 // Handles all transcoding operations
 // The reason why this logic is not in the Video class is because there can be
@@ -34,16 +29,13 @@ export default new class TranscoderQueue {
     SocketUtils.broadcastAdmin(SocketEvent.AdminTranscodeQueueList, this.clientTranscodeList)
     const transcodingJobs = this.jobs.filter(item => item.state === JobState.Transcoding)
     // console.log(`job1 `, transcodingJobs)
-    if (transcodingJobs.length >= MAX_TRANSCODING_JOBS) return
+    if (transcodingJobs.length >= Settings.getSettings().maxTranscodingJobs) return
 
     const nextJob = this.jobs.find(item => item.state === JobState.AwaitingTranscode)
     if (!nextJob) return
 
     await nextJob.transcode()
-    SocketUtils.broadcastAdmin(SocketEvent.AdminTranscodeQueueList, this.clientTranscodeList)
 
-    // const nextJobIndex = this.jobs.findIndex(item => item === nextJob)
-    // this.jobs.splice(nextJobIndex, 1)
     this.processQueue()
   }
 

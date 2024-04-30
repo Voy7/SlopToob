@@ -31,9 +31,11 @@ export default class Video {
     this.job = TranscoderQueue.newJob(this)
     
     this.job.onStreamableReady(() => {
-      console.log(`onStreamableReady() - ${this.name}`.cyan)
+      console.log(`onStreamableReady() - ${this.name} - ${this.state}`.cyan)
       this.durationSeconds = this.job.duration
-      if (this.state === State.Preparing) this.state = State.Ready
+      // if (this.state === State.Preparing) this.state = State.Ready
+      // this.state = State.Ready
+      if (this.state !== State.Playing && this.state !== State.Paused && this.state !== State.Errored) this.state = State.Ready
       this.resolveReadyCallbacks()
     })
 

@@ -1,7 +1,7 @@
 import fs from 'fs/promises'
 import path from 'path'
 import { socketClients } from '@/server/socketClients'
-import { SocketEvent } from '@/lib/enums'
+import { ChatType, SocketEvent } from '@/lib/enums'
 import { getClientBumpers } from '@/stream/bumpers'
 import authRoleFromPassword from '@/lib/authRoleFromPassword'
 import isNicknameValid from '@/lib/isNicknameValid'
@@ -26,11 +26,22 @@ type EventOptions = {
 export const socketEvents: Record<string, EventOptions> = {
   // If client disconnects, remove them from the viewers list and broadcast new list
   'disconnect': { run: (socket) => {
-    const index = socketClients.findIndex(c => c.socket === socket)
-    if (index === -1) return
-    socketClients.splice(index, 1)
+    const existingClient = socketClients.find(c => c.socket === socket)
+    if (!existingClient) return
+    socketClients.splice(socketClients.indexOf(existingClient), 1)
+
     VoteSkipHandler.removeVote(socket.id)
+    VoteSkipHandler.resyncChanges()
     SocketUtils.broadcastViewersList()
+
+    const { sendLeftStream } = Settings.getSettings()
+    if (sendLeftStream) {
+      const chatMessage: ChatMessage = {
+        type: ChatType.Left,
+        message: `${existingClient.username} left the stream.`
+      }
+      SocketUtils.broadcast(SocketEvent.NewChatMessage, chatMessage)
+    }
   }},
 
   // Message sent from client on first connection, adds them to the viewers list
@@ -47,10 +58,21 @@ export const socketEvents: Record<string, EventOptions> = {
       username: isNicknameValid(payload.username) === true ? payload.username : 'Anonymous',
       role: authRole
     })
+    
+    VoteSkipHandler.resyncChanges()
     SocketUtils.broadcastViewersList()
 
     socket.emit(SocketEvent.StreamInfo, Player.clientStreamInfo)
     socket.emit(SocketEvent.JoinStream, true)
+
+    const { sendJoinedStream } = Settings.getSettings()
+    if (sendJoinedStream) {
+      const chatMessage: ChatMessage = {
+        type: ChatType.Joined,
+        message: `${payload.username} joined the stream.`
+      }
+      SocketUtils.broadcast(SocketEvent.NewChatMessage, chatMessage)
+    }
   }},
 
   // Client changed their nickname
@@ -63,10 +85,22 @@ export const socketEvents: Record<string, EventOptions> = {
       if (typeof isValid === 'string') throw new Error(isValid)
 
       const client = socketClients.find(c => c.socket === socket)
-      if (client) client.username = newName
+      if (!client) throw new Error('Socket not found.') // Should never happen
+
+      const oldName = client.username
+      client.username = newName
 
       socket.emit(SocketEvent.ChangeNickname, true)
       SocketUtils.broadcastViewersList()
+
+      const { sendChangedNickname } = Settings.getSettings()
+      if (sendChangedNickname) {
+        const chatMessage: ChatMessage = {
+          type: ChatType.NicknameChange,
+          message: `${oldName} changed their nickname to: ${newName}`
+        }
+        SocketUtils.broadcast(SocketEvent.NewChatMessage, chatMessage)
+      }
     }
 
     catch (error: any) {
@@ -87,8 +121,10 @@ export const socketEvents: Record<string, EventOptions> = {
       if (!client) throw new Error('Socket not found.') // Should never happen
 
       const chatMessage: ChatMessage = {
+        type: ChatType.UserChat,
         username: client.username,
         role: client.role,
+        image: `/api/avatar/${client.socket.id}`, // Not sure if socket.id in sensitive, might need to change
         message: message
       }
       SocketUtils.broadcast(SocketEvent.NewChatMessage, chatMessage)

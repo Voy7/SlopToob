@@ -2,14 +2,22 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useStreamContext } from '@/contexts/StreamContext'
-import { AuthRole, SocketEvent } from '@/lib/enums'
+import { AuthRole, ChatType, SocketEvent } from '@/lib/enums'
+import Image from 'next/image'
 import Icon from '@/components/ui/Icon'
 import styles from './Chat.module.scss'
 
 // Name colors for different roles
 const roleColors = {
-  [AuthRole.Normal]: 'gray',
-  [AuthRole.Admin]: 'red',
+  [AuthRole.Normal]: '#00ff73',
+  [AuthRole.Admin]: '#ff4545',
+}
+
+const eventIcons = {
+  [ChatType.Joined]: <Icon name="user" />,
+  [ChatType.Left]: <Icon name="user" />,
+  [ChatType.NicknameChange]: <Icon name="edit" />,
+  [ChatType.VoteSkipPassed]: <Icon name="skip" />,
 }
 
 export default function Chat() {
@@ -30,7 +38,7 @@ export default function Chat() {
   // If message received, it's an error
   useEffect(() => {
     socket.on(SocketEvent.SendChatMessage, (error: string) => {
-      setChatMessages(messages => [{ error }, ...messages])
+      setChatMessages(messages => [{ type: ChatType.Error, message: error, time: Date.now() }, ...messages])
     })
     return () => { socket.off(SocketEvent.SendChatMessage) }
   }, [])
@@ -55,20 +63,42 @@ export default function Chat() {
         </div>
         <button className={styles.usernameButton} onClick={() => setShowNicknameModal(true)} title="Change Nickname">
           {nickname}<Icon name="edit" />
-      </button>
+        </button>
       </div>
       <div className={styles.messages} ref={messagesRef}>
-        {chatMessages.length > 0 ? chatMessages.map((message, index) => {
-          if ('error' in message) {
-            return <p key={chatMessages.length - index} className={styles.error}>{message.error}</p>
+        {chatMessages.length > 0 ? chatMessages.map((chat, index) => {
+          // Timestamp format: HH:MM AM/PM
+          const timestamp = new Date(chat.time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+          const fullTimestamp = new Date(chat.time).toLocaleString('en-US')
+
+          // Normal user chat message
+          if (chat.type === ChatType.UserChat) {
+            const nameColor = roleColors[chat.role]
+            return (
+              <div key={chatMessages.length - index} className={styles.message}>
+                {/* <img src={chat.image} alt="" className={styles.image} /> */}
+                <p><span style={{ color: nameColor }}>{chat.username}:</span> {chat.message}</p>
+                <span className={styles.timestamp} title={fullTimestamp}>{timestamp}</span>
+              </div>
+            )
           }
 
-          // Normal chat message
-          const nameColor = roleColors[message.role]
+          // Is error, use different styling
+          if (chat.type === ChatType.Error) {
+            return (
+              <div key={chatMessages.length - index} className={styles.error}>
+                <p>{chat.message}</p>
+              </div>
+            )
+          }
+
+          // Chat event message
+          const icon = eventIcons[chat.type]
           return (
-            <p key={chatMessages.length - index} className={styles.message}>
-              <span style={{ color: nameColor }}>{message.username}:</span> {message.message}
-            </p>
+            <div key={chatMessages.length - index} className={styles.event}>
+              <p>{icon && icon}{chat.message}</p>
+              <span className={styles.timestamp} title={fullTimestamp}>{timestamp}</span>
+            </div>
           )
         }) : (
           <div className={styles.noMessages}>
