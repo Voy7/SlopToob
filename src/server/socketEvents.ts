@@ -209,6 +209,7 @@ export const socketEvents: Record<string, EventOptions> = {
       const base64 = payload.videoFile.split(';base64,').pop()
       if (!base64) throw new Error('Invalid base64 data.')
       await fs.writeFile(bumperPath, base64, { encoding: 'base64' })
+      socket.emit(SocketEvent.AdminUploadBumper, true)
     }
     catch (error: any) { socket.emit(SocketEvent.AdminUploadBumper, error.message) }
   }},

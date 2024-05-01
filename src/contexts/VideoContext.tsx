@@ -22,6 +22,7 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
   const [isPaused, setIsPaused] = useState<boolean>(true)
   const [volume, setVolume] = useState<number>(100)
   const [showControls, setShowControls] = useState<boolean>(false)
+  const [prevState, setPrevState] = useState<StreamState>(StreamState.Loading)
 
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -84,12 +85,15 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const video = videoRef.current!
 
+    if (streamInfo.state === prevState) return
+    setPrevState(streamInfo.state)
+
     if (streamInfo.state === StreamState.Playing) {
       video.play().catch(() => {})
       return
     }
     video.pause()
-  }, [streamInfo, lastStreamUpdateTimestamp])
+  }, [streamInfo, prevState, lastStreamUpdateTimestamp])
 
   // Pause/unpause video when background is clicked
   function backgroundClick() {
