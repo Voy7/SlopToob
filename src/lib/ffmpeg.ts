@@ -22,7 +22,7 @@ export const transcodeArgs = [
   '-b:a 192k',
   '-map 0:a:0',
   '-start_number 0',
-  '-hls_time 10',
+  '-hls_time 5',
   '-hls_list_size 0',
   '-f hls'
 ]

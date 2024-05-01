@@ -5,6 +5,7 @@ import { StreamProvider } from '@/contexts/StreamContext'
 import { AuthRole } from '@/lib/enums'
 import dynamic from 'next/dynamic'
 import { AdminProvider } from '@/contexts/AdminContext'
+import AuthExpired from '@/components/stream/AuthExpired'
 import Header from '@/components/stream/Header'
 import Video from '@/components/stream/Video'
 import Chat from '@/components/stream/Chat'
@@ -19,7 +20,7 @@ const AdminModal = dynamic(() => import('@/components/admin/AdminModal'), { ssr:
 export default async function StreamPage() {
   const session = await getServerSession(authOptions)
   const authUser = session?.user
-  if (!authUser) return null
+  if (!authUser) return <AuthExpired />
 
   const cookieStore = cookies()
   const username = cookieStore.get('nickname')?.value
