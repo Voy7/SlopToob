@@ -11,9 +11,9 @@ export default function SectionBumpers() {
 
   return (
     <>
-      <h2>BUMPERS</h2>
+      <h2>Bumpers</h2>
       <SettingGroup>
-        <Header icon="bumper">BUMPER SETTINGS</Header>
+        <Header icon="bumper">Bumper Settings</Header>
         <ToggleOption label="Bumpers Enabled" {...bumpersEnabled} />
         <NumberOption label="Bumper Interval in Minutes" type="float" {...bumperInterval} />
         <Description>Minimum time between bumpers in minutes.</Description>

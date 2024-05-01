@@ -43,7 +43,7 @@ export default function SectionPlaylists() {
 
   return (
     <>
-      <h2>PLAYLISTS ({playlists.length})</h2>
+      <h2>Playlists ({playlists.length})</h2>
       <div className={styles.playlistNavbar}>
         <div className={styles.playlists}>
           {playlists.map(playlist => (

@@ -1,60 +1,49 @@
-.queueList {
-  .queueHeader {
-    margin-bottom: 0.5rem;
-    font-weight: normal;
-    text-transform: uppercase;
-    font-size: 0.9rem;
-    color: var(--text-color-3);
-    cursor: default;
-  }
-  
-  .items {
-    display: flex;
-    flex-direction: column;
-    border: 1px solid var(--border-color-1);
+.queueItems {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-color-1);
 
-    .queueItem {
+  .queueItem {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem;
+    cursor: default;
+    animation: itemFadeIn 300ms ease-in-out forwards;
+
+    @keyframes itemFadeIn {
+      from { opacity: 0; transform: translateY(1rem); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    &:hover { background: var(--bg-color-2); }
+
+    .number {
+      font-size: 0.9rem;
+      color: var(--text-color-3);
+    }
+
+    .column {
       display: flex;
-      justify-content: flex-start;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .name { font-size: 1rem; }
+
+    .state {
+      display: flex;
       align-items: center;
-      gap: 0.75rem;
-      padding: 0.5rem;
-      cursor: default;
-      animation: itemFadeIn 300ms ease-in-out forwards;
-  
-      @keyframes itemFadeIn {
-        from { opacity: 0; transform: translateY(1rem); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-  
-      &:hover { background: var(--bg-color-2); }
-  
-      .number {
-        font-size: 0.9rem;
-        color: var(--text-color-3);
-      }
-  
-      .column {
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-      }
-  
-      .name { font-size: 1rem; }
-  
-      .state {
-        display: flex;
-        align-items: center;
-        gap: 0.35em;
-        font-size: 0.9rem;
-        color: var(--text-color-2);
-  
-        .dot {
-          width: 0.5em;
-          height: 0.5em;
-          border-radius: 50%;
-          background: white;
-        }
+      gap: 0.35em;
+      font-size: 0.9rem;
+      color: var(--text-color-2);
+
+      .dot {
+        width: 0.5em;
+        height: 0.5em;
+        border-radius: 50%;
+        background: white;
       }
     }
   }

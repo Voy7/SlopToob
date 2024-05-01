@@ -1,7 +1,5 @@
 import CredentialsProvider from 'next-auth/providers/credentials'
-import Env from '@/EnvVariables'
 import authRoleFromPassword from '@/lib/authRoleFromPassword'
-import { AuthRole } from '@/lib/enums'
 import type { AuthOptions } from 'next-auth'
 import type { AuthUser } from '@/typings/types'
 
@@ -42,7 +40,7 @@ const authOptions: AuthOptions = ({
     signIn: '/',
     signOut: '/',
     error: '/', // Error code passed in query string as ?error=
-    newUser: '/stream'
+    newUser: '/stream',
   }
 })
 

@@ -2,6 +2,7 @@
 
 import { useAdminContext } from '@/contexts/AdminContext'
 import { VideoState } from '@/lib/enums'
+import { SettingGroup, Header } from '@/components/admin/SettingsComponents'
 import styles from './QueueList.module.scss'
 
 const states: Record<VideoState, { name: string, color: string }> = {
@@ -18,9 +19,9 @@ export default function QueueList() {
   const { queue } = useAdminContext()
 
   return (
-    <div className={styles.queueList}>
-      <h3 className={styles.queueHeader}>Queue ({queue.length}):</h3>
-      <div className={styles.items}>
+    <SettingGroup>
+      <Header icon="menu">Queue ({queue.length})</Header>
+      <div className={styles.queueItems}>
         {queue.map((video, index) => (
           <div key={video.id} className={styles.queueItem}>
             <span className={styles.number}>{index + 1}.</span>
@@ -34,6 +35,6 @@ export default function QueueList() {
           </div>
         ))}
       </div>
-    </div>
+    </SettingGroup>
   )
 }

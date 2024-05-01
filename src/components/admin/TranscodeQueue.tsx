@@ -2,6 +2,7 @@
 
 import { useAdminContext } from '@/contexts/AdminContext'
 import { JobState } from '@/lib/enums'
+import { SettingGroup, Header } from '@/components/admin/SettingsComponents'
 import styles from './QueueList.module.scss'
 
 const states: Record<JobState, { name: string, color: string }> = {
@@ -18,9 +19,9 @@ export default function QueueList() {
   const { transcodeQueue } = useAdminContext()
 
   return (
-    <div className={styles.queueList}>
-      <h3 className={styles.queueHeader}>Transcoding Jobs ({transcodeQueue.length}):</h3>
-      <div className={styles.items}>
+    <SettingGroup>
+      <Header icon="menu">Transcoding Jobs ({transcodeQueue.length})</Header>
+      <div className={styles.queueItems}>
         {transcodeQueue.map((video, index) => (
           <div key={video.name} className={styles.queueItem}>
             <span className={styles.number}>{index + 1}.</span>
@@ -34,6 +35,6 @@ export default function QueueList() {
           </div>
         ))}
       </div>
-    </div>
+    </SettingGroup>
   )
 }

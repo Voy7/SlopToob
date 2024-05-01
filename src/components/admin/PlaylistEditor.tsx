@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from 'react'
 import { useStreamContext } from '@/contexts/StreamContext'
+import { useAdminContext } from '@/contexts/AdminContext'
 import { SocketEvent } from '@/lib/enums'
 import { SettingGroup, Header, Description } from '@/components/admin/SettingsComponents'
 import Icon from '@/components/ui/Icon'
@@ -12,7 +13,6 @@ import FilePicker from '@/components/admin/FilePicker'
 import styles from './PlaylistEditor.module.scss'
 import type { ClientPlaylist, FileTree } from '@/typings/types'
 import type { EditPlaylistNamePayload, EditPlaylistVideosPayload } from '@/typings/socket'
-import { useAdminContext } from '@/contexts/AdminContext'
 
 export default function PlaylistEditor({ playlist }: { playlist: ClientPlaylist }) {
   const { socket } = useStreamContext()
@@ -72,7 +72,7 @@ export default function PlaylistEditor({ playlist }: { playlist: ClientPlaylist 
         </p>
       </label>
       <SettingGroup>
-        <Header icon="files">Selected Videos ({activePaths.length}):</Header>
+        <Header icon="files">Selected Videos ({activePaths.length})</Header>
         <FilePicker tree={fileTree} activePaths={activePaths} setActivePaths={setActivePaths} />
       </SettingGroup>
       <SettingGroup>
