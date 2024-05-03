@@ -51,16 +51,16 @@
     display: flex;
     flex-direction: column-reverse;
     padding: 0.5rem 0;
+    overscroll-behavior: contain;
+    overflow-x: hidden;
     overflow-y: auto;
 
     .message, .error, .event {
       display: flex;
       justify-content: space-between;
-      align-items: baseline;
+      align-items: flex-start;
       gap: 0.25rem;
       padding: 0.125em 0.25em;
-      overflow: hidden;
-
       animation: chatMessage 150ms ease-in-out;
 
       @keyframes chatMessage {
@@ -70,13 +70,19 @@
 
       &:hover { background: var(--bg-color-2);}
 
-      // .image {
-      //   flex-shrink: 0;
-      //   width: 2.5rem;
-      //   height: 2.5rem;
-      //   border-radius: 50%;
-      //   background: var(--bg-color-2);
-      // }
+      div {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.35rem;
+        overflow: hidden;
+      }
+
+      .image {
+        width: 1.4rem;
+        height: 1.4rem;
+        border-radius: 50%;
+        background: white;
+      }
 
       p {
         word-wrap: break-word;
@@ -89,6 +95,7 @@
       }
 
       .timestamp {
+        margin-top: 0.25em;
         white-space: nowrap;
         font-size: 0.75rem;
         color: var(--text-color-3);
@@ -108,7 +115,10 @@
         color: var(--text-color-3);
         // color: #ff4545;
         // color: #00ff73;
-        svg { margin-right: 0.25em; color: var(--select-color); }
+        svg {
+          margin-right: 0.25em;
+          color: var(--select-color);
+        }
       }
     }
 

@@ -1,11 +1,12 @@
 'use client'
 
 import { useState, useContext, createContext, useEffect } from 'react'
-import io, { type Socket } from 'socket.io-client'
-import generateSecret from '@/lib/generateSecret'
-import SocketLoading from '@/components/stream/SocketLoading'
-import { StreamState, SocketEvent } from '@/lib/enums'
+import { useSocketContext } from '@/contexts/SocketContext'
+import useSocketOn from '@/hooks/useSocketOn'
+import LoadingPage from '@/components/stream/LoadingPage'
+import {  Msg } from '@/lib/enums'
 import type { AuthUser } from '@/typings/types'
+import type { Socket } from 'socket.io-client'
 import type { JoinStreamPayload, Viewer, ChatMessage, StreamInfo } from '@/typings/socket'
 
 // Stream page context
@@ -17,8 +18,7 @@ type ContextProps = {
   chatMessages: (ChatMessage & { time: number })[], setChatMessages: React.Dispatch<React.SetStateAction<(ChatMessage & { time: number })[]>>,
   streamInfo: StreamInfo,
   lastStreamUpdateTimestamp: number | null,
-  socket: Socket,
-  socketSecret: string
+  socket: Socket
 }
 
 type Props =  {
@@ -29,58 +29,39 @@ type Props =  {
 
 // Context provider wrapper component
 export function StreamProvider({ authUser, cookieUsername, children }:Props) {
+  const { socket } = useSocketContext()
+
   const [viewers, setViewers] = useState<Viewer[]>([])
   const [nickname, setNickname] = useState<string>(cookieUsername)
   const [showNicknameModal, setShowNicknameModal] = useState<boolean>(nickname === 'Anonymous')
   const [showAdminModal, setShowAdminModal] = useState<boolean>(false)
   const [chatMessages, setChatMessages] = useState<(ChatMessage & { time: number })[]>([])
-  const [socket, setSocket] = useState<Socket | null>(null)
-
-  const [socketSecret] = useState(generateSecret())
-
   const [streamInfo, setStreamInfo] = useState<StreamInfo | null>(null)
   const [lastStreamUpdateTimestamp, setLastStreamUpdateTimestamp] = useState<number | null>(null)
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
 
   useEffect(() => {
-    const socket = io()
-    // setSocket(socket)
-
-    // On connect, send join stream payload to receive all other events
-    socket.on('connect', () => {
-      const joinStreamPayload: JoinStreamPayload = {
-        username: nickname,
-        secret: socketSecret,
-        password: authUser.password
-      }
-      socket.emit(SocketEvent.JoinStream, joinStreamPayload)
-
-      // Server responds with boolean once authenticated
-      socket.on(SocketEvent.JoinStream, (isAuthenticated: boolean) => {
-        if (isAuthenticated) setSocket(socket)
-      })
-    })
-
-    socket.on('disconnect', () => {
-      setSocket(null)
-    })
-
-    socket.on(SocketEvent.ViewersList, (viewers: Viewer[]) => {
-      // console.log('Viewers list updated:', viewers)
-      setViewers(viewers)
-    })
-
-    socket.on(SocketEvent.StreamInfo, (info: StreamInfo) => {
-      console.log('Stream info:', info)
-      setStreamInfo(info)
-      setLastStreamUpdateTimestamp(Date.now())
-    })
-
-    socket.on(SocketEvent.NewChatMessage, (message: ChatMessage) => {
-      setChatMessages(messages => [{ ...message, time: Date.now() }, ...messages])
-    })
-
-    return () => { socket.disconnect() }
+    socket.emit(Msg.JoinStream,  {
+      username: cookieUsername,
+      password: authUser.password
+    } satisfies JoinStreamPayload)
   }, [])
+
+  useSocketOn(Msg.JoinStream, (isAuthenticated: boolean) => setIsAuthenticated(isAuthenticated))
+
+  useSocketOn(Msg.StreamInfo, (info: StreamInfo) => {
+    setStreamInfo(info)
+    setLastStreamUpdateTimestamp(Date.now())
+  })
+
+  useSocketOn(Msg.NewChatMessage, (message: ChatMessage) => {
+    setChatMessages(messages => [{ ...message, time: Date.now() }, ...messages])
+  })
+
+  useSocketOn(Msg.ViewersList, (viewers: Viewer[]) => setViewers(viewers))
+  
+  if (!isAuthenticated) return <LoadingPage text="Authenticating..." />
+  if (!streamInfo) return <LoadingPage text="Fetching stream info..." />
 
   const context: ContextProps = {
     viewers,
@@ -88,17 +69,12 @@ export function StreamProvider({ authUser, cookieUsername, children }:Props) {
     showNicknameModal, setShowNicknameModal,
     showAdminModal, setShowAdminModal,
     chatMessages, setChatMessages,
-    streamInfo: streamInfo!,
+    streamInfo: streamInfo,
     lastStreamUpdateTimestamp,
-    socket: socket!,
-    socketSecret
+    socket
   }
 
-  return (
-    <StreamContext.Provider value={context}>
-      {socket && streamInfo ? children : <SocketLoading />}
-    </StreamContext.Provider>
-  )
+  return <StreamContext.Provider value={context}>{children}</StreamContext.Provider>
 }
 
 // Create the context and custom hook for it

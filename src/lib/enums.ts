@@ -3,7 +3,7 @@ export const enum AuthRole {
   Admin
 }
 
-export const enum SocketEvent {
+export const enum Msg {
   JoinStream = 'join-stream',
   ChangeNickname = 'change-nickname',
   ViewersList = 'viewers-list',
@@ -60,11 +60,12 @@ export const enum JobState {
   Errored
 }
 
-export const enum ChatType {
+export enum ChatType {
   UserChat,
   Error,
   Joined,
   Left,
   NicknameChange,
+  VotedToSkip,
   VoteSkipPassed
 }

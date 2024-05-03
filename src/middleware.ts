@@ -10,11 +10,13 @@ export default async function middleware(req: NextRequest, event: NextFetchEvent
     return NextResponse.redirect(new URL('/stream', req.url))
   }
 
-  const authMiddleware = await withAuth({
-    pages: {
-      signIn: '/'
-    }
-  })
-
-  return authMiddleware(req as any, event)
+  if (req.nextUrl.pathname.startsWith('/stream')) {
+    const authMiddleware = await withAuth({
+      pages: {
+        signIn: '/'
+      }
+    })
+  
+    return authMiddleware(req as any, event)
+  }
 }

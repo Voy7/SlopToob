@@ -4,7 +4,8 @@ import Button from '@/components/ui/Button'
 import styles from './VoteSkipButton.module.scss'
 import { useStreamContext } from '@/contexts/StreamContext'
 import { useEffect, useState } from 'react'
-import { SocketEvent } from '@/lib/enums'
+import { Msg } from '@/lib/enums'
+import useSocketOn from '@/hooks/useSocketOn'
 
 // Vote skip button
 export default function VoteSkipButton() {
@@ -16,6 +17,7 @@ export default function VoteSkipButton() {
   useEffect(() => {
     if (streamInfo.voteSkip.allowedInSeconds <= -1) {
       setAllowedInSeconds(-1)
+      setHasVoted(false)
       return
     }
 
@@ -29,16 +31,13 @@ export default function VoteSkipButton() {
     return () => clearInterval(interval)
   }, [streamInfo.voteSkip])
 
-  useEffect(() => {
-    socket.on(SocketEvent.VoteSkipStatus, (hasVoted: boolean) => {
-      setHasVoted(hasVoted)
-    })
-    return () => { socket.off(SocketEvent.VoteSkipStatus) }
-  }, [])
+  useSocketOn<boolean>(Msg.VoteSkipStatus, hasVoted => {
+    setHasVoted(hasVoted)
+  })
 
   function submitVote() {
-    if (hasVoted) socket.emit(SocketEvent.VoteSkipRemove)
-    else socket.emit(SocketEvent.VoteSkipAdd)
+    if (hasVoted) socket.emit(Msg.VoteSkipRemove)
+    else socket.emit(Msg.VoteSkipAdd)
   }
 
   // Vote skipping entirely disabled

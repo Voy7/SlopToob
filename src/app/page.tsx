@@ -50,7 +50,7 @@ export default function Home() {
     <div className={success ? `${styles.home} ${styles.fadeOutAnimation}` : styles.home}>
       <Canvas3D />
       <form onSubmit={submit}>
-        <Image src="/logo.png" alt="Logo" width={100} height={100} />
+        <Image src="/logo.png" alt="Logo" width={110} height={110} />
         <h1><span>Slop</span>Toob</h1>
         <p className={styles.blurb}>
           Enter the password to access infinite slop!

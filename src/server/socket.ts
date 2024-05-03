@@ -1,6 +1,6 @@
 import { Server, type Socket } from 'socket.io'
 import { httpServer } from '@/server/httpServer'
-import { AuthRole, SocketEvent } from '@/lib/enums'
+import { AuthRole, Msg } from '@/lib/enums'
 import Logger from '@/lib/Logger'
 import type { JoinStreamPayload, SocketClient, Viewer, EditPlaylistNamePayload, EditPlaylistVideosPayload } from '@/typings/socket'
 import { socketEvents } from '@/server/socketEvents'
@@ -73,8 +73,5 @@ async function handleSettingEvent(socket: Socket, settingKey: keyof typeof setti
     return
   }
 
-  const isSuccess = await Settings.setSetting(settingKey, payload)
-  // if (!isSuccess) return
-
-  // if ('onChange' in setting) setting.onChange(payload as never)
+  await Settings.setSetting(settingKey, payload)
 }

@@ -1,18 +1,18 @@
 import { socketClients } from '@/server/socketClients'
-import { SocketEvent, AuthRole } from '@/lib/enums'
+import { Msg, AuthRole } from '@/lib/enums'
 import type { Viewer } from '@/typings/socket'
 
 // Server-side socket utilities
 export default class SocketUtils {
   // Broadcast message to all connected (and authenticated) clients
-  static broadcast(event: SocketEvent, payload: any) {
+  static broadcast(event: Msg, payload: any) {
     for (const client of socketClients) {
       client.socket.emit(event, payload)
     }
   }
 
   // Broadcast message to all admin clients
-  static broadcastAdmin(event: SocketEvent, payload: any) {
+  static broadcastAdmin(event: Msg, payload: any) {
     for (const client of socketClients) {
       if (client.role < AuthRole.Admin) continue
       client.socket.emit(event, payload)
@@ -29,6 +29,6 @@ export default class SocketUtils {
         role: client.role
       })
     }
-    this.broadcast(SocketEvent.ViewersList, viewers)
+    this.broadcast(Msg.ViewersList, viewers)
   }
 }

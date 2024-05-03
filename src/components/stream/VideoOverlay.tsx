@@ -10,8 +10,11 @@ import { useState } from 'react'
 
 // Video center overlay items (not bottom controls)
 export default function VideoOverlay() {
+  const { streamInfo } = useStreamContext()
+
   return (
     <>
+      {streamInfo.streamTheme === 'FoxNews' && <FoxNewsOverlay />}
       <StateOverlay />
       <BumperOverlay />
     </>
@@ -84,4 +87,8 @@ function BumperOverlay() {
       Ends in <span key={time}>{time}</span><span key={unit}>{unit}</span>
     </div>
   )
+}
+
+function FoxNewsOverlay() {
+  return <img src="/fox-news-overlay.png" alt="" className={styles.fullImageOverlay} />
 }

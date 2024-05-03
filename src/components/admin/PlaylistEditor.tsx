@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react'
 import { useStreamContext } from '@/contexts/StreamContext'
 import { useAdminContext } from '@/contexts/AdminContext'
-import { SocketEvent } from '@/lib/enums'
+import { Msg } from '@/lib/enums'
 import { SettingGroup, Header, Description } from '@/components/admin/SettingsComponents'
 import Icon from '@/components/ui/Icon'
 import Button from '@/components/ui/Button'
@@ -32,10 +32,10 @@ export default function PlaylistEditor({ playlist }: { playlist: ClientPlaylist 
       playlistID: playlist.id,
       newName: playlistName
     }
-    socket?.emit(SocketEvent.AdminEditPlaylistName, payload)
+    socket?.emit(Msg.AdminEditPlaylistName, payload)
 
     // If event is received, it is an error
-    socket?.on(SocketEvent.AdminEditPlaylistName, (error: string) => {
+    socket?.on(Msg.AdminEditPlaylistName, (error: string) => {
       setPlaylistNameError(error)
     })
   }, [playlistName])
@@ -47,7 +47,7 @@ export default function PlaylistEditor({ playlist }: { playlist: ClientPlaylist 
       playlistID: playlist.id,
       newVideoPaths: activePaths
     }
-    socket?.emit(SocketEvent.AdminEditPlaylistVideos, payload)
+    socket?.emit(Msg.AdminEditPlaylistVideos, payload)
   }, [activePaths])
 
   // Update and send out playlist name change when input is changed
@@ -58,7 +58,7 @@ export default function PlaylistEditor({ playlist }: { playlist: ClientPlaylist 
 
   // Delete playlist
   function deletePlaylist() {
-    socket?.emit(SocketEvent.AdminDeletePlaylist, playlist.id)
+    socket?.emit(Msg.AdminDeletePlaylist, playlist.id)
   }
 
   return (

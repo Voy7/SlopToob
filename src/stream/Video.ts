@@ -10,7 +10,7 @@ import TranscoderQueue from '@/stream/TranscoderQueue'
 import TranscoderJob from '@/stream/TranscoderJob'
 import Settings from '@/stream/Settings'
 import SocketUtils from '@/lib/SocketUtils'
-import { SocketEvent, VideoState as State } from '@/lib/enums'
+import { Msg, VideoState as State } from '@/lib/enums'
 import type { ClientVideo } from '@/typings/types'
 import VoteSkipHandler from './VoteSkipHandler'
 
@@ -27,11 +27,9 @@ export default class Video {
   private job: TranscoderJob
 
   constructor(public path: string, public isBumper: boolean = false) {
-    // console.log('new video', this.path)
     this.job = TranscoderQueue.newJob(this)
     
     this.job.onStreamableReady(() => {
-      console.log(`onStreamableReady() - ${this.name} - ${this.state}`.cyan)
       this.durationSeconds = this.job.duration
       // if (this.state === State.Preparing) this.state = State.Ready
       // this.state = State.Ready
@@ -53,13 +51,12 @@ export default class Video {
   get state() { return this._state }
   private set state(newState: State) {
     this._state = newState
-    if (Player.playing === this) SocketUtils.broadcast(SocketEvent.StreamInfo, Player.clientStreamInfo)
-    else SocketUtils.broadcastAdmin(SocketEvent.AdminQueueList, Player.queue.map(video => video.clientVideo))
+    if (Player.playing === this) SocketUtils.broadcast(Msg.StreamInfo, Player.clientStreamInfo)
+    else SocketUtils.broadcastAdmin(Msg.AdminQueueList, Player.queue.map(video => video.clientVideo))
   }
 
   // Returns true when transcoded (or already ready), returns false if error
   async prepare(): Promise<void> {
-    console.log(`video.prepare() ${this.name}`.green, this.state , this.error)
     if (this.state !== State.NotReady && this.state !== State.Preparing) return
 
     return new Promise<void>(resolve => {
@@ -76,7 +73,6 @@ export default class Video {
 
   async play() {
     await this.prepare()
-    console.log(`video.play() ${this.name}`.magenta, this.state)
     // if (this.state === State.Finished) throw new Error(`Tried to play video that has already been played: ${this.name}`)
     if (this.state === State.Finished) return
     
@@ -91,7 +87,7 @@ export default class Video {
       if (this.state === State.Errored) {
         const { errorDisplaySeconds } = Settings.getSettings()
         this.finishedTimeout = setTimeout(() => this.end(), errorDisplaySeconds * 1000)
-        SocketUtils.broadcast(SocketEvent.StreamInfo, Player.clientStreamInfo)
+        SocketUtils.broadcast(Msg.StreamInfo, Player.clientStreamInfo)
         return
       }
 
@@ -105,13 +101,10 @@ export default class Video {
   // Must be called before being removed from the queue or Player
   // This is primarily so the Transcoder Handler can clean up shared jobs properly
   end() {
-    //
-
     if (this.finishedTimeout) {
       clearTimeout(this.finishedTimeout)
     }
     
-    console.log(`.end() ${this.name}`.red, this.state)
     Logger.debug(`[Video] Finished playing in ${this.durationSeconds}s: ${this.name}`)
     this.error = null
     this.playingDate = null
@@ -125,7 +118,6 @@ export default class Video {
 
   // Pause video
   pause() {
-    console.log(this)
     if (this.state !== State.Playing || !this.playingDate) return
     if (this.finishedTimeout) clearTimeout(this.finishedTimeout)
     this.passedDurationSeconds += (new Date().getTime() - this.playingDate.getTime()) / 1000

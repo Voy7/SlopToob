@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useStreamContext } from '@/contexts/StreamContext'
 import { useAdminContext } from '@/contexts/AdminContext'
-import { SocketEvent } from '@/lib/enums'
+import { Msg } from '@/lib/enums'
 import Icon from '@/components/ui/Icon'
 import Button from '@/components/ui/Button'
 import PlaylistEditor from '@/components/admin/PlaylistEditor'
@@ -30,10 +30,10 @@ export default function SectionPlaylists() {
   function addPlaylist() {
     if (addLoading) return
     setAddLoading(true)
-    socket?.emit(SocketEvent.AdminAddPlaylist, 'New Playlist')
+    socket?.emit(Msg.AdminAddPlaylist, 'New Playlist')
     
     // New playlist request was successful, stop loading
-    socket?.on(SocketEvent.AdminAddPlaylist, (newPlaylistID: string) => {
+    socket?.on(Msg.AdminAddPlaylist, (newPlaylistID: string) => {
       setAddLoading(false)
       setSelectedPlaylist(newPlaylistID)
     })

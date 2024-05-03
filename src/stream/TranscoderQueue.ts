@@ -2,7 +2,7 @@ import Logger from '@/lib/Logger'
 import Settings from '@/stream/Settings'
 import TranscoderJob from '@/stream/TranscoderJob'
 import SocketUtils from '@/lib/SocketUtils'
-import { JobState, SocketEvent } from '@/lib/enums'
+import { JobState, Msg } from '@/lib/enums'
 import type { TranscodeClientVideo } from '@/typings/socket'
 import type Video from '@/stream/Video'
 
@@ -26,9 +26,8 @@ export default new class TranscoderQueue {
   }
 
   async processQueue() {
-    SocketUtils.broadcastAdmin(SocketEvent.AdminTranscodeQueueList, this.clientTranscodeList)
+    SocketUtils.broadcastAdmin(Msg.AdminTranscodeQueueList, this.clientTranscodeList)
     const transcodingJobs = this.jobs.filter(item => item.state === JobState.Transcoding)
-    // console.log(`job1 `, transcodingJobs)
     if (transcodingJobs.length >= Settings.getSettings().maxTranscodingJobs) return
 
     const nextJob = this.jobs.find(item => item.state === JobState.AwaitingTranscode)

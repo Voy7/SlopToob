@@ -5,7 +5,7 @@ import Video from '@/stream/Video'
 import Settings from '@/stream/Settings'
 import SocketUtils from '@/lib/SocketUtils'
 import { getNextBumper } from '@/stream/bumpers'
-import { StreamState, SocketEvent, VideoState } from '@/lib/enums'
+import { StreamState, Msg, VideoState } from '@/lib/enums'
 import type { RichPlaylist, FileTree, ClientPlaylist, ListOption } from '@/typings/types'
 import type { StreamInfo, StreamOptions } from '@/typings/socket'
 import VoteSkipHandler from './VoteSkipHandler'
@@ -44,7 +44,7 @@ export default new class Player {
     }
 
     if (this.queue.length === 0) { // Display 'no videos' error
-      SocketUtils.broadcast(SocketEvent.StreamInfo, this.clientStreamInfo)
+      SocketUtils.broadcast(Msg.StreamInfo, this.clientStreamInfo)
       return
     }
 
@@ -95,8 +95,8 @@ export default new class Player {
     this.queue = [] // Clear queue when playlist changes
     this.populateRandomToQueue()
 
-    SocketUtils.broadcastAdmin(SocketEvent.AdminRequestPlaylists, this.clientPlaylists)
-    SocketUtils.broadcastAdmin(SocketEvent.AdminQueueList, this.queue.map(video => video.clientVideo))
+    SocketUtils.broadcastAdmin(Msg.AdminRequestPlaylists, this.clientPlaylists)
+    SocketUtils.broadcastAdmin(Msg.AdminQueueList, this.queue.map(video => video.clientVideo))
   }
 
   get clientPlaylists(): ClientPlaylist[] {
@@ -110,7 +110,17 @@ export default new class Player {
   get listOptionPlaylists(): ListOption {
     return {
       list: this.playlists.map(playlist => ({ name: playlist.name, id: playlist.id })),
-      selectedID: this.activePlaylist?.id || 'None'
+      selectedID: Settings.getSettings().activePlaylistID
+    }
+  }
+
+  get listOptionThemes(): ListOption {
+    return {
+      list: [
+        { name: 'None', id: 'None' },
+        { name: 'Fox News', id: 'FoxNews' }
+      ],
+      selectedID: Settings.getSettings().streamTheme
     }
   }
 
@@ -118,7 +128,7 @@ export default new class Player {
     Logger.debug('Adding video to queue:', video.name)
     this.queue.push(video)
     if (!this.playing) this.playNext()
-    SocketUtils.broadcastAdmin(SocketEvent.AdminQueueList, this.queue.map(video => video.clientVideo))
+    SocketUtils.broadcastAdmin(Msg.AdminQueueList, this.queue.map(video => video.clientVideo))
   }
 
   get clientStreamInfo(): StreamInfo {
@@ -167,9 +177,14 @@ export default new class Player {
   }
 
   get clientStreamOptions(): StreamOptions {
-    const { enableVoteSkip } = Settings.getSettings()
+    const { streamTheme, showChatTimestamps, showChatIdenticons, enableVoteSkip } = Settings.getSettings()
 
     return {
+      streamTheme: streamTheme,
+      chat: {
+        showTimestamps: showChatTimestamps,
+        showIdenticons: showChatIdenticons
+      },
       voteSkip: {
         isEnabled: enableVoteSkip,
         isAllowed: VoteSkipHandler.isAllowed,
@@ -186,7 +201,7 @@ export default new class Player {
     })
 
     this.playlists = playlists
-    SocketUtils.broadcastAdmin(SocketEvent.AdminRequestPlaylists, this.clientPlaylists)
+    SocketUtils.broadcastAdmin(Msg.AdminRequestPlaylists, this.clientPlaylists)
     return playlists
   }
 

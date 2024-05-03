@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useStreamContext } from '@/contexts/StreamContext'
 import { useAdminContext } from '@/contexts/AdminContext'
-import { SocketEvent } from '@/lib/enums'
+import { Msg } from '@/lib/enums'
 import { SettingGroup, Header } from '@/components/admin/SettingsComponents'
 import Icon from '@/components/ui/Icon'
 import Button from '@/components/ui/Button'
@@ -40,19 +40,19 @@ export default function BumpersList() {
       reader.readAsDataURL(videoFile)
     })
 
-    socket?.emit(SocketEvent.AdminUploadBumper, { name: bumperName, videoFile: videoFileBase64 })
+    socket?.emit(Msg.AdminUploadBumper, { name: bumperName, videoFile: videoFileBase64 })
   }
 
   async function deleteBumper() {
     if (deleteBumperLoading || !deleteBumperSelected) return
     setDeleteBumperLoading(true)
     setDeleteBumperError(null)
-    socket?.emit(SocketEvent.AdminDeleteBumper, deleteBumperSelected.path)
+    socket?.emit(Msg.AdminDeleteBumper, deleteBumperSelected.path)
   }
 
   useEffect(() => {
     // Response will either be true for success or string for error
-    socket?.on(SocketEvent.AdminUploadBumper, (response: true | string) => {
+    socket?.on(Msg.AdminUploadBumper, (response: true | string) => {
       setAddBumperLoading(false)
       if (response === true) return setShowAddModal(false)
       setAddBumperError(response)
@@ -60,15 +60,15 @@ export default function BumpersList() {
 
     
     // Response will either be true for success or string for error
-    socket?.on(SocketEvent.AdminDeleteBumper, (response: true | string) => {
+    socket?.on(Msg.AdminDeleteBumper, (response: true | string) => {
       setDeleteBumperLoading(false)
       if (response === true) return setShowDeleteModal(false)
       setDeleteBumperError(response)
     })
 
     return () => {
-      socket?.off(SocketEvent.AdminUploadBumper)
-      socket?.off(SocketEvent.AdminDeleteBumper)
+      socket?.off(Msg.AdminUploadBumper)
+      socket?.off(Msg.AdminDeleteBumper)
     }
   }, [])
 

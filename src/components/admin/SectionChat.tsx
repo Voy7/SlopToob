@@ -5,14 +5,20 @@ import useNumberOption from '@/hooks/useNumberOption'
 import { SettingGroup, Header, Description, Gap, ToggleOption, NumberOption } from '@/components/admin/SettingsComponents'
 
 export default function SectionChat() {
-  const nicknameOnlyAlphanumeric = useToggleOption('nicknameOnlyAlphanumeric')
-  const nicknameMinLength = useNumberOption('nicknameMinLength')
-  const nicknameMaxLength = useNumberOption('nicknameMaxLength')
   const chatMaxLength = useNumberOption('chatMaxLength')
+  
+  const showChatTimestamps = useToggleOption('showChatTimestamps')
+  const showChatIdenticons = useToggleOption('showChatIdenticons')
+  
   const sendJoinedStream = useToggleOption('sendJoinedStream')
   const sendLeftStream = useToggleOption('sendLeftStream')
   const sendChangedNickname = useToggleOption('sendChangedNickname')
+  const sendVotedToSkip = useToggleOption('sendVotedToSkip')
   const sendVoteSkipPassed = useToggleOption('sendVoteSkipPassed')
+
+  const nicknameOnlyAlphanumeric = useToggleOption('nicknameOnlyAlphanumeric')
+  const nicknameMinLength = useNumberOption('nicknameMinLength')
+  const nicknameMaxLength = useNumberOption('nicknameMaxLength')
 
   return (
     <>
@@ -23,10 +29,17 @@ export default function SectionChat() {
         <Description>Maximum amount of characters in a chat message.</Description>
       </SettingGroup>
       <SettingGroup>
+        <Header icon="chat">Chat Elements</Header>
+        <ToggleOption {...showChatTimestamps} label="Display Timestamps" />
+        <ToggleOption {...showChatIdenticons} label="Display Identicons" />
+        <Description>Display timestamps and identicons in chat.</Description>
+      </SettingGroup>
+      <SettingGroup>
         <Header icon="menu">Event Messages</Header>
         <ToggleOption {...sendJoinedStream} label="User Joined Stream" />
         <ToggleOption {...sendLeftStream} label="User Left Stream" />
         <ToggleOption {...sendChangedNickname} label="User Changed Nickname" />
+        <ToggleOption {...sendVotedToSkip} label="User Voted to Skip" />
         <ToggleOption {...sendVoteSkipPassed} label="Vote Skip Passed" />
         <Description>Send a message when an event occurs.</Description>
       </SettingGroup>

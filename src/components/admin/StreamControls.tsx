@@ -1,7 +1,7 @@
 'use client'
 
 import { useStreamContext } from '@/contexts/StreamContext'
-import { SocketEvent, StreamState } from '@/lib/enums'
+import { Msg, StreamState } from '@/lib/enums'
 import useStreamTimestamp from '@/hooks/useStreamTimestamp'
 import Icon from '@/components/ui/Icon'
 import styles from './StreamControls.module.scss'
@@ -21,7 +21,7 @@ export default function StreamControls() {
   return (
     <div className={styles.streamControls}>
       <ActionButton />
-      <button className={styles.actionButton} onClick={() => socket.emit(SocketEvent.AdminSkipVideo)}>
+      <button className={styles.actionButton} onClick={() => socket.emit(Msg.AdminSkipVideo)}>
         <Icon name="skip" />
       </button>
       <div className={styles.text}>
@@ -37,7 +37,7 @@ function ActionButton() {
 
   if (streamInfo.state === StreamState.Playing) {
     return (
-      <button className={styles.actionButton} onClick={() => socket.emit(SocketEvent.AdminPauseStream)}>
+      <button className={styles.actionButton} onClick={() => socket.emit(Msg.AdminPauseStream)}>
         <Icon name="pause" />
       </button>
     )
@@ -45,7 +45,7 @@ function ActionButton() {
 
   if (streamInfo.state === StreamState.Paused) {
     return (
-      <button className={styles.actionButton} onClick={() => socket.emit(SocketEvent.AdminUnpauseStream)}>
+      <button className={styles.actionButton} onClick={() => socket.emit(Msg.AdminUnpauseStream)}>
         <Icon name="play" />
       </button>
     )

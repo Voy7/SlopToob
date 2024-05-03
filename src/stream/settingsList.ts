@@ -1,6 +1,3 @@
-import { SocketEvent } from '@/lib/enums'
-import SocketUtils from '@/lib/SocketUtils'
-// import Player from '@/stream/Player'
 import type { ListOption } from '@/typings/types'
 
 type Setting = {
@@ -12,6 +9,7 @@ type Setting = {
 // List of all settings, with their default values and optional hooks
 // NOTE: Because of how Settings is initialized, most top-level imports are not allowed.
 // Instead, use dynamic imports (except importing types is fine)
+
 export const settingsList = {
   // Current active playlist, client uses the setting as a ListOption
   activePlaylistID: {
@@ -24,6 +22,15 @@ export const settingsList = {
       const { default: Player } = await import('@/stream/Player')
       Player.setActivePlaylistID(value)
     },
+  },
+
+  streamTheme: {
+    default: 'None',
+    clientValue: async (): Promise<ListOption> => {
+      const { default: Player } = await import('@/stream/Player')
+      return Player.listOptionThemes
+    },
+    onChange: chatElementChange,
   },
 
   // Enable vote skipping & percentage of votes needed to skip
@@ -63,10 +70,15 @@ export const settingsList = {
   // Chat related settings
   chatMaxLength: { default: 120 },
 
+  // Chat elements
+  showChatTimestamps: { default: true, onChange: chatElementChange },
+  showChatIdenticons: { default: true, onChange: chatElementChange },
+
   // Chat event settings
   sendJoinedStream: { default: true },
   sendLeftStream: { default: true },
   sendChangedNickname: { default: true },
+  sendVotedToSkip: { default: true },
   sendVoteSkipPassed: { default: true },
 
   // ...
@@ -75,4 +87,9 @@ export const settingsList = {
 async function voteSkipChange() {
   const { default: VoteSkipHandler } = await import('@/stream/VoteSkipHandler')
   VoteSkipHandler.resyncChanges()
+}
+
+async function chatElementChange() {
+  const { default: Chat } = await import('@/stream/Chat')
+  Chat.resyncChanges()
 }

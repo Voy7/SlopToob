@@ -4,7 +4,7 @@ import path from 'path'
 import Env from '@/EnvVariables'
 import Logger from '@/lib/Logger'
 import SocketUtils from '@/lib/SocketUtils'
-import { SocketEvent } from '@/lib/enums'
+import { Msg } from '@/lib/enums'
 import type { FileTree } from '@/typings/types'
 
 const VALID_EXTENSIONS = ['.mp4', '.mkv', '.avi', '.mov', '.flv', '.wmv', '.webm', '.m2ts']
@@ -39,8 +39,6 @@ export default new class FileTreeHandler {
     await getChildren(rootPath)
     this.paths = paths
     this.pathsToTree(false)
-    console.log(this.paths)
-    console.log(this._tree)
 
     const passedSeconds = (Date.now() - startDate) / 1000
     Logger.info(`File tree handler fetched tree in ${passedSeconds.toFixed(1)}s.`)
@@ -57,7 +55,6 @@ export default new class FileTreeHandler {
       const fullPath = path.join(Env.VIDEOS_PATH, filename).replace(/\\/g, '/')
       const fileExists = fs.existsSync(fullPath)
       const index = this.paths.indexOf(fullPath)
-      console.log(fullPath, fileExists, index)
 
       // File was deleted
       if (!fileExists) {
@@ -137,7 +134,7 @@ export default new class FileTreeHandler {
 
     this._tree = tree
     if (logDone) Logger.debug('File tree object reconstructed.')
-    SocketUtils.broadcastAdmin(SocketEvent.AdminRequestFileTree, this.tree)
+    SocketUtils.broadcastAdmin(Msg.AdminRequestFileTree, this.tree)
   }
 
   onReady(callback: () => void) {

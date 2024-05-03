@@ -4,7 +4,7 @@ import Env from '@/EnvVariables'
 import Logger from '@/lib/Logger'
 import Video from '@/stream/Video'
 import SocketUtils from '@/lib/SocketUtils'
-import { SocketEvent } from '@/lib/enums'
+import { Msg } from '@/lib/enums'
 import type { ClientBumper, ClientVideo } from '@/typings/types'
 
 // export const bumpers: Video[] = []
@@ -38,7 +38,7 @@ function syncCheckBumper(pathName: string) {
   if (!fileExists && existingBumper) {
     bumperPaths.splice(bumperPaths.indexOf(pathName), 1)
     Logger.debug(`Bumper deleted: ${pathName}`)
-    SocketUtils.broadcastAdmin(SocketEvent.AdminBumpersList, getClientBumpers())
+    SocketUtils.broadcastAdmin(Msg.AdminBumpersList, getClientBumpers())
     return
   }
 
@@ -46,7 +46,7 @@ function syncCheckBumper(pathName: string) {
   if (fileExists && !existingBumper) {
     bumperPaths.push(pathName)
     Logger.debug(`Bumper added: ${pathName}`)
-    SocketUtils.broadcastAdmin(SocketEvent.AdminBumpersList, getClientBumpers())
+    SocketUtils.broadcastAdmin(Msg.AdminBumpersList, getClientBumpers())
     return
   }
 
@@ -92,13 +92,9 @@ export function getNextBumper(): Video | null {
 
 // TODO: Implement 'smart shuffle' algorithm
 function getRandomBumper(): Video | null {
-  // return null
-  console.log(bumperPaths)
   const bumperPath = bumperPaths[Math.floor(Math.random() * bumperPaths.length)]
-  console.log(bumperPath)
   if (!bumperPath) return null
   const video = new Video(bumperPath, true)
-  console.log(video)
   return video
 }
 

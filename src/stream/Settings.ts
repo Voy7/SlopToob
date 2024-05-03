@@ -17,7 +17,6 @@ export default new class Settings {
 
   private async createDefaultSettings() {
     const allSettings = await prisma.settings.findMany()
-    // console.log(allSettings)
 
     const vars: { [key: string]: SettingsList[keyof SettingsList] } = {}
 
@@ -94,12 +93,12 @@ export default new class Settings {
 
     const setting = settingsList[key]
 
+    Logger.debug(`Updating setting.${key} to ${value}`)
+    this.settings[key] = value as never // This is a hack to make TS happy, because it doesn't understand that value is valid
     
     const clientValue = ('clientValue' in setting) ? await setting.clientValue() : value
     SocketUtils.broadcastAdmin(`setting.${key}` as any, clientValue)
     
-    console.log(`Updating setting ${key} to ${value}`)
-    this.settings[key] = value as never // This is a hack to make TS happy, because it doesn't understand that value is valid
     if ('onChange' in setting) await setting.onChange(value as never)
     await prisma.settings.update({
       where: { key },

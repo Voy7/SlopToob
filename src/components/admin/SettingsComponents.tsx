@@ -1,6 +1,6 @@
 'use client'
 
-import { SocketEvent } from '@/lib/enums'
+import { Msg } from '@/lib/enums'
 import Icon, { IconNames } from '@/components/ui/Icon'
 import Slider from '@/components/ui/Slider'
 import styles from './SettingsComponents.module.scss'

@@ -7,11 +7,11 @@ import Modal from '@/components/ui/Modal'
 import Button from '@/components/ui/Button'
 import Icon from '@/components/ui/Icon'
 import styles from './NicknameModal.module.scss'
-import { SocketEvent } from '@/lib/enums'
+import { Msg } from '@/lib/enums'
 
 // Change username modal prompt
 export default function NicknameModal() {
-  const { socket, setNickname, showNicknameModal, setShowNicknameModal, socketSecret } = useStreamContext()
+  const { socket, setNickname, showNicknameModal, setShowNicknameModal } = useStreamContext()
 
   const [name, setName] = useState<string>('')
   const [error, setError] = useState<string | null>(null)
@@ -24,12 +24,12 @@ export default function NicknameModal() {
     setLoading(true)
     setError(null)
 
-    socket.emit(SocketEvent.ChangeNickname, name)
+    socket.emit(Msg.ChangeNickname, name)
   }
 
   useEffect(() => {
     // Response is 'true' if successful, string if error
-    socket.on(SocketEvent.ChangeNickname, async (result: true | string) => {
+    socket.on(Msg.ChangeNickname, async (result: true | string) => {
       setLoading(false)
       if (result !== true) {
         setError(result)
@@ -43,7 +43,7 @@ export default function NicknameModal() {
       await setNicknameCookie(name)
     })
 
-    return () => { socket.off(SocketEvent.ChangeNickname) }
+    return () => { socket.off(Msg.ChangeNickname) }
   }, [name])
 
   return (

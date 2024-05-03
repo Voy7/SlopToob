@@ -3,9 +3,10 @@
 import { useState, useContext, createContext, useEffect } from 'react'
 import { sections, type SectionName } from '@/components/admin/AdminModal'
 import { useStreamContext } from './StreamContext'
-import { SocketEvent } from '@/lib/enums'
+import { Msg } from '@/lib/enums'
 import { ClientBumper, ClientPlaylist, ClientVideo, FileTree } from '@/typings/types'
 import { TranscodeClientVideo } from '@/typings/socket'
+import useSocketOn from '@/hooks/useSocketOn'
 
 // Stream page context
 type ContextProps = {
@@ -37,36 +38,16 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     if (sec) setSectionState(sec)
   }
 
+  // Request data from server, expect a bunch of socket messages
   useEffect(() => {
-    // Request data from server, expect a bunch of socket messages
-    socket.emit(SocketEvent.AdminRequestAllData)
-
-    socket.on(SocketEvent.AdminRequestFileTree, (tree: FileTree) => {
-      console.log('File tree:', tree)
-      setFileTree(tree)
-    })
-
-
-    socket.on(SocketEvent.AdminRequestPlaylists, (playlists: ClientPlaylist[]) => {
-      console.log('Playlists:', selectedPlaylist, playlists)
-      setPlaylists(playlists)
-      // if (!selectedPlaylist && playlists[0]) setSelectedPlaylist(playlists[0].id)
-    })
-
-    socket.on(SocketEvent.AdminBumpersList, (bumpers: ClientBumper[]) => {
-      setBumpers(bumpers)
-    })
-
-    socket.on(SocketEvent.AdminQueueList, (queue: ClientVideo[]) => {
-      console.log('Queue:', queue)
-      setQueue(queue)
-    })
-
-    socket.on(SocketEvent.AdminTranscodeQueueList, (queue: TranscodeClientVideo[]) => {
-      console.log('Transcode queue:', queue)
-      setTranscodeQueue(queue)
-    })
+    socket.emit(Msg.AdminRequestAllData)
   }, [])
+
+  useSocketOn(Msg.AdminRequestFileTree, (tree: FileTree) => setFileTree(tree))
+  useSocketOn(Msg.AdminRequestPlaylists, (playlists: ClientPlaylist[]) => setPlaylists(playlists))
+  useSocketOn(Msg.AdminBumpersList, (bumpers: ClientBumper[]) => setBumpers(bumpers))
+  useSocketOn(Msg.AdminQueueList, (queue: ClientVideo[]) => setQueue(queue))
+  useSocketOn(Msg.AdminTranscodeQueueList, (queue: TranscodeClientVideo[]) => setTranscodeQueue(queue))
 
   useEffect(() => {
     const isPlaylistSelected = playlists.some(playlist => playlist.id === selectedPlaylist)

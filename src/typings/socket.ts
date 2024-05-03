@@ -33,6 +33,11 @@ export type StreamError = {
 }
 
 export type StreamOptions = {
+  streamTheme: string,
+  chat: {
+    showTimestamps: boolean,
+    showIdenticons: boolean
+  }
   voteSkip: {
     isEnabled: boolean,
     isAllowed: boolean,
@@ -51,7 +56,6 @@ export type StreamInfo = (
 
 export type SocketClient = {
   socket: Socket
-  secret: string,
   username: string,
   role: AuthRole
 }
@@ -75,7 +79,6 @@ export type ChatMessage = {
 
 export type JoinStreamPayload = {
   username: string,
-  secret: string,
   password: string
 }
 

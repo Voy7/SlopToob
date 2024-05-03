@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers'
 import { getServerSession } from 'next-auth'
 import authOptions from '@/lib/authOptions'
+import { SocketProvider } from '@/contexts/SocketContext'
 import { StreamProvider } from '@/contexts/StreamContext'
 import { AuthRole } from '@/lib/enums'
 import dynamic from 'next/dynamic'
@@ -27,21 +28,23 @@ export default async function StreamPage() {
   const cookieUsername = username || 'Anonymous'
 
   return (
-    <StreamProvider authUser={authUser} cookieUsername={cookieUsername}>
-      <NicknameModal />
-      {authUser.role >= AuthRole.Admin && (
-        <AdminProvider>
-          <AdminModal />
-        </AdminProvider>
-      )}
-      <Header />
-      <div className={styles.videoAndChat}>
-        <Video />
-        <Chat />
-      </div>
-      <InfoBody />
-      <History />
-      {/* {authUser.role >= AuthRole.Admin && <StreamControls />} */}
-    </StreamProvider>
+    <SocketProvider>
+      <StreamProvider authUser={authUser} cookieUsername={cookieUsername}>
+        <NicknameModal />
+        {authUser.role >= AuthRole.Admin && (
+          <AdminProvider>
+            <AdminModal />
+          </AdminProvider>
+        )}
+        <Header />
+        <div className={styles.videoAndChat}>
+          <Video />
+          <Chat />
+        </div>
+        <InfoBody />
+        <History />
+        {/* {authUser.role >= AuthRole.Admin && <StreamControls />} */}
+      </StreamProvider>
+    </SocketProvider>
   )
 }

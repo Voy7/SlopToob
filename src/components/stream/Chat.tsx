@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useStreamContext } from '@/contexts/StreamContext'
-import { AuthRole, ChatType, SocketEvent } from '@/lib/enums'
+import useSocketOn from '@/hooks/useSocketOn'
+import { AuthRole, ChatType, Msg } from '@/lib/enums'
 import Image from 'next/image'
 import Icon from '@/components/ui/Icon'
 import styles from './Chat.module.scss'
@@ -14,14 +15,15 @@ const roleColors = {
 }
 
 const eventIcons = {
-  [ChatType.Joined]: <Icon name="user" />,
-  [ChatType.Left]: <Icon name="user" />,
+  [ChatType.Joined]: <Icon name="arrow-right" />,
+  [ChatType.Left]: <Icon name="arrow-left" />,
   [ChatType.NicknameChange]: <Icon name="edit" />,
+  [ChatType.VotedToSkip]: <Icon name="skip" />,
   [ChatType.VoteSkipPassed]: <Icon name="skip" />,
 }
 
 export default function Chat() {
-  const { socket, chatMessages, setChatMessages, viewers, nickname, setShowNicknameModal } = useStreamContext()
+  const { socket, streamInfo, chatMessages, setChatMessages, viewers, nickname, setShowNicknameModal } = useStreamContext()
 
   const [message, setMessage] = useState<string>('')
 
@@ -32,16 +34,13 @@ export default function Chat() {
     if (message.length === 0) return
     setMessage('')
 
-    socket.emit(SocketEvent.SendChatMessage, message)
+    socket.emit(Msg.SendChatMessage, message)
   }
 
   // If message received, it's an error
-  useEffect(() => {
-    socket.on(SocketEvent.SendChatMessage, (error: string) => {
-      setChatMessages(messages => [{ type: ChatType.Error, message: error, time: Date.now() }, ...messages])
-    })
-    return () => { socket.off(SocketEvent.SendChatMessage) }
-  }, [])
+  useSocketOn(Msg.SendChatMessage, (error: string) => {
+    setChatMessages(messages => [{ type: ChatType.Error, message: error, time: Date.now() }, ...messages])
+  })
 
   // When new message is received, scroll to bottom of container if it's already at the bottom
   useEffect(() => {
@@ -76,9 +75,15 @@ export default function Chat() {
             const nameColor = roleColors[chat.role]
             return (
               <div key={chatMessages.length - index} className={styles.message}>
-                {/* <img src={chat.image} alt="" className={styles.image} /> */}
-                <p><span style={{ color: nameColor }}>{chat.username}:</span> {chat.message}</p>
-                <span className={styles.timestamp} title={fullTimestamp}>{timestamp}</span>
+                <div>
+                  {streamInfo.chat.showIdenticons && (
+                    <img src={chat.image} alt="" className={styles.image} />
+                  )}
+                  <p><span style={{ color: nameColor }}>{chat.username}:</span> {chat.message}</p>
+                </div>
+                {streamInfo.chat.showTimestamps && (
+                  <span className={styles.timestamp} title={fullTimestamp}>{timestamp}</span>
+                )}
               </div>
             )
           }
@@ -97,7 +102,9 @@ export default function Chat() {
           return (
             <div key={chatMessages.length - index} className={styles.event}>
               <p>{icon && icon}{chat.message}</p>
-              <span className={styles.timestamp} title={fullTimestamp}>{timestamp}</span>
+              {streamInfo.chat.showTimestamps && (
+                <span className={styles.timestamp} title={fullTimestamp}>{timestamp}</span>
+              )}
             </div>
           )
         }) : (

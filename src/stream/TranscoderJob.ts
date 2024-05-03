@@ -8,7 +8,7 @@ import TranscoderQueue from '@/stream/TranscoderQueue'
 import Settings from './Settings'
 import type Video from '@/stream/Video'
 import SocketUtils from '@/lib/SocketUtils'
-import { JobState, SocketEvent } from '@/lib/enums'
+import { JobState, Msg } from '@/lib/enums'
 import type { FfmpegCommand } from 'fluent-ffmpeg'
 
 // Represents a transcoding job
@@ -34,9 +34,7 @@ export default class TranscoderJob {
   get state() { return this._state }
   private set state(value: JobState) {
     this._state = value
-    SocketUtils.broadcastAdmin(SocketEvent.AdminTranscodeQueueList, TranscoderQueue.clientTranscodeList)
-    console.log(`s: ${value} (${this.video.name})`)
-    // if (value === 'finished') this.cleanup()
+    SocketUtils.broadcastAdmin(Msg.AdminTranscodeQueueList, TranscoderQueue.clientTranscodeList)
   }
 
   // Running completeJob() will see if the transcoded files already exist, if so the job is already done
@@ -56,7 +54,7 @@ export default class TranscoderJob {
     this.ffmpegCommand.on('end', async () => {
       // For some stupid reason, 'error' fires after 'end'. So wait a couple ms to make sure errors are handled
       await new Promise(resolve => setTimeout(resolve, 1000))
-      console.log(`ffmpeg end`.yellow, this.error)
+      // console.log(`ffmpeg end`.yellow, this.error)
 
       if (this.state === JobState.CleaningUp) {
         await this.cleanup()
@@ -154,7 +152,6 @@ export default class TranscoderJob {
 
   // Add this job to the queue
   activate() {
-    console.log(`activate() - ${this.video.name}`.yellow, this.state)
     if (this.state === JobState.Errored) {
       this.resolveErrorCallbacks()
       return
@@ -184,7 +181,6 @@ export default class TranscoderJob {
   // Actually start the transcoding process
   // Should only be called once
   async transcode(): Promise<void>{
-    console.log(`transcode() - ${this.video.name}`.yellow, this.state)
     if (this.state !== JobState.AwaitingTranscode) throw new Error('Transcoding job is not in the correct state to start transcoding.')
     this.state = JobState.Transcoding
 
@@ -217,7 +213,6 @@ export default class TranscoderJob {
 
     this.isReady = false
     this.state = JobState.CleaningUp
-    console.log(`CleaningUp - ${this.video.name}`)
 
     const { cacheVideos, cacheBumpers } = Settings.getSettings()
     const keepCache = this.video.isBumper ? cacheBumpers : cacheVideos
