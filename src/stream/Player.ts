@@ -118,7 +118,8 @@ export default new class Player {
     return {
       list: [
         { name: 'None', id: 'None' },
-        { name: 'Fox News', id: 'FoxNews' }
+        { name: 'Fox News', id: 'FoxNews' },
+        { name: 'Saul Goodman', id: 'SaulGoodman' }
       ],
       selectedID: Settings.getSettings().streamTheme
     }

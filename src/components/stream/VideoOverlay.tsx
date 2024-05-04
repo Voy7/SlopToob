@@ -15,6 +15,7 @@ export default function VideoOverlay() {
   return (
     <>
       {streamInfo.streamTheme === 'FoxNews' && <FoxNewsOverlay />}
+      {streamInfo.streamTheme === 'SaulGoodman' && <SaulGoodmanOverlay />}
       <StateOverlay />
       <BumperOverlay />
     </>
@@ -91,4 +92,8 @@ function BumperOverlay() {
 
 function FoxNewsOverlay() {
   return <img src="/fox-news-overlay.png" alt="" className={styles.fullImageOverlay} />
+}
+
+function SaulGoodmanOverlay() {
+  return <img src="/saul-goodman-overlay.gif" alt="" className={styles.saulGoodmanOverlay} />
 }
