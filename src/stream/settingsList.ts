@@ -81,6 +81,9 @@ export const settingsList = {
   sendVotedToSkip: { default: true },
   sendVoteSkipPassed: { default: true },
 
+  // If average video is 10~ min, history is valid for roughly a week
+  historyMaxItems: { default: 1000 },
+
   // ...
 } satisfies Record<string, Setting>
 

@@ -1,20 +1,20 @@
 import prisma from '@/lib/prisma'
-import Env from '@/EnvVariables'
 import Logger from '@/lib/Logger'
 import Video from '@/stream/Video'
+import PlayHistory from '@/stream/PlayHistory'
+import VoteSkipHandler from '@/stream/VoteSkipHandler'
 import Settings from '@/stream/Settings'
 import SocketUtils from '@/lib/SocketUtils'
 import { getNextBumper } from '@/stream/bumpers'
 import { StreamState, Msg, VideoState } from '@/lib/enums'
-import type { RichPlaylist, FileTree, ClientPlaylist, ListOption } from '@/typings/types'
+import type { RichPlaylist, ClientPlaylist, ListOption } from '@/typings/types'
 import type { StreamInfo, StreamOptions } from '@/typings/socket'
-import VoteSkipHandler from './VoteSkipHandler'
 
 // Main player (video) handler, singleton
 export default new class Player {
   playing: Video | null = null
   queue: Video[] = []
-  playlists: RichPlaylist[] = []
+  private playlists: RichPlaylist[] = []
   private activePlaylist: RichPlaylist | null = null
   private lastBumperDate: Date = new Date()
 
@@ -74,10 +74,11 @@ export default new class Player {
     const { targetQueueSize } = Settings.getSettings()
     if (this.queue.length >= targetQueueSize) return
 
-    const randomVideo = this.activePlaylist.videos[Math.floor(Math.random() * this.activePlaylist.videos.length)]
+    const paths = this.activePlaylist.videos.map(video => video.path)
+    const randomVideo = PlayHistory.getRandom(paths)
     if (!randomVideo) return
 
-    this.addVideo(new Video(randomVideo.path))
+    this.addVideo(new Video(randomVideo))
 
     if (this.queue.length < targetQueueSize) {
       this.populateRandomToQueue()

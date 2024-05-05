@@ -3,6 +3,7 @@ import path from 'path'
 import Env from '@/EnvVariables'
 import Logger from '@/lib/Logger'
 import Video from '@/stream/Video'
+import PlayHistory from '@/stream/PlayHistory'
 import SocketUtils from '@/lib/SocketUtils'
 import { Msg } from '@/lib/enums'
 import type { ClientBumper, ClientVideo } from '@/typings/types'
@@ -92,9 +93,9 @@ export function getNextBumper(): Video | null {
 
 // TODO: Implement 'smart shuffle' algorithm
 function getRandomBumper(): Video | null {
-  const bumperPath = bumperPaths[Math.floor(Math.random() * bumperPaths.length)]
-  if (!bumperPath) return null
-  const video = new Video(bumperPath, true)
+  const randomBumper = PlayHistory.getRandom(bumperPaths)
+  if (!randomBumper) return null
+  const video = new Video(randomBumper, true)
   return video
 }
 

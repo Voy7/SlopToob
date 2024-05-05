@@ -10,6 +10,7 @@ import TranscoderQueue from '@/stream/TranscoderQueue'
 import TranscoderJob from '@/stream/TranscoderJob'
 import Settings from '@/stream/Settings'
 import SocketUtils from '@/lib/SocketUtils'
+import PlayHistory from '@/stream/PlayHistory'
 import { Msg, VideoState as State } from '@/lib/enums'
 import type { ClientVideo } from '@/typings/types'
 import VoteSkipHandler from './VoteSkipHandler'
@@ -83,6 +84,8 @@ export default class Video {
 
       if (this.state === State.Playing || this.state === State.Paused) return
       Logger.debug(`[Video] Playing video: ${this.name}`, this.state)
+
+      PlayHistory.add(this.inputPath)
 
       if (this.state === State.Errored) {
         const { errorDisplaySeconds } = Settings.getSettings()
