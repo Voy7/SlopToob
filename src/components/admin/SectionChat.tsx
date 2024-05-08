@@ -46,7 +46,7 @@ export default function SectionChat() {
       <SettingGroup>
         <Header icon="user">Chat Nicknames</Header>
         <ToggleOption {...nicknameOnlyAlphanumeric} label="Only Alphanumeric" />
-        <Description>Can nickname can only contain letters, numbers, underscores, and spaces.</Description>
+        <Description>Can nickname only contain letters, numbers, underscores, and spaces.</Description>
         <Gap />
         <NumberOption type="integer" {...nicknameMinLength} label="Minimum Length" />
         <NumberOption type="integer" {...nicknameMaxLength} label="Maximum Length" />

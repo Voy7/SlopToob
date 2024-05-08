@@ -17,6 +17,7 @@ import VoteSkipHandler from './VoteSkipHandler'
 
 export default class Video {
   readonly id: string = generateSecret()
+  private path: string
   private _state: State = State.NotReady
   error: string | null = null
   durationSeconds: number = 0
@@ -27,7 +28,9 @@ export default class Video {
   private finishedTimeout: NodeJS.Timeout | null = null
   private job: TranscoderJob
 
-  constructor(public path: string, public isBumper: boolean = false) {
+  constructor(path: string, public isBumper: boolean = false) {
+    this.path = path.replace(/\\/g, '/')
+
     this.job = TranscoderQueue.newJob(this)
     
     this.job.onStreamableReady(() => {

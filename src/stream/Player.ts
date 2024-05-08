@@ -209,6 +209,7 @@ export default new class Player {
 
   // Create new blank playlist, return ID
   async addPlaylist(name: string): Promise<string> {
+    this.checkPlaylistNameValid(name)
     const playlist = await prisma.playlist.create({
       data: { name }
     })
@@ -217,34 +218,35 @@ export default new class Player {
     return playlist.id
   }
 
-  // Delete playlist by ID
-  async deletePlaylist(playlistID: string) {
-    await prisma.playlist.delete({
-      where: { id: playlistID }
-    })
-    Logger.debug('Playlist deleted:', playlistID)
-    await this.syncUpdatePlaylists()
+  // Delete playlist by ID, return error as string if failed
+  async deletePlaylist(playlistID: string): Promise<string | void> {
+    try {
+      await prisma.video.deleteMany({ where: { playlistID } })
+      await prisma.playlist.delete({
+        where: { id: playlistID },
+        include: { videos: true }
+      })
+      Logger.debug('Playlist deleted:', playlistID)
+      this.syncUpdatePlaylists()
+    }
+    catch (error: any) { return error.message }
   }
 
   // Change playlist name, return error as string if failed
-  async editPlaylistName(playlistID: string, newName: string): Promise<string | void> {
-    try {
-      // Name must be between 3-30 characters
-      if (newName.length < 3) throw new Error('Name must be at least 3 characters long.')
-      if (newName.length > 30) throw new Error('Name must be at most 30 characters long.')
+  async editPlaylistName(playlistID: string, newName: string) {
+    this.checkPlaylistNameValid(newName)
+    await prisma.playlist.update({
+      where: { id: playlistID },
+      data: { name: newName }
+    })
+    Logger.debug(`Playlist (${playlistID}) name updated:`, newName)
+    await this.syncUpdatePlaylists()
+  }
 
-      // Check if name already exists
-      const exists = this.playlists.find(playlist => playlist.name === newName)
-      if (exists) throw new Error('Playlist name already taken.')
-
-      await prisma.playlist.update({
-        where: { id: playlistID },
-        data: { name: newName }
-      })
-      Logger.debug(`Playlist (${playlistID}) name updated:`, newName)
-      await this.syncUpdatePlaylists()
-    }
-    catch (error: any) { return error.message }
+  private checkPlaylistNameValid(name: string) {
+    if (name.length < 3) throw new Error('Name must be at least 3 characters long.')
+    if (name.length > 30) throw new Error('Name must be at most 30 characters long.')
+    if (this.playlists.find(playlist => playlist.name === name)) throw new Error('Playlist name already taken.')
   }
 
   // Set new videos for playlist

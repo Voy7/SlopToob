@@ -70,7 +70,7 @@ $optionPadding: 0.35rem;
   @include option;
 }
 
-.numberOption {
+.textOption {
   @include option;
   padding-top: 0;
   padding-bottom: 0;
@@ -125,4 +125,17 @@ $optionPadding: 0.35rem;
   }
 
   svg { color: var(--text-color-3); }
+}
+
+.buttonOption {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: $optionPadding;
+  color: var(--text-color-3);
+  background: var(--bg-color-2);
+  border-radius: 0.25rem;
+
+  &.swapped { flex-direction: row-reverse; }
 }

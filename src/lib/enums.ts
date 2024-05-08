@@ -55,8 +55,8 @@ export const enum JobState {
   Idle,
   AwaitingTranscode,
   Transcoding,
-  CleaningUp,
   Finished,
+  CleaningUp,
   Errored
 }
 

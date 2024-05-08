@@ -1,0 +1,61 @@
+.actionModal {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+
+  p {
+    margin: 0 auto;
+    padding: 1rem 0;
+    color: var(--text-color-2);
+  }
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    input {
+      flex: 1;
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      font-size: 1rem;
+      color: var(--text-color-1);
+      background: var(--bg-color-2);
+      border: 1px solid var(--border-color-1);
+      border-radius: 0.5rem;
+
+      &:focus { outline: none; border-color: var(--select-color); }
+
+      &[type="file"] {
+        color: var(--text-color-3);
+
+        &::file-selector-button {
+          margin-right: 0.5rem;
+          padding: 0.35em 0.5em;
+          color: var(--text-color-1);
+          background-color: var(--select-color);
+          border: none;
+          border-radius: 0.5em;
+          cursor: pointer;
+        }
+      }
+    }
+  }
+
+  .buttons {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .error {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 1rem 0 0 0;
+    color: var(--error-color);
+  }
+}

@@ -47,6 +47,60 @@ export function ToggleOption({ label, value, setValue }: ToggleProps) {
   )
 }
 
+type StringOptionProps = {
+  label: string,
+  value: string | null,
+  setValue: (value: string) => void,
+  error?: string | null
+}
+
+export function StringOption({ label, value, setValue, error }:StringOptionProps) {
+  const [input, setInput] = useState<string | null>(null)
+  const [isEditing, setIsEditing] = useState<boolean>(false)
+
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  // Update input when value changes from server
+  useEffect(() => { setInput(value) }, [value])
+  
+  // Update width of input based on value
+  useEffect(() => {
+    if (!inputRef.current) return
+    const input = inputRef.current
+    input.style.width = `calc(${input.value.length}ch + 1em)`
+  }, [input])
+
+  function onSubmit(event?: React.FormEvent) {
+    event?.preventDefault()
+    if (!input) return
+    setValue(input)
+    inputRef.current?.blur()
+  }
+
+  return (
+    <form onSubmit={onSubmit}>
+      <label className={isEditing ? `${styles.textOption} ${styles.isEditing}` : styles.textOption}>
+        {label}
+        {value !== null && input !== null ? (
+          <div className={styles.right}>
+            <div className={styles.valueLabel}>
+              <p key={`${error}`} className={typeof error ==='string' ? styles.show : undefined}><Icon name="warning" />{error}</p>
+              <input
+                ref={inputRef}
+                type="text"
+                value={`${input}`}
+                onChange={event => setInput(event.target.value)}
+                onFocus={() => setIsEditing(true)}
+                onBlur={() => { setIsEditing(false); onSubmit() }}
+              />
+            </div>
+          </div>
+        ) : <Icon name="loading" className={styles.loadingIcon} /> }
+      </label>
+    </form>
+  )
+}
+
 type NumberOptionProps = {
   label: string,
   type: 'integer' | 'float' | 'percentage',
@@ -66,18 +120,7 @@ export function NumberOption({ label, type, value, setValue }: NumberOptionProps
     setInput(value !== null ? `${value}` : null)
     setIsValid(value !== null ? checkIsValid(`${value}`) : null)
   }, [value])
-
-  // Submit when input loses focus
-  // useEffect(() => {
-  //   if (!inputRef.current) return
-  //   const element = inputRef.current
-  //   const onBlur = () => {
-  //     if (element !== document.activeElement) onSubmit()
-  //   }
-  //   element.addEventListener('blur', onBlur)
-  //   return () => element.removeEventListener('blur', onBlur)
-  // }, [inputRef.current, input, value])
-
+  
   // Update width of input based on value
   useEffect(() => {
     if (!inputRef.current) return
@@ -109,7 +152,7 @@ export function NumberOption({ label, type, value, setValue }: NumberOptionProps
 
   return (
     <form onSubmit={onSubmit}>
-      <label className={isEditing ? `${styles.numberOption} ${styles.isEditing}` : styles.numberOption}>
+      <label className={isEditing ? `${styles.textOption} ${styles.isEditing}` : styles.textOption}>
         {label}
         {value !== null && input !== null ? (
           <div className={styles.right}>
@@ -164,5 +207,20 @@ export function ListOption({ value, setValue }: ListOptionProps) {
         </label>
       ))}
     </>
+  )
+}
+
+type ButtonOptionProps = {
+  label: string,
+  swapped?: boolean,
+  children: React.ReactNode
+}
+
+export function ButtonOption({ label, swapped, children }: ButtonOptionProps) {
+  return (
+    <div className={swapped ? `${styles.buttonOption} ${styles.swapped}` : styles.buttonOption}>
+      {children}
+      {label}
+    </div>
   )
 }

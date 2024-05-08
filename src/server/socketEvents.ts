@@ -166,19 +166,23 @@ export const socketEvents: Record<string, EventOptions> = {
 
   // Admin adds a new playlist
   [Msg.AdminAddPlaylist]: { adminOnly: true, run: async (socket, newPlaylistName: string) => {
-    const newPlaylistID = await Player.addPlaylist(newPlaylistName)
-    socket.emit(Msg.AdminAddPlaylist, newPlaylistID)
+    try {
+      const newPlaylistID = await Player.addPlaylist(newPlaylistName)
+      socket.emit(Msg.AdminAddPlaylist, newPlaylistID)
+    }
+    catch (error: any) { socket.emit(Msg.AdminAddPlaylist, { error: error.message }) }
   }},
 
   // Admin deletes a playlist
-  [Msg.AdminDeletePlaylist]: { adminOnly: true, run: (socket, playlistID: string) => {
-    Player.deletePlaylist(playlistID)
+  [Msg.AdminDeletePlaylist]: { adminOnly: true, run: async (socket, playlistID: string) => {
+    const errorMsg = await Player.deletePlaylist(playlistID)
+    if (errorMsg) socket.emit(Msg.AdminDeletePlaylist, errorMsg)
   }},
 
   // Admin edits a playlist name
   [Msg.AdminEditPlaylistName]: { adminOnly: true, run: async (socket, payload: EditPlaylistNamePayload) => {
-    const errorMsg = await Player.editPlaylistName(payload.playlistID, payload.newName)
-    if (errorMsg) socket.emit(Msg.AdminEditPlaylistName, errorMsg)
+    try { await Player.editPlaylistName(payload.playlistID, payload.newName) }
+    catch (error: any) { socket.emit(Msg.AdminEditPlaylistName, error.message) }
   }},
 
   // Admin edits a playlist's videos
