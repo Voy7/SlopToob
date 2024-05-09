@@ -20,7 +20,7 @@ export default function QueueList() {
 
   return (
     <SettingGroup>
-      <Header icon="menu">Transcoding Jobs ({transcodeQueue.length})</Header>
+      <Header icon="list">Transcoding Jobs ({transcodeQueue.length})</Header>
       <div className={styles.queueItems}>
         {transcodeQueue.map((video, index) => (
           <div key={video.name} className={styles.queueItem}>

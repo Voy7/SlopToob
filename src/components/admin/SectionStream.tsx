@@ -8,7 +8,6 @@ import QueueList from '@/components/admin/QueueList'
 
 export default function SectionStream() {
   const activePlaylist = useListOption('activePlaylistID')
-  const targetQueueSize = useNumberOption('targetQueueSize')
   const activeTheme = useListOption('streamTheme')
 
   return (
@@ -21,11 +20,6 @@ export default function SectionStream() {
         <Description>Playlist that will be used for the stream.</Description>
       </SettingGroup>
       <QueueList />
-      <SettingGroup>
-        <Header icon="menu">Queue</Header>
-        <NumberOption label="Target Queue Size" type="integer" {...targetQueueSize} />
-        <Description>Minimum number of videos to keep in the queue.</Description>
-      </SettingGroup>
       <SettingGroup>
         <Header icon="menu">Joke Themes</Header>
         <ListOption {...activeTheme} />

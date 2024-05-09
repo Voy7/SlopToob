@@ -80,9 +80,18 @@ export const settingsList = {
   sendChangedNickname: { default: true },
   sendVotedToSkip: { default: true },
   sendVoteSkipPassed: { default: true },
+  sendAdminPausePlay: { default: true },
+  sendAdminSkip: { default: true },
+  sendAdminChangePlaylist: { default: true },
+
+  // Pause stream when no one is watching
+  pauseWhenInactive: { default: true },
 
   // If average video is 10~ min, history is valid for roughly a week
   historyMaxItems: { default: 1000 },
+
+  // How long to extend the video duration by
+  videoPaddingSeconds: { default: 1 },
 
   // ...
 } satisfies Record<string, Setting>

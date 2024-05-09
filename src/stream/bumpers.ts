@@ -6,9 +6,8 @@ import Video from '@/stream/Video'
 import PlayHistory from '@/stream/PlayHistory'
 import SocketUtils from '@/lib/SocketUtils'
 import { Msg } from '@/lib/enums'
-import type { ClientBumper, ClientVideo } from '@/typings/types'
+import type { ClientBumper } from '@/typings/types'
 
-// export const bumpers: Video[] = []
 const bumperPaths: string[] = []
 let nextBumper: Video | null = null
 
@@ -54,11 +53,6 @@ function syncCheckBumper(pathName: string) {
   // ... Handle future cases
 }
 
-// Utility function to get all bumpers as ClientVideo[] for client side
-// export function getClientBumpers(): ClientVideo[] {
-//   return bumpers.map(bumper => bumper.clientVideo)
-// }
-
 export function getClientBumpers():ClientBumper[] {
   return bumperPaths.map(path => {
     const name = (path.split('/').pop() || 'Unknown').split('.')[0]
@@ -66,27 +60,18 @@ export function getClientBumpers():ClientBumper[] {
   })
 }
 
-// Prepare the next bumper to be played
-// export function queueNextBumper(): Video | null {
-//   if (!bumpers.length) return null // No bumpers available
-
-//   // Randomly select a bumper
-//   nextBumper = bumpers[Math.floor(Math.random() * bumpers.length)]
-//   nextBumper.prepare()
-//   return nextBumper
-// }
-
-
 export function getNextBumper(): Video | null {
   if (bumperPaths.length <= 0) return null // No bumpers available
 
   if (nextBumper) {
     const bumper = nextBumper
     nextBumper = getRandomBumper()
+    nextBumper?.prepare()
     return bumper
   }
 
   nextBumper = getRandomBumper()
+  nextBumper?.prepare()
 
   return getRandomBumper()
 }
@@ -98,10 +83,3 @@ function getRandomBumper(): Video | null {
   const video = new Video(randomBumper, true)
   return video
 }
-
-const messages = [
-  'A quicky message from our sponsor',
-  'Slop brought to you by..."',
-  'Endorsed by the one and only',
-  'We need money',
-]

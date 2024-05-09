@@ -8,7 +8,7 @@ export default function History() {
   return (
     <div className={styles.history}>
       <h3 className={styles.header}>
-        <Icon name="files" />
+        <Icon name="history" />
         Stream History
       </h3>
       <p>(Feature Coming Soon)</p>

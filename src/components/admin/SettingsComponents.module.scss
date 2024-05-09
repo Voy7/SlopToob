@@ -77,8 +77,8 @@ $optionPadding: 0.35rem;
   padding-right: 0;
 
   &.isEditing { transition: background 150ms; background: var(--bg-color-4); }
-  
-  svg { color: var(--text-color-3); }
+
+  svg { margin: $optionPadding; color: var(--text-color-3); }
 
   p { // Error
     display: flex;

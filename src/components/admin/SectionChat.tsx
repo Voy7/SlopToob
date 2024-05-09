@@ -15,6 +15,9 @@ export default function SectionChat() {
   const sendChangedNickname = useToggleOption('sendChangedNickname')
   const sendVotedToSkip = useToggleOption('sendVotedToSkip')
   const sendVoteSkipPassed = useToggleOption('sendVoteSkipPassed')
+  const sendAdminPausePlay = useToggleOption('sendAdminPausePlay')
+  const sendAdminSkip = useToggleOption('sendAdminSkip')
+  const sendAdminChangePlaylist = useToggleOption('sendAdminChangePlaylist')
 
   const nicknameOnlyAlphanumeric = useToggleOption('nicknameOnlyAlphanumeric')
   const nicknameMinLength = useNumberOption('nicknameMinLength')
@@ -25,31 +28,34 @@ export default function SectionChat() {
       <h2>Chat</h2>
       <SettingGroup>
         <Header icon="chat">User Chat Messages</Header>
-        <NumberOption type="integer" {...chatMaxLength} label="Maximum Message Length" />
+        <NumberOption label="Maximum Message Length" type="integer" {...chatMaxLength} />
         <Description>Maximum amount of characters in a chat message.</Description>
       </SettingGroup>
       <SettingGroup>
-        <Header icon="chat">Chat Elements</Header>
-        <ToggleOption {...showChatTimestamps} label="Display Timestamps" />
-        <ToggleOption {...showChatIdenticons} label="Display Identicons" />
+        <Header icon="view">Chat Elements</Header>
+        <ToggleOption label="Display Timestamps" {...showChatTimestamps} />
+        <ToggleOption label="Display Identicons" {...showChatIdenticons} />
         <Description>Display timestamps and identicons in chat.</Description>
       </SettingGroup>
       <SettingGroup>
-        <Header icon="menu">Event Messages</Header>
-        <ToggleOption {...sendJoinedStream} label="User Joined Stream" />
-        <ToggleOption {...sendLeftStream} label="User Left Stream" />
-        <ToggleOption {...sendChangedNickname} label="User Changed Nickname" />
-        <ToggleOption {...sendVotedToSkip} label="User Voted to Skip" />
-        <ToggleOption {...sendVoteSkipPassed} label="Vote Skip Passed" />
+        <Header icon="list">Event Messages</Header>
+        <ToggleOption label="User Joined Stream" {...sendJoinedStream} />
+        <ToggleOption label="User Left Stream" {...sendLeftStream} />
+        <ToggleOption label="User Changed Nickname" {...sendChangedNickname} />
+        <ToggleOption label="User Voted to Skip" {...sendVotedToSkip} />
+        <ToggleOption label="Vote Skip Passed" {...sendVoteSkipPassed} />
+        <ToggleOption label="Admin Paused/Resumed Stream" {...sendAdminPausePlay} />
+        <ToggleOption label="Admin Skipped Video" {...sendAdminSkip} />
+        <ToggleOption label="Admin Changed Active Playlist" {...sendAdminChangePlaylist} />
         <Description>Send a message when an event occurs.</Description>
       </SettingGroup>
       <SettingGroup>
         <Header icon="user">Chat Nicknames</Header>
-        <ToggleOption {...nicknameOnlyAlphanumeric} label="Only Alphanumeric" />
+        <ToggleOption label="Only Alphanumeric" {...nicknameOnlyAlphanumeric} />
         <Description>Can nickname only contain letters, numbers, underscores, and spaces.</Description>
         <Gap />
-        <NumberOption type="integer" {...nicknameMinLength} label="Minimum Length" />
-        <NumberOption type="integer" {...nicknameMaxLength} label="Maximum Length" />
+        <NumberOption label="Minimum Length" type="integer" {...nicknameMinLength} />
+        <NumberOption label="Maximum Length" type="integer" {...nicknameMaxLength} />
         <Description>Minimum and maximum amount of characters in nicknames.</Description>
       </SettingGroup>
     </>

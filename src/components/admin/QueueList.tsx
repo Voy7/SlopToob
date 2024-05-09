@@ -20,7 +20,7 @@ export default function QueueList() {
 
   return (
     <SettingGroup>
-      <Header icon="menu">Queue ({queue.length})</Header>
+      <Header icon="list">Queue ({queue.length})</Header>
       <div className={styles.queueItems}>
         {queue.map((video, index) => (
           <div key={video.id} className={styles.queueItem}>

@@ -11,18 +11,20 @@ import SectionCaching from '@/components/admin/SectionCaching'
 import SectionChat from '@/components/admin/SectionChat'
 import SectionVoteSkip from '@/components/admin/SectionVoteSkip'
 import SectionMonitor from '@/components/admin/SectionMonitor'
+import SectionAdvanced from '@/components/admin/SectionAdvanced'
 import Modal from '@/components/ui/Modal'
 import styles from './AdminModal.module.scss'
 
 // Admin panel sections
 export const sections = [
-  { name: 'Stream', icon: <Icon name="settings" />, component: <SectionStream /> },
+  { name: 'Stream', icon: <Icon name="stream-settings" />, component: <SectionStream /> },
   { name: 'Playlists', icon: <Icon name="playlist" />, component: <SectionPlaylists /> },
-  { name: 'Bumpers', icon: <Icon name="video-file" />, component: <SectionBumpers /> },
+  { name: 'Bumpers', icon: <Icon name="bumper" />, component: <SectionBumpers /> },
   { name: 'Caching', icon: <Icon name="cache" />, component: <SectionCaching /> },
   { name: 'Chat', icon: <Icon name="chat" />, component: <SectionChat /> },
   { name: 'Vote Skip', icon: <Icon name="skip" />, component: <SectionVoteSkip /> },
   { name: 'Monitor', icon: <Icon name="admin-panel" />, component: <SectionMonitor /> },
+  { name: 'Advanced', icon: <Icon name="settings" />, component: <SectionAdvanced /> },
 ] as const
 
 export type SectionName = typeof sections[number]['name']

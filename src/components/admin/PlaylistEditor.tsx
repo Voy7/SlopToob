@@ -61,6 +61,7 @@ export default function PlaylistEditor({ playlist }: { playlist: ClientPlaylist 
   // Delete playlist
   function deletePlaylist() {
     if (deletePlaylistLoading) return
+    setDeletePlaylistLoading(true)
     socket.emit(Msg.AdminDeletePlaylist, playlist.id)
   }
 

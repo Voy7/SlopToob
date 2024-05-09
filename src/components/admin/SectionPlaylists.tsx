@@ -74,7 +74,7 @@ export default function SectionPlaylists() {
         isOpen={showAddModal}
         setClose={() => setShowAddModal(false)}
         width={360}
-        button={<Button style="main" icon="playlist-add" isSubmit>Add Playlist</Button>}
+        button={<Button style="main" icon="playlist-add" loading={addLoading} isSubmit>Add Playlist</Button>}
         error={addError}
         formOnSubmit={submitAddPlaylist}
       >

@@ -165,10 +165,8 @@ export default class Video {
   get outputPath(): string {
     const basePath = this.isBumper ? Env.BUMPERS_PATH : Env.VIDEOS_PATH
     const outputBasePath = this.isBumper ? Env.BUMPERS_OUTPUT_PATH : Env.VIDEOS_OUTPUT_PATH
-    // let newPath = path.resolve(this.path)
-    let newPath = this.path.replace(basePath, '')
-    newPath = path.join(outputBasePath, newPath).replace(/\\/g, '/')
-    return newPath
+    const newPath = this.path.replace(basePath, '')
+    return path.join(outputBasePath, newPath).replace(/\\/g, '/')
   }
 
   get name() {

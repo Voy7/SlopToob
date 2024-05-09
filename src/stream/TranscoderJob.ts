@@ -322,12 +322,13 @@ export default class TranscoderJob {
     return new Promise<number>((resolve, reject) => {
       ffmpeg.ffprobe(this.video.inputPath, (error, metadata) => {
         if (error) reject('Failed to get video duration.')
-          const duration = metadata?.format?.duration
-          if (typeof duration !== 'number') {
-            reject('Failed to get video metadata duration value.')
-            return
-          }
-        resolve(duration)
+        const duration = metadata?.format?.duration
+        if (typeof duration !== 'number') {
+          reject('Failed to get video metadata duration value.')
+          return
+        }
+        const { videoPaddingSeconds } = Settings.getSettings()
+        resolve(duration + videoPaddingSeconds)
       })
     })
   }
