@@ -1,16 +1,22 @@
 import prisma from '@/lib/prisma'
+import parseVideoName from '@/lib/parseVideoName'
 import Logger from '@/lib/Logger'
 import Settings from '@/stream/Settings'
+import Player from '@/stream/Player'
 import TranscoderQueue from '@/stream/TranscoderQueue'
+
+// How many items to show for client history
+const MAX_RECENT_ITEMS = 5
 
 // Video history handler
 export default new class PlayHistory {
   private history: string[] = []
+  private recent: string[] = []
 
   constructor() { this.populateHistory() }
 
   // Populate history with last N videos
-  async populateHistory() {
+  private async populateHistory() {
     const { historyMaxItems } = Settings.getSettings()
 
     // Get last N videos from history
@@ -20,39 +26,71 @@ export default new class PlayHistory {
     })
 
     this.history = history.map(h => h.path)
+    this.recent = history.slice(0, MAX_RECENT_ITEMS + 1).map(h => h.path)
+
     Logger.debug(`[History] Populated history with ${this.history.length} items.`)
   }
 
   // Add a video path to the history
-  add(inputPath: string) {
-    if (this.history.includes(inputPath)) return
-
+  async add(inputPath: string) {
     this.history.unshift(inputPath)
+    this.recent.unshift(inputPath)
     
     if (this.history.length > Settings.getSettings().historyMaxItems) {
       this.history.pop()
     }
 
-    prisma.playHistory.create({ data: { path: inputPath } })
+    if (this.recent.length > MAX_RECENT_ITEMS + 1) {
+      this.recent.pop()
+    }
+
+    await prisma.playHistory.create({ data: { path: inputPath } })
     Logger.debug(`[History] Added ${inputPath} to history.`)
   }
 
   // Get a random video path from the supplied list of paths if it is not in the history
-  // If all paths are in history, history is ignored and a random path is returned
+  // If all paths are in history, history is weighted by lowest amount of times played
   // Will also take all videos in queue into account
   getRandom(inputPaths: string[]): string | null {
-    if (inputPaths.length === 0) return null
+    if (inputPaths.length == 0) return null
 
-    const notInHistory = inputPaths.filter(p => {
-      if (this.history.includes(p)) return false
-      if (TranscoderQueue.jobs.some(j => j.video.inputPath === p)) return false
-      return true
+    // Use history AND queue items for algorithm
+    const historyItems = [...this.history, ...TranscoderQueue.jobs.map(j => j.video.inputPath)]
+
+    // Count how many times each item has been played
+    const countMap = new Map<string, number>()
+    for (const item of historyItems) {
+      if (!inputPaths.includes(item)) continue
+      const existing = countMap.get(item)
+      if (existing) countMap.set(item, existing + 1)
+      else countMap.set(item, 1)
+    }
+
+    // Get the lowest amount of times played
+    let minCount = Infinity
+    countMap.forEach(count => {
+      if (count < minCount) minCount = count
     })
 
-    // No 'new' videos, return random
-    if (notInHistory.length === 0) return inputPaths[Math.floor(Math.random() * inputPaths.length)]
+    // Pool is all inputPaths 
+    const pool: string[] = []
+    for (const path of inputPaths) {
+      const playCount = countMap.get(path)
+      if (!playCount || playCount === minCount) pool.push(path)
+    }
 
-    // Return random from 'new' videos
-    return notInHistory[Math.floor(Math.random() * notInHistory.length)]
+    // If pool is empty, return null
+    if (pool.length === 0) return null
+
+    // Return a random item from the pool
+    return pool[Math.floor(Math.random() * pool.length)]
+  }
+
+  get clientHistory(): string[] {
+    // Don't include the current video
+    if (Player.playing?.inputPath === this.recent[0]) {
+      return this.recent.slice(1).map(path => parseVideoName(path))
+    }
+    return this.recent.slice(0, MAX_RECENT_ITEMS).map(path => parseVideoName(path))
   }
 }

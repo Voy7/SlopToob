@@ -3,11 +3,9 @@
 import { useEffect, useState } from 'react'
 import { useStreamContext } from '@/contexts/StreamContext'
 import { setNicknameCookie } from '@/app/actions'
-import Modal from '@/components/ui/Modal'
-import Button from '@/components/ui/Button'
-import Icon from '@/components/ui/Icon'
-import styles from './NicknameModal.module.scss'
 import { Msg } from '@/lib/enums'
+import ActionModal from '@/components/ui/ActionModal'
+import Button from '@/components/ui/Button'
 
 // Change username modal prompt
 export default function NicknameModal() {
@@ -47,20 +45,24 @@ export default function NicknameModal() {
   }, [name])
 
   return (
-    <Modal title="Set Nickname" isOpen={showNicknameModal} setClose={() => setShowNicknameModal(false)}>
-      <form onSubmit={submit} className={styles.nicknameModal}>
-        <p>Enter a nickname to be displayed in chat.</p>
+    <ActionModal
+      title="Set Nickname"
+      isOpen={showNicknameModal}
+      setClose={() => setShowNicknameModal(false)}
+      button={<Button style="main" icon="edit" loading={loading} active={name.length > 0} isSubmit>Save Nickname</Button>}
+      error={error}
+      formOnSubmit={submit}
+      width={380}
+    >
+      <p>Enter a nickname to be displayed in chat.</p>
+      <label>
         <input
           type="text" name="nickname"
           placeholder="Enter a nickname..."
           value={name} onChange={event => setName(event.target.value)}
           autoFocus
         />
-        <div className={styles.buttons}>
-          <Button style="main" icon="edit" loading={loading} active={name.length > 0} isSubmit>Save Nickname</Button>
-        </div>
-        {error && <p className={styles.error}><Icon name="warning" />{error}</p>}
-      </form>
-    </Modal>
+      </label>
+    </ActionModal>
   )
 }

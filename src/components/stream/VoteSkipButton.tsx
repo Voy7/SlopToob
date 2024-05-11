@@ -42,25 +42,25 @@ export default function VoteSkipButton() {
 
   // Vote skipping entirely disabled
   if (!streamInfo.voteSkip.isEnabled) {
-    return <Button style="normal" icon="skip" active={false}>Vote Skipping Disabled</Button>    
+    return <Button data-vote-button style="normal" icon="skip" active={false}>Vote Skipping Disabled</Button>    
   }
 
   // Vote skip not ready yet
   if (!streamInfo.voteSkip.isAllowed && streamInfo.voteSkip.allowedInSeconds <= -1) {
-    return <Button style="normal" icon="skip" active={false}>Vote Skip &bull; Wait</Button>
+    return <Button data-vote-button style="normal" icon="skip" active={false}>Vote Skip &bull; Wait</Button>
   }
 
   
   // Vote skip countdown to be allowed
   if (!streamInfo.voteSkip.isAllowed) {
-    return <Button style="normal" icon="skip">Vote Skip &bull; <span key={`s${allowedInSeconds}`}>{allowedInSeconds}</span>s</Button>
+    return <Button data-vote-button style="normal" icon="skip">Vote Skip &bull; <span key={`s${allowedInSeconds}`}>{allowedInSeconds}</span>s</Button>
   }
 
   // Submit vote (not voted yet)
   if (!hasVoted) {
-    return <Button key="vote" style="normal" icon="skip" onClick={submitVote}><span key="v1">Vote Skip</span> &bull; <span key={streamInfo.voteSkip.currentCount}>{streamInfo.voteSkip.currentCount}</span>/<span key={streamInfo.voteSkip.requiredCount}>{streamInfo.voteSkip.requiredCount}</span></Button>
+    return <Button data-vote-button key="vote" style="normal" icon="skip" onClick={submitVote}><span key="v1">Vote Skip</span> &bull; <span key={streamInfo.voteSkip.currentCount}>{streamInfo.voteSkip.currentCount}</span>/<span key={streamInfo.voteSkip.requiredCount}>{streamInfo.voteSkip.requiredCount}</span></Button>
   }
 
   // Remove vote (already voted)
-  return <Button key="vote" style="normal-highlight" icon="skip" onClick={submitVote}><span key="v2">Voted</span> &bull; <span key={`c${streamInfo.voteSkip.currentCount}`}>{streamInfo.voteSkip.currentCount}</span>/<span key={streamInfo.voteSkip.requiredCount}>{streamInfo.voteSkip.requiredCount}</span></Button>
+  return <Button data-vote-button key="vote" style="normal-highlight" icon="skip" onClick={submitVote}><span key="v2">Voted</span> &bull; <span key={`c${streamInfo.voteSkip.currentCount}`}>{streamInfo.voteSkip.currentCount}</span>/<span key={streamInfo.voteSkip.requiredCount}>{streamInfo.voteSkip.requiredCount}</span></Button>
 }

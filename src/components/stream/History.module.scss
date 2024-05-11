@@ -11,9 +11,35 @@
     gap: 0.3em;
     font-weight: 400;
     font-size: 1.2rem;
+
+    span {
+      font-size: 1rem;
+      color: var(--text-color-3);
+    }
   }
 
-  p {
+  .items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    list-style-type: none;
+    animation: fadeIn 300ms ease-in-out;
+
+    @keyframes fadeIn {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+
+    li {
+      font-size: 1rem;
+      color: var(--text-color-1);
+
+      span { color: var(--text-color-3); }
+    }
+  }
+
+  .noVideos {
     margin: 1.5rem 0;
     text-transform: uppercase;
     font-size: 1rem;

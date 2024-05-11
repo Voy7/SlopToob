@@ -1,3 +1,4 @@
+import { SocketClient } from '@/typings/socket'
 import type { ListOption } from '@/typings/types'
 
 type Setting = {
@@ -18,9 +19,9 @@ export const settingsList = {
       const { default: Player } = await import('@/stream/Player')
       return Player.listOptionPlaylists
     },
-    onChange: async (value: string) => {
+    onChange: async (value: string, executedBy?: SocketClient) => {
       const { default: Player } = await import('@/stream/Player')
-      Player.setActivePlaylistID(value)
+      Player.setActivePlaylistID(value, executedBy)
     },
   },
 
@@ -80,7 +81,8 @@ export const settingsList = {
   sendChangedNickname: { default: true },
   sendVotedToSkip: { default: true },
   sendVoteSkipPassed: { default: true },
-  sendAdminPausePlay: { default: true },
+  sendAdminPause: { default: true },
+  sendAdminUnpause: { default: true },
   sendAdminSkip: { default: true },
   sendAdminChangePlaylist: { default: true },
 

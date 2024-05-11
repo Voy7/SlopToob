@@ -15,7 +15,8 @@ export default function SectionChat() {
   const sendChangedNickname = useToggleOption('sendChangedNickname')
   const sendVotedToSkip = useToggleOption('sendVotedToSkip')
   const sendVoteSkipPassed = useToggleOption('sendVoteSkipPassed')
-  const sendAdminPausePlay = useToggleOption('sendAdminPausePlay')
+  const sendAdminPause = useToggleOption('sendAdminPause')
+  const sendAdminUnpause = useToggleOption('sendAdminUnpause')
   const sendAdminSkip = useToggleOption('sendAdminSkip')
   const sendAdminChangePlaylist = useToggleOption('sendAdminChangePlaylist')
 
@@ -44,7 +45,8 @@ export default function SectionChat() {
         <ToggleOption label="User Changed Nickname" {...sendChangedNickname} />
         <ToggleOption label="User Voted to Skip" {...sendVotedToSkip} />
         <ToggleOption label="Vote Skip Passed" {...sendVoteSkipPassed} />
-        <ToggleOption label="Admin Paused/Resumed Stream" {...sendAdminPausePlay} />
+        <ToggleOption label="Admin Paused Stream" {...sendAdminPause} />
+        <ToggleOption label="Admin Unpaused Stream" {...sendAdminUnpause} />
         <ToggleOption label="Admin Skipped Video" {...sendAdminSkip} />
         <ToggleOption label="Admin Changed Active Playlist" {...sendAdminChangePlaylist} />
         <Description>Send a message when an event occurs.</Description>

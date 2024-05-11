@@ -2,6 +2,7 @@ import prisma from '@/lib/prisma'
 import Logger from '@/lib/Logger'
 import SocketUtils from '@/lib/SocketUtils'
 import { settingsList } from '@/stream/settingsList'
+import type { SocketClient } from '@/typings/socket'
 
 export { settingsList }
 
@@ -77,7 +78,7 @@ export default new class Settings {
   }
 
   // Update a setting, returns true if value is valid & successful
-  async setSetting(key: keyof SettingsList, value: string | number | boolean): Promise<boolean> {
+  async setSetting(key: keyof SettingsList, value: string | number | boolean, executedBy?: SocketClient): Promise<boolean> {
     if (value === undefined) return false
 
     if (!this.settings) {
@@ -99,7 +100,7 @@ export default new class Settings {
     const clientValue = ('clientValue' in setting) ? await setting.clientValue() : value
     SocketUtils.broadcastAdmin(`setting.${key}` as any, clientValue)
     
-    if ('onChange' in setting) await setting.onChange(value as never)
+    if ('onChange' in setting) await setting.onChange(value as never, executedBy)
     await prisma.settings.update({
       where: { key },
       data: { value: value.toString() }

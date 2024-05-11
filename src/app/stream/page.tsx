@@ -12,6 +12,7 @@ import Video from '@/components/stream/Video'
 import Chat from '@/components/stream/Chat'
 import InfoBody from '@/components/stream/InfoBody'
 import History from '@/components/stream/History'
+import KeybindsListModal from '@/components/stream/KeybindsListModal'
 import StreamControls from '@/components/admin/StreamControls'
 import styles from './Stream.module.scss'
 
@@ -43,6 +44,7 @@ export default async function StreamPage() {
         </div>
         <InfoBody />
         <History />
+        <KeybindsListModal />
         {/* {authUser.role >= AuthRole.Admin && <StreamControls />} */}
       </StreamProvider>
     </SocketProvider>

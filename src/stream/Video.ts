@@ -1,8 +1,6 @@
-import fs from 'fs'
-import fsAsync from 'fs/promises'
 import path from 'path'
 import generateSecret from '@/lib/generateSecret'
-import ffmpeg from '@/lib/ffmpeg'
+import parseVideoName from '@/lib/parseVideoName'
 import Player from '@/stream/Player'
 import Env from '@/EnvVariables'
 import Logger from '@/lib/Logger'
@@ -10,14 +8,15 @@ import TranscoderQueue from '@/stream/TranscoderQueue'
 import TranscoderJob from '@/stream/TranscoderJob'
 import Settings from '@/stream/Settings'
 import SocketUtils from '@/lib/SocketUtils'
+import VoteSkipHandler from '@/stream/VoteSkipHandler'
 import PlayHistory from '@/stream/PlayHistory'
 import { Msg, VideoState as State } from '@/lib/enums'
 import type { ClientVideo } from '@/typings/types'
-import VoteSkipHandler from './VoteSkipHandler'
 
 export default class Video {
   readonly id: string = generateSecret()
-  private path: string
+  readonly path: string
+  readonly name: string
   private _state: State = State.NotReady
   error: string | null = null
   durationSeconds: number = 0
@@ -30,6 +29,7 @@ export default class Video {
 
   constructor(path: string, public isBumper: boolean = false) {
     this.path = path.replace(/\\/g, '/')
+    this.name = parseVideoName(path)
 
     this.job = TranscoderQueue.newJob(this)
     
@@ -122,20 +122,22 @@ export default class Video {
     this.job.unlink(this)
   }
 
-  // Pause video
-  pause() {
-    if (this.state !== State.Playing || !this.playingDate) return
+  // Pause video, boolean return is if successful
+  pause(): boolean {
+    if (this.state !== State.Playing || !this.playingDate) return false
     if (this.finishedTimeout) clearTimeout(this.finishedTimeout)
     this.passedDurationSeconds += (new Date().getTime() - this.playingDate.getTime()) / 1000
     this.state = State.Paused
+    return true
   }
 
-  // Unpause video
-  unpause() {
-    if (this.state !== State.Paused) return
+  // Unpause video, boolean return is if successful
+  unpause(): boolean {
+    if (this.state !== State.Paused) return false
     this.playingDate = new Date()
     this.finishedTimeout = setTimeout(() => this.end(), (this.durationSeconds - this.passedDurationSeconds) * 1000)
     this.state = State.Playing
+    return true
   }
 
   private resolveReadyCallbacks() {
@@ -168,18 +170,4 @@ export default class Video {
     const newPath = this.path.replace(basePath, '')
     return path.join(outputBasePath, newPath).replace(/\\/g, '/')
   }
-
-  get name() {
-    let name = path.basename(this.path) // File name
-    if (name.includes('.')) name = name.substring(0, name.lastIndexOf('.')) // Remove extension if it exists
-    name = name.replace(/_/g, ' ') // Underscores to spaces
-    name = name.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()) // Capatalize every word
-    return name
-  }
-
-  // TODO: Implement these
-  get title() { return '' }
-  get show() { return '' }
-  get season() { return 0 }
-  get episode() { return 0 }
 }

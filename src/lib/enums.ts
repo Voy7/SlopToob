@@ -67,5 +67,9 @@ export enum ChatType {
   Left,
   NicknameChange,
   VotedToSkip,
-  VoteSkipPassed
+  VoteSkipPassed,
+  AdminPause,
+  AdminUnpause,
+  AdminSkip,
+  AdminChangePlaylist
 }

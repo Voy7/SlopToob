@@ -6,7 +6,6 @@ import useStreamTimestamp from '@/hooks/useStreamTimestamp'
 import Icon from '@/components/ui/Icon'
 import { StreamState } from '@/lib/enums'
 import styles from './VideoOverlay.module.scss'
-import { useState } from 'react'
 
 // Video center overlay items (not bottom controls)
 export default function VideoOverlay() {
@@ -18,6 +17,7 @@ export default function VideoOverlay() {
       {streamInfo.streamTheme === 'SaulGoodman' && <SaulGoodmanOverlay />}
       <StateOverlay />
       <BumperOverlay />
+      <ActionPopupOverlay />
     </>
   )
 }
@@ -56,6 +56,7 @@ function StateOverlay() {
 
 function BumperOverlay() {
   const { streamInfo } = useStreamContext()
+  const { showControls } = useVideoContext()
 
   const { currentSeconds, totalSeconds } = useStreamTimestamp()
 
@@ -65,9 +66,6 @@ function BumperOverlay() {
   // Adding 0.5 helps remove the lingering "0s"
   const remainingTime = Math.floor(totalSeconds - currentSeconds + 0.5)
 
-  // If time is >= 1 minute, time is in minutes (rounded down)
-  // If time is < 1 minute, time is in 5 second increments
-  // If time is < 5 seconds, time is in seconds
   let time: number
   let unit: string
   if (remainingTime >= 60) {
@@ -84,8 +82,21 @@ function BumperOverlay() {
   }
 
   return (
-    <div className={styles.bumperTime}>
+    <div className={showControls ? `${styles.bumperTime} ${styles.offsetUp}` : styles.bumperTime}>
       Ends in <span key={time}>{time}</span><span key={unit}>{unit}</span>
+    </div>
+  )
+}
+
+function ActionPopupOverlay() {
+  const { actionPopup } = useVideoContext()
+
+  if (!actionPopup) return null
+  
+  return (
+    <div className={styles.actionPopup} key={actionPopup.id}>
+      <Icon name={actionPopup.icon} />
+      {actionPopup.text && <p>{actionPopup.text}</p>}
     </div>
   )
 }

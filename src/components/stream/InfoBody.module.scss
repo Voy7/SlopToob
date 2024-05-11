@@ -18,9 +18,11 @@
     .bumper {
       padding: 0.35em 0.5em;
       text-transform: uppercase;
+      font-weight: 400;
       font-size: 1.15rem;
-      background: var(--select-color);
-      border-radius: 0.25rem;
+      background: rgb(100, 100, 255);
+      border-radius: 0.75rem;
+      cursor: default;
     }
     
     h2 {

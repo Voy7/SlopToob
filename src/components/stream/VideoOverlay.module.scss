@@ -87,13 +87,59 @@
   background: rgba(0, 0, 0, 0.75);
   border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 0.5rem;
+  transition: bottom 150ms ease-out;
   cursor: default;
+
+  &.offsetUp {
+    bottom: 5rem; // Rough height of controls bar + 1rem
+  }
 
   span {
     animation: fadeIn 300ms ease-in-out;
     @keyframes fadeIn {
       0% { opacity: 0; }
       100% { opacity: 1; }
+    }
+  }
+}
+
+.actionPopup {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  cursor: default;
+  pointer-events: none;
+
+  svg {
+    padding: 1rem;
+    font-size: 5rem;
+    color: var(--text-color-2);
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    animation: iconFadeOut 500ms ease-out forwards;
+
+    @keyframes iconFadeOut {
+      0% { opacity: 1; scale: 1; }
+      100% { opacity: 0; scale: 1.5; }
+    }
+  }
+
+  p {
+    font-size: 1.5rem;
+    color: white;
+    text-shadow: 0 0 0.5rem black;
+    animation: textFadeOut 300ms ease-out forwards;
+    animation-delay: 500ms;
+
+    @keyframes textFadeOut {
+      0% { opacity: 1; }
+      100% { opacity: 0; }
     }
   }
 }

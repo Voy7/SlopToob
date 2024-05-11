@@ -34,6 +34,7 @@ export type StreamError = {
 
 export type StreamOptions = {
   streamTheme: string,
+  history: string[],
   chat: {
     showTimestamps: boolean,
     showIdenticons: boolean

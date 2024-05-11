@@ -35,11 +35,6 @@ export default function SelectDropdown({ text, icon, image, isFullHeight, childr
     return () => window.removeEventListener('click', close)
   }, [open])
 
-  // function buttonClick(event: React.MouseEvent<HTMLButtonElement>) {
-  //   event.stopPropagation()
-  //   setOpen(!open)
-  // }
-
   const buttonStyles: string[] = [styles.button]
   if (open) buttonStyles.push(styles.open)
   if (isFullHeight) buttonStyles.push(styles.fullHeight)

@@ -11,7 +11,7 @@ export default function SectionStream() {
     <>
       <h2>Caching</h2>
       <SettingGroup>
-        <Header icon="cache">Caching</Header>
+        <Header icon="cache">Cache Settings</Header>
         <ToggleOption label="Cache Videos" {...cacheVideos} />
         <ToggleOption label="Cache Bumpers" {...cacheBumpers} />
         <Description>Cache videos and bumpers for faster loading times</Description>

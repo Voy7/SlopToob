@@ -73,5 +73,5 @@ async function handleSettingEvent(socket: Socket, settingKey: keyof typeof setti
     return
   }
 
-  await Settings.setSetting(settingKey, payload)
+  await Settings.setSetting(settingKey, payload, client)
 }

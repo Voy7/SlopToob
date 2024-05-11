@@ -226,17 +226,26 @@ export const socketEvents: Record<string, EventOptions> = {
   }},
 
   // Admin pauses the stream
-  [Msg.AdminPauseStream]: { adminOnly: true, run: () => {
-    Player.pause()
+  [Msg.AdminPauseStream]: { adminOnly: true, run: (socket) => {
+    const wasSuccess = Player.pause()
+    const client = socketClients.find(c => c.socket === socket)
+    if (!client || !wasSuccess || !Settings.getSettings().sendAdminPause) return
+    Chat.send({ type: Chat.Type.AdminPause, message: `${client.username} paused the stream.` })
   }},
 
   // Admin unpauses the stream
-  [Msg.AdminUnpauseStream]: { adminOnly: true, run: () => {
-    Player.unpause()
+  [Msg.AdminUnpauseStream]: { adminOnly: true, run: (socket) => {
+    const wasSuccess = Player.unpause()
+    const client = socketClients.find(c => c.socket === socket)
+    if (!client || !wasSuccess || !Settings.getSettings().sendAdminUnpause) return
+    Chat.send({ type: Chat.Type.AdminUnpause, message: `${client.username} unpaused the stream.` })
   }},
 
   // Admin skips the current video
-  [Msg.AdminSkipVideo]: { adminOnly: true, run: () => {
+  [Msg.AdminSkipVideo]: { adminOnly: true, run: (socket) => {
     Player.skip()
+    const client = socketClients.find(c => c.socket === socket)
+    if (!client || !Settings.getSettings().sendAdminSkip) return
+    Chat.send({ type: Chat.Type.AdminSkip, message: `${client.username} skipped the video.` })
   }},
 }

@@ -5,12 +5,14 @@ import { useContext, createContext, useState, useRef, useEffect } from 'react'
 import { useStreamContext } from '@/contexts/StreamContext'
 import { StreamState } from '@/lib/enums'
 import styles from '@/components/stream/Video.module.scss'
+import type { IconNames } from '@/components/ui/Icon'
 
 // Video player context
 type ContextProps = {
   isPaused: boolean, setIsPaused: React.Dispatch<React.SetStateAction<boolean>>,
   volume: number, setVolume: React.Dispatch<React.SetStateAction<number>>,
   showControls: boolean, setShowControls: React.Dispatch<React.SetStateAction<boolean>>,
+  actionPopup: { id: number, icon: IconNames, text?: string } | null, showActionPopup: (icon: IconNames, text?: string) => void,
   videoElement: HTMLVideoElement,
   containerElement: HTMLDivElement
 }
@@ -23,6 +25,7 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
   const [volume, setVolume] = useState<number>(100)
   const [showControls, setShowControls] = useState<boolean>(false)
   const [prevState, setPrevState] = useState<StreamState>(StreamState.Loading)
+  const [actionPopup, setActionPopup] = useState<{ id: number, icon: IconNames, text?: string } | null>(null)
 
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -105,10 +108,15 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
   if (isPaused) hideCursor = false
   if (showControls) hideCursor = false
 
+  function showActionPopup(icon: IconNames, text?: string) {
+    setActionPopup({ id: Date.now(), icon, text })
+  }
+
   const context: ContextProps = {
     isPaused, setIsPaused,
     volume, setVolume,
     showControls, setShowControls,
+    actionPopup, showActionPopup,
     videoElement: videoRef.current!,
     containerElement: containerRef.current!
   }

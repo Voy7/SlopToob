@@ -132,7 +132,7 @@ $optionPadding: 0.35rem;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
-  padding: $optionPadding;
+  padding: $optionPadding 0.5rem;
   color: var(--text-color-3);
   background: var(--bg-color-2);
   border-radius: 0.25rem;

@@ -24,9 +24,11 @@ export default function Modal({ title, isOpen, setClose, canEscapeKeyClose = tru
       return
     }
 
-    setTimeout(() => {
+    const timeout = setTimeout(() => {
       setShow(false)
     }, 350) // Animation duration
+
+    return () => clearTimeout(timeout)
   }, [isOpen])
 
   // Escape key press logic

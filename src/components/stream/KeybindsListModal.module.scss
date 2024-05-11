@@ -1,0 +1,29 @@
+.topLabel {
+  padding: 1.5rem 1rem;
+  color: var(--text-color-3);
+}
+
+.keybindsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  list-style-type: none;
+  margin: 0 1rem 1.5rem 1rem;
+
+  li {
+    padding: 0.25rem;
+    font-size: 1rem;
+    color: var(--text-color-1);
+
+    span { color: var(--text-color-3); }
+
+    strong {
+      padding: 0.25rem 0.35rem;
+      margin-right: 0.25rem;
+      font-weight: normal;
+      color: var(--text-color-2);
+      background: var(--bg-color-2);
+      border-radius: 0.25rem;
+    }
+  }
+}
