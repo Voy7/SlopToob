@@ -43,8 +43,8 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     socket.emit(Msg.AdminRequestAllData)
   }, [])
 
-  useSocketOn(Msg.AdminRequestFileTree, (tree: FileTree) => setFileTree(tree))
-  useSocketOn(Msg.AdminRequestPlaylists, (playlists: ClientPlaylist[]) => setPlaylists(playlists))
+  useSocketOn(Msg.AdminFileTree, (tree: FileTree) => setFileTree(tree))
+  useSocketOn(Msg.AdminPlaylists, (playlists: ClientPlaylist[]) => setPlaylists(playlists))
   useSocketOn(Msg.AdminBumpersList, (bumpers: ClientBumper[]) => setBumpers(bumpers))
   useSocketOn(Msg.AdminQueueList, (queue: ClientVideo[]) => setQueue(queue))
   useSocketOn(Msg.AdminTranscodeQueueList, (queue: TranscodeClientVideo[]) => setTranscodeQueue(queue))

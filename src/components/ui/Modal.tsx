@@ -60,9 +60,7 @@ export default function Modal({ title, isOpen, setClose, canEscapeKeyClose = tru
             <Icon name="close" />
           </button>
         </div>
-        <div className={styles.modalBody}>
-          {children}
-        </div>
+        {children}
       </div>
     </div>,
     document.body

@@ -67,7 +67,7 @@ async function handleSettingEvent(socket: Socket, settingKey: keyof typeof setti
   
   // If value is undefined, they are just requesting the current value
   if (payload === undefined) {
-    const clientValue = ('clientValue' in setting) ? await setting.clientValue() : Settings.getSettings()[settingKey]
+    const clientValue = ('clientValue' in setting) ? await setting.clientValue() : Settings[settingKey]
     // console.log(setting, clientValue)
     socket.emit(`setting.${settingKey}`, clientValue)
     return

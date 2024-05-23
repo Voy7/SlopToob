@@ -18,7 +18,7 @@ export default function Header() {
 
   return (
     <div className={styles.header}>
-      <Link className={styles.logo} href="/">
+      <Link className={styles.logo} href="/home">
         <Image src="/logo.png" alt="Logo" width={30} height={30} />
         <h1><span>Slop</span>Toob</h1>
       </Link>

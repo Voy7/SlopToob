@@ -39,7 +39,9 @@ model Video {
 }
 
 model PlayHistory {
-  id        Int      @id @default(autoincrement())
-  path      String
-  createdAt DateTime @default(now())
+  id            Int      @id @default(autoincrement())
+  path          String
+  isBumper      Boolean @default(false)
+  totalDuration Int     @default(0)
+  createdAt     DateTime @default(now())
 }

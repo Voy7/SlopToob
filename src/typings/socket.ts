@@ -34,7 +34,7 @@ export type StreamError = {
 
 export type StreamOptions = {
   streamTheme: string,
-  history: string[],
+  history: ClientHistoryItem[],
   chat: {
     showTimestamps: boolean,
     showIdenticons: boolean
@@ -99,4 +99,11 @@ export type TranscodeClientVideo = {
   name: string,
   inputPath: string,
   progressPercentage: number
+}
+
+export type ClientHistoryItem = {
+  name: string,
+  totalDuration: string,
+  thumbnailURL: string,
+  isBumper: boolean,
 }

@@ -4,6 +4,11 @@ export const enum AuthRole {
 }
 
 export const enum Msg {
+  // Socket.io predefined events
+  Connect = 'connect',
+  Disconnect = 'disconnect',
+
+  // Normal client events
   JoinStream = 'join-stream',
   ChangeNickname = 'change-nickname',
   ViewersList = 'viewers-list',
@@ -16,8 +21,8 @@ export const enum Msg {
 
   // Admin events
   AdminRequestAllData = 'admin-request-all-data',
-  AdminRequestFileTree = 'admin-request-file-tree',
-  AdminRequestPlaylists = 'admin-request-playlists',
+  AdminFileTree = 'admin-file-tree',
+  AdminPlaylists = 'admin-playlists',
   AdminAddPlaylist = 'admin-add-playlist',
   AdminDeletePlaylist = 'admin-delete-playlist',
   AdminEditPlaylistName = 'admin-edit-playlist-name',

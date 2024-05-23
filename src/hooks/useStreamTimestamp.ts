@@ -21,6 +21,7 @@ export default function useStreamTimestamp(): Return {
 
     function updateTimestamp() {
       if (!('currentSeconds' in streamInfo) || !('totalSeconds' in streamInfo)) return setTimeStamp(0)
+      if (streamInfo.state === StreamState.Paused) return setTimeStamp(streamInfo.currentSeconds)
       if (!lastStreamUpdateTimestamp) return setTimeStamp(streamInfo.currentSeconds)
       const diff = ((Date.now() - lastStreamUpdateTimestamp) / 1000) + streamInfo.currentSeconds
       setTimeStamp(diff)

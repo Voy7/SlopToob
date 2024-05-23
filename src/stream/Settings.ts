@@ -10,126 +10,102 @@ export type SettingsList = {
   [key in keyof typeof settingsList]: typeof settingsList[key]['default'] extends boolean ? boolean : typeof settingsList[key]['default']
 }
 
-export default new class Settings {
-  private settings: SettingsList | null = null
-  private onReadyCallback: (() => void) | null = null
 
-  constructor() { this.createDefaultSettings() }
+let settings: SettingsList | null = null
+let onReadyCallback: Function | null = null
 
-  private async createDefaultSettings() {
-    const allSettings = await prisma.settings.findMany()
-
-    const vars: { [key: string]: SettingsList[keyof SettingsList] } = {}
-
-    for (const settingKey in settingsList) {
-      const key = settingKey as keyof SettingsList
-      const existingSetting = allSettings.find(s => s.key === key)
-      const defaultValue = settingsList[key].default
-
-      if (existingSetting === undefined) {
-        Logger.debug(`Setting ${key} not found, creating with default value: ${defaultValue}`)
-        vars[key] = defaultValue
-        await prisma.settings.create({ data: { key, value: defaultValue.toString() } })
-        continue
-      }
-
-      // if (!this.isValidValue(key, existingSetting.value)) {
-      //   Logger.warn(`Invalid value for settings.${key}: ${existingSetting.value}, resetting to default.`)
-
-      //   vars[key] = defaultValue
-      //   await prisma.settings.update({
-      //     where: { key },
-      //     data: { value: defaultValue.toString() }
-      //   })
-      //   continue
-      // }
-
-      // Parse value to correct type
-      // const defaultSetting = settingsList[key]
-      // const expectedType = settingsList[key].type
-      const type = typeof defaultValue
-      let value
-      if (type === 'string') value = existingSetting.value.toString()
-      else if (type === 'number') value = Number(existingSetting.value)
-      else if (type === 'boolean') value = existingSetting.value === 'true'
-
-      if (type !== typeof value) {
-        Logger.warn(`Invalid value for setting.${key}: ${existingSetting.value}, resetting to default.`)
-
-        vars[key] = defaultValue
-        await prisma.settings.update({
-          where: { key },
-          data: { value: defaultValue.toString() }
-        })
-        continue
-      }
-
-      vars[key] = value as never
-    }
-
-    this.settings = vars as SettingsList
-
-    this.onReadyCallback?.()
-  }
-
-  getSettings(): SettingsList {
-    if (!this.settings) throw new Error('Tried to get settings before they were initialized.')
-    return this.settings
-  }
-
-  // Update a setting, returns true if value is valid & successful
+const Settings = {
   async setSetting(key: keyof SettingsList, value: string | number | boolean, executedBy?: SocketClient): Promise<boolean> {
-    if (value === undefined) return false
+    if (!settings || value === undefined) return false
 
-    if (!this.settings) {
-      Logger.error('Failed to update setting. Settings not initialized.')
-      return false
-    }
-
-    const valueIsValid = typeof value === typeof this.settings[key]
+    const valueIsValid = typeof value === typeof settings[key]
     if (!valueIsValid) {
-      Logger.error(`Failed to update setting. Invalid value for settings.${key}: ${value}`)
+      Logger.error(`[Settings] Failed to update setting.${key}: Invalid value type. Expected ${typeof settings[key]}, got ${typeof value}.`)
       return false
     }
-
+    
+    Logger.debug(`[Settings] Updating setting.${key} to: ${value}`)
+    settings[key] = value as never // This is a hack to make TS happy, because it doesn't understand that value is valid
+    
     const setting = settingsList[key]
-
-    Logger.debug(`Updating setting.${key} to ${value}`)
-    this.settings[key] = value as never // This is a hack to make TS happy, because it doesn't understand that value is valid
     
     const clientValue = ('clientValue' in setting) ? await setting.clientValue() : value
     SocketUtils.broadcastAdmin(`setting.${key}` as any, clientValue)
     
     if ('onChange' in setting) await setting.onChange(value as never, executedBy)
+      
     await prisma.settings.update({
       where: { key },
       data: { value: value.toString() }
     })
 
     return true
+  },
+
+  onReady(callback: Function) {
+    if (settings) callback()
+    else onReadyCallback = callback
   }
-
-  onReady(callback: () => void) {
-    if (this.settings) return callback()
-    this.onReadyCallback = callback
-  }
-
-  // private isValidValue(key: keyof SettingsList, value: any): boolean {
-  //   const setting = settingsList[key]
-  //   if (!setting) return false
-
-  //   // Is enum checker
-  //   if (setting.type === 'enum') {
-  //     const enumValues = Object.values(setting.enum)
-  //     if (enumValues.includes(value)) return true
-  //   }
-
-  //   if (setting.type === 'number') value = Number(value)
-  //   if (setting.type === 'boolean') value = Boolean(value)
-
-  //   // Is primitive type checker
-  //   if (typeof value === setting.type) return true
-
-  //   return false
-  // }
 }
+
+async function initializeSettings() {
+  const dbSettings = await prisma.settings.findMany()
+
+  settings = {} as SettingsList
+
+  for (const settingKey in settingsList) {
+    const key = settingKey as keyof SettingsList
+    const dbSetting = dbSettings.find(s => s.key === key)
+    const defaultValue = settingsList[key].default
+
+    if (dbSetting === undefined) {
+      Logger.debug(`[Settings] Setting ${key} not found, creating with default value: ${defaultValue}`)
+      settings[key] = defaultValue as never
+      await prisma.settings.create({ data: { key, value: defaultValue.toString() } })
+      continue
+    }
+
+    // Parse value to correct type
+    const type = typeof defaultValue
+    let value
+    if (type === 'string') value = dbSetting.value.toString()
+    else if (type === 'number') value = Number(dbSetting.value)
+    else if (type === 'boolean') value = dbSetting.value === 'true'
+
+    if (type !== typeof value) {
+      Logger.warn(`[Settings] Invalid value for setting.${key}: ${dbSetting.value}, resetting to default.`)
+
+      settings[key] = defaultValue as never
+      await prisma.settings.update({
+        where: { key },
+        data: { value: defaultValue.toString() }
+      })
+      continue
+    }
+
+    settings[key] = value as never
+  }
+
+  // Define getters for each setting on main Settings object
+  for (const settingKey in settingsList) {
+    const key = settingKey as keyof SettingsList
+    Object.defineProperty(Settings, key, {
+      get: () => {
+        if (!settings) throw new Error('Settings not initialized.')
+        return settings[key]
+      },
+      enumerable: true
+    })
+  }
+
+  onReadyCallback?.()
+}
+
+initializeSettings()
+
+type ReadonlySettingsList = {
+  readonly [key in keyof SettingsList]: SettingsList[key]
+}
+
+// Export Settings with readonly SettingsList type
+export default Settings as ReadonlySettingsList & typeof Settings

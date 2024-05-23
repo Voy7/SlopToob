@@ -1,7 +1,7 @@
 import fs from 'fs'
 import fsAsync from 'fs/promises'
 import path from 'path'
-import ffmpeg, { transcodeArgs } from '@/lib/ffmpeg'
+import ffmpeg, { TRANSCODE_ARGS } from '@/lib/ffmpeg'
 import generateSecret from '@/lib/generateSecret'
 import Logger from '@/lib/Logger'
 import TranscoderQueue from '@/stream/TranscoderQueue'
@@ -48,7 +48,7 @@ export default class TranscoderJob {
   initialize() {
     this.state = JobState.Initializing
 
-    this.ffmpegCommand = ffmpeg(this.video.inputPath, { timeout: 432000 }).addOptions(transcodeArgs)
+    this.ffmpegCommand = ffmpeg(this.video.inputPath, { timeout: 432000 }).addOptions(TRANSCODE_ARGS)
     this.ffmpegCommand.output(path.join(this.video.outputPath, '/video.m3u8'))
   
     this.ffmpegCommand.on('end', async () => {
@@ -214,8 +214,7 @@ export default class TranscoderJob {
     this.isReady = false
     this.state = JobState.CleaningUp
 
-    const { cacheVideos, cacheBumpers } = Settings.getSettings()
-    const keepCache = this.video.isBumper ? cacheBumpers : cacheVideos
+    const keepCache = this.video.isBumper ? Settings.cacheBumpers : Settings.cacheVideos
 
     if (!keepCache) {
       try { fs.rmSync(this.video.outputPath, { recursive: true }) }
@@ -327,8 +326,7 @@ export default class TranscoderJob {
           reject('Failed to get video metadata duration value.')
           return
         }
-        const { videoPaddingSeconds } = Settings.getSettings()
-        resolve(duration + videoPaddingSeconds)
+        resolve(duration + Settings.videoPaddingSeconds)
       })
     })
   }

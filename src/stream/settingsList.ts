@@ -1,15 +1,15 @@
-import { SocketClient } from '@/typings/socket'
 import type { ListOption } from '@/typings/types'
+import type { SocketClient } from '@/typings/socket'
+
+// List of all settings, with their default values and optional hooks
+// NOTE: Because of how Settings is initialized, most top-level imports are not allowed.
+// Instead, use dynamic imports (except importing types is fine)
 
 type Setting = {
   default: string | number | boolean,
   onChange?: (value: any) => void,
   clientValue?: () => any
 }
-
-// List of all settings, with their default values and optional hooks
-// NOTE: Because of how Settings is initialized, most top-level imports are not allowed.
-// Instead, use dynamic imports (except importing types is fine)
 
 export const settingsList = {
   // Current active playlist, client uses the setting as a ListOption
@@ -95,7 +95,8 @@ export const settingsList = {
   // How long to extend the video duration by
   videoPaddingSeconds: { default: 1 },
 
-  // ...
+  // Advanced name parsing for common torrent filename patterns
+  torrentNameParsing: { default: false },
 } satisfies Record<string, Setting>
 
 async function voteSkipChange() {

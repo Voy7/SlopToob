@@ -25,7 +25,7 @@ type EventOptions = {
 
 export const socketEvents: Record<string, EventOptions> = {
   // If client disconnects, remove them from the viewers list and broadcast new list
-  'disconnect': { run: (socket) => {
+  [Msg.Disconnect]: { run: (socket) => {
     const existingClient = socketClients.find(c => c.socket === socket)
     if (!existingClient) return
     socketClients.splice(socketClients.indexOf(existingClient), 1)
@@ -34,13 +34,11 @@ export const socketEvents: Record<string, EventOptions> = {
     VoteSkipHandler.resyncChanges()
     SocketUtils.broadcastViewersList()
 
-    const { sendLeftStream } = Settings.getSettings()
-    if (sendLeftStream) {
-      Chat.send({
-        type: Chat.Type.Left,
-        message: `${existingClient.username} left the stream.`
-      })
-    }
+    if (!Settings.sendLeftStream) return
+    Chat.send({
+      type: Chat.Type.Left,
+      message: `${existingClient.username} left the stream.`
+    })
   }},
 
   // Message sent from client on first connection, adds them to the viewers list
@@ -63,13 +61,11 @@ export const socketEvents: Record<string, EventOptions> = {
     socket.emit(Msg.StreamInfo, Player.clientStreamInfo)
     socket.emit(Msg.JoinStream, true)
 
-    const { sendJoinedStream } = Settings.getSettings()
-    if (sendJoinedStream) {
-      Chat.send({
-        type: Chat.Type.Joined,
-        message: `${payload.username} joined the stream.`
-      })
-    }
+    if (!Settings.sendJoinedStream) return
+    Chat.send({
+      type: Chat.Type.Joined,
+      message: `${payload.username} joined the stream.`
+    })
   }},
 
   // Client changed their nickname
@@ -90,18 +86,14 @@ export const socketEvents: Record<string, EventOptions> = {
       socket.emit(Msg.ChangeNickname, true)
       SocketUtils.broadcastViewersList()
 
-      const { sendChangedNickname } = Settings.getSettings()
-      if (sendChangedNickname) {
-        Chat.send({
-          type: Chat.Type.NicknameChange,
-          message: `${oldName} changed their nickname to: ${newName}`
-        })
-      }
+      if (!Settings.sendChangedNickname) return
+      Chat.send({
+        type: Chat.Type.NicknameChange,
+        message: `${oldName} changed their nickname to: ${newName}`
+      })
     }
 
-    catch (error: any) {
-      socket.emit(Msg.ChangeNickname, error.message)
-    }
+    catch (error: any) { socket.emit(Msg.ChangeNickname, error.message) }
   }},
 
   // Client sent a chat message, respond with string if error
@@ -109,9 +101,10 @@ export const socketEvents: Record<string, EventOptions> = {
     try {
       if (typeof message !== 'string') throw new Error('Invalid payload.')
 
-      const { chatMaxLength } = Settings.getSettings()
-      if (message.length === 0) throw new Error('Message cannot be empty.')
-      if (message.length > chatMaxLength) throw new Error(`Max message length is ${chatMaxLength} characters.`)
+      message = message.trim() // Remove leading/trailing whitespace
+
+      if (typeof message !== 'string' || message.length === 0) throw new Error('Message cannot be empty.')
+      if (message.length > Settings.chatMaxLength) throw new Error(`Max message length is ${Settings.chatMaxLength} characters.`)
 
       const client = socketClients.find(c => c.socket === socket)
       if (!client) throw new Error('Socket not found.') // Should never happen
@@ -124,9 +117,7 @@ export const socketEvents: Record<string, EventOptions> = {
         message: message
       })
     }
-    catch (error: any) {
-      socket.emit(Msg.SendChatMessage, error.message)
-    }
+    catch (error: any) { socket.emit(Msg.SendChatMessage, error.message) }
   }},
 
   // User votes to skip current video
@@ -146,23 +137,12 @@ export const socketEvents: Record<string, EventOptions> = {
     const playlists = Player.clientPlaylists
     const bumpers = getClientBumpers()
 
-    socket.emit(Msg.AdminRequestFileTree, FileTreeHandler.tree)
-    socket.emit(Msg.AdminRequestPlaylists, playlists)
+    socket.emit(Msg.AdminFileTree, FileTreeHandler.tree)
+    socket.emit(Msg.AdminPlaylists, playlists)
     socket.emit(Msg.AdminBumpersList, bumpers)
     socket.emit(Msg.AdminQueueList, Player.queue.map(video => video.clientVideo))
     socket.emit(Msg.AdminTranscodeQueueList, TranscoderQueue.clientTranscodeList)
   }},
-
-  // Admin request for the file tree
-  [Msg.AdminRequestFileTree]: { adminOnly: true, run: (socket) => {
-    socket.emit(Msg.AdminRequestFileTree, FileTreeHandler.tree)
-  }},
-
-  // Admin request for the playlists
-  // [SocketEvent.AdminRequestPlaylists]: { adminOnly: true, run: async (socket) => {
-  //   const playlists = Player.clientPlaylists
-  //   socket.emit(SocketEvent.AdminRequestPlaylists, playlists)
-  // }},
 
   // Admin adds a new playlist
   [Msg.AdminAddPlaylist]: { adminOnly: true, run: async (socket, newPlaylistName: string) => {
@@ -229,7 +209,7 @@ export const socketEvents: Record<string, EventOptions> = {
   [Msg.AdminPauseStream]: { adminOnly: true, run: (socket) => {
     const wasSuccess = Player.pause()
     const client = socketClients.find(c => c.socket === socket)
-    if (!client || !wasSuccess || !Settings.getSettings().sendAdminPause) return
+    if (!client || !wasSuccess || !Settings.sendAdminPause) return
     Chat.send({ type: Chat.Type.AdminPause, message: `${client.username} paused the stream.` })
   }},
 
@@ -237,7 +217,7 @@ export const socketEvents: Record<string, EventOptions> = {
   [Msg.AdminUnpauseStream]: { adminOnly: true, run: (socket) => {
     const wasSuccess = Player.unpause()
     const client = socketClients.find(c => c.socket === socket)
-    if (!client || !wasSuccess || !Settings.getSettings().sendAdminUnpause) return
+    if (!client || !wasSuccess || !Settings.sendAdminUnpause) return
     Chat.send({ type: Chat.Type.AdminUnpause, message: `${client.username} unpaused the stream.` })
   }},
 
@@ -245,7 +225,7 @@ export const socketEvents: Record<string, EventOptions> = {
   [Msg.AdminSkipVideo]: { adminOnly: true, run: (socket) => {
     Player.skip()
     const client = socketClients.find(c => c.socket === socket)
-    if (!client || !Settings.getSettings().sendAdminSkip) return
+    if (!client || !Settings.sendAdminSkip) return
     Chat.send({ type: Chat.Type.AdminSkip, message: `${client.username} skipped the video.` })
   }},
 }

@@ -4,6 +4,7 @@ import { httpServer } from '@/server/httpServer'
 import { initializeSocketServer } from '@/server/socket'
 import { initializeHlsServer } from '@/server/hls'
 import Env from '@/EnvVariables'
+import Thumbnails from '@/stream/Thumbnails'
 import type { IncomingMessage, ServerResponse } from 'http'
 
 const app = next({
@@ -25,6 +26,12 @@ async function nextRequestHandler(req: IncomingMessage, res: ServerResponse) {
   try {
     if (!req.url) throw new Error('No url')
     const parsedUrl = parse(req.url, true)
+
+    // Custom handling for thumbnails
+    if (parsedUrl.pathname?.startsWith('/thumbnails/')) {
+      return await Thumbnails.handleThumbnailRequest(req, res, parsedUrl)
+    }
+
     await handle(req, res, parsedUrl)
   }
   catch (error: any) {

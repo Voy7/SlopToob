@@ -13,7 +13,8 @@ const keybindsList: { key: string, action: string }[] = [
   { key: 'F', action: 'Toggle fullscreen' },
   { key: 'C', action: 'Clear chat' },
   { key: 'V', action: 'Vote to skip' },
-  { key: 'L', action: 'Show keybinds list' },
+  {key: 'A', action: 'Show admin panel (Admins only)'},
+  { key: 'Slash / L', action: 'Show keybinds list' },
 ]
 
 // List of keybinds/shortcuts

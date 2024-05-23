@@ -1,9 +1,11 @@
 .infoBody {
   display: grid;
   grid-template-columns: 1fr calc(var(--chat-width) - 2rem);
-  align-items: flex-start;
+  align-items: center;
   gap: 1rem;
-  padding: 1rem;
+  height: 3.5rem; // This is used to calculate max height of video/chat container
+  margin: 0 1rem;
+  border-bottom: 1px solid var(--border-color-1);
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;

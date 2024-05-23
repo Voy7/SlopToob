@@ -88,11 +88,10 @@ export default class Video {
       if (this.state === State.Playing || this.state === State.Paused) return
       Logger.debug(`[Video] Playing video: ${this.name}`, this.state)
 
-      PlayHistory.add(this.inputPath)
+      PlayHistory.add(this)
 
       if (this.state === State.Errored) {
-        const { errorDisplaySeconds } = Settings.getSettings()
-        this.finishedTimeout = setTimeout(() => this.end(), errorDisplaySeconds * 1000)
+        this.finishedTimeout = setTimeout(() => this.end(), Settings.errorDisplaySeconds * 1000)
         SocketUtils.broadcast(Msg.StreamInfo, Player.clientStreamInfo)
         return
       }

@@ -13,7 +13,7 @@ const OVERLAY_MOUSE_TIMEOUT = 3000
 // Video bottom controls
 export default function VideoControls() {
   const { isPaused, volume, showControls, setShowControls, videoElement, containerElement, showActionPopup } = useVideoContext()
-  const { setShowClearChatModal, setShowKeybindsModal } = useStreamContext()
+  const { setShowClearChatModal, setShowKeybindsModal, setShowAdminModal } = useStreamContext()
 
   const { currentTimestamp, totalTimestamp, currentSeconds, totalSeconds } = useStreamTimestamp()
 
@@ -81,12 +81,17 @@ export default function VideoControls() {
         const voteSkipButton = document.querySelector('[data-vote-button]') as HTMLElement
         if (voteSkipButton) voteSkipButton.click()
       }},
+    
+      // A - Show Admin Panel
+      { key: ['a'], action: () => setShowAdminModal(true) },
 
-      // L - Show keybinds list
-      { key: ['l'], action: () => setShowKeybindsModal(true) }
+      // '/' / L - Show keybinds list
+      { key: ['/', 'l'], action: () => setShowKeybindsModal(true) },
     ] satisfies { key: string[], action: () => void }[]
 
     function keydown(event: KeyboardEvent) {
+      // No Ctrl/Alt/Shift keybinds
+      if (event.ctrlKey || event.altKey || event.shiftKey) return
       // Only allow keybinds if not typing in an input
       if (document.activeElement?.tagName === 'INPUT' && document.activeElement?.getAttribute('type') !== 'range') return
       if (document.activeElement?.tagName === 'TEXTAREA') return

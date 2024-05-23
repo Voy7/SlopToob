@@ -28,7 +28,7 @@ export default new class TranscoderQueue {
   async processQueue() {
     SocketUtils.broadcastAdmin(Msg.AdminTranscodeQueueList, this.clientTranscodeList)
     const transcodingJobs = this.jobs.filter(item => item.state === JobState.Transcoding)
-    if (transcodingJobs.length >= Settings.getSettings().maxTranscodingJobs) return
+    if (transcodingJobs.length >= Settings.maxTranscodingJobs) return
 
     const nextJob = this.jobs.find(item => item.state === JobState.AwaitingTranscode)
     if (!nextJob) return

@@ -32,10 +32,40 @@
     }
 
     li {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
       font-size: 1rem;
       color: var(--text-color-1);
 
-      span { color: var(--text-color-3); }
+      .index { color: var(--text-color-3); }
+
+      .details {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+
+        .title {
+          display: flex;
+          align-items: center;
+          gap: 0.35rem;
+
+          span {
+            padding: 0.2em 0.4em;
+            text-transform: uppercase;
+            font-weight: 400;
+            font-size: 1em;
+            background: rgb(100, 100, 255);
+            border-radius: 0.5em;
+            cursor: default;
+          }
+        }
+
+        .duration {
+          font-size: 1rem;
+          color: var(--text-color-3);
+        }
+      }
     }
   }
 

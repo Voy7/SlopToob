@@ -25,8 +25,7 @@ export default new class Player {
   private async initialize() {
     Logger.debug('Initializing player handler...')
     await this.populatePlaylists()
-    const { activePlaylistID } = Settings.getSettings()
-    await this.setActivePlaylistID(activePlaylistID)
+    await this.setActivePlaylistID(Settings.activePlaylistID)
   }
 
   pause(): boolean { return this.playing?.pause() || false }
@@ -35,8 +34,7 @@ export default new class Player {
 
   private async playNext() {
     // Play bumper if enough time has passed
-    const { bumpersEnabled, bumperIntervalMinutes } = Settings.getSettings()
-    if (bumpersEnabled && this.lastBumperDate.getTime() + bumperIntervalMinutes * 60 * 1000 < Date.now()) {
+    if (Settings.bumpersEnabled && this.lastBumperDate.getTime() + Settings.bumperIntervalMinutes * 60 * 1000 < Date.now()) {
       const nextBumper = getNextBumper()
       if (nextBumper) {
         this.queue.unshift(nextBumper)
@@ -72,8 +70,7 @@ export default new class Player {
   private populateRandomToQueue() {
     if (!this.activePlaylist) return
 
-    const { targetQueueSize } = Settings.getSettings()
-    if (this.queue.length >= targetQueueSize) return
+    if (this.queue.length >= Settings.targetQueueSize) return
 
     const paths = this.activePlaylist.videos.map(video => video.path.replace(/\\/g, '/'))
     const randomVideo = PlayHistory.getRandom(paths)
@@ -81,7 +78,7 @@ export default new class Player {
 
     this.addVideo(new Video(randomVideo))
 
-    if (this.queue.length < targetQueueSize) {
+    if (this.queue.length < Settings.targetQueueSize) {
       this.populateRandomToQueue()
     }
   }
@@ -92,7 +89,7 @@ export default new class Player {
     Logger.info('Setting active playlist:', playlist?.name || 'None')
 
     const sendChangedMessage = () => {
-      if (!Settings.getSettings().sendAdminChangePlaylist) return
+      if (!Settings.sendAdminChangePlaylist) return
       if (!executedBy) return
       if (!playlist) return
       if (this.activePlaylist?.id === playlistID) return
@@ -106,7 +103,7 @@ export default new class Player {
     this.queue = [] // Clear queue when playlist changes
     this.populateRandomToQueue()
 
-    SocketUtils.broadcastAdmin(Msg.AdminRequestPlaylists, this.clientPlaylists)
+    SocketUtils.broadcastAdmin(Msg.AdminPlaylists, this.clientPlaylists)
     SocketUtils.broadcastAdmin(Msg.AdminQueueList, this.queue.map(video => video.clientVideo))
   }
 
@@ -121,7 +118,7 @@ export default new class Player {
   get listOptionPlaylists(): ListOption {
     return {
       list: this.playlists.map(playlist => ({ name: playlist.name, id: playlist.id })),
-      selectedID: Settings.getSettings().activePlaylistID
+      selectedID: Settings.activePlaylistID
     }
   }
 
@@ -132,7 +129,7 @@ export default new class Player {
         { name: 'Fox News', id: 'FoxNews' },
         { name: 'Saul Goodman', id: 'SaulGoodman' }
       ],
-      selectedID: Settings.getSettings().streamTheme
+      selectedID: Settings.streamTheme
     }
   }
 
@@ -189,17 +186,15 @@ export default new class Player {
   }
 
   get clientStreamOptions(): StreamOptions {
-    const { streamTheme, showChatTimestamps, showChatIdenticons, enableVoteSkip } = Settings.getSettings()
-
     return {
-      streamTheme: streamTheme,
+      streamTheme: Settings.streamTheme,
       history: PlayHistory.clientHistory,
       chat: {
-        showTimestamps: showChatTimestamps,
-        showIdenticons: showChatIdenticons
+        showTimestamps: Settings.showChatTimestamps,
+        showIdenticons: Settings.showChatIdenticons
       },
       voteSkip: {
-        isEnabled: enableVoteSkip,
+        isEnabled: Settings.enableVoteSkip,
         isAllowed: VoteSkipHandler.isAllowed,
         allowedInSeconds: VoteSkipHandler.allowedInSeconds,
         currentCount: VoteSkipHandler.currentCount,
@@ -216,7 +211,7 @@ export default new class Player {
     // Sort playlists by name
     this.playlists = playlists.sort((a, b) => a.name.localeCompare(b.name))
 
-    SocketUtils.broadcastAdmin(Msg.AdminRequestPlaylists, this.clientPlaylists)
+    SocketUtils.broadcastAdmin(Msg.AdminPlaylists, this.clientPlaylists)
     return playlists
   }
 
@@ -230,7 +225,7 @@ export default new class Player {
     this.playlists.push({ ...playlist, videos: [] })
     this.playlists = this.playlists.sort((a, b) => a.name.localeCompare(b.name))
 
-    SocketUtils.broadcastAdmin(Msg.AdminRequestPlaylists, this.clientPlaylists)
+    SocketUtils.broadcastAdmin(Msg.AdminPlaylists, this.clientPlaylists)
     Logger.debug('Playlist added:', name)
     return playlist.id
   }
@@ -246,7 +241,7 @@ export default new class Player {
 
       this.playlists = this.playlists.filter(playlist => playlist.id !== playlistID)
 
-      SocketUtils.broadcastAdmin(Msg.AdminRequestPlaylists, this.clientPlaylists)
+      SocketUtils.broadcastAdmin(Msg.AdminPlaylists, this.clientPlaylists)
       Logger.debug('Playlist deleted:', playlistID)
     }
     catch (error: any) { return error.message }
@@ -263,7 +258,7 @@ export default new class Player {
     const playlist = this.playlists.find(playlist => playlist.id === playlistID)
     if (playlist) playlist.name = newName
 
-    SocketUtils.broadcastAdmin(Msg.AdminRequestPlaylists, this.clientPlaylists)
+    SocketUtils.broadcastAdmin(Msg.AdminPlaylists, this.clientPlaylists)
     Logger.debug(`Playlist (${playlistID}) name updated:`, newName)
   }
 
@@ -298,7 +293,7 @@ export default new class Player {
     await prisma.video.deleteMany({ where: { path: { in: removePaths } } })
     playlist.videos = playlist.videos.filter(video => !removePaths.includes(video.path))
 
-    SocketUtils.broadcastAdmin(Msg.AdminRequestPlaylists, this.clientPlaylists)
+    SocketUtils.broadcastAdmin(Msg.AdminPlaylists, this.clientPlaylists)
     Logger.debug(`Playlist (${playlistID}) videos updated:`, newVideoPaths)
   }
 }

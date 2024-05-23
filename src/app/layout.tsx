@@ -5,8 +5,8 @@ import Footer from '@/components/layout/Footer'
 import type { Metadata } from 'next'
 import '@/app/globals.scss'
 
-import { Ubuntu } from 'next/font/google'
-const mainFont = Ubuntu({
+import { Roboto } from 'next/font/google'
+const mainFont = Roboto({
   subsets: ['latin'],
   weight: ['400', '700']
 })

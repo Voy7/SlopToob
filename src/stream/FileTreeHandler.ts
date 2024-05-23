@@ -12,7 +12,7 @@ const VALID_EXTENSIONS = ['.mp4', '.mkv', '.avi', '.mov', '.flv', '.wmv', '.webm
 export default new class FileTreeHandler {
   private _tree: FileTree | null = null
   private paths: string[] = []
-  private onReadyCallback: (() => void) | null = null
+  private onReadyCallback: Function | null = null
   private refreshTimeout: NodeJS.Timeout | null = null
 
   constructor() { this.initialize() }
@@ -134,10 +134,10 @@ export default new class FileTreeHandler {
 
     this._tree = tree
     if (logDone) Logger.debug('File tree object reconstructed.')
-    SocketUtils.broadcastAdmin(Msg.AdminRequestFileTree, this.tree)
+    SocketUtils.broadcastAdmin(Msg.AdminFileTree, this.tree)
   }
 
-  onReady(callback: () => void) {
+  onReady(callback: Function) {
     if (this._tree) return callback()
     this.onReadyCallback = callback
   }

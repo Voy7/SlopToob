@@ -20,7 +20,7 @@ export default function ActionModal({ width = 500, button, error, formOnSubmit, 
     <Modal {...modalProps}>
       <Wrapper
         className={styles.actionModal}
-        style={{ width: `min(calc(100vw - 1rem), ${width}px)` }}
+        style={{ width: `min(100%, ${width}px)` }}
         // @ts-expect-error - onSubmit is only defined if it exists, so this would be a form
         onSubmit={formOnSubmit}
       >
