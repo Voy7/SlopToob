@@ -9,6 +9,8 @@
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
+    height: unset;
+    margin-top: 1rem;
   }
 
   .title {

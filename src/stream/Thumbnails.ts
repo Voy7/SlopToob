@@ -2,52 +2,60 @@ import fs from 'fs'
 import path from 'path'
 import ffmpeg, { THUMBNAIL_ARGS } from '@/lib/ffmpeg'
 import Env from '@/EnvVariables'
+import Logger from '@/lib/Logger'
 import type { IncomingMessage, ServerResponse } from 'http'
 import type { UrlWithParsedQuery } from 'url'
-import Logger from '@/lib/Logger'
 
 export default new class Thumbnails {
-  // Generate thumbnail for video if it doesn't exist & return URL
+  private generateCallbacks: Record<string, Array<(thumbnailPath: string | null) => void>> = {}
   
-async generate(videoPath: string): Promise<string> {
-  try {
-        // Parse special characters (like %20)
-        videoPath = decodeURIComponent(videoPath)
+  // Generate thumbnail for video if it doesn't exist & return URL
+  async generate(videoPath: string): Promise<string | null> {
+    videoPath = decodeURIComponent(videoPath) // Parse special characters (like %20)
 
-        if (!videoPath.startsWith(Env.VIDEOS_PATH) && !videoPath.startsWith(Env.BUMPERS_PATH)) {
-          throw new Error('Video path is not in the videos or bumpers folder.')
-        }
-    
-        const thumbnailPath = path.join(Env.THUMBNAILS_OUTPUT_PATH, `${videoPath.replace(/\//g, '_').replace(/\:/g, '')}.jpg`)
-        // const thumbnailPath = path.join(Env.THUMBNAILS_OUTPUT_PATH, `test.jpg`).replace(/\\/g, '/')
-        if (fs.existsSync(thumbnailPath)) return thumbnailPath
-      // Generate thumbnail with ffmpeg
-      if (!fs.existsSync(Env.THUMBNAILS_OUTPUT_PATH)) { // Create folder if it doesn't exist
-        fs.mkdirSync(Env.THUMBNAILS_OUTPUT_PATH)
+    if (!videoPath.startsWith(Env.VIDEOS_PATH) && !videoPath.startsWith(Env.BUMPERS_PATH)) {
+      Logger.error('Video path is not in the videos or bumpers folder.')
+      return null
+    }
+
+    const thumbnailPath = path.join(Env.THUMBNAILS_OUTPUT_PATH, `${videoPath.replace(/\//g, '_').replace(/\:/g, '')}.jpg`)
+
+    if (fs.existsSync(thumbnailPath)) return thumbnailPath
+
+    return new Promise<string | null>(async resolve => {
+      const callbacks = this.generateCallbacks[thumbnailPath]
+      if (callbacks) {
+        callbacks.push(resolve)
+        return
       }
+      this.generateCallbacks[thumbnailPath] = [resolve]
 
       const command = ffmpeg(videoPath)
       command.outputOptions(THUMBNAIL_ARGS)
       command.output(thumbnailPath)
-      console.log(thumbnailPath)
-      // commnad arguments
-      console.log(command._getArguments())
-      await new Promise((resolve, reject) => {
-        command.on('end', resolve)
-        // command.on('error', reject)
-        command.run()
+
+      command.on('end', () => {
+        Logger.debug(`[Thumbnails] Generated thumbnail at: ${thumbnailPath}`)
+        const callbacks = this.generateCallbacks[thumbnailPath]
+        if (!callbacks) return
+        for (const callback of callbacks) callback(thumbnailPath)
+        delete this.generateCallbacks[thumbnailPath]
       })
-      return thumbnailPath
-    }
-    catch (error: any) {
-      Logger.error('[Thumbnails] Error generating thumbnail:', error)
-      return ''
-    }
+
+      command.on('error', error => {
+        Logger.error('[Thumbnails] Error generating thumbnail:', error)
+        const callbacks = this.generateCallbacks[thumbnailPath]
+        if (!callbacks) return
+        for (const callback of callbacks) callback(null)
+        delete this.generateCallbacks[thumbnailPath]
+      })
+
+      command.run()
+    })
   }
 
+  // Get client thumbnail URL for video
   getURL(videoPath: string): string {
-    // const id = videoPath.split('/').pop().split('.').shift()
-    // const thumbnailPath = `${Env.THUMBNAIL_PATH}/${id}.jpg`
     return `/thumbnails/${videoPath}`
   }
 
@@ -57,7 +65,10 @@ async generate(videoPath: string): Promise<string> {
       const videoPath = parsedUrl.pathname?.replace('/thumbnails/', '')
       if (!videoPath) throw new Error('Could not parse video path from URL')
       const thumbnailPath = await this.generate(videoPath)
-      if (!thumbnailPath) throw new Error('No thumbnail path returned')
+      if (!thumbnailPath) throw new Error(`No thumbnail path returned: ${videoPath}`)
+        
+      // TODO: Investigate why this throws sometimes, even though we should be generating it right above this line
+      if (!fs.existsSync(thumbnailPath)) throw new Error(`Thumbnail file not found: ${thumbnailPath}`)
 
       const file = fs.createReadStream(thumbnailPath)
       res.setHeader('Content-Type', 'image/png')

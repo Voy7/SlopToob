@@ -1,6 +1,6 @@
 .adminModal {
   display: flex;
-  width: min(calc(100vw - 1rem), 900px);
+  width: min(calc(100vw - 2rem - 2px), 900px);
   height: calc(100vh - 9rem);
   overflow-y: auto;
 
