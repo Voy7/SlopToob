@@ -7,6 +7,7 @@ import Settings from '@/stream/Settings'
 import SocketUtils from '@/lib/SocketUtils'
 import Chat from '@/stream/Chat'
 import { getNextBumper } from '@/stream/bumpers'
+import { themes } from '@/stream/themes'
 import { StreamState, Msg, VideoState } from '@/lib/enums'
 import type { RichPlaylist, ClientPlaylist, ListOption } from '@/typings/types'
 import type { SocketClient, StreamInfo, StreamOptions } from '@/typings/socket'
@@ -67,10 +68,15 @@ export default new class Player {
   }
 
   // Fill queue with random videos from active playlist
-  private populateRandomToQueue() {
+  populateRandomToQueue() {
     if (!this.activePlaylist) return
+    if (this.queue.length == Settings.targetQueueSize) return
 
-    if (this.queue.length >= Settings.targetQueueSize) return
+    if (this.queue.length > Settings.targetQueueSize) {
+      this.queue = this.queue.slice(0, Settings.targetQueueSize)
+      SocketUtils.broadcastAdmin(Msg.AdminQueueList, this.queue.map(video => video.clientVideo))
+      return
+    }
 
     const paths = this.activePlaylist.videos.map(video => video.path.replace(/\\/g, '/'))
     const randomVideo = PlayHistory.getRandom(paths)
@@ -124,11 +130,7 @@ export default new class Player {
 
   get listOptionThemes(): ListOption {
     return {
-      list: [
-        { name: 'None', id: 'None' },
-        { name: 'Fox News', id: 'FoxNews' },
-        { name: 'Saul Goodman', id: 'SaulGoodman' }
-      ],
+      list: themes,
       selectedID: Settings.streamTheme
     }
   }
@@ -160,6 +162,7 @@ export default new class Player {
     if (this.playing.state === VideoState.Errored) {
       return {
         state: StreamState.Error,
+        name: this.playing.name,
         error: this.playing.error || 'Unknown error occurred.', // Should never be null, but just in case
         ...this.clientStreamOptions
       }

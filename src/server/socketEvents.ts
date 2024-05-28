@@ -34,6 +34,9 @@ export const socketEvents: Record<string, EventOptions> = {
     VoteSkipHandler.resyncChanges()
     SocketUtils.broadcastViewersList()
 
+    // Pause stream if 'pause when inactive' criteria is met
+    if (Settings.pauseWhenInactive && socketClients.length <= 0) Player.playing?.pause(false)
+
     if (!Settings.sendLeftStream) return
     Chat.send({
       type: Chat.Type.Left,
@@ -60,6 +63,9 @@ export const socketEvents: Record<string, EventOptions> = {
 
     socket.emit(Msg.StreamInfo, Player.clientStreamInfo)
     socket.emit(Msg.JoinStream, true)
+
+    // Unpause stream if 'pause when inactive' was active
+    if (Settings.pauseWhenInactive && !Settings.streamIsPaused) Player.unpause()
 
     if (!Settings.sendJoinedStream) return
     Chat.send({

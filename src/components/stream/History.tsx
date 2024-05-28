@@ -9,6 +9,8 @@ import styles from './History.module.scss'
 export default function History() {
   const { streamInfo } = useStreamContext()
 
+  if (!streamInfo.history) return null
+
   return (
     <div className={styles.history}>
       <h3 className={styles.header}>

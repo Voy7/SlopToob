@@ -73,7 +73,11 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
       video.currentTime = diff
     }
 
-    video.onpause = () => { setIsPaused(true) }
+    video.onpause = () => {
+      // If the video has reached the end, don't set isPaused to prevent the play button flashing at the end
+      if (video.currentTime >= video.duration) return
+      setIsPaused(true)
+    }
 
     video.onvolumechange = () => {
       if (video.muted) {
@@ -97,6 +101,15 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
     }
     video.pause()
   }, [streamInfo, prevState, lastStreamUpdateTimestamp])
+
+  // Sync video title with document title
+  useEffect(() => {
+    if (streamInfo.state === StreamState.Playing || streamInfo.state === StreamState.Paused) {
+      document.title = streamInfo.name
+      return
+    }
+    document.title = 'SlopToob'
+  }, [streamInfo])
 
   // Pause/unpause video when background is clicked
   function backgroundClick() {
@@ -124,9 +137,17 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
   return (
     <VideoContext.Provider value={context}>
       <div ref={containerRef} className={hideCursor ? `${styles.videoContainer} ${styles.hideCursor}` : styles.videoContainer} onClick={backgroundClick}>
-        <video ref={videoRef} autoPlay>
-          Your browser does not support the video tag.
-        </video>
+        {streamInfo.streamTheme === 'Zoomer' ? (
+          <div className={styles.zoomerThemeGrid}>
+            <video ref={videoRef} autoPlay>
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        ) : (
+          <video ref={videoRef} autoPlay>
+            Your browser does not support the video tag.
+          </video>
+        )}
         {children}
       </div>
     </VideoContext.Provider>

@@ -13,7 +13,7 @@ export default function StreamControls() {
   const { currentTimestamp, totalTimestamp } = useStreamTimestamp()
 
   let name = 'Unknown State'
-  if ('name' in streamInfo) name = streamInfo.name
+  if ('name' in streamInfo && streamInfo.name) name = streamInfo.name
   if (streamInfo.state === StreamState.Error) name = streamInfo.error
 
   const isError = streamInfo.state === StreamState.Error

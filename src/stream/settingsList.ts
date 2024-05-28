@@ -31,15 +31,18 @@ export const settingsList = {
       const { default: Player } = await import('@/stream/Player')
       return Player.listOptionThemes
     },
-    onChange: chatElementChange,
+    onChange: chatResync,
   },
 
+  // Is not a normal setting, just a persistant state for if the server restarts
+  streamIsPaused: { default: false },
+
   // Enable vote skipping & percentage of votes needed to skip
-  enableVoteSkip: { default: true, onChange: voteSkipChange },
-  voteSkipPercentage: { default: 50, onChange: voteSkipChange },
-  voteSkipDelaySeconds: { default: 10, onChange: voteSkipChange },
-  canVoteSkipIfBumper: { default: false, onChange: voteSkipChange },
-  canVoteSkipIfPaused: { default: false, onChange: voteSkipChange },
+  enableVoteSkip: { default: true, onChange: voteSkipResync },
+  voteSkipPercentage: { default: 50, onChange: voteSkipResync },
+  voteSkipDelaySeconds: { default: 10, onChange: voteSkipResync },
+  canVoteSkipIfBumper: { default: false, onChange: voteSkipResync },
+  canVoteSkipIfPaused: { default: false, onChange: voteSkipResync },
 
   // Minimum time between bumpers in minutes
   bumpersEnabled: { default: true },
@@ -48,8 +51,9 @@ export const settingsList = {
   // Minimum number of videos to keep in the queue, not including 'manually' added videos
   targetQueueSize: {
     default: 3,
-    onChange: (value: number) => {
-      //
+    onChange: async (value: number) => {
+      const { default: Player } = await import('@/stream/Player')
+      Player.populateRandomToQueue()
     }
   },
 
@@ -72,8 +76,8 @@ export const settingsList = {
   chatMaxLength: { default: 120 },
 
   // Chat elements
-  showChatTimestamps: { default: true, onChange: chatElementChange },
-  showChatIdenticons: { default: true, onChange: chatElementChange },
+  showChatTimestamps: { default: true, onChange: chatResync },
+  showChatIdenticons: { default: true, onChange: chatResync },
 
   // Chat event settings
   sendJoinedStream: { default: true },
@@ -89,8 +93,13 @@ export const settingsList = {
   // Pause stream when no one is watching
   pauseWhenInactive: { default: true },
 
-  // If average video is 10~ min, history is valid for roughly a week
-  historyMaxItems: { default: 1000 },
+  // If average video is 10~ min, smart-shuffle history is valid for roughly a week
+  historyMaxItems: { default: 1000, onChange: historyResync },
+
+  // Settings for stream history display
+  historyDisplayEnabled: { default: true, onChange: historyResync },
+  historyDisplayItems: { default: 5, onChange: historyResync },
+  historyDisplayBumpers: { default: false, onChange: historyResync },
 
   // How long to extend the video duration by
   videoPaddingSeconds: { default: 1 },
@@ -99,12 +108,17 @@ export const settingsList = {
   torrentNameParsing: { default: false },
 } satisfies Record<string, Setting>
 
-async function voteSkipChange() {
+async function voteSkipResync() {
   const { default: VoteSkipHandler } = await import('@/stream/VoteSkipHandler')
   VoteSkipHandler.resyncChanges()
 }
 
-async function chatElementChange() {
+async function chatResync() {
   const { default: Chat } = await import('@/stream/Chat')
   Chat.resyncChanges()
+}
+
+async function historyResync() {
+  const { default: PlayHistory } = await import('@/stream/PlayHistory')
+  PlayHistory.resyncChanges()
 }

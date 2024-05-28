@@ -7,17 +7,16 @@ import Settings from '@/stream/Settings'
 import Player from '@/stream/Player'
 import TranscoderQueue from '@/stream/TranscoderQueue'
 import Thumbnails from '@/stream/Thumbnails'
+import SocketUtils from '@/lib/SocketUtils'
+import { Msg } from '@/lib/enums'
 import type { PlayHistory as DBPlayHistory } from '@prisma/client'
 import type { ClientHistoryItem } from '@/typings/socket'
 import type Video from '@/stream/Video'
 
-// How many items to show for client history
-const MAX_RECENT_ITEMS = 5
-
 // Video history handler
 export default new class PlayHistory {
-  private history: string[] = []
-  private recent: DBPlayHistory[] = []
+  private internalHistory: string[] = []
+  private displayHistory: DBPlayHistory[] = []
 
   constructor() { this.populateHistory() }
 
@@ -25,32 +24,38 @@ export default new class PlayHistory {
   private async populateHistory() {
     // Get last N videos from history
     const history = await prisma.playHistory.findMany({
-      take: Settings.historyMaxItems,
+      where: { isDeleted: false },
+      take: Math.max(Settings.historyMaxItems, Settings.historyDisplayItems),
       orderBy: { createdAt: 'desc' }
     })
 
-    this.history = history.map(h => h.path)
-    this.recent = history.slice(0, MAX_RECENT_ITEMS + 1)
+    this.internalHistory = history.map(h => h.path)
 
-    Logger.debug(`[History] Populated history with ${this.history.length} items.`)
+    this.displayHistory = history
+      .filter(h => Settings.historyDisplayBumpers || !h.path.startsWith(Env.BUMPERS_PATH))
+      .slice(0, Settings.historyDisplayItems + 1)
+
+    Logger.debug(`[History] Populated history with ${this.internalHistory.length} items.`)
   }
 
   // Add a video path to the history
   async add(video: Video) {
-    this.history.unshift(video.inputPath)
+    this.internalHistory.unshift(video.inputPath)
     
-    if (this.history.length > Settings.historyMaxItems) {
-      this.history.pop()
-    }
-
-    if (this.recent.length > MAX_RECENT_ITEMS + 1) {
-      this.recent.pop()
+    if (this.internalHistory.length > Settings.historyMaxItems) {
+      this.internalHistory.pop()
     }
 
     const newEntry = await prisma.playHistory.create({
       data: { path: video.inputPath, totalDuration: video.durationSeconds }
     })
-    this.recent.unshift(newEntry)
+
+    if (Settings.historyDisplayBumpers || !video.inputPath.startsWith(Env.BUMPERS_PATH)) {
+      if (this.displayHistory.length >= Settings.historyDisplayItems) {
+        this.displayHistory.pop()
+      }
+      this.displayHistory.unshift(newEntry)
+    }
 
     Logger.debug(`[History] Added ${video.inputPath} to history.`)
   }
@@ -62,7 +67,7 @@ export default new class PlayHistory {
     if (inputPaths.length == 0) return null
 
     // Use history AND queue items for algorithm
-    const historyItems = [...this.history, ...TranscoderQueue.jobs.map(j => j.video.inputPath)]
+    const historyItems = [...this.internalHistory, ...TranscoderQueue.jobs.map(j => j.video.inputPath)]
 
     // Count how many times each item has been played
     const countMap = new Map<string, number>()
@@ -93,11 +98,24 @@ export default new class PlayHistory {
     return pool[Math.floor(Math.random() * pool.length)]
   }
 
-  get clientHistory(): ClientHistoryItem[] {
+  // Sync new display history settings
+  async resyncChanges() {
+    await this.populateHistory()
+    SocketUtils.broadcast(Msg.StreamInfo, Player.clientStreamInfo)
+  }
+
+  async clearAllHistory() {
+    await prisma.playHistory.updateMany({ data: { isDeleted: true } })
+    await this.populateHistory()
+  }
+
+  get clientHistory(): ClientHistoryItem[] | null {
+    if (!Settings.historyDisplayEnabled) return null
+
     // Don't include the current video
-    const items = Player.playing?.inputPath === this.recent[0]?.path
-      ? this.recent.slice(1)
-      : this.recent.slice(0, MAX_RECENT_ITEMS)
+    const items = Player.playing?.inputPath === this.displayHistory[0]?.path
+      ? this.displayHistory.slice(1)
+      : this.displayHistory.slice(0, Settings.historyDisplayItems)
     return  items.map(item => ({
       name: parseVideoName(item.path),
       totalDuration: parseTimestamp(item.totalDuration),

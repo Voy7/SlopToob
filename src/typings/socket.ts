@@ -29,12 +29,13 @@ export type StreamLoading = {
 
 export type StreamError = {
   state: StreamState.Error,
+  name?: string,
   error: string
 }
 
 export type StreamOptions = {
   streamTheme: string,
-  history: ClientHistoryItem[],
+  history: ClientHistoryItem[] | null,
   chat: {
     showTimestamps: boolean,
     showIdenticons: boolean

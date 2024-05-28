@@ -48,7 +48,7 @@ export default class TranscoderJob {
   initialize() {
     this.state = JobState.Initializing
 
-    this.ffmpegCommand = ffmpeg(this.video.inputPath, { timeout: 432000 }).addOptions(TRANSCODE_ARGS)
+    this.ffmpegCommand = ffmpeg(this.video.inputPath).addOptions(TRANSCODE_ARGS)
     this.ffmpegCommand.output(path.join(this.video.outputPath, '/video.m3u8'))
   
     this.ffmpegCommand.on('end', async () => {

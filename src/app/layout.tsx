@@ -13,7 +13,7 @@ const mainFont = Roboto({
 
 export const metadata: Metadata = {
   title: 'SlopToob',
-  description: '(Work in progress)',
+  description: 'Enjoy a 24/7 live stream of the highest quality slop content.',
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

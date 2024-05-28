@@ -10,6 +10,7 @@ import Settings from '@/stream/Settings'
 import SocketUtils from '@/lib/SocketUtils'
 import VoteSkipHandler from '@/stream/VoteSkipHandler'
 import PlayHistory from '@/stream/PlayHistory'
+import { socketClients } from '@/server/socketClients'
 import { Msg, VideoState as State } from '@/lib/enums'
 import type { ClientVideo } from '@/typings/types'
 
@@ -100,6 +101,20 @@ export default class Video {
       this.state = State.Playing
       this.playingDate = new Date()
       this.finishedTimeout = setTimeout(() => this.end(), this.durationSeconds * 1000)
+
+      // Immediately pause if stream was paused before server restart
+      if (Settings.streamIsPaused) {
+        this.pause()
+        return
+      }
+
+      // Immediately pause if 'pause when inactive' criteria is met
+      if (Settings.pauseWhenInactive && socketClients.length <= 0) {
+        this.pause(false)
+        return
+      }
+
+      // Settings.setSetting('streamIsPaused', false)
     })
   }
 
@@ -117,16 +132,17 @@ export default class Video {
     this.passedDurationSeconds = 0
     this.state = State.Finished
     this.resolveFinishedCallbacks()
-
     this.job.unlink(this)
+    Settings.setSetting('streamIsPaused', false)
   }
 
   // Pause video, boolean return is if successful
-  pause(): boolean {
+  pause(persistPause = true): boolean {
     if (this.state !== State.Playing || !this.playingDate) return false
     if (this.finishedTimeout) clearTimeout(this.finishedTimeout)
     this.passedDurationSeconds += (new Date().getTime() - this.playingDate.getTime()) / 1000
     this.state = State.Paused
+    if (persistPause) Settings.setSetting('streamIsPaused', true)
     return true
   }
 
@@ -136,6 +152,7 @@ export default class Video {
     this.playingDate = new Date()
     this.finishedTimeout = setTimeout(() => this.end(), (this.durationSeconds - this.passedDurationSeconds) * 1000)
     this.state = State.Playing
+    Settings.setSetting('streamIsPaused', false)
     return true
   }
 

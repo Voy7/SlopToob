@@ -9,6 +9,7 @@ import SectionPlaylists from '@/components/admin/SectionPlaylists'
 import SectionBumpers from '@/components/admin/SectionBumpers'
 import SectionCaching from '@/components/admin/SectionCaching'
 import SectionChat from '@/components/admin/SectionChat'
+import SectionHistory from '@/components/admin/SectionHistory'
 import SectionVoteSkip from '@/components/admin/SectionVoteSkip'
 import SectionMonitor from '@/components/admin/SectionMonitor'
 import SectionAdvanced from '@/components/admin/SectionAdvanced'
@@ -22,6 +23,7 @@ export const sections = [
   { name: 'Bumpers', icon: <Icon name="bumper" />, component: <SectionBumpers /> },
   { name: 'Caching', icon: <Icon name="cache" />, component: <SectionCaching /> },
   { name: 'Chat', icon: <Icon name="chat" />, component: <SectionChat /> },
+  { name: 'History', icon: <Icon name="history" />, component: <SectionHistory /> },
   { name: 'Vote Skip', icon: <Icon name="skip" />, component: <SectionVoteSkip /> },
   { name: 'Monitor', icon: <Icon name="admin-panel" />, component: <SectionMonitor /> },
   { name: 'Advanced', icon: <Icon name="settings" />, component: <SectionAdvanced /> },

@@ -8,7 +8,6 @@ export default function SectionAdvanced() {
   const pauseWhenInactive = useToggleOption('pauseWhenInactive')
   const maxTranscodingJobs = useNumberOption('maxTranscodingJobs')
   const targetQueueSize = useNumberOption('targetQueueSize')
-  const historyMaxItems = useNumberOption('historyMaxItems')
   const videoPaddingSeconds = useNumberOption('videoPaddingSeconds')
   const errorDisplaySeconds = useNumberOption('errorDisplaySeconds')
 
@@ -25,9 +24,6 @@ export default function SectionAdvanced() {
         <Gap />
         <NumberOption label="Target Queue Size" type="integer" {...targetQueueSize} />
         <Description>Amount of videos from the active playlist to populate the queue with.</Description>
-        <Gap />
-        <NumberOption label="Shuffle History Max Items" type="integer" {...historyMaxItems} />
-        <Description>Maximum number of videos to keep in history for smart-shuffle logic.</Description>
         <Gap />
         <NumberOption label="Video Padding Seconds" type="float" {...videoPaddingSeconds} />
         <Description>Amount of seconds to pad the end of videos by. Can help with videos being cut off early due to client latency.</Description>

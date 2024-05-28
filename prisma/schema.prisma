@@ -43,5 +43,6 @@ model PlayHistory {
   path          String
   isBumper      Boolean @default(false)
   totalDuration Int     @default(0)
+  isDeleted     Boolean @default(false)
   createdAt     DateTime @default(now())
 }

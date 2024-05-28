@@ -68,7 +68,13 @@ export default new class Thumbnails {
       if (!thumbnailPath) throw new Error(`No thumbnail path returned: ${videoPath}`)
         
       // TODO: Investigate why this throws sometimes, even though we should be generating it right above this line
-      if (!fs.existsSync(thumbnailPath)) throw new Error(`Thumbnail file not found: ${thumbnailPath}`)
+      if (!fs.existsSync(thumbnailPath)) {
+        // throw new Error(`Thumbnail file not found: ${thumbnailPath}`)
+        Logger.warn(`Thumbnail file not found: ${thumbnailPath}`)
+        res.statusCode = 404
+        res.end()
+        return
+      }
 
       const file = fs.createReadStream(thumbnailPath)
       res.setHeader('Content-Type', 'image/png')
