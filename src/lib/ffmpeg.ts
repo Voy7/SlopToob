@@ -29,5 +29,6 @@ export const THUMBNAIL_ARGS = [
   '-vf scale=-1:420', // Scale to 420p height
   '-vframes 1', // Only 1 frame
   '-q:v 2', // Quality level
+  '-map 0:v:0', // Use first video stream
   '-ss 5' // Seek to 5 seconds in
 ]
