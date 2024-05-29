@@ -30,6 +30,11 @@ export default new class Thumbnails {
       }
       this.generateCallbacks[thumbnailPath] = [resolve]
 
+      // Create thumbnail directory if it doesn't exist
+      if (!fs.existsSync(Env.THUMBNAILS_OUTPUT_PATH)) {
+        fs.mkdirSync(Env.THUMBNAILS_OUTPUT_PATH, { recursive: true })
+      }
+
       const command = ffmpeg(videoPath)
       command.outputOptions(THUMBNAIL_ARGS)
       command.output(thumbnailPath)
