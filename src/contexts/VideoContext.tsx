@@ -134,19 +134,22 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
     containerElement: containerRef.current!
   }
 
+  let containerClass: string = styles.videoContainer
+  if (hideCursor) containerClass += ` ${styles.hideCursor}`
+  if (streamInfo.streamTheme === 'Zoomer') containerClass += ` ${styles.zoomerThemeGrid}`
+
   return (
     <VideoContext.Provider value={context}>
-      <div ref={containerRef} className={hideCursor ? `${styles.videoContainer} ${styles.hideCursor}` : styles.videoContainer} onClick={backgroundClick}>
-        {streamInfo.streamTheme === 'Zoomer' ? (
-          <div className={styles.zoomerThemeGrid}>
-            <video ref={videoRef} autoPlay>
-              Your browser does not support the video tag.
-            </video>
-          </div>
-        ) : (
-          <video ref={videoRef} autoPlay>
-            Your browser does not support the video tag.
-          </video>
+      <div ref={containerRef} className={containerClass} onClick={backgroundClick}>
+        <video ref={videoRef} autoPlay>
+          Your browser does not support the video tag.
+        </video>
+        {streamInfo.streamTheme === 'Zoomer' && (
+          <>
+            <video src="/zoomer-videos/1.mp4" autoPlay loop muted></video>
+            <video src="/zoomer-videos/2.mp4" autoPlay loop muted></video>
+            <video src="/zoomer-videos/3.mp4" autoPlay loop muted></video>
+          </>
         )}
         {children}
       </div>

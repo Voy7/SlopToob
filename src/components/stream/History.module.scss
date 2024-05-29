@@ -9,9 +9,9 @@
   .header {
     display: flex;
     align-items: center;
-    gap: 0.3em;
+    gap: 0.25em;
     font-weight: 400;
-    font-size: 1.2rem;
+    font-size: 1.25rem;
 
     span {
       font-size: 1rem;
@@ -22,7 +22,7 @@
   .items {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
     margin-top: 1rem;
     list-style-type: none;
     animation: fadeIn 300ms ease-in-out;
@@ -53,6 +53,7 @@
       .details {
         display: flex;
         flex-direction: column;
+        justify-content: space-between;
         gap: 0.2rem;
 
         .title {
@@ -62,21 +63,33 @@
           white-space: nowrap;
           text-overflow: ellipsis;
           overflow: hidden;
-
-          span {
-            padding: 0.2em 0.4em;
-            text-transform: uppercase;
-            font-weight: 400;
-            font-size: 1em;
-            background: rgb(100, 100, 255);
-            border-radius: 0.5em;
-            cursor: default;
-          }
         }
 
         .duration {
+          width: fit-content;
+          padding: 0.2em 0.4em;
           font-size: 1rem;
           color: var(--text-color-3);
+          background: var(--bg-color-3);
+          border-radius: 0.2em;
+        }
+
+        .bumper {
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+          width: fit-content;
+          padding: 0.2em 0.4em;
+          font-size: 1rem;
+          color: rgb(100, 100, 255);
+          background: var(--bg-color-3);
+          border-radius: 0.25rem;
+        }
+
+        .row {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
         }
       }
     }

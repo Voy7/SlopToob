@@ -5,6 +5,7 @@
   width: var(--chat-width);
   height: 100%;
   padding: 0 0.5rem;
+  overflow: hidden;
 
   @media (max-width: 767px) {
     width: 100%;
@@ -12,22 +13,26 @@
   }
 
   .header {
-    width: 100%;
+    position: relative;
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 1rem;
+    width: 100%;
     border-bottom: 1px solid var(--border-color-1);
 
-    .viewerCount {
+    .viewersButton {
       display: flex;
       align-items: center;
       gap: 0.25rem;
       padding: 0.5rem 0.75rem;
       color: var(--text-color-2);
-      cursor: default;
+      background: none;
+      border: none;
+      cursor: pointer;
 
       &:hover { color: var(--text-color-1); background: var(--bg-color-2); }
+      &.active { color: var(--text-color-1); background: var(--bg-color-3); }
     }
 
     .usernameButton {
@@ -179,6 +184,96 @@
 
       &:hover {
         background: var(--bg-color-3);
+      }
+    }
+  }
+}
+
+.viewersList {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  transform: translateY(calc(100% + 0.25rem));
+  width: 100%;
+  max-height: 20rem;
+  padding-bottom: 0.5rem;
+  background: var(--bg-color-2);
+  border: 1px solid var(--border-color-2);
+  border-radius: 0.5rem;
+  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.5);
+  overflow-y: auto;
+  animation: fadeIn 150ms ease-in-out;
+
+  @keyframes fadeIn {
+    0% { bottom: 1rem; opacity: 0; }
+    100% { bottom: 0; opacity: 1; }
+  }
+
+  @media (max-width: 767px) {
+    max-height: 12rem;
+  }
+  
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem 0;
+    margin: 0 0.5rem;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color-2);
+
+    h3 {
+      color: var(--text-color-1);
+      font-size: 1.15rem;
+      font-weight: 400;
+      cursor: default;
+    }
+
+    button {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0.25rem;
+      font-size: 1.25rem;
+      color: var(--text-color-1);
+      background: var(--bg-color-2);
+      border: 1px solid var(--border-color-1);
+      border-radius: 0.25rem;
+      transition: all 0.2s ease-in-out;
+      cursor: pointer;
+
+      &:hover {
+        background: var(--bg-color-3);
+        border: 1px solid var(--border-color-2);
+      }
+    }
+  }
+
+  ul {
+    li {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      width: 100%;
+      padding: 0.25rem 0.5rem;
+      font-size: 1rem;
+      overflow: hidden;
+      cursor: default;
+
+      &:hover { background: var(--bg-color-3); }
+
+      img {
+        width: 1.4rem;
+        height: 1.4rem;
+        border-radius: 50%;
+        background: white;
+      }
+
+      span {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
       }
     }
   }

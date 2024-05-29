@@ -10,6 +10,12 @@
   align-items: center;
   overflow: hidden;
 
+  &.zoomerThemeGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+
   @media (max-width: 767px) {
     width: 100%;
     height: calc(100vw * 9 / 16);

@@ -5,7 +5,7 @@ import { sections, type SectionName } from '@/components/admin/AdminModal'
 import { useStreamContext } from './StreamContext'
 import { Msg } from '@/lib/enums'
 import { ClientBumper, ClientPlaylist, ClientVideo, FileTree } from '@/typings/types'
-import { TranscodeClientVideo } from '@/typings/socket'
+import { ClientCacheStatus, ClientHistoryStatus, TranscodeClientVideo } from '@/typings/socket'
 import useSocketOn from '@/hooks/useSocketOn'
 
 // Stream page context
@@ -18,7 +18,10 @@ type ContextProps = {
   setSelectedPlaylist: (id: string | null) => void,
   bumpers: ClientBumper[],
   queue: ClientVideo[],
-  transcodeQueue: TranscodeClientVideo[]
+  transcodeQueue: TranscodeClientVideo[],
+  historyStatus: ClientHistoryStatus | null,
+  videosCacheStatus: ClientCacheStatus | null,
+  bumpersCacheStatus: ClientCacheStatus | null
 }
 
 // Context provider wrapper component
@@ -32,6 +35,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [bumpers, setBumpers] = useState<ClientBumper[]>([])
   const [queue, setQueue] = useState<ClientVideo[]>([])
   const [transcodeQueue, setTranscodeQueue] = useState<TranscodeClientVideo[]>([])
+  const [historyStatus, setHistoryStatus] = useState<ClientHistoryStatus | null>(null)
+  const [videosCacheStatus, setVideosCacheStatus] = useState<ClientCacheStatus | null>(null)
+  const [bumpersCacheStatus, setBumpersCacheStatus] = useState<ClientCacheStatus | null>(null)
 
   function setSection(sectionName: SectionName) {
     const sec = sections.find(s => s.name === sectionName)
@@ -48,6 +54,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   useSocketOn(Msg.AdminBumpersList, (bumpers: ClientBumper[]) => setBumpers(bumpers))
   useSocketOn(Msg.AdminQueueList, (queue: ClientVideo[]) => setQueue(queue))
   useSocketOn(Msg.AdminTranscodeQueueList, (queue: TranscodeClientVideo[]) => setTranscodeQueue(queue))
+  useSocketOn(Msg.AdminHistoryStatus, (status: ClientHistoryStatus) => setHistoryStatus(status))
+  useSocketOn(Msg.AdminVideosCacheStatus, (status: ClientCacheStatus) => setVideosCacheStatus(status))
+  useSocketOn(Msg.AdminBumpersCacheStatus, (status: ClientCacheStatus) => setBumpersCacheStatus(status))
 
   useEffect(() => {
     const isPlaylistSelected = playlists.some(playlist => playlist.id === selectedPlaylist)
@@ -63,7 +72,10 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     setSelectedPlaylist,
     bumpers,
     queue,
-    transcodeQueue
+    transcodeQueue,
+    historyStatus,
+    videosCacheStatus,
+    bumpersCacheStatus
   }
 
   return <AdminContext.Provider value={context}>{children}</AdminContext.Provider>

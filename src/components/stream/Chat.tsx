@@ -3,9 +3,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { useStreamContext } from '@/contexts/StreamContext'
 import useSocketOn from '@/hooks/useSocketOn'
+import useTooltip from '@/hooks/useTooltip'
 import { AuthRole, ChatType, Msg } from '@/lib/enums'
 import Icon from '@/components/ui/Icon'
 import Button from '@/components/ui/Button'
+import Tooltip from '@/components/ui/Tooltip'
 import ActionModal from '@/components/ui/ActionModal'
 import styles from './Chat.module.scss'
 
@@ -31,8 +33,12 @@ export default function Chat() {
   const { socket, streamInfo, showClearChatModal, setShowClearChatModal, chatMessages, addChatMessage, clearChatMessages, viewers, nickname, setShowNicknameModal } = useStreamContext()
 
   const [message, setMessage] = useState<string>('')
+  const [showViewersList, setShowViewersList] = useState<boolean>(false)
 
   const messagesRef = useRef<HTMLDivElement>(null)
+
+  const viewersTooltip = useTooltip('bottom-start')
+  const nicknameTooltip = useTooltip('bottom-end')
 
   async function submitMessage(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -63,12 +69,43 @@ export default function Chat() {
     <>
       <div className={styles.chat}>
         <div className={styles.header}>
-          <div className={styles.viewerCount} title={`${viewers.length} Viewers`}>
+          <button
+            className={showViewersList ? `${styles.viewersButton} ${styles.active}` : styles.viewersButton}
+            onClick={() => setShowViewersList(!showViewersList)}
+            {...viewersTooltip.anchorProps}
+          >
             <Icon name="users" />{viewers.length}
-          </div>
-          <button className={styles.usernameButton} onClick={() => setShowNicknameModal(true)} title="Change Nickname">
+          </button>
+          {!showViewersList && (
+            <Tooltip {...viewersTooltip.tooltipProps}>Open Viewers List</Tooltip>
+          )}
+          <button
+            className={styles.usernameButton}
+            onClick={() => setShowNicknameModal(true)}
+            {...nicknameTooltip.anchorProps}
+          >
             {nickname}<Icon name="edit" />
           </button>
+          <Tooltip {...nicknameTooltip.tooltipProps}>Change Nickname</Tooltip>
+
+          {showViewersList && (
+            <div className={styles.viewersList}>
+              <header>
+                <h3>{viewers.length} Viewers</h3>
+                <button onClick={() => setShowViewersList(false)}><Icon name="close" /></button>
+              </header>
+              <ul>
+                {viewers.map((viewer, index) => (
+                  <li key={index}>
+                    {streamInfo.chat.showIdenticons && (
+                      <img src={viewer.image} alt="" />
+                    )}
+                    <span style={{ color: roleColors[viewer.role] }}>{viewer.username}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
         <div className={styles.messages} ref={messagesRef}>
           {chatMessages.length > 0 ? chatMessages.map((chat, index) => {
@@ -88,7 +125,7 @@ export default function Chat() {
                     <p><span style={{ color: nameColor }}>{chat.username}:</span> {chat.message}</p>
                   </div>
                   {streamInfo.chat.showTimestamps && (
-                    <span className={styles.timestamp} title={fullTimestamp}>{timestamp}</span>
+                    <Timestamp hoverText={fullTimestamp}>{timestamp}</Timestamp>
                   )}
                 </div>
               )
@@ -109,7 +146,7 @@ export default function Chat() {
               <div key={chatMessages.length - index} className={styles.event}>
                 <p>{icon && icon}{chat.message}</p>
                 {streamInfo.chat.showTimestamps && (
-                  <span className={styles.timestamp} title={fullTimestamp}>{timestamp}</span>
+                  <Timestamp hoverText={fullTimestamp}>{timestamp}</Timestamp>
                 )}
               </div>
             )
@@ -136,6 +173,17 @@ export default function Chat() {
       >
         <p>Are you sure you want to clear {chatMessages.length} messages?</p>
       </ActionModal>
+    </>
+  )
+}
+
+function Timestamp({ hoverText, children }: { hoverText: string, children: string }) {
+  const timestampTooltip = useTooltip('top-end')
+
+  return (
+    <>
+      <span className={styles.timestamp} {...timestampTooltip.anchorProps}>{children}</span>
+      <Tooltip {...timestampTooltip.tooltipProps}>{hoverText}</Tooltip>
     </>
   )
 }

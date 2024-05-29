@@ -26,6 +26,7 @@ export default class SocketUtils {
       viewers.push({
         socketID: client.socket.id,
         username: client.username,
+        image: client.image,
         role: client.role
       })
     }

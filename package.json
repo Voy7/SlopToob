@@ -1,6 +1,6 @@
 {
   "name": "sloptoob",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "scripts": {
     "dev": "tsx src/index.ts",
     "dev2": "next dev",
@@ -11,6 +11,7 @@
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@ffprobe-installer/ffprobe": "^2.1.2",
+    "@floating-ui/react-dom": "^2.1.0",
     "@prisma/client": "^5.11.0",
     "@react-three/fiber": "^8.16.2",
     "colors": "^1.4.0",
@@ -22,7 +23,7 @@
     "hls-server": "^1.5.0",
     "hls.js": "^1.5.7",
     "minidenticons": "^4.2.1",
-    "next": "^14.1.4",
+    "next": "^14.2.3",
     "next-auth": "^4.24.7",
     "react": "^18",
     "react-dom": "^18",

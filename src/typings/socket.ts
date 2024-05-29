@@ -34,6 +34,7 @@ export type StreamError = {
 }
 
 export type StreamOptions = {
+  version: string,
   streamTheme: string,
   history: ClientHistoryItem[] | null,
   chat: {
@@ -59,12 +60,14 @@ export type StreamInfo = (
 export type SocketClient = {
   socket: Socket
   username: string,
+  image: string,
   role: AuthRole
 }
 
 export type Viewer = {
   socketID: string,
   username: string,
+  image: string,
   role: AuthRole
 }
 
@@ -107,4 +110,16 @@ export type ClientHistoryItem = {
   totalDuration: string,
   thumbnailURL: string,
   isBumper: boolean,
+}
+
+export type ClientHistoryStatus = {
+  currentCount: number,
+  totalCount: number,
+  isDeleting: boolean
+}
+
+export type ClientCacheStatus = {
+  filesCount: number,
+  size: string,
+  isDeleting: boolean
 }

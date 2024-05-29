@@ -24,10 +24,13 @@ export default function History() {
           {streamInfo.history.map((video, index) => (
             <li key={index}>
               <span className={styles.index}>{index + 1}.</span>
-              <Thumbnail src={video.thumbnailURL} height={40} />
+              <Thumbnail src={video.thumbnailURL} height={50} />
               <div className={styles.details}>
-                <p className={styles.title}>{video.isBumper ? <span>Bumper</span> : null}{video.name}</p>
-                <p className={styles.duration}>{video.totalDuration}</p>
+                <p className={styles.title}>{video.name}</p>
+                <div className={styles.row}>
+                  <p className={styles.duration}>{video.totalDuration}</p>
+                  {video.isBumper && <p className={styles.bumper}><Icon name="bumper" />Bumper</p>}
+                </div>
               </div>
             </li>
           ))}

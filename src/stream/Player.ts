@@ -11,6 +11,7 @@ import { themes } from '@/stream/themes'
 import { StreamState, Msg, VideoState } from '@/lib/enums'
 import type { RichPlaylist, ClientPlaylist, ListOption } from '@/typings/types'
 import type { SocketClient, StreamInfo, StreamOptions } from '@/typings/socket'
+import packageJSON from '@package' assert { type: 'json' }
 
 // Main player (video) handler, singleton
 export default new class Player {
@@ -190,6 +191,7 @@ export default new class Player {
 
   get clientStreamOptions(): StreamOptions {
     return {
+      version: packageJSON.version,
       streamTheme: Settings.streamTheme,
       history: PlayHistory.clientHistory,
       chat: {

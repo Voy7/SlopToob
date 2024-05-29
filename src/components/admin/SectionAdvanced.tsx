@@ -1,10 +1,13 @@
 'use client'
 
+import { useStreamContext } from '@/contexts/StreamContext'
 import useToggleOption from '@/hooks/useToggleOption'
 import useNumberOption from '@/hooks/useNumberOption'
-import { SettingGroup, Description, Header, ToggleOption, NumberOption, Gap } from '@/components/admin/SettingsComponents'
+import { SettingGroup, Description, Header, ToggleOption, NumberOption, ButtonOption, Gap } from '@/components/admin/SettingsComponents'
 
 export default function SectionAdvanced() {
+  const { streamInfo } = useStreamContext()
+
   const pauseWhenInactive = useToggleOption('pauseWhenInactive')
   const maxTranscodingJobs = useNumberOption('maxTranscodingJobs')
   const targetQueueSize = useNumberOption('targetQueueSize')
@@ -30,6 +33,10 @@ export default function SectionAdvanced() {
         <Gap />
         <NumberOption label="Error Display Seconds" type="float" {...errorDisplaySeconds} />
         <Description>How long to display errors on the player for in seconds.</Description>
+      </SettingGroup>
+      <SettingGroup>
+        <Header icon="admin-panel">App Information</Header>
+        <ButtonOption label={`Version: ${streamInfo.version}`}><></></ButtonOption>
       </SettingGroup>
     </>
   )

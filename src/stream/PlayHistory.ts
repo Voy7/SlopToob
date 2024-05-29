@@ -10,13 +10,14 @@ import Thumbnails from '@/stream/Thumbnails'
 import SocketUtils from '@/lib/SocketUtils'
 import { Msg } from '@/lib/enums'
 import type { PlayHistory as DBPlayHistory } from '@prisma/client'
-import type { ClientHistoryItem } from '@/typings/socket'
+import type { ClientHistoryItem, ClientHistoryStatus } from '@/typings/socket'
 import type Video from '@/stream/Video'
 
 // Video history handler
 export default new class PlayHistory {
   private internalHistory: string[] = []
   private displayHistory: DBPlayHistory[] = []
+  private isDeleting: boolean = false
 
   constructor() { this.populateHistory() }
 
@@ -57,6 +58,8 @@ export default new class PlayHistory {
       this.displayHistory.unshift(newEntry)
     }
 
+    SocketUtils.broadcastAdmin(Msg.AdminHistoryStatus, this.clientHistoryStatus)
+
     Logger.debug(`[History] Added ${video.inputPath} to history.`)
   }
 
@@ -65,6 +68,9 @@ export default new class PlayHistory {
   // Will also take all videos in queue into account
   getRandom(inputPaths: string[]): string | null {
     if (inputPaths.length == 0) return null
+
+    // Remove duplicates from inputPaths
+    inputPaths = [...new Set(inputPaths)]
 
     // Use history AND queue items for algorithm
     const historyItems = [...this.internalHistory, ...TranscoderQueue.jobs.map(j => j.video.inputPath)]
@@ -79,10 +85,13 @@ export default new class PlayHistory {
     }
 
     // Get the lowest amount of times played
-    let minCount = Infinity
-    countMap.forEach(count => {
-      if (count < minCount) minCount = count
-    })
+    let minCount = 0
+    if (countMap.size >= inputPaths.length) {
+      minCount = Infinity
+      countMap.forEach(count => {
+        if (count < minCount) minCount = count
+      })
+    }
 
     // Pool is all inputPaths 
     const pool: string[] = []
@@ -102,11 +111,17 @@ export default new class PlayHistory {
   async resyncChanges() {
     await this.populateHistory()
     SocketUtils.broadcast(Msg.StreamInfo, Player.clientStreamInfo)
+    SocketUtils.broadcastAdmin(Msg.AdminHistoryStatus, this.clientHistoryStatus)
   }
 
   async clearAllHistory() {
+    if (this.isDeleting) return
+    this.isDeleting = true
+    SocketUtils.broadcastAdmin(Msg.AdminHistoryStatus, this.clientHistoryStatus)
     await prisma.playHistory.updateMany({ data: { isDeleted: true } })
     await this.populateHistory()
+    this.isDeleting = false
+    SocketUtils.broadcastAdmin(Msg.AdminHistoryStatus, this.clientHistoryStatus)
   }
 
   get clientHistory(): ClientHistoryItem[] | null {
@@ -122,5 +137,13 @@ export default new class PlayHistory {
       thumbnailURL: Thumbnails.getURL(item.path),
       isBumper: item.path.startsWith(Env.BUMPERS_PATH)
     }))
+  }
+
+  get clientHistoryStatus(): ClientHistoryStatus {
+    return {
+      currentCount: this.internalHistory.length,
+      totalCount: Settings.historyMaxItems,
+      isDeleting: this.isDeleting
+    }
   }
 }

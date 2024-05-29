@@ -3,12 +3,14 @@ import path from 'path'
 import { socketClients } from '@/server/socketClients'
 import { Msg } from '@/lib/enums'
 import { getClientBumpers } from '@/stream/bumpers'
+import generateSecret from '@/lib/generateSecret'
 import authRoleFromPassword from '@/lib/authRoleFromPassword'
 import isNicknameValid from '@/lib/isNicknameValid'
 import Env from '@/EnvVariables'
 import Logger from '@/lib/Logger'
 import Player from '@/stream/Player'
 import TranscoderQueue from '@/stream/TranscoderQueue'
+import PlayHistory from '@/stream/PlayHistory'
 import SocketUtils from '@/lib/SocketUtils'
 import Settings from '@/stream/Settings'
 import FileTreeHandler from '@/stream/FileTreeHandler'
@@ -55,6 +57,7 @@ export const socketEvents: Record<string, EventOptions> = {
     socketClients.push({
       socket: socket,
       username: isNicknameValid(payload.username) === true ? payload.username : 'Anonymous',
+      image: `/api/avatar/${generateSecret()}`,
       role: authRole
     })
     
@@ -119,7 +122,7 @@ export const socketEvents: Record<string, EventOptions> = {
         type: Chat.Type.UserChat,
         username: client.username,
         role: client.role,
-        image: `/api/avatar/${client.socket.id}`, // Not sure if socket.id in sensitive, might need to change
+        image: client.image,
         message: message
       })
     }
@@ -148,6 +151,7 @@ export const socketEvents: Record<string, EventOptions> = {
     socket.emit(Msg.AdminBumpersList, bumpers)
     socket.emit(Msg.AdminQueueList, Player.queue.map(video => video.clientVideo))
     socket.emit(Msg.AdminTranscodeQueueList, TranscoderQueue.clientTranscodeList)
+    socket.emit(Msg.AdminHistoryStatus, PlayHistory.clientHistoryStatus)
   }},
 
   // Admin adds a new playlist
@@ -209,6 +213,11 @@ export const socketEvents: Record<string, EventOptions> = {
       socket.emit(Msg.AdminDeleteBumper, true)
     }
     catch (error: any) { socket.emit(Msg.AdminDeleteBumper, error.message) }
+  }},
+
+  // Admin clears history
+  [Msg.AdminDeleteHistory]: { adminOnly: true, run: async (socket) => {
+    await PlayHistory.clearAllHistory()
   }},
 
   // Admin pauses the stream

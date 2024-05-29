@@ -1,17 +1,24 @@
 'use client'
 
 import { useEffect } from 'react'
+import { useSession } from 'next-auth/react'
 import { useVideoContext } from '@/contexts/VideoContext'
 import { useStreamContext } from '@/contexts/StreamContext'
-import { StreamState } from '@/lib/enums'
+import { StreamState, AuthRole } from '@/lib/enums'
 import useStreamTimestamp from '@/hooks/useStreamTimestamp'
+import useTooltip from '@/hooks/useTooltip'
 import Icon from '@/components/ui/Icon'
+import Tooltip from '@/components/ui/Tooltip'
 import styles from './VideoControls.module.scss'
 
 const OVERLAY_MOUSE_TIMEOUT = 3000
+const VOLUME_STEP_PERCENT = 0.05
 
 // Video bottom controls
 export default function VideoControls() {
+  const session = useSession()
+  const authUser = session.data?.user
+
   const { isPaused, volume, showControls, setShowControls, videoElement, containerElement, showActionPopup } = useVideoContext()
   const { setShowClearChatModal, setShowKeybindsModal, setShowAdminModal } = useStreamContext()
 
@@ -56,11 +63,11 @@ export default function VideoControls() {
       
       // UP / DOWN - Volume by 10%
       { key: ['arrowup'], action: () => {
-        videoElement.volume = Math.min(videoElement.volume + 0.1, 1)
+        videoElement.volume = Math.min(videoElement.volume + VOLUME_STEP_PERCENT, 1)
         showActionPopup('volume', `${Math.round(videoElement.volume * 100)}%`)
       }},
       { key: ['arrowdown'], action: () => {
-        videoElement.volume = Math.max(videoElement.volume - 0.1, 0)
+        videoElement.volume = Math.max(videoElement.volume - VOLUME_STEP_PERCENT, 0)
         showActionPopup('volume', `${Math.round(videoElement.volume * 100)}%`)
       }},
       
@@ -128,6 +135,13 @@ export default function VideoControls() {
             </div>
           </button>
         </div>
+        {authUser && authUser.role >= AuthRole.Admin && (
+          <div className={styles.group}>
+            {/* <button className={styles.actionButton} onClick={() => setShowKeybindsModal(true)}>
+              <Icon name="stream-settings" />
+            </button> */}
+          </div>
+        )}
         <div className={styles.group}>
           <button className={styles.actionButton} onClick={toggleFullscreen}>
             <Icon name="fullscreen" />
@@ -158,9 +172,18 @@ function PausePlayButton() {
     )
   }
 
+  return <StreamPausedButton />
+}
+
+function StreamPausedButton() {
+  const tooltip = useTooltip('top-start')
+
   return (
-    <button className={`${styles.actionButton} ${styles.disabled}`} title="Stream Paused">
-      <Icon name="pause" />
-    </button>
+    <>
+      <button className={`${styles.actionButton} ${styles.disabled}`} {...tooltip.anchorProps}>
+        <Icon name="pause" />
+      </button>
+      <Tooltip {...tooltip.tooltipProps}>Stream Paused</Tooltip>
+    </>
   )
 }
