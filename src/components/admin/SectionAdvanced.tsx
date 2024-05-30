@@ -13,6 +13,7 @@ export default function SectionAdvanced() {
   const targetQueueSize = useNumberOption('targetQueueSize')
   const videoPaddingSeconds = useNumberOption('videoPaddingSeconds')
   const errorDisplaySeconds = useNumberOption('errorDisplaySeconds')
+  const torrentNameParsing = useToggleOption('torrentNameParsing')
 
   return (
     <>
@@ -33,6 +34,9 @@ export default function SectionAdvanced() {
         <Gap />
         <NumberOption label="Error Display Seconds" type="float" {...errorDisplaySeconds} />
         <Description>How long to display errors on the player for in seconds.</Description>
+        <Gap />
+        <ToggleOption label="Torrent Name Parsing" {...torrentNameParsing} />
+        <Description>Parse common torrent filename patterns into nice video titles.</Description>
       </SettingGroup>
       <SettingGroup>
         <Header icon="admin-panel">App Information</Header>

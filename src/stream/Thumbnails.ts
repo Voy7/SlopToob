@@ -3,6 +3,7 @@ import path from 'path'
 import ffmpeg, { THUMBNAIL_ARGS } from '@/lib/ffmpeg'
 import Env from '@/EnvVariables'
 import Logger from '@/lib/Logger'
+import TranscoderJob from '@/stream/TranscoderJob'
 import type { IncomingMessage, ServerResponse } from 'http'
 import type { UrlWithParsedQuery } from 'url'
 
@@ -35,8 +36,12 @@ export default new class Thumbnails {
         fs.mkdirSync(Env.THUMBNAILS_OUTPUT_PATH, { recursive: true })
       }
 
+      let seekSeconds = 5
+      try { seekSeconds = await TranscoderJob.getVideoDuration(videoPath) / 2 }
+      catch (error: any) {}
+
       const command = ffmpeg(videoPath)
-      command.outputOptions(THUMBNAIL_ARGS)
+      command.outputOptions([...THUMBNAIL_ARGS, `-ss ${seekSeconds}`])
       command.output(thumbnailPath)
 
       command.on('end', () => {

@@ -104,7 +104,7 @@ export default class TranscoderJob {
 
     const asyncInit = async () => {
       // Get the duration of the video
-      try { this.duration = await this.getVideoDuration() }
+      try { this.duration = await TranscoderJob.getVideoDuration(this.video.inputPath) }
       catch (error: any) { // If we can't get the duration, it's a hard fail
         Logger.error('[Video] Transcoding error:', error)
         this.error = error
@@ -317,9 +317,9 @@ export default class TranscoderJob {
 
   // Use ffprobe to get the duration of the video if it hasn't been set yet
   // This also acts as a check to see if input is a valid video file
-  private async getVideoDuration(): Promise<number> {
+  static async getVideoDuration(inputPath: string): Promise<number> {
     return new Promise<number>((resolve, reject) => {
-      ffmpeg.ffprobe(this.video.inputPath, (error, metadata) => {
+      ffmpeg.ffprobe(inputPath, (error, metadata) => {
         if (error) reject('Failed to get video duration.')
         const duration = metadata?.format?.duration
         if (typeof duration !== 'number') {

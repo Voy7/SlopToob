@@ -28,6 +28,5 @@ export const TRANSCODE_ARGS = [
 export const THUMBNAIL_ARGS = [
   '-vf scale=-1:420', // Scale to 420p height
   '-vframes 1', // Only 1 frame
-  '-q:v 2', // Quality level
-  '-ss 5' // Seek to 5 seconds in
+  '-q:v 2' // Quality level
 ]

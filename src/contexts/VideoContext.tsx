@@ -146,9 +146,9 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
         </video>
         {streamInfo.streamTheme === 'Zoomer' && (
           <>
-            <video src="/zoomer-videos/1.mp4" autoPlay loop muted></video>
-            <video src="/zoomer-videos/2.mp4" autoPlay loop muted></video>
-            <video src="/zoomer-videos/3.mp4" autoPlay loop muted></video>
+            <video src="/theme-assets/zoomer-1.mp4" autoPlay loop muted></video>
+            <video src="/theme-assets/zoomer-2.mp4" autoPlay loop muted></video>
+            <video src="/theme-assets/zoomer-3.mp4" autoPlay loop muted></video>
           </>
         )}
         {children}

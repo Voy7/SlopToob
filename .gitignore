@@ -40,3 +40,7 @@ next-env.d.ts
 output/
 
 prisma/database.db
+
+/public/theme-assets/zoomer-1.mp4
+/public/theme-assets/zoomer-2.mp4
+/public/theme-assets/zoomer-3.mp4

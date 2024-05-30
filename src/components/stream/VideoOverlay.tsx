@@ -102,9 +102,9 @@ function ActionPopupOverlay() {
 }
 
 function FoxNewsOverlay() {
-  return <img src="/fox-news-overlay.png" alt="" className={styles.fullImageOverlay} />
+  return <img src="/theme-assets/fox-news-overlay.png" alt="" className={styles.fullImageOverlay} />
 }
 
 function SaulGoodmanOverlay() {
-  return <img src="/saul-goodman-overlay.gif" alt="" className={styles.saulGoodmanOverlay} />
+  return <img src="/theme-assets/saul-goodman-overlay.gif" alt="" className={styles.saulGoodmanOverlay} />
 }
