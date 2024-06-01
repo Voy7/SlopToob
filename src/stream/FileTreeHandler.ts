@@ -4,6 +4,7 @@ import path from 'path'
 import Env from '@/EnvVariables'
 import Logger from '@/lib/Logger'
 import SocketUtils from '@/lib/SocketUtils'
+import { passCheck, failCheck } from '@/stream/initChecks'
 import { Msg } from '@/lib/enums'
 import type { FileTree } from '@/typings/types'
 
@@ -18,7 +19,6 @@ export default new class FileTreeHandler {
   constructor() { this.initialize() }
 
   private async initialize() {
-    Logger.info('Initializing file tree handler...')
     const startDate = Date.now()
 
     const paths: string[] = []
@@ -38,10 +38,18 @@ export default new class FileTreeHandler {
 
     await getChildren(rootPath)
     this.paths = paths
+
+    // Special development test option to test large fake file trees
+    if (Env.DEV_FILE_TREE_TEST) {
+      const { fakePaths } = await import('@/lib/fileTreeTest')
+      this.paths = fakePaths
+      Logger.debug(`[FileTreeHandler] DEV: Using fake file tree with ${fakePaths.length} paths.`)
+    }
+
     this.pathsToTree(false)
 
     const passedSeconds = (Date.now() - startDate) / 1000
-    Logger.info(`File tree handler fetched tree in ${passedSeconds.toFixed(1)}s.`)
+    passCheck('fileTreeReady', `Fetched tree in ${passedSeconds.toFixed(1)}s.`)
 
     this.onReadyCallback?.()
 

@@ -4,7 +4,10 @@ import { httpServer } from '@/server/httpServer'
 import { initializeSocketServer } from '@/server/socket'
 import { initializeHlsServer } from '@/server/hls'
 import Env from '@/EnvVariables'
+import Logger from '@/lib/Logger'
+import Player from '@/stream/Player'
 import Thumbnails from '@/stream/Thumbnails'
+import { passCheck, failCheck } from '@/stream/initChecks'
 import type { IncomingMessage, ServerResponse } from 'http'
 
 const app = next({
@@ -16,10 +19,11 @@ const app = next({
 const handle = app.getRequestHandler()
 
 app.prepare().then(() => {
-  console.log('Next.js server ready')
+  passCheck('nextAppReady', 'Next.js app ready.')
   httpServer.on('request', nextRequestHandler)
   initializeSocketServer()
   initializeHlsServer()
+  Player.initialize()
 })
 
 async function nextRequestHandler(req: IncomingMessage, res: ServerResponse) {
@@ -35,7 +39,7 @@ async function nextRequestHandler(req: IncomingMessage, res: ServerResponse) {
     await handle(req, res, parsedUrl)
   }
   catch (error: any) {
-    console.error('Error occurred handling', req.url, error)
+    Logger.error('[Next] Error occurred handling', req.url, error)
     res.statusCode = 500
     res.end('internal server error')
   }

@@ -1,0 +1,15 @@
+import Env from '@/EnvVariables'
+import generateSecret from '@/lib/generateSecret'
+
+// Fake file tree data for testing purposes
+const FOLDERS = 10
+const FILES_PER_FOLDER = 10000
+
+export let fakePaths: string[] = []
+for (let i = 0; i < FOLDERS; i++) {
+  let folderName = generateSecret()
+  for (let f = 0; f < FILES_PER_FOLDER; f++) {
+    let fileName = generateSecret()
+    fakePaths.push(`${Env.VIDEOS_PATH}/${i}-${folderName}/${f}-${fileName}.mp4`)
+  }
+}

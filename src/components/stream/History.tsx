@@ -22,7 +22,7 @@ export default function History() {
       {streamInfo.history.length > 0 ? (
         <ol className={styles.items}>
           {streamInfo.history.map((video, index) => (
-            <li key={index}>
+            <li key={`${index}${video.name}`}>
               <span className={styles.index}>{index + 1}.</span>
               <Thumbnail src={video.thumbnailURL} height={50} />
               <div className={styles.details}>

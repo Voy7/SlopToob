@@ -2,6 +2,7 @@ import prisma from '@/lib/prisma'
 import Logger from '@/lib/Logger'
 import SocketUtils from '@/lib/SocketUtils'
 import { settingsList } from '@/stream/settingsList'
+import { passCheck, failCheck } from '@/stream/initChecks'
 import type { SocketClient } from '@/typings/socket'
 
 export { settingsList }
@@ -49,56 +50,61 @@ const Settings = {
 }
 
 async function initializeSettings() {
-  const dbSettings = await prisma.settings.findMany()
+  try {
+    const dbSettings = await prisma.settings.findMany()
 
-  settings = {} as SettingsList
+    settings = {} as SettingsList
 
-  for (const settingKey in settingsList) {
-    const key = settingKey as keyof SettingsList
-    const dbSetting = dbSettings.find(s => s.key === key)
-    const defaultValue = settingsList[key].default
+    for (const settingKey in settingsList) {
+      const key = settingKey as keyof SettingsList
+      const dbSetting = dbSettings.find(s => s.key === key)
+      const defaultValue = settingsList[key].default
 
-    if (dbSetting === undefined) {
-      Logger.debug(`[Settings] Setting ${key} not found, creating with default value: ${defaultValue}`)
-      settings[key] = defaultValue as never
-      await prisma.settings.create({ data: { key, value: defaultValue.toString() } })
-      continue
+      if (dbSetting === undefined) {
+        Logger.debug(`[Settings] Setting ${key} not found, creating with default value: ${defaultValue}`)
+        settings[key] = defaultValue as never
+        await prisma.settings.create({ data: { key, value: defaultValue.toString() } })
+        continue
+      }
+
+      // Parse value to correct type
+      const type = typeof defaultValue
+      let value
+      if (type === 'string') value = dbSetting.value.toString()
+      else if (type === 'number') value = Number(dbSetting.value)
+      else if (type === 'boolean') value = dbSetting.value === 'true'
+
+      if (type !== typeof value) {
+        Logger.warn(`[Settings] Invalid value for setting.${key}: ${dbSetting.value}, resetting to default.`)
+
+        settings[key] = defaultValue as never
+        await prisma.settings.update({
+          where: { key },
+          data: { value: defaultValue.toString() }
+        })
+        continue
+      }
+
+      settings[key] = value as never
     }
 
-    // Parse value to correct type
-    const type = typeof defaultValue
-    let value
-    if (type === 'string') value = dbSetting.value.toString()
-    else if (type === 'number') value = Number(dbSetting.value)
-    else if (type === 'boolean') value = dbSetting.value === 'true'
-
-    if (type !== typeof value) {
-      Logger.warn(`[Settings] Invalid value for setting.${key}: ${dbSetting.value}, resetting to default.`)
-
-      settings[key] = defaultValue as never
-      await prisma.settings.update({
-        where: { key },
-        data: { value: defaultValue.toString() }
+    // Define getters for each setting on main Settings object
+    for (const settingKey in settingsList) {
+      const key = settingKey as keyof SettingsList
+      Object.defineProperty(Settings, key, {
+        get: () => {
+          if (!settings) throw new Error('Settings not initialized.')
+          return settings[key]
+        },
+        enumerable: true
       })
-      continue
     }
 
-    settings[key] = value as never
-  }
+    passCheck('settingsReady', `Loaded ${Object.keys(settings).length} settings from database.`)
 
-  // Define getters for each setting on main Settings object
-  for (const settingKey in settingsList) {
-    const key = settingKey as keyof SettingsList
-    Object.defineProperty(Settings, key, {
-      get: () => {
-        if (!settings) throw new Error('Settings not initialized.')
-        return settings[key]
-      },
-      enumerable: true
-    })
+    onReadyCallback?.()
   }
-
-  onReadyCallback?.()
+  catch (error: any) { failCheck('settingsReady', error.message) }
 }
 
 initializeSettings()

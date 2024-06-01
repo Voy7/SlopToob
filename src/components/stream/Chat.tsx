@@ -30,7 +30,7 @@ const eventIcons = {
 }
 
 export default function Chat() {
-  const { socket, streamInfo, showClearChatModal, setShowClearChatModal, chatMessages, addChatMessage, clearChatMessages, viewers, nickname, setShowNicknameModal } = useStreamContext()
+  const { socket, streamInfo, showClearChatModal, setShowClearChatModal, chatMessages, addChatMessage, clearChatMessages, viewers, nickname, showNicknameModal, setShowNicknameModal } = useStreamContext()
 
   const [message, setMessage] = useState<string>('')
   const [showViewersList, setShowViewersList] = useState<boolean>(false)
@@ -86,7 +86,9 @@ export default function Chat() {
           >
             {nickname}<Icon name="edit" />
           </button>
-          <Tooltip {...nicknameTooltip.tooltipProps}>Change Nickname</Tooltip>
+          {!showNicknameModal && (
+            <Tooltip {...nicknameTooltip.tooltipProps}>Change Nickname</Tooltip>
+          )}
 
           {showViewersList && (
             <div className={styles.viewersList}>

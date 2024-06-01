@@ -3,6 +3,7 @@ import fsAsync from 'fs/promises'
 import path from 'path'
 import ffmpeg, { TRANSCODE_ARGS } from '@/lib/ffmpeg'
 import generateSecret from '@/lib/generateSecret'
+import Env from '@/EnvVariables'
 import Logger from '@/lib/Logger'
 import TranscoderQueue from '@/stream/TranscoderQueue'
 import Settings from './Settings'
@@ -143,13 +144,6 @@ export default class TranscoderJob {
     asyncInit()
   }
 
-  // private callbacks() {
-  //   if (this.state === JobState.Initializing) return
-  //   if (this.state === JobState.Idle) return
-  //   if (this.state === JobState.AwaitingTranscode) return
-  //   if (this.state === JobState.Transcoding) return
-  // }
-
   // Add this job to the queue
   activate() {
     if (this.state === JobState.Errored) {
@@ -234,16 +228,8 @@ export default class TranscoderJob {
     const index = TranscoderQueue.jobs.findIndex(item => item === this)
     if (index !== -1) TranscoderQueue.jobs.splice(index, 1)
 
-    // this.state = JobState.
     // console.log(`Finished - ${this.video.name}`)
     this.initialize()
-    // this.cleanUpCallback?.()
-
-    // console.log('cleanup()'.yellow, this.videos.length)
-    // if (this.videos.length > 0) {
-    //   this.activate()
-    //   return
-    // }
   }
 
   onInitialized(callback: () => void) {
@@ -286,19 +272,13 @@ export default class TranscoderJob {
 
   private resolveTranscodeFinishedCallbacks() {
     for (const callback of this.onTranscodeFinishedCallbacks) callback()
-    // this.onTranscodeFinishedCallbacks = []
+    this.onTranscodeFinishedCallbacks = []
   }
 
   private resolveErrorCallbacks() {
     for (const callback of this.onErrorCallbacks) callback(this.error as string)
-    // this.onErrorCallbacks = []
+    this.onErrorCallbacks = []
   }
-
-  // Private callback for when ffmpeg command has been created
-  // private onFfmpegCmdReady(callback: () => void) {
-  //   if (this.ffmpegCmdReady) callback()
-  //   else this.onFfmpegCmdReadyCallback = callback
-  // }
 
   // Get additional info about a completed job
   // Currently only used for getting duration, can be expanded in the future

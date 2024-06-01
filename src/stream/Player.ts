@@ -9,6 +9,7 @@ import Chat from '@/stream/Chat'
 import { getNextBumper } from '@/stream/bumpers'
 import { themes } from '@/stream/themes'
 import { StreamState, Msg, VideoState } from '@/lib/enums'
+import { passCheck, failCheck } from '@/stream/initChecks'
 import type { RichPlaylist, ClientPlaylist, ListOption } from '@/typings/types'
 import type { SocketClient, StreamInfo, StreamOptions } from '@/typings/socket'
 import packageJSON from '@package' assert { type: 'json' }
@@ -21,13 +22,12 @@ export default new class Player {
   private activePlaylist: RichPlaylist | null = null
   private lastBumperDate: Date = new Date()
 
-  constructor() { this.initialize() }
-  
   // Get all playlists on startup
-  private async initialize() {
+  async initialize() {
     Logger.debug('Initializing player handler...')
     await this.populatePlaylists()
     await this.setActivePlaylistID(Settings.activePlaylistID)
+    passCheck('playerReady', 'Stream player handler ready.')
   }
 
   pause(): boolean { return this.playing?.pause() || false }
@@ -93,7 +93,7 @@ export default new class Player {
   // Set playlist as active, and start playing it
   async setActivePlaylistID(playlistID: string, executedBy?: SocketClient) {
     const playlist = this.playlists.find(playlist => playlist.id === playlistID) || null
-    Logger.info('Setting active playlist:', playlist?.name || 'None')
+    Logger.debug('Setting active playlist:', playlist?.name || 'None')
 
     const sendChangedMessage = () => {
       if (!Settings.sendAdminChangePlaylist) return
