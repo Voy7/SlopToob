@@ -20,17 +20,6 @@ export default function SectionPlaylists() {
   const [addLoading, setAddLoading] = useState<boolean>(false)
   const [addError, setAddError] = useState<string | null>(null)
 
-  // No playlists exist, show add first playlist button
-  if (!playlists || !selectedPlaylist) {
-    return (
-      <div className={styles.addFirstPlaylist}>
-        <Icon name="playlist-add" className={styles.icon} />
-        <p>No playlists yet, add one.</p>
-        <Button style="main" icon="playlist-add" loading={addLoading} onClick={() => setShowAddModal(true)}>Add Playlist</Button>
-      </div>
-    )
-  }
-
   function submitAddPlaylist(event: React.FormEvent) {
     event.preventDefault()
     if (addLoading) return
@@ -54,20 +43,30 @@ export default function SectionPlaylists() {
 
   return (
     <>
-      <h2>Playlists ({playlists.length})</h2>
-      <div className={styles.playlistNavbar}>
-        <SelectDropdown text={activePlaylist?.name || 'None Selected'} icon="playlist">
-          {playlists.map(playlist => (
-            <button
-              key={playlist.id}
-              className={selectedPlaylist === playlist.id ? `${styles.playlistItem} ${styles.selected}` : styles.playlistItem}
-              onClick={() => setSelectedPlaylist(playlist.id)}
-            >{playlist.name}<span>{playlist.videoPaths.length} Videos</span></button>
-          ))}
-        </SelectDropdown>
-        <Button style="main" icon="playlist-add" loading={addLoading} onClick={() => setShowAddModal(true)}>Add Playlist</Button>
-      </div>
-      {activePlaylist && <PlaylistEditor key={activePlaylist.id} playlist={activePlaylist} />}
+      {!playlists || !selectedPlaylist ? (
+        <div className={styles.addFirstPlaylist}>
+          <Icon name="playlist-add" className={styles.icon} />
+          <p>No playlists yet, add one.</p>
+          <Button style="main" icon="playlist-add" loading={addLoading} onClick={() => setShowAddModal(true)}>Add Playlist</Button>
+        </div>
+      ) : (
+        <>
+          <h2>Playlists ({playlists.length})</h2>
+          <div className={styles.playlistNavbar}>
+            <SelectDropdown text={activePlaylist?.name || 'None Selected'} icon="playlist">
+              {playlists.map(playlist => (
+                <button
+                  key={playlist.id}
+                  className={selectedPlaylist === playlist.id ? `${styles.playlistItem} ${styles.selected}` : styles.playlistItem}
+                  onClick={() => setSelectedPlaylist(playlist.id)}
+                >{playlist.name}<span>{playlist.videoPaths.length} Videos</span></button>
+              ))}
+            </SelectDropdown>
+            <Button style="main" icon="playlist-add" loading={addLoading} onClick={() => setShowAddModal(true)}>Add Playlist</Button>
+          </div>
+          {activePlaylist && <PlaylistEditor key={activePlaylist.id} playlist={activePlaylist} />}
+        </>
+      )}
 
       <ActionModal
         title="Add Playlist"
