@@ -94,7 +94,8 @@ export type EditPlaylistNamePayload = {
 
 export type EditPlaylistVideosPayload = {
   playlistID: string,
-  newVideoPaths: string[]
+  // newVideoPaths: string[]
+  newVideoPaths: number[]
 }
 
 export type TranscodeClientVideo = {

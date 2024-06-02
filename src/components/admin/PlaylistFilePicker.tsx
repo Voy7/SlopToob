@@ -61,9 +61,17 @@ function PlaylistFilePickerProvider({ playlist, children }: { playlist: ClientPl
   // Update playlist video paths when activePaths change
   useEffect(() => {
     if (activePaths === playlist.videoPaths) return
+    // const deletedPaths = playlist.videoPaths.filter(path => !activePaths.includes(path))
+    // const newPaths = activePaths.filter(path => !playlist.videoPaths.includes(path))
+    const pathsIndex: number[] = []
+    for (const path of activePaths) {
+      const index = pathMap.get(path)
+      if (index !== undefined) pathsIndex.push(index)
+    }
     socket.emit(Msg.AdminEditPlaylistVideos, {
       playlistID: playlist.id,
-      newVideoPaths: activePaths
+      // newVideoPaths: activePaths
+      newVideoPaths: pathsIndex
     } satisfies EditPlaylistVideosPayload)
   }, [activePaths])
 

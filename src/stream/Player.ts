@@ -13,6 +13,7 @@ import { passCheck, failCheck } from '@/stream/initChecks'
 import type { RichPlaylist, ClientPlaylist, ListOption } from '@/typings/types'
 import type { SocketClient, StreamInfo, StreamOptions } from '@/typings/socket'
 import packageJSON from '@package' assert { type: 'json' }
+import FileTreeHandler from './FileTreeHandler'
 
 // Main player (video) handler, singleton
 export default new class Player {
@@ -274,8 +275,24 @@ export default new class Player {
   }
 
   // Set new videos for playlist
-  async setPlaylistVideos(playlistID: string, newVideoPaths: string[]) {
-    newVideoPaths = Array.from(new Set(newVideoPaths)) // Remove duplicate paths
+  async setPlaylistVideos(playlistID: string, newVideoPathsIndex: number[]) {
+    newVideoPathsIndex = Array.from(new Set(newVideoPathsIndex)) // Remove duplicate paths
+
+    // --- PLAYLIST OPTIMIZE TEST -----------
+
+    const allPaths: string[] = []
+    function getPaths(item: typeof FileTreeHandler.tree) {
+      if (!item.isDirectory) allPaths.push(item.path)
+      else if (item.children) for (const child of item.children) { getPaths(child) }
+    }
+    getPaths(FileTreeHandler.tree)
+
+    // console.log(newVideoPathsIndex, newVideoPathsIndex.length)
+    const newVideoPaths = newVideoPathsIndex.map(index => allPaths[index])
+    // console.log(newVideoPaths, newVideoPaths.length)
+    // return
+
+    // ------------------------
 
     const playlist = this.playlists.find(playlist => playlist.id === playlistID)
     if (!playlist) return Logger.warn(`Tried to set videos for non-existent playlist: ${playlistID}`)
