@@ -12,7 +12,7 @@ let io: Server | null = null
 // Socket server must be initialized after Next.js is ready
 export function initializeSocketServer() {
   io = new Server(httpServer, {
-    maxHttpBufferSize: 50e6 // Max 50MB message size (mainly for uploading bumper videos)
+    maxHttpBufferSize: 500e6 // Max 50MB message size (mainly for uploading bumper videos)
   })
 
   passCheck('socketServerReady', 'Web Socket Server Ready.')
