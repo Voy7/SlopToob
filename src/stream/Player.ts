@@ -211,7 +211,11 @@ export default new class Player {
 
   private async populatePlaylists(): Promise<RichPlaylist[]> {
     const playlists = await prisma.playlist.findMany({
-      include: { videos: true }
+      include: {
+        videos: {
+          select: { path: true }
+        }
+      }
     })
 
     // Sort playlists by name

@@ -26,7 +26,8 @@ export type FileTree = {
 }
 
 export type RichPlaylist = {
-  videos: Video[]
+  // videos: Video[]
+  videos: { path: string }[]
 } & Playlist
 
 export type ClientPlaylist = {
