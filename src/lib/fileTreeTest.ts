@@ -2,8 +2,8 @@ import Env from '@/EnvVariables'
 import generateSecret from '@/lib/generateSecret'
 
 // Fake file tree data for testing purposes
-const FOLDERS = 10
-const FILES_PER_FOLDER = 10000
+const FOLDERS = 200
+const FILES_PER_FOLDER = 500
 
 export let fakePaths: string[] = []
 for (let i = 0; i < FOLDERS; i++) {

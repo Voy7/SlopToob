@@ -59,7 +59,7 @@ export default function SectionPlaylists() {
                   key={playlist.id}
                   className={selectedPlaylist === playlist.id ? `${styles.playlistItem} ${styles.selected}` : styles.playlistItem}
                   onClick={() => setSelectedPlaylist(playlist.id)}
-                >{playlist.name}<span>{playlist.videoPaths.length} Videos</span></button>
+                >{playlist.name}<span>{playlist.videoPaths.length.toLocaleString()} Videos</span></button>
               ))}
             </SelectDropdown>
             <Button style="main" icon="playlist-add" loading={addLoading} onClick={() => setShowAddModal(true)}>Add Playlist</Button>

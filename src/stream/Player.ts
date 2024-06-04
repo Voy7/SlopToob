@@ -10,7 +10,7 @@ import { getNextBumper } from '@/stream/bumpers'
 import { themes } from '@/stream/themes'
 import { StreamState, Msg, VideoState } from '@/lib/enums'
 import { passCheck, failCheck } from '@/stream/initChecks'
-import type { RichPlaylist, ClientPlaylist, ListOption } from '@/typings/types'
+import type { RichPlaylist, ClientPlaylist, ListOption, FileTree } from '@/typings/types'
 import type { SocketClient, StreamInfo, StreamOptions } from '@/typings/socket'
 import packageJSON from '@package' assert { type: 'json' }
 import FileTreeHandler from './FileTreeHandler'
@@ -80,8 +80,7 @@ export default new class Player {
       return
     }
 
-    const paths = this.activePlaylist.videos.map(video => video.path.replace(/\\/g, '/'))
-    const randomVideo = PlayHistory.getRandom(paths)
+    const randomVideo = PlayHistory.getRandom(this.activePlaylist.videos)
     if (!randomVideo) return
 
     this.addVideo(new Video(randomVideo))
@@ -119,7 +118,7 @@ export default new class Player {
     return this.playlists.map(playlist => ({
       id: playlist.id,
       name: playlist.name,
-      videoPaths: playlist.videos.map(video => video.path)
+      videoPaths: playlist.videos
     }))
   }
 
@@ -209,20 +208,19 @@ export default new class Player {
     }
   }
 
-  private async populatePlaylists(): Promise<RichPlaylist[]> {
-    const playlists = await prisma.playlist.findMany({
-      include: {
-        videos: {
-          select: { path: true }
-        }
-      }
-    })
+  private async populatePlaylists() {
+    const dbPlaylists = await prisma.playlist.findMany()
 
-    // Sort playlists by name
-    this.playlists = playlists.sort((a, b) => a.name.localeCompare(b.name))
+    // Parse video paths & sort playlists by name
+    this.playlists = dbPlaylists
+      .map(playlist => ({
+        ...playlist,
+        videoPaths: undefined,
+        videos: playlist.videoPaths.replace(/\\/g, '/').split('|')
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name))
 
     SocketUtils.broadcastAdmin(Msg.AdminPlaylists, this.clientPlaylists)
-    return playlists
   }
 
   // Create new blank playlist, return ID
@@ -243,10 +241,8 @@ export default new class Player {
   // Delete playlist by ID, return error as string if failed
   async deletePlaylist(playlistID: string): Promise<string | void> {
     try {
-      await prisma.video.deleteMany({ where: { playlistID } })
       await prisma.playlist.delete({
-        where: { id: playlistID },
-        include: { videos: true }
+        where: { id: playlistID }
       })
 
       this.playlists = this.playlists.filter(playlist => playlist.id !== playlistID)
@@ -282,44 +278,31 @@ export default new class Player {
   async setPlaylistVideos(playlistID: string, newVideoPathsIndex: number[]) {
     newVideoPathsIndex = Array.from(new Set(newVideoPathsIndex)) // Remove duplicate paths
 
-    // --- PLAYLIST OPTIMIZE TEST -----------
-
-    const allPaths: string[] = []
-    function getPaths(item: typeof FileTreeHandler.tree) {
-      if (!item.isDirectory) allPaths.push(item.path)
-      else if (item.children) for (const child of item.children) { getPaths(child) }
+    const pathIndexes: string[] = []
+    let index = 0
+    function getPaths(item: FileTree) {
+      if (!item.children) {
+        pathIndexes[index] = item.path
+        index++
+      }
+      else for (const child of item.children) { getPaths(child) }
     }
     getPaths(FileTreeHandler.tree)
 
-    // console.log(newVideoPathsIndex, newVideoPathsIndex.length)
-    const newVideoPaths = newVideoPathsIndex.map(index => allPaths[index])
-    // console.log(newVideoPaths, newVideoPaths.length)
-    // return
-
-    // ------------------------
+    const newVideoPaths = newVideoPathsIndex
+      .map(index => pathIndexes[index])
+      .filter(path => path) // Remove undefined paths
 
     const playlist = this.playlists.find(playlist => playlist.id === playlistID)
     if (!playlist) return Logger.warn(`Tried to set videos for non-existent playlist: ${playlistID}`)
 
-    // List of videos to be added
-    const addPaths = newVideoPaths.filter(path => !playlist.videos.find(video => video.path === path))
+    playlist.videos = newVideoPaths
 
-    // List of videos to be removed
-    const removePaths = playlist.videos.filter(video => !newVideoPaths.includes(video.path)).map(video => video.path)
+    await prisma.playlist.update({
+      where: { id: playlistID },
+      data: { videoPaths: newVideoPaths.join('|') }
+    })
 
-    // Add new videos
-    for (const path of addPaths) {
-      const video = await prisma.video.create({
-        data: { path, playlistID }
-      })
-      playlist.videos.push(video)
-    }
-
-    // Remove old videos
-    await prisma.video.deleteMany({ where: { path: { in: removePaths } } })
-    playlist.videos = playlist.videos.filter(video => !removePaths.includes(video.path))
-
-    SocketUtils.broadcastAdmin(Msg.AdminPlaylists, this.clientPlaylists)
-    Logger.debug(`Playlist (${playlistID}) videos updated:`, newVideoPaths)
+    Logger.debug(`Playlist (${playlistID}) videos updated: ${newVideoPaths.length}`)
   }
 }

@@ -39,7 +39,7 @@ next-env.d.ts
 
 output/
 
-prisma/database.db
+prisma/database.sqlite
 
 /public/theme-assets/zoomer-1.mp4
 /public/theme-assets/zoomer-2.mp4

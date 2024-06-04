@@ -1,7 +1,7 @@
 import fs from 'fs/promises'
 import path from 'path'
 import { socketClients } from '@/server/socketClients'
-import { Msg } from '@/lib/enums'
+import { AuthRole, Msg } from '@/lib/enums'
 import { getClientBumpers } from '@/stream/bumpers'
 import generateSecret from '@/lib/generateSecret'
 import authRoleFromPassword from '@/lib/authRoleFromPassword'
@@ -175,9 +175,15 @@ export const socketEvents: Record<string, EventOptions> = {
     catch (error: any) { socket.emit(Msg.AdminEditPlaylistName, error.message) }
   }},
 
-  // Admin edits a playlist's videos
+  // Admin edits a playlist's videos, only send updated playlists to other admins
   [Msg.AdminEditPlaylistVideos]: { adminOnly: true, run: async (socket, payload: EditPlaylistVideosPayload) => {
     await Player.setPlaylistVideos(payload.playlistID, payload.newVideoPaths)
+    const senderClient = socketClients.find(c => c.socket === socket)
+    if (!senderClient) return
+    for (const client of socketClients) {
+      if (client === senderClient || client.role !== AuthRole.Admin) continue
+      client.socket.emit(Msg.AdminPlaylists, Player.clientPlaylists)
+    }
   }},
 
   // Admin uploads a bumper

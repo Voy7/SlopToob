@@ -9,16 +9,19 @@ import styles from './PlaylistFilePicker.module.scss'
 import type { ClientPlaylist, FileTree } from '@/typings/types'
 import type { EditPlaylistVideosPayload } from '@/typings/socket'
 
+type TreeNode = {
+  path: string,
+  name: string,
+  active: boolean,
+  parent?: TreeNode,
+  children?: TreeNode[]
+}
+
 // Stream page context
 type ContextProps = {
   playlist: ClientPlaylist,
   tree: FileTree,
-  allPaths: string[],
-  pathMap: Map<string, number>,
-  activePaths: string[],
-  setActivePaths: (paths: string[]) => void,
-  openFolders: string[],
-  setOpenFolders: (folders: string[]) => void,
+  activeMap: Map<string, TreeNode>,
   selectFolder: (folderPath: string) => void,
   deselectFolder: (folderPath: string) => void,
   selectFile: (filePath: string) => void,
@@ -32,84 +35,149 @@ function PlaylistFilePickerProvider({ playlist, children }: { playlist: ClientPl
 
   const { socket } = useStreamContext()
 
-  const [activePaths, setActivePaths] = useState<string[]>(playlist.videoPaths)
-  const [openFolders, setOpenFolders] = useState<string[]>([tree.path])
+  const [activeMap, setActiveMap] = useState<Map<string, TreeNode>>(new Map())
+
+  // Create map of all paths and if they're active (if they're in playlist.videoPaths)
+  useEffect(() => {
+    const map = new Map<string, TreeNode>()
+    function getPaths(item: FileTree, parentNode?: TreeNode): TreeNode {
+      if (item.children) {
+        const parent: TreeNode = {
+          path: item.path,
+          name: item.name,
+          active: false,
+          children: []
+        }
+        if (parentNode) parent.parent = parentNode
+        for (const child of item.children) {
+          const childNode = getPaths(child, parent)
+          if (!childNode) continue
+          parent.children?.push(childNode)
+        }
+        map.set(item.path, parent)
+        return parent
+      }
+      const childNode: TreeNode = { path: item.path, name: item.name, active: false }
+      if (parentNode) childNode.parent = parentNode
+      map.set(item.path, childNode)
+      return childNode
+    }
+    map.set(tree.path, getPaths(tree))
+
+    for (const path of playlist.videoPaths) {
+      const node = map.get(path)
+      if (node) node.active = true
+    }
+
+    // Sync active state of children with parent if all children are active
+    for (const [_, node] of map) {
+      if (!node.children) continue
+      const active = node.children.every(child => child.active)
+      node.active = active
+    }
+
+    setActiveMap(map)
+  }, [tree, playlist.videoPaths])
+
+  // Sync active state of node with all parents if all children are active
+  function syncActiveState(node: TreeNode) {
+    function check(node: TreeNode) {
+      if (node.children) {
+        const active = node.children.every(child => child.active)
+        node.active = active
+      }
+      if (node.parent) check(node.parent)
+    }
+    check(node)
+  }
 
   // Select all children of a folder
   function selectFolder(folderPath: string) {
-    const children = allPaths.filter(path => path.startsWith(folderPath + '/'))
-    setActivePaths([...activePaths, ...children])
+    const item = activeMap.get(folderPath)
+    if (!item || !item.children) return
+    function selectChildren(node: TreeNode) {
+      node.active = true
+      if (!node.children) return
+      for (const child of node.children) { selectChildren(child) }
+    }
+    selectChildren(item)
+    syncActiveState(item)
+    setActiveMap(new Map(activeMap))
+    updatePlaylistVideos(activeMap)
   }
 
   // Deselect all children of a folder
   function deselectFolder(folderPath: string) {
-    setActivePaths(activePaths.filter(path => !path.startsWith(folderPath + '/')))
+    const item = activeMap.get(folderPath)
+    if (!item || !item.children) return
+    function deselectChildren(node: TreeNode) {
+      node.active = false
+      if (!node.children) return
+      for (const child of node.children) { deselectChildren(child) }
+    }
+    deselectChildren(item)
+    syncActiveState(item)
+    setActiveMap(new Map(activeMap))
+    updatePlaylistVideos(activeMap)
   }
 
   // Select specific file path
   function selectFile(filePath: string) {
-    setActivePaths([...activePaths, filePath])
+    const item = activeMap.get(filePath)
+    if (!item) return
+    item.active = true
+    syncActiveState(item)
+    setActiveMap(new Map(activeMap))
+    updatePlaylistVideos(activeMap)
   }
 
   // Deselect specific file path
   function deselectFile(filePath: string) {
-    const index = activePaths.indexOf(filePath)
-    if (index === -1) return
-    setActivePaths([...activePaths.slice(0, index), ...activePaths.slice(index + 1)])
+    const item = activeMap.get(filePath)
+    if (!item) return
+    item.active = false
+    syncActiveState(item)
+    setActiveMap(new Map(activeMap))
+    updatePlaylistVideos(activeMap)
   }
 
-  // Update playlist video paths when activePaths change
-  useEffect(() => {
-    if (activePaths === playlist.videoPaths) return
-    // const deletedPaths = playlist.videoPaths.filter(path => !activePaths.includes(path))
-    // const newPaths = activePaths.filter(path => !playlist.videoPaths.includes(path))
-    const pathsIndex: number[] = []
-    for (const path of activePaths) {
-      const index = pathMap.get(path)
-      if (index !== undefined) pathsIndex.push(index)
-    }
-    socket.emit(Msg.AdminEditPlaylistVideos, {
-      playlistID: playlist.id,
-      // newVideoPaths: activePaths
-      newVideoPaths: pathsIndex
-    } satisfies EditPlaylistVideosPayload)
-  }, [activePaths])
-
-  const allPaths = useMemo(() => {
-    const allPaths: string[] = []
+  const indexMap = useMemo(() => {
+    const indexMap = new Map<string, number>()
+    if (!tree) return indexMap
+    let index = 0
     function getPaths(item: FileTree) {
-      if (!item.isDirectory) allPaths.push(item.path)
-      else if (item.children) for (const child of item.children) { getPaths(child) }
+      if (!item.children) {
+        indexMap.set(item.path, index)
+        index++
+      }
+      else for (const child of item.children) { getPaths(child) }
     }
     getPaths(tree)
-    return allPaths
+    return indexMap
   }, [tree])
-  // const allPaths: string[] = []
-  // function getPaths(item: FileTree) {
-  //   if (!item.isDirectory) allPaths.push(item.path)
-  //   else if (item.children) for (const child of item.children) { getPaths(child) }
-  // }
-  // getPaths(tree)
 
-  const pathMap = useMemo(() => {
-    const map = new Map<string, number>()
-    for (let i = 0; i < allPaths.length; i++) {
-      map.set(allPaths[i], i)
+  function updatePlaylistVideos(activeMap: Map<string, TreeNode>) {
+    const pathsIndex: number[] = []
+    for (const [path, node] of activeMap) {
+      if (node.children || !node.active) continue
+      // console.log(path)
+      const index = indexMap.get(path)
+      if (index !== undefined) pathsIndex.push(index)
     }
-    return map
-  }, [tree])
+    console.log(pathsIndex)
+
+    socket.emit(Msg.AdminEditPlaylistVideos, {
+      playlistID: playlist.id,
+      newVideoPaths: pathsIndex
+    } as EditPlaylistVideosPayload)
+  }
 
   const context: ContextProps = {
     playlist,
     tree,
-    allPaths,
-    pathMap,
-    activePaths, setActivePaths,
-    openFolders, setOpenFolders,
-    selectFolder,
-    deselectFolder,
-    selectFile,
-    deselectFile
+    activeMap,
+    selectFolder, deselectFolder,
+    selectFile, deselectFile
   }
 
   return <PlaylistFilePickerContext.Provider value={context}>{children}</PlaylistFilePickerContext.Provider>
@@ -131,79 +199,53 @@ export default function PlaylistFilePicker({ playlist }: { playlist: ClientPlayl
 }
 
 function Root() {
-  const { tree, playlist } = usePlaylistFilePickerContext()
-  return <TreeFolder item={tree} depth={0} />
+  const { tree, activeMap } = usePlaylistFilePickerContext()
+  const node = activeMap.get(tree.path)
+  if (!node) return null
+  return <TreeFolder item={node} depth={0} />
 }
 
 type TreeFolderProps = {
-  item: FileTree,
+  item: TreeNode,
   depth: number
 }
 
 function TreeFolder({ item, depth }: TreeFolderProps) {
-  const { openFolders, setOpenFolders, allPaths, activePaths, selectFolder, deselectFolder } = usePlaylistFilePickerContext()
+  const { selectFolder, deselectFolder } = usePlaylistFilePickerContext()
 
-  const childrenCount = useMemo(() => {
-    return allPaths.filter(path => path.startsWith(item.path + '/')).length
-  }, [allPaths])
+  const [isOpen, setIsOpen] = useState<boolean>(depth == 0)
 
-  const [isActive, activeChildrenPaths] = useMemo(() => {
-    // return childrenPaths.every(path => activePaths.includes(path))
-    // let count = 0
-    // for (const path of activePaths) {
-    //   if (!path.startsWith(item.path + '/')) continue
-    //   count++
-    //   if (count === childrenCount) return true
-    // }
-    // return false
-    const activeChildrenPaths: string[] = []
-    for (const path of activePaths) {
-      if (!path.startsWith(item.path + '/')) continue
-      activeChildrenPaths.push(path)
-      if (activeChildrenPaths.length === childrenCount) return [true, activeChildrenPaths]
-    }
-    return [false, activeChildrenPaths]
-  }, [activePaths])
-
-  const isFolderOpen = useMemo(() => {
-    return openFolders.includes(item.path)
-  }, [openFolders])
+  const isActive = item.active
 
   function toggleActive() {
     if (isActive) deselectFolder(item.path)
     else selectFolder(item.path) 
   }
 
-  function toggleOpen() {
-    if (openFolders.includes(item.path)) setOpenFolders(openFolders.filter(path => path !== item.path))
-    else setOpenFolders([...openFolders, item.path])
-  }
-
   return (
     <div className={isActive ? `${styles.treeItem} ${styles.selected}` : styles.treeItem} style={depth === 0 ? undefined : { marginLeft: `1rem` }}>
-      <div className={isActive ? `${styles.item} ${styles.selected}` : styles.item} onClick={toggleOpen}>
+      <div className={isActive ? `${styles.item} ${styles.selected}` : styles.item} onClick={() => setIsOpen(!isOpen)}>
         <input type="checkbox" checked={isActive} onChange={toggleActive} onClick={event => event.stopPropagation()} />
-        <Icon name={isFolderOpen ? 'folder-open' : 'folder'} />
+        <Icon name={isOpen ? 'folder-open' : 'folder'} />
         <span title={item.name}>{item.name}</span>
       </div>
-      {isFolderOpen && item.children && item.children.map(child => {
-        if (child.isDirectory) return <TreeFolder key={child.path} item={child} depth={depth + 1} />
-
-        const isFileActive = isActive || activeChildrenPaths.includes(child.path)
-        return <TreeFile key={child.path} item={child} depth={depth + 1} isActive={isFileActive} />
+      {isOpen && item.children && item.children.map(child => {
+        if (child.children) return <TreeFolder key={child.path} item={child} depth={depth + 1} />
+        return <TreeFile key={child.path} item={child} depth={depth + 1} />
       })}
     </div>
   )
 }
 
 type TreeFileProps = {
-  item: FileTree,
-  depth: number,
-  isActive: boolean
+  item: TreeNode,
+  depth: number
 }
 
-function TreeFile({ item, depth, isActive }: TreeFileProps) {
+function TreeFile({ item, depth }: TreeFileProps) {
   const { selectFile, deselectFile } = usePlaylistFilePickerContext()
+
+  const isActive = item.active
 
   function toggleActive() {
     if (isActive) deselectFile(item.path)

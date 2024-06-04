@@ -70,7 +70,7 @@ export default function BumpersList() {
           <Button style="main" icon="add" onClick={() => setShowAddModal(true)}>Upload Bumper</Button>
         </ButtonOption>
         <Gap />
-        <Header icon="list">Bumpers List ({bumpers.length})</Header>
+        <Header icon="list">Bumpers List ({bumpers.length.toLocaleString()})</Header>
         <div className={styles.list}>
           {bumpers.map((bumper, index) => (
             <div key={bumper.path} className={styles.bumper}>

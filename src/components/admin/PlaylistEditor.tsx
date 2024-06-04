@@ -66,7 +66,7 @@ export default function PlaylistEditor({ playlist }: { playlist: ClientPlaylist 
         />
       </SettingGroup>
       <SettingGroup>
-        <Header icon="files">Selected Videos ({playlist.videoPaths.length})</Header>
+        <Header icon="files">Selected Videos ({playlist.videoPaths.length.toLocaleString()})</Header>
         <PlaylistFilePicker key={playlist.id} playlist={playlist} />
       </SettingGroup>
       <SettingGroup>

@@ -1,5 +1,5 @@
 import { AuthRole, VideoState } from '@/lib/enums'
-import type { Playlist, Video } from '@prisma/client'
+import type { Playlist } from '@prisma/client'
 
 export type AuthUser = {
   password: string,
@@ -26,9 +26,8 @@ export type FileTree = {
 }
 
 export type RichPlaylist = {
-  // videos: Video[]
-  videos: { path: string }[]
-} & Playlist
+  videos: string[]
+} & Omit<Playlist, 'videoPaths'>
 
 export type ClientPlaylist = {
   id: string,
