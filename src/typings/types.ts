@@ -18,21 +18,21 @@ export type ChangeUsernamePayload = {
   socketID: string
 }
 
-export type FileTree = {
-  isDirectory: boolean,
+export type FileTreeNode = {
   name: string,
   path: string,
-  children?: FileTree[]
+  children?: FileTreeNode[]
 }
 
 export type RichPlaylist = {
   videos: string[]
+  videoIndexes: number[]
 } & Omit<Playlist, 'videoPaths'>
 
 export type ClientPlaylist = {
   id: string,
   name: string,
-  videoPaths: string[]
+  videoPaths: number[]
 }
 
 export type ClientVideo = {

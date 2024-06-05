@@ -4,7 +4,7 @@ import { useState, useContext, createContext, useEffect } from 'react'
 import { sections, type SectionName } from '@/components/admin/AdminModal'
 import { useStreamContext } from './StreamContext'
 import { Msg } from '@/lib/enums'
-import { ClientBumper, ClientPlaylist, ClientVideo, FileTree } from '@/typings/types'
+import { ClientBumper, ClientPlaylist, ClientVideo, FileTreeNode } from '@/typings/types'
 import { ClientCacheStatus, ClientHistoryStatus, TranscodeClientVideo } from '@/typings/socket'
 import useSocketOn from '@/hooks/useSocketOn'
 
@@ -12,10 +12,12 @@ import useSocketOn from '@/hooks/useSocketOn'
 type ContextProps = {
   section: typeof sections[number],
   setSection: (sectionName: SectionName) => void,
-  fileTree: FileTree | null,
+  fileTree: FileTreeNode | null,
   playlists: ClientPlaylist[],
+  setPlaylists: React.Dispatch<React.SetStateAction<ClientPlaylist[]>>,
   selectedPlaylist: string | null,
-  setSelectedPlaylist: (id: string | null) => void,
+  setSelectedPlaylist: React.Dispatch<React.SetStateAction<string | null>>,
+  lastReceivedPlaylistsDate: number,
   bumpers: ClientBumper[],
   queue: ClientVideo[],
   transcodeQueue: TranscodeClientVideo[],
@@ -29,9 +31,10 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const { socket } = useStreamContext()
 
   const [section, setSectionState] = useState<typeof sections[number]>(sections[0])
-  const [fileTree, setFileTree] = useState<FileTree | null>(null)
+  const [fileTree, setFileTree] = useState<FileTreeNode | null>(null)
   const [playlists, setPlaylists] = useState<ClientPlaylist[]>([])
   const [selectedPlaylist, setSelectedPlaylist] = useState<string | null>(null)
+  const [lastReceivedPlaylistsDate, setLastReceivedPlaylistsDate] = useState<number>(0)
   const [bumpers, setBumpers] = useState<ClientBumper[]>([])
   const [queue, setQueue] = useState<ClientVideo[]>([])
   const [transcodeQueue, setTranscodeQueue] = useState<TranscodeClientVideo[]>([])
@@ -49,8 +52,8 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     socket.emit(Msg.AdminRequestAllData)
   }, [])
 
-  useSocketOn(Msg.AdminFileTree, (tree: FileTree) => setFileTree(tree))
-  useSocketOn(Msg.AdminPlaylists, (playlists: ClientPlaylist[]) => setPlaylists(playlists))
+  useSocketOn(Msg.AdminFileTree, (tree: FileTreeNode) => setFileTree(tree))
+  useSocketOn(Msg.AdminPlaylists, (playlists: ClientPlaylist[]) => { setPlaylists(playlists); setLastReceivedPlaylistsDate(Date.now()) })
   useSocketOn(Msg.AdminBumpersList, (bumpers: ClientBumper[]) => setBumpers(bumpers))
   useSocketOn(Msg.AdminQueueList, (queue: ClientVideo[]) => setQueue(queue))
   useSocketOn(Msg.AdminTranscodeQueueList, (queue: TranscodeClientVideo[]) => setTranscodeQueue(queue))
@@ -67,9 +70,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     section,
     setSection,
     fileTree,
-    playlists,
-    selectedPlaylist,
-    setSelectedPlaylist,
+    playlists, setPlaylists,
+    selectedPlaylist, setSelectedPlaylist,
+    lastReceivedPlaylistsDate,
     bumpers,
     queue,
     transcodeQueue,

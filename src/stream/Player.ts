@@ -10,7 +10,7 @@ import { getNextBumper } from '@/stream/bumpers'
 import { themes } from '@/stream/themes'
 import { StreamState, Msg, VideoState } from '@/lib/enums'
 import { passCheck, failCheck } from '@/stream/initChecks'
-import type { RichPlaylist, ClientPlaylist, ListOption, FileTree } from '@/typings/types'
+import type { RichPlaylist, ClientPlaylist, ListOption, FileTreeNode } from '@/typings/types'
 import type { SocketClient, StreamInfo, StreamOptions } from '@/typings/socket'
 import packageJSON from '@package' assert { type: 'json' }
 import FileTreeHandler from './FileTreeHandler'
@@ -29,6 +29,14 @@ export default new class Player {
     await this.populatePlaylists()
     await this.setActivePlaylistID(Settings.activePlaylistID)
     passCheck('playerReady', 'Stream player handler ready.')
+
+    // Update video indexes when file tree changes
+    FileTreeHandler.onTreeChange(() => {
+      for (const playlist of this.playlists) {
+        playlist.videoIndexes = FileTreeHandler.getPathIndexes(playlist.videos)
+      }
+      SocketUtils.broadcastAdmin(Msg.AdminPlaylists, this.clientPlaylists)
+    })
   }
 
   pause(): boolean { return this.playing?.pause() || false }
@@ -118,7 +126,7 @@ export default new class Player {
     return this.playlists.map(playlist => ({
       id: playlist.id,
       name: playlist.name,
-      videoPaths: playlist.videos
+      videoPaths: playlist.videoIndexes
     }))
   }
 
@@ -213,11 +221,15 @@ export default new class Player {
 
     // Parse video paths & sort playlists by name
     this.playlists = dbPlaylists
-      .map(playlist => ({
-        ...playlist,
-        videoPaths: undefined,
-        videos: playlist.videoPaths.replace(/\\/g, '/').split('|')
-      }))
+      .map(playlist => {
+        const paths = playlist.videoPaths.replace(/\\/g, '/').split('|')
+        return {
+          ...playlist,
+          videoPaths: undefined,
+          videos: paths,
+          videoIndexes: FileTreeHandler.getPathIndexes(paths)
+        }
+      })
       .sort((a, b) => a.name.localeCompare(b.name))
 
     SocketUtils.broadcastAdmin(Msg.AdminPlaylists, this.clientPlaylists)
@@ -230,7 +242,7 @@ export default new class Player {
       data: { name }
     })
 
-    this.playlists.push({ ...playlist, videos: [] })
+    this.playlists.push({ ...playlist, videos: [], videoIndexes: [] })
     this.playlists = this.playlists.sort((a, b) => a.name.localeCompare(b.name))
 
     SocketUtils.broadcastAdmin(Msg.AdminPlaylists, this.clientPlaylists)
@@ -280,7 +292,7 @@ export default new class Player {
 
     const pathIndexes: string[] = []
     let index = 0
-    function getPaths(item: FileTree) {
+    function getPaths(item: FileTreeNode) {
       if (!item.children) {
         pathIndexes[index] = item.path
         index++
@@ -297,6 +309,7 @@ export default new class Player {
     if (!playlist) return Logger.warn(`Tried to set videos for non-existent playlist: ${playlistID}`)
 
     playlist.videos = newVideoPaths
+    playlist.videoIndexes = newVideoPathsIndex
 
     await prisma.playlist.update({
       where: { id: playlistID },

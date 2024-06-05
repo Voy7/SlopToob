@@ -6,15 +6,17 @@ import Logger from '@/lib/Logger'
 import SocketUtils from '@/lib/SocketUtils'
 import { passCheck, failCheck } from '@/stream/initChecks'
 import { Msg } from '@/lib/enums'
-import type { FileTree } from '@/typings/types'
+import type { FileTreeNode } from '@/typings/types'
 
 const VALID_EXTENSIONS = ['.mp4', '.mkv', '.avi', '.mov', '.flv', '.wmv', '.webm', '.m2ts']
 
 export default new class FileTreeHandler {
-  private _tree: FileTree | null = null
+  private _tree: FileTreeNode | null = null
   private paths: string[] = []
+  private onTreeChangeCallbacks: Function[] = []
   private onReadyCallback: Function | null = null
   private refreshTimeout: NodeJS.Timeout | null = null
+  pathIndexesMap: Map<string, number> = new Map()
 
   constructor() { this.initialize() }
 
@@ -46,7 +48,7 @@ export default new class FileTreeHandler {
       Logger.debug(`[FileTreeHandler] DEV: Using fake file tree with ${fakePaths.length} paths.`)
     }
 
-    this.pathsToTree(false)
+    this.buildTreeObject(false)
 
     const passedSeconds = (Date.now() - startDate) / 1000
     passCheck('fileTreeReady', `Fetched tree in ${passedSeconds.toFixed(1)}s.`)
@@ -56,12 +58,18 @@ export default new class FileTreeHandler {
     // Watch & update tree if 1* seconds pass without any more changes
     fs.watch(Env.VIDEOS_PATH, { recursive: true }, (event, filename) => {
       if (!filename) return
+
+      // Only trigger if file is added/deleted/renamed
       if (event !== 'change' && event !== 'rename') return
 
-      
-      // Remove/add path to paths array
       const fullPath = path.join(Env.VIDEOS_PATH, filename).replace(/\\/g, '/')
       const fileExists = fs.existsSync(fullPath)
+      const isInTree = this.paths.includes(fullPath)
+
+      if (isInTree && fileExists) return
+      if (!isInTree && !fileExists) return
+
+      // Remove/add path to paths array
       const index = this.paths.indexOf(fullPath)
 
       // File was deleted
@@ -87,17 +95,16 @@ export default new class FileTreeHandler {
       }
 
       if (this.refreshTimeout) clearTimeout(this.refreshTimeout)
-      this.refreshTimeout = setTimeout(() => this.pathsToTree(true), 1000)
+      this.refreshTimeout = setTimeout(() => this.buildTreeObject(true), 1000)
     })
   }
 
   // Transform paths array to a tree structure
-  private pathsToTree(logDone: boolean) {
+  private buildTreeObject(logDone: boolean) {
     const rootPath = Env.VIDEOS_PATH
     const rootName = rootPath.slice(rootPath.lastIndexOf('/') + 1)
     
-    const tree: FileTree = {
-      isDirectory: true,
+    const tree: FileTreeNode = {
       name: rootName,
       path: rootPath,
       children: []
@@ -113,12 +120,8 @@ export default new class FileTreeHandler {
 
         let child = parent.children?.find(c => c.name === part)
         if (!child) {
-          child = {
-            isDirectory: i < parts.length - 1,
-            name: part,
-            path: currentPath
-          }
-          if (child.isDirectory) child.children = []
+          child = { name: part, path: currentPath }
+          if (i < parts.length - 1) child.children = []
           parent.children?.push(child)
         }
 
@@ -127,10 +130,10 @@ export default new class FileTreeHandler {
     }
 
     // Sort tree alphabetically, and sort directories first
-    function sortChildren(children: FileTree[]) {
+    function sortChildren(children: FileTreeNode[]) {
       children.sort((a, b) => {
-        if (a.isDirectory && !b.isDirectory) return -1
-        if (!a.isDirectory && b.isDirectory) return 1
+        if (a.children && !b.children) return -1
+        if (!a.children && b.children) return 1
         return a.name.localeCompare(b.name)
       })
       for (const child of children) {
@@ -141,8 +144,38 @@ export default new class FileTreeHandler {
     if (tree.children) sortChildren(tree.children)
 
     this._tree = tree
+    this.pathIndexesMap = this.treeToIndexesMap(tree)
+    for (const callback of this.onTreeChangeCallbacks) callback()
+
     if (logDone) Logger.debug('File tree object reconstructed.')
     SocketUtils.broadcastAdmin(Msg.AdminFileTree, this.tree)
+  }
+
+  private treeToIndexesMap(tree: FileTreeNode): Map<string, number> {
+    const map = new Map<string, number>()
+    let index = 0
+    function buildIndexesMap(item: FileTreeNode) {
+      if (!item.children) {
+        map.set(item.path, index)
+        index++
+      }
+      else for (const child of item.children) { buildIndexesMap(child) }
+    }
+    buildIndexesMap(tree)
+    return map
+  }
+
+  getPathIndexes(paths: string[]): number[] {
+    const indexes: number[] = []
+    for (const path of paths) {
+      const index = this.pathIndexesMap.get(path)
+      if (index !== undefined) indexes.push(index)
+    }
+    return indexes
+  }
+
+  onTreeChange(callback: Function) {
+    this.onTreeChangeCallbacks.push(callback)
   }
 
   onReady(callback: Function) {
@@ -150,7 +183,7 @@ export default new class FileTreeHandler {
     this.onReadyCallback = callback
   }
 
-  get tree(): FileTree {
+  get tree(): FileTreeNode {
     if (!this._tree) throw new Error('Tried to get file tree before it was initialized.')
     return this._tree
   }

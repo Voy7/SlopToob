@@ -6,22 +6,29 @@ import { useStreamContext } from '@/contexts/StreamContext'
 import { Msg } from '@/lib/enums'
 import Icon from '@/components/ui/Icon'
 import styles from './PlaylistFilePicker.module.scss'
-import type { ClientPlaylist, FileTree } from '@/typings/types'
+import type { ClientPlaylist, FileTreeNode } from '@/typings/types'
 import type { EditPlaylistVideosPayload } from '@/typings/socket'
 
-type TreeNode = {
+export default function PlaylistFilePicker({ playlist }: { playlist: ClientPlaylist }) {
+  return <PlaylistFilePickerProvider playlist={playlist} />
+}
+
+type ActiveTreeNode = {
   path: string,
   name: string,
   active: boolean,
-  parent?: TreeNode,
-  children?: TreeNode[]
+  parent?: ActiveTreeNode,
+  children?: ActiveTreeNode[]
 }
 
 // Stream page context
 type ContextProps = {
   playlist: ClientPlaylist,
-  tree: FileTree,
-  activeMap: Map<string, TreeNode>,
+  tree: FileTreeNode,
+  activeMap: Map<string, ActiveTreeNode>,
+  searchResults: Map<string, [number, number]> | null,
+  searchText: string,
+  setSearchText: (text: string) => void,
   selectFolder: (folderPath: string) => void,
   deselectFolder: (folderPath: string) => void,
   selectFile: (filePath: string) => void,
@@ -29,20 +36,41 @@ type ContextProps = {
 }
 
 // Context provider wrapper component
-function PlaylistFilePickerProvider({ playlist, children }: { playlist: ClientPlaylist, children: React.ReactNode }) {
-  const { fileTree: tree } = useAdminContext()
+function PlaylistFilePickerProvider({ playlist }: { playlist: ClientPlaylist }) {
+  const { fileTree: tree, setPlaylists, lastReceivedPlaylistsDate } = useAdminContext()
   if (!tree) return null
 
   const { socket } = useStreamContext()
 
-  const [activeMap, setActiveMap] = useState<Map<string, TreeNode>>(new Map())
+  const [activeMap, setActiveMap] = useState<Map<string, ActiveTreeNode>>(new Map())
+  const [isSearching, setIsSearching] = useState<boolean>(false)
+  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null)
+  const [searchResults, setSearchResults] = useState<Map<string, [number, number]> | null>(null)
+  const [searchInput, setSearchInput] = useState<string>('')
+
+  const [indexesMap, pathsArray] = useMemo(() => {
+    const indexesMap = new Map<string, number>()
+    const pathsArray: string[] = []
+    if (!tree) return [indexesMap, pathsArray]
+    let index = 0
+    function getPaths(item: FileTreeNode) {
+      if (!item.children) {
+        indexesMap.set(item.path, index)
+        pathsArray.push(item.path)
+        index++
+      }
+      else for (const child of item.children) { getPaths(child) }
+    }
+    getPaths(tree)
+    return [indexesMap, pathsArray]
+  }, [tree])
 
   // Create map of all paths and if they're active (if they're in playlist.videoPaths)
   useEffect(() => {
-    const map = new Map<string, TreeNode>()
-    function getPaths(item: FileTree, parentNode?: TreeNode): TreeNode {
+    const map = new Map<string, ActiveTreeNode>()
+    function getPaths(item: FileTreeNode, parentNode?: ActiveTreeNode): ActiveTreeNode {
       if (item.children) {
-        const parent: TreeNode = {
+        const parent: ActiveTreeNode = {
           path: item.path,
           name: item.name,
           active: false,
@@ -57,15 +85,15 @@ function PlaylistFilePickerProvider({ playlist, children }: { playlist: ClientPl
         map.set(item.path, parent)
         return parent
       }
-      const childNode: TreeNode = { path: item.path, name: item.name, active: false }
+      const childNode: ActiveTreeNode = { path: item.path, name: item.name, active: false }
       if (parentNode) childNode.parent = parentNode
       map.set(item.path, childNode)
       return childNode
     }
     map.set(tree.path, getPaths(tree))
 
-    for (const path of playlist.videoPaths) {
-      const node = map.get(path)
+    for (const pathIndex of playlist.videoPaths) {
+      const node = map.get(pathsArray[pathIndex])
       if (node) node.active = true
     }
 
@@ -77,11 +105,11 @@ function PlaylistFilePickerProvider({ playlist, children }: { playlist: ClientPl
     }
 
     setActiveMap(map)
-  }, [tree, playlist.videoPaths])
+  }, [tree, lastReceivedPlaylistsDate])
 
   // Sync active state of node with all parents if all children are active
-  function syncActiveState(node: TreeNode) {
-    function check(node: TreeNode) {
+  function syncActiveState(node: ActiveTreeNode) {
+    function check(node: ActiveTreeNode) {
       if (node.children) {
         const active = node.children.every(child => child.active)
         node.active = active
@@ -95,7 +123,7 @@ function PlaylistFilePickerProvider({ playlist, children }: { playlist: ClientPl
   function selectFolder(folderPath: string) {
     const item = activeMap.get(folderPath)
     if (!item || !item.children) return
-    function selectChildren(node: TreeNode) {
+    function selectChildren(node: ActiveTreeNode) {
       node.active = true
       if (!node.children) return
       for (const child of node.children) { selectChildren(child) }
@@ -110,7 +138,7 @@ function PlaylistFilePickerProvider({ playlist, children }: { playlist: ClientPl
   function deselectFolder(folderPath: string) {
     const item = activeMap.get(folderPath)
     if (!item || !item.children) return
-    function deselectChildren(node: TreeNode) {
+    function deselectChildren(node: ActiveTreeNode) {
       node.active = false
       if (!node.children) return
       for (const child of node.children) { deselectChildren(child) }
@@ -141,30 +169,21 @@ function PlaylistFilePickerProvider({ playlist, children }: { playlist: ClientPl
     updatePlaylistVideos(activeMap)
   }
 
-  const indexMap = useMemo(() => {
-    const indexMap = new Map<string, number>()
-    if (!tree) return indexMap
-    let index = 0
-    function getPaths(item: FileTree) {
-      if (!item.children) {
-        indexMap.set(item.path, index)
-        index++
-      }
-      else for (const child of item.children) { getPaths(child) }
-    }
-    getPaths(tree)
-    return indexMap
-  }, [tree])
-
-  function updatePlaylistVideos(activeMap: Map<string, TreeNode>) {
+  function updatePlaylistVideos(activeMap: Map<string, ActiveTreeNode>) {
     const pathsIndex: number[] = []
     for (const [path, node] of activeMap) {
       if (node.children || !node.active) continue
-      // console.log(path)
-      const index = indexMap.get(path)
+      const index = indexesMap.get(path)
       if (index !== undefined) pathsIndex.push(index)
     }
-    console.log(pathsIndex)
+
+    // Update admin context playlists state
+    setPlaylists(playlists => {
+      return playlists.map(playlist => {
+        if (playlist.id !== playlist.id) return playlist
+        return { ...playlist, videoPaths: pathsIndex }
+      })
+    })
 
     socket.emit(Msg.AdminEditPlaylistVideos, {
       playlistID: playlist.id,
@@ -172,92 +191,156 @@ function PlaylistFilePickerProvider({ playlist, children }: { playlist: ClientPl
     } as EditPlaylistVideosPayload)
   }
 
+  function searchFiles(input: string) {
+    if (searchTimeout) clearTimeout(searchTimeout)
+
+    input = input.trim()
+    if (!input) {
+      setSearchResults(null)
+      setIsSearching(false)
+      return
+    }
+
+    const timeout = setTimeout(async () => {
+      setIsSearching(true)
+
+      // Look through all paths (keys of activeMap) and find matches
+      // Use a loose regex for better search results
+
+      // Key in path, value is array of start and end indexes of match in the name
+      const results = new Map<string, [number, number]>()
+      const regex = new RegExp(input.split('').join('.*?'), 'i')
+      for (const [_, node] of activeMap) {
+        const matches = node.name.match(regex)
+        if (matches?.index !== undefined) results.set(node.path, [matches.index, matches.index + matches[0].length])
+      }
+
+      // Sort results by folders first, and names naturally (case-insensitive)
+      const sortedResults = new Map([...results.entries()].sort((a, b) => {
+        const aNode = activeMap.get(a[0])!
+        const bNode = activeMap.get(b[0])!
+        if (aNode.children && !bNode.children) return -1
+        if (!aNode.children && bNode.children) return 1
+        return aNode.name.localeCompare(bNode.name, undefined, { sensitivity: 'base' })
+      }))
+      
+
+      console.log(results)
+      setSearchResults(sortedResults)
+      setIsSearching(false)
+    }, 1000)
+    setSearchTimeout(timeout)
+  }
+
   const context: ContextProps = {
     playlist,
     tree,
     activeMap,
+    searchResults,
+    searchText: searchInput, setSearchText: setSearchInput,
     selectFolder, deselectFolder,
     selectFile, deselectFile
   }
 
-  return <PlaylistFilePickerContext.Provider value={context}>{children}</PlaylistFilePickerContext.Provider>
+  const rootNode = activeMap.get(tree.path)
+  if (!rootNode) return null
+
+  return (
+    <PlaylistFilePickerContext.Provider value={context}>
+      <input type="text" onChange={event => searchFiles(event.target.value)} placeholder="Search files..." />
+      <div className={styles.filePicker}>
+        {!isSearching ? (
+          !searchResults ? ( // Display normal tree
+            <TreeFolder node={rootNode} depth={0} defaultOpen={true} />
+          ) : (
+            // Display search results
+            Array.from(searchResults).map(([path, highlightPos]) => {
+              const node = activeMap.get(path)
+              if (!node) return null
+              if (node.children) return <TreeFolder key={path} node={node} depth={0} />
+              return <TreeFile key={path} node={node} depth={0} highlightPos={highlightPos} />
+            })
+          )
+        ) : ( // Display search loading spinner
+          <div>SEARCHING...</div>
+        )}
+      </div>
+    </PlaylistFilePickerContext.Provider>
+  )
 }
 
 // Create the context and custom hook for it
 const PlaylistFilePickerContext = createContext<ContextProps>(null as any)
 const usePlaylistFilePickerContext = () => useContext(PlaylistFilePickerContext)
 
-
-export default function PlaylistFilePicker({ playlist }: { playlist: ClientPlaylist }) {
-  return (
-    <div className={styles.filePicker}>
-      <PlaylistFilePickerProvider playlist={playlist}>
-        <Root />
-      </PlaylistFilePickerProvider>
-    </div>
-  )
-}
-
-function Root() {
-  const { tree, activeMap } = usePlaylistFilePickerContext()
-  const node = activeMap.get(tree.path)
-  if (!node) return null
-  return <TreeFolder item={node} depth={0} />
-}
-
 type TreeFolderProps = {
-  item: TreeNode,
-  depth: number
+  node: ActiveTreeNode,
+  depth: number,
+  highlightPos?: [number, number],
+  defaultOpen?: boolean
 }
 
-function TreeFolder({ item, depth }: TreeFolderProps) {
+function TreeFolder({ node, depth, highlightPos, defaultOpen = false }: TreeFolderProps) {
   const { selectFolder, deselectFolder } = usePlaylistFilePickerContext()
 
-  const [isOpen, setIsOpen] = useState<boolean>(depth == 0)
-
-  const isActive = item.active
+  const [isOpen, setIsOpen] = useState<boolean>(defaultOpen)
 
   function toggleActive() {
-    if (isActive) deselectFolder(item.path)
-    else selectFolder(item.path) 
+    if (node.active) deselectFolder(node.path)
+    else selectFolder(node.path) 
   }
 
   return (
-    <div className={isActive ? `${styles.treeItem} ${styles.selected}` : styles.treeItem} style={depth === 0 ? undefined : { marginLeft: `1rem` }}>
-      <div className={isActive ? `${styles.item} ${styles.selected}` : styles.item} onClick={() => setIsOpen(!isOpen)}>
-        <input type="checkbox" checked={isActive} onChange={toggleActive} onClick={event => event.stopPropagation()} />
+    <div className={node.active ? `${styles.treeItem} ${styles.selected}` : styles.treeItem} style={depth === 0 ? undefined : { marginLeft: `1rem` }}>
+      <div className={node.active ? `${styles.item} ${styles.selected}` : styles.item} onClick={() => setIsOpen(!isOpen)}>
+        <input type="checkbox" checked={node.active} onChange={toggleActive} onClick={event => event.stopPropagation()} />
         <Icon name={isOpen ? 'folder-open' : 'folder'} />
-        <span title={item.name}>{item.name}</span>
+        {!highlightPos ? (
+          <p title={node.name}>{node.name}</p>
+        ) : (
+          <p title={node.name}>
+            <>{node.name.slice(0, highlightPos[0])}</>
+            <span>{node.name.slice(highlightPos[0], highlightPos[1])}</span>
+            <>{node.name.slice(highlightPos[1])}</>
+          </p>
+        )}
       </div>
-      {isOpen && item.children && item.children.map(child => {
-        if (child.children) return <TreeFolder key={child.path} item={child} depth={depth + 1} />
-        return <TreeFile key={child.path} item={child} depth={depth + 1} />
+      {isOpen && node.children && node.children.map(child => {
+        if (child.children) return <TreeFolder key={child.path} node={child} depth={depth + 1} />
+        return <TreeFile key={child.path} node={child} depth={depth + 1} />
       })}
     </div>
   )
 }
 
 type TreeFileProps = {
-  item: TreeNode,
-  depth: number
+  node: ActiveTreeNode,
+  depth: number,
+  highlightPos?: [number, number]
 }
 
-function TreeFile({ item, depth }: TreeFileProps) {
+function TreeFile({ node, depth, highlightPos }: TreeFileProps) {
   const { selectFile, deselectFile } = usePlaylistFilePickerContext()
 
-  const isActive = item.active
-
   function toggleActive() {
-    if (isActive) deselectFile(item.path)
-    else selectFile(item.path)
+    if (node.active) deselectFile(node.path)
+    else selectFile(node.path)
   }
 
   return (
-    <div className={isActive ? `${styles.treeItem} ${styles.selected}` : styles.treeItem} style={depth === 0 ? undefined : { marginLeft: `1rem` }}>
-      <label className={isActive ? `${styles.item} ${styles.selected}` : styles.item}>
-        <input type="checkbox" checked={isActive} onChange={toggleActive} />
+    <div className={node.active ? `${styles.treeItem} ${styles.selected}` : styles.treeItem} style={depth === 0 ? undefined : { marginLeft: `1rem` }}>
+      <label className={node.active ? `${styles.item} ${styles.selected}` : styles.item}>
+        <input type="checkbox" checked={node.active} onChange={toggleActive} />
         <Icon name="video-file" />
-        <span title={item.name}>{item.name}</span>
+        {!highlightPos ? (
+          <p title={node.name}>{node.name}</p>
+        ) : (
+          <p title={node.name}>
+            <>{node.name.slice(0, highlightPos[0])}</>
+            <span>{node.name.slice(highlightPos[0], highlightPos[1])}</span>
+            <>{node.name.slice(highlightPos[1])}</>
+          </p>
+        )}
       </label>
     </div>
   )
