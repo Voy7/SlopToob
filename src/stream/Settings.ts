@@ -43,9 +43,11 @@ const Settings = {
     return true
   },
 
-  onReady(callback: Function) {
-    if (settings) callback()
-    else onReadyCallback = callback
+  async onReady() {
+    if (settings) return
+    return new Promise<void>(resolve => {
+      onReadyCallback = resolve
+    })
   }
 }
 

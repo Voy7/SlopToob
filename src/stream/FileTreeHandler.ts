@@ -16,7 +16,7 @@ export default new class FileTreeHandler {
   private onTreeChangeCallbacks: Function[] = []
   private onReadyCallback: Function | null = null
   private refreshTimeout: NodeJS.Timeout | null = null
-  pathIndexesMap: Map<string, number> = new Map()
+  private pathIndexesMap: Map<string, number> = new Map()
 
   constructor() { this.initialize() }
 
@@ -106,21 +106,21 @@ export default new class FileTreeHandler {
     
     const tree: FileTreeNode = {
       name: rootName,
-      path: rootPath,
+      path: '',
       children: []
     }
     
     for (const pathn of this.paths) {
       const parts = pathn.replace(rootPath, '').split('/')
       let parent = tree
-      let currentPath = rootPath
+      let currentPath = ''
       for (let i = 1; i < parts.length; i++) {
         const part = parts[i]
         currentPath += `/${part}`
 
         let child = parent.children?.find(c => c.name === part)
         if (!child) {
-          child = { name: part, path: currentPath }
+          child = { name: part, path: `${currentPath}` }
           if (i < parts.length - 1) child.children = []
           parent.children?.push(child)
         }
@@ -178,9 +178,11 @@ export default new class FileTreeHandler {
     this.onTreeChangeCallbacks.push(callback)
   }
 
-  onReady(callback: Function) {
-    if (this._tree) return callback()
-    this.onReadyCallback = callback
+  async onReady() {
+    if (this._tree) return
+    return new Promise<void>(resolve => {
+      this.onReadyCallback = resolve
+    })
   }
 
   get tree(): FileTreeNode {

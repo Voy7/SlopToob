@@ -3,6 +3,9 @@ import authRoleFromPassword from '@/lib/authRoleFromPassword'
 import type { AuthOptions } from 'next-auth'
 import type { AuthUser } from '@/typings/types'
 
+process.env.NEXTAUTH_URL = process.env.SERVER_URL
+process.env.NEXTAUTH_SECRET = process.env.SECRET_KEY
+
 const authOptions: AuthOptions = ({ 
   providers: [
     CredentialsProvider({

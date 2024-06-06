@@ -9,7 +9,7 @@
   opacity: 0;
   animation: backgroundFadeIn 250ms ease-in-out;
   transition: opacity 250ms ease-in-out;
-  z-index: 100;
+  // z-index: 1;
 
   @keyframes backgroundFadeIn {
     0% { opacity: 0; }
@@ -32,7 +32,6 @@
     transition: all 350ms ease-in-out;
     box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.25);
     overflow-y: auto;
-    z-index: 100;
 
     @keyframes modalFadeIn {
       0% { top: calc(50% - 20px); opacity: 0; }

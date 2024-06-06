@@ -11,9 +11,10 @@ import { passCheck, failCheck } from '@/stream/initChecks'
 import type { IncomingMessage, ServerResponse } from 'http'
 
 const app = next({
-  dev: process.env.NODE_ENV !== 'production',
-  hostname: Env.SERVER_HOST,
-  port: Env.SERVER_PORT
+  dev: Env.PROJECT_MODE !== 'production',
+  quiet: Env.PROJECT_MODE === 'production',
+  port: Env.SERVER_PORT,
+  conf: {}
 })
 
 const handle = app.getRequestHandler()

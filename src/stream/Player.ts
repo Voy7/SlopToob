@@ -1,4 +1,5 @@
 import prisma from '@/lib/prisma'
+import Env from '@/EnvVariables'
 import Logger from '@/lib/Logger'
 import Video from '@/stream/Video'
 import PlayHistory from '@/stream/PlayHistory'
@@ -294,7 +295,7 @@ export default new class Player {
     let index = 0
     function getPaths(item: FileTreeNode) {
       if (!item.children) {
-        pathIndexes[index] = item.path
+        pathIndexes[index] = `${Env.VIDEOS_PATH}${item.path}`
         index++
       }
       else for (const child of item.children) { getPaths(child) }

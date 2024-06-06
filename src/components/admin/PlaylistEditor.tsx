@@ -21,6 +21,13 @@ export default function PlaylistEditor({ playlist }: { playlist: ClientPlaylist 
   const [deletePlaylistLoading, setDeletePlaylistLoading] = useState<boolean>(false)
   const [deletePlaylistError, setDeletePlaylistError] = useState<string | null>(null)
 
+  // If playlist changes, update playlist name
+  useEffect(() => {
+    if (playlistName === playlist.name) return
+    setPlaylistName(playlist.name)
+    setPlaylistNameError(null)
+  }, [playlist.name])
+
   // Update playlist name when playlistName changes
   useEffect(() => {
     if (playlistName === playlist.name) return

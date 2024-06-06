@@ -5,7 +5,7 @@ import { passCheck, failCheck } from '@/stream/initChecks'
 export const httpServer = new Server()
 
 httpServer.listen(Env.SERVER_PORT, () => {
-  passCheck('httpServerReady', `Ready on: http://${Env.SERVER_HOST}:${Env.SERVER_PORT}`)
+  passCheck('httpServerReady', `Ready on: http://localhost:${Env.SERVER_PORT}`)
 })
 
 httpServer.once('error', (error) => {
