@@ -134,7 +134,7 @@ export default new class FileTreeHandler {
       children.sort((a, b) => {
         if (a.children && !b.children) return -1
         if (!a.children && b.children) return 1
-        return a.name.localeCompare(b.name)
+        return a.name.localeCompare(b.name, undefined, { numeric: true })
       })
       for (const child of children) {
         if (child.children) sortChildren(child.children)

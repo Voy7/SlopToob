@@ -210,13 +210,21 @@ function PlaylistFilePickerProvider({ playlist }: { playlist: ClientPlaylist }) 
       const results = new Map<string, [number, number]>()
       const regex = new RegExp(input.split('').join('.*?'), 'i')
       let items = 0
-      for (const [_, node] of activeMap) {
-        items += 1
-        // If items count is a multiple of SEARCH_ITEMS_PER_MS, wait for next tick
-        if (items % SEARCH_ITEMS_PER_MS === 0) await new Promise(resolve => setTimeout(resolve, 1))
-          const matches = node.name.match(regex)
-        if (matches?.index !== undefined) results.set(node.path, [matches.index, matches.index + matches[0].length])
+      for (const [_, node] of activeMap) { // First folders
         if (results.size >= SEARCH_MAX_ITEMS) break
+        if (!node.children) continue
+        items += 1
+        if (items % SEARCH_ITEMS_PER_MS === 0) await new Promise(resolve => setTimeout(resolve, 1))
+        const matches = node.name.match(regex)
+        if (matches?.index !== undefined) results.set(node.path, [matches.index, matches.index + matches[0].length])
+      }
+      for (const [_, node] of activeMap) { // Then files
+        if (results.size >= SEARCH_MAX_ITEMS) break
+        if (node.children) continue
+        items += 1
+        if (items % SEARCH_ITEMS_PER_MS === 0) await new Promise(resolve => setTimeout(resolve, 1))
+        const matches = node.name.match(regex)
+        if (matches?.index !== undefined) results.set(node.path, [matches.index, matches.index + matches[0].length])
       }
 
       // Sort results by folders first, and names naturally (case-insensitive)
