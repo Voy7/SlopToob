@@ -197,7 +197,7 @@ function PlaylistFilePickerProvider({ playlist }: { playlist: ClientPlaylist }) 
     setSearchInput(input)
     if (searchTimeout) clearTimeout(searchTimeout)
 
-    input = input.trim()
+    input = input.replace(/\s+/g, '') // Remove all spaces
     if (!input) {
       setSearchResults(null)
       setIsSearching(false)
@@ -208,7 +208,8 @@ function PlaylistFilePickerProvider({ playlist }: { playlist: ClientPlaylist }) 
       setIsSearching(true)
 
       const results = new Map<string, [number, number]>()
-      const regex = new RegExp(input.split('').join('.*?'), 'i')
+      // Regex - match all characters in input in order, with any whitespace in between
+      const regex = new RegExp(input.split('').join('\\s*'), 'i')
       let items = 0
       for (const [_, node] of activeMap) { // First folders
         if (results.size >= SEARCH_MAX_ITEMS) break
@@ -236,8 +237,6 @@ function PlaylistFilePickerProvider({ playlist }: { playlist: ClientPlaylist }) 
         return aNode.name.localeCompare(bNode.name, undefined, { sensitivity: 'base' })
       }))
       
-
-      console.log(results)
       setSearchResults(sortedResults)
       setIsSearching(false)
     }, SEARCH_TIMEOUT_MS)
@@ -393,9 +392,9 @@ function TreeFile({ node, depth, highlightPos }: TreeFileProps) {
         )}
       </div>
       {highlightPos && (
-        <div className={styles.right}>
-          <p>{node.parent?.path}/</p>
-        </div>
+        <p className={styles.right} title={`${node.parent?.path}/`}>
+          {node.parent?.path}/
+        </p>
       )}
     </label>
   )

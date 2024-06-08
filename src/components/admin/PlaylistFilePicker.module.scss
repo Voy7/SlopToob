@@ -134,6 +134,7 @@
 
       .right {
         flex-shrink: 0;
+        max-width: 33%;
         font-size: 0.85rem;
         color: var(--text-color-3);
         white-space: nowrap;
