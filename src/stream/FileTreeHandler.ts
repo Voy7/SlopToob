@@ -156,7 +156,7 @@ export default new class FileTreeHandler {
     let index = 0
     function buildIndexesMap(item: FileTreeNode) {
       if (!item.children) {
-        map.set(item.path, index)
+        map.set(`${Env.VIDEOS_PATH}${item.path}`, index)
         index++
       }
       else for (const child of item.children) { buildIndexesMap(child) }

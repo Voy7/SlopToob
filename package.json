@@ -1,6 +1,6 @@
 {
   "name": "sloptoob",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "scripts": {
     "start": "cross-env NODE_ENV=production tsx src/index.ts",
     "dev": "tsx src/index.ts",
