@@ -1,10 +1,10 @@
 import { Server, type Socket } from 'socket.io'
 import { httpServer } from '@/server/httpServer'
-import Logger from '@/lib/Logger'
+import Logger from '@/server/Logger'
+import Checklist from '@/server/Checklist'
 import Settings, { settingsList } from '@/stream/Settings'
 import { socketClients } from '@/server/socketClients'
 import { socketEvents } from '@/server/socketEvents'
-import { passCheck, failCheck } from '@/stream/initChecks'
 import { AuthRole } from '@/lib/enums'
 
 let io: Server | null = null
@@ -15,7 +15,7 @@ export function initializeSocketServer() {
     maxHttpBufferSize: 50e6 // Max 50MB message size (mainly for uploading bumper videos)
   })
 
-  passCheck('socketServerReady', 'Web Socket Server Ready.')
+  Checklist.pass('socketServerReady', 'Web Socket Server Ready.')
 
   // Handle socket events
   io.on('connection', (socket) => {

@@ -1,8 +1,8 @@
 import prisma from '@/lib/prisma'
-import Logger from '@/lib/Logger'
+import Logger from '@/server/Logger'
+import Checklist from '@/server/Checklist'
 import SocketUtils from '@/lib/SocketUtils'
 import { settingsList } from '@/stream/settingsList'
-import { passCheck, failCheck } from '@/stream/initChecks'
 import type { SocketClient } from '@/typings/socket'
 
 export { settingsList }
@@ -102,11 +102,11 @@ async function initializeSettings() {
       })
     }
 
-    passCheck('settingsReady', `Loaded ${Object.keys(settings).length} settings from database.`)
+    Checklist.pass('settingsReady', `Loaded ${Object.keys(settings).length} settings from database.`)
 
     onReadyCallback?.()
   }
-  catch (error: any) { failCheck('settingsReady', error.message) }
+  catch (error: any) { Checklist.fail('settingsReady', error.message) }
 }
 
 initializeSettings()

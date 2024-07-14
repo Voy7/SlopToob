@@ -1,9 +1,6 @@
 // Project entry point
 
 import 'colors'
-import packageJSON from '@package' assert { type: 'json' }
-
-console.log(`\n  Starting up SlopToob v${packageJSON.version}...\n`.cyan)
 
 // Start servers once following checks are passed
 async function main() {

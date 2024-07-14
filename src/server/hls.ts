@@ -2,8 +2,8 @@
 import Hls from 'hls-server'
 import fs from 'fs'
 import { httpServer } from '@/server/httpServer'
+import Logger from '@/server/Logger'
 import Player from '@/stream/Player'
-import Logger from '@/lib/Logger'
 
 // HLS server must be initialized after Next.js is ready
 export function initializeHlsServer() {

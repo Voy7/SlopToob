@@ -1,6 +1,7 @@
 import prisma from '@/lib/prisma'
 import Env from '@/EnvVariables'
-import Logger from '@/lib/Logger'
+import Logger from '@/server/Logger'
+import Checklist from '@/server/Checklist'
 import Video from '@/stream/Video'
 import PlayHistory from '@/stream/PlayHistory'
 import VoteSkipHandler from '@/stream/VoteSkipHandler'
@@ -10,7 +11,6 @@ import Chat from '@/stream/Chat'
 import { getNextBumper } from '@/stream/bumpers'
 import { themes } from '@/stream/themes'
 import { StreamState, Msg, VideoState } from '@/lib/enums'
-import { passCheck, failCheck } from '@/stream/initChecks'
 import type { RichPlaylist, ClientPlaylist, ListOption, FileTreeNode } from '@/typings/types'
 import type { SocketClient, StreamInfo, StreamOptions } from '@/typings/socket'
 import packageJSON from '@package' assert { type: 'json' }
@@ -29,7 +29,7 @@ export default new class Player {
     Logger.debug('Initializing player handler...')
     await this.populatePlaylists()
     await this.setActivePlaylistID(Settings.activePlaylistID)
-    passCheck('playerReady', 'Stream player handler ready.')
+    Checklist.pass('playerReady', 'Stream player handler ready.')
 
     // Update video indexes when file tree changes
     FileTreeHandler.onTreeChange(() => {

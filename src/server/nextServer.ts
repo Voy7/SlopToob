@@ -4,10 +4,10 @@ import { httpServer } from '@/server/httpServer'
 import { initializeSocketServer } from '@/server/socket'
 import { initializeHlsServer } from '@/server/hls'
 import Env from '@/EnvVariables'
-import Logger from '@/lib/Logger'
+import Logger from '@/server/Logger'
+import Checklist from '@/server/Checklist'
 import Player from '@/stream/Player'
 import Thumbnails from '@/stream/Thumbnails'
-import { passCheck, failCheck } from '@/stream/initChecks'
 import type { IncomingMessage, ServerResponse } from 'http'
 
 const app = next({
@@ -20,7 +20,7 @@ const app = next({
 const handle = app.getRequestHandler()
 
 app.prepare().then(() => {
-  passCheck('nextAppReady', 'Next.js app ready.')
+  Checklist.pass('nextAppReady', 'Next.js app ready.')
   httpServer.on('request', nextRequestHandler)
   initializeSocketServer()
   initializeHlsServer()

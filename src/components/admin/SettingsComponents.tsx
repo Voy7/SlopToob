@@ -1,11 +1,8 @@
-'use client'
-
-import { Msg } from '@/lib/enums'
+import { useEffect, useRef, useState } from 'react'
 import Icon, { IconNames } from '@/components/ui/Icon'
 import Slider from '@/components/ui/Slider'
 import styles from './SettingsComponents.module.scss'
 import type { ListOption } from '@/typings/types'
-import { useEffect, useRef, useState } from 'react'
 
 // Admin panel settings components
 

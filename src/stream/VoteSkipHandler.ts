@@ -1,4 +1,4 @@
-import Logger from '@/lib/Logger'
+import Logger from '@/server/Logger'
 import Settings from '@/stream/Settings'
 import Player from '@/stream/Player'
 import SocketUtils from '@/lib/SocketUtils'

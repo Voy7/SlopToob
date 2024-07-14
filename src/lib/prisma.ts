@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import Logger from '@/lib/Logger'
+import Logger from '@/server/Logger'
 // import { Roles } from '#src/lib/enums'
 
 declare global {

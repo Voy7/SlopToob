@@ -2,9 +2,9 @@ import fs from 'fs'
 import fsAsync from 'fs/promises'
 import path from 'path'
 import Env from '@/EnvVariables'
-import Logger from '@/lib/Logger'
+import Logger from '@/server/Logger'
+import Checklist from '@/server/Checklist'
 import SocketUtils from '@/lib/SocketUtils'
-import { passCheck, failCheck } from '@/stream/initChecks'
 import { Msg } from '@/lib/enums'
 import type { FileTreeNode } from '@/typings/types'
 
@@ -51,7 +51,7 @@ export default new class FileTreeHandler {
     this.buildTreeObject(false)
 
     const passedSeconds = (Date.now() - startDate) / 1000
-    passCheck('fileTreeReady', `Fetched tree in ${passedSeconds.toFixed(1)}s.`)
+    Checklist.pass('fileTreeReady', `Fetched tree in ${passedSeconds.toFixed(1)}s.`)
 
     this.onReadyCallback?.()
 
