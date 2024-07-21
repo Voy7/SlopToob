@@ -24,9 +24,12 @@
       border: 1px solid var(--border-color-1);
       border-radius: 0.5rem;
 
-      &:focus { outline: none; border-color: var(--select-color); }
+      &:focus {
+        outline: none;
+        border-color: var(--select-color);
+      }
 
-      &[type="file"] {
+      &[type='file'] {
         color: var(--text-color-3);
 
         &::file-selector-button {

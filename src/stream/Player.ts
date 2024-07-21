@@ -17,7 +17,7 @@ import packageJSON from '@package' assert { type: 'json' }
 import FileTreeHandler from './FileTreeHandler'
 
 // Main player (video) handler, singleton
-export default new class Player {
+export default new (class Player {
   playing: Video | null = null
   queue: Video[] = []
   private playlists: RichPlaylist[] = []
@@ -40,13 +40,22 @@ export default new class Player {
     })
   }
 
-  pause(): boolean { return this.playing?.pause() || false }
-  unpause(): boolean { return this.playing?.unpause() || false }
-  skip() { this.playing?.end() }
+  pause(): boolean {
+    return this.playing?.pause() || false
+  }
+  unpause(): boolean {
+    return this.playing?.unpause() || false
+  }
+  skip() {
+    this.playing?.end()
+  }
 
   private async playNext() {
     // Play bumper if enough time has passed
-    if (Settings.bumpersEnabled && this.lastBumperDate.getTime() + Settings.bumperIntervalMinutes * 60 * 1000 < Date.now()) {
+    if (
+      Settings.bumpersEnabled &&
+      this.lastBumperDate.getTime() + Settings.bumperIntervalMinutes * 60 * 1000 < Date.now()
+    ) {
       const nextBumper = getNextBumper()
       if (nextBumper) {
         this.queue.unshift(nextBumper)
@@ -54,7 +63,8 @@ export default new class Player {
       }
     }
 
-    if (this.queue.length === 0) { // Display 'no videos' error
+    if (this.queue.length === 0) {
+      // Display 'no videos' error
       SocketUtils.broadcast(Msg.StreamInfo, this.clientStreamInfo)
       return
     }
@@ -63,13 +73,13 @@ export default new class Player {
       Logger.warn('Tried to play next video while one is already playing:', this.playing.name)
       return
     }
-    
+
     this.playing = this.queue.shift() || null
     if (!this.playing) return
-    
+
     this.populateRandomToQueue()
     this.playing.prepare()
-    
+
     // Start transcoding next video in queue
     this.queue[0]?.prepare()
 
@@ -85,7 +95,10 @@ export default new class Player {
 
     if (this.queue.length > Settings.targetQueueSize) {
       this.queue = this.queue.slice(0, Settings.targetQueueSize)
-      SocketUtils.broadcastAdmin(Msg.AdminQueueList, this.queue.map(video => video.clientVideo))
+      SocketUtils.broadcastAdmin(
+        Msg.AdminQueueList,
+        this.queue.map((video) => video.clientVideo)
+      )
       return
     }
 
@@ -101,7 +114,7 @@ export default new class Player {
 
   // Set playlist as active, and start playing it
   async setActivePlaylistID(playlistID: string, executedBy?: SocketClient) {
-    const playlist = this.playlists.find(playlist => playlist.id === playlistID) || null
+    const playlist = this.playlists.find((playlist) => playlist.id === playlistID) || null
     Logger.debug('Setting active playlist:', playlist?.name || 'None')
 
     const sendChangedMessage = () => {
@@ -109,7 +122,10 @@ export default new class Player {
       if (!executedBy) return
       if (!playlist) return
       if (this.activePlaylist?.id === playlistID) return
-      Chat.send({ type: Chat.Type.AdminChangePlaylist, message: `${executedBy.username} set the playlist to: ${playlist.name}` })
+      Chat.send({
+        type: Chat.Type.AdminChangePlaylist,
+        message: `${executedBy.username} set the playlist to: ${playlist.name}`
+      })
     }
     sendChangedMessage()
 
@@ -120,11 +136,14 @@ export default new class Player {
     this.populateRandomToQueue()
 
     SocketUtils.broadcastAdmin(Msg.AdminPlaylists, this.clientPlaylists)
-    SocketUtils.broadcastAdmin(Msg.AdminQueueList, this.queue.map(video => video.clientVideo))
+    SocketUtils.broadcastAdmin(
+      Msg.AdminQueueList,
+      this.queue.map((video) => video.clientVideo)
+    )
   }
 
   get clientPlaylists(): ClientPlaylist[] {
-    return this.playlists.map(playlist => ({
+    return this.playlists.map((playlist) => ({
       id: playlist.id,
       name: playlist.name,
       videoPaths: playlist.videoIndexes
@@ -133,7 +152,7 @@ export default new class Player {
 
   get listOptionPlaylists(): ListOption {
     return {
-      list: this.playlists.map(playlist => ({ name: playlist.name, id: playlist.id })),
+      list: this.playlists.map((playlist) => ({ name: playlist.name, id: playlist.id })),
       selectedID: Settings.activePlaylistID
     }
   }
@@ -149,7 +168,10 @@ export default new class Player {
     Logger.debug('Adding video to queue:', video.name)
     this.queue.push(video)
     if (!this.playing) this.playNext()
-    SocketUtils.broadcastAdmin(Msg.AdminQueueList, this.queue.map(video => video.clientVideo))
+    SocketUtils.broadcastAdmin(
+      Msg.AdminQueueList,
+      this.queue.map((video) => video.clientVideo)
+    )
   }
 
   get clientStreamInfo(): StreamInfo {
@@ -212,7 +234,7 @@ export default new class Player {
         isAllowed: VoteSkipHandler.isAllowed,
         allowedInSeconds: VoteSkipHandler.allowedInSeconds,
         currentCount: VoteSkipHandler.currentCount,
-        requiredCount: VoteSkipHandler.requiredCount,
+        requiredCount: VoteSkipHandler.requiredCount
       }
     }
   }
@@ -222,7 +244,7 @@ export default new class Player {
 
     // Parse video paths & sort playlists by name
     this.playlists = dbPlaylists
-      .map(playlist => {
+      .map((playlist) => {
         const paths = playlist.videoPaths.replace(/\\/g, '/').split('|')
         return {
           ...playlist,
@@ -258,12 +280,13 @@ export default new class Player {
         where: { id: playlistID }
       })
 
-      this.playlists = this.playlists.filter(playlist => playlist.id !== playlistID)
+      this.playlists = this.playlists.filter((playlist) => playlist.id !== playlistID)
 
       SocketUtils.broadcastAdmin(Msg.AdminPlaylists, this.clientPlaylists)
       Logger.debug('Playlist deleted:', playlistID)
+    } catch (error: any) {
+      return error.message
     }
-    catch (error: any) { return error.message }
   }
 
   // Change playlist name, return error as string if failed
@@ -273,8 +296,8 @@ export default new class Player {
       where: { id: playlistID },
       data: { name: newName }
     })
-    
-    const playlist = this.playlists.find(playlist => playlist.id === playlistID)
+
+    const playlist = this.playlists.find((playlist) => playlist.id === playlistID)
     if (playlist) playlist.name = newName
 
     SocketUtils.broadcastAdmin(Msg.AdminPlaylists, this.clientPlaylists)
@@ -284,7 +307,8 @@ export default new class Player {
   private checkPlaylistNameValid(name: string) {
     if (name.length < 3) throw new Error('Name must be at least 3 characters long.')
     if (name.length > 30) throw new Error('Name must be at most 30 characters long.')
-    if (this.playlists.find(playlist => playlist.name === name)) throw new Error('Playlist name already taken.')
+    if (this.playlists.find((playlist) => playlist.name === name))
+      throw new Error('Playlist name already taken.')
   }
 
   // Set new videos for playlist
@@ -297,17 +321,20 @@ export default new class Player {
       if (!item.children) {
         pathIndexes[index] = `${Env.VIDEOS_PATH}${item.path}`
         index++
-      }
-      else for (const child of item.children) { getPaths(child) }
+      } else
+        for (const child of item.children) {
+          getPaths(child)
+        }
     }
     getPaths(FileTreeHandler.tree)
 
     const newVideoPaths = newVideoPathsIndex
-      .map(index => pathIndexes[index])
-      .filter(path => path) // Remove undefined paths
+      .map((index) => pathIndexes[index])
+      .filter((path) => path) // Remove undefined paths
 
-    const playlist = this.playlists.find(playlist => playlist.id === playlistID)
-    if (!playlist) return Logger.warn(`Tried to set videos for non-existent playlist: ${playlistID}`)
+    const playlist = this.playlists.find((playlist) => playlist.id === playlistID)
+    if (!playlist)
+      return Logger.warn(`Tried to set videos for non-existent playlist: ${playlistID}`)
 
     playlist.videos = newVideoPaths
     playlist.videoIndexes = newVideoPathsIndex
@@ -319,4 +346,4 @@ export default new class Player {
 
     Logger.debug(`Playlist (${playlistID}) videos updated: ${newVideoPaths.length}`)
   }
-}
+})()

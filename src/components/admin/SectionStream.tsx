@@ -1,7 +1,12 @@
 'use client'
 
 import useListOption from '@/hooks/useListOption'
-import { SettingGroup, Header, Description, ListOption } from '@/components/admin/SettingsComponents'
+import {
+  SettingGroup,
+  Header,
+  Description,
+  ListOption
+} from '@/components/admin/SettingsComponents'
 import StreamControls from '@/components/admin/StreamControls'
 import QueueList from '@/components/admin/QueueList'
 

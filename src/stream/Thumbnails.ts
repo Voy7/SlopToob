@@ -7,9 +7,9 @@ import TranscoderJob from '@/stream/TranscoderJob'
 import type { IncomingMessage, ServerResponse } from 'http'
 import type { UrlWithParsedQuery } from 'url'
 
-export default new class Thumbnails {
+export default new (class Thumbnails {
   private generateCallbacks: Record<string, Array<(thumbnailPath: string | null) => void>> = {}
-  
+
   // Generate thumbnail for video if it doesn't exist & return URL
   async generate(videoPath: string): Promise<string | null> {
     videoPath = decodeURIComponent(videoPath) // Parse special characters (like %20)
@@ -19,11 +19,14 @@ export default new class Thumbnails {
       return null
     }
 
-    const thumbnailPath = path.join(Env.THUMBNAILS_OUTPUT_PATH, `${videoPath.replace(/\//g, '_').replace(/\:/g, '')}.jpg`)
+    const thumbnailPath = path.join(
+      Env.THUMBNAILS_OUTPUT_PATH,
+      `${videoPath.replace(/\//g, '_').replace(/\:/g, '')}.jpg`
+    )
 
     if (fs.existsSync(thumbnailPath)) return thumbnailPath
 
-    return new Promise<string | null>(async resolve => {
+    return new Promise<string | null>(async (resolve) => {
       const callbacks = this.generateCallbacks[thumbnailPath]
       if (callbacks) {
         callbacks.push(resolve)
@@ -37,8 +40,9 @@ export default new class Thumbnails {
       }
 
       let seekSeconds = 5
-      try { seekSeconds = await TranscoderJob.getVideoDuration(videoPath) / 2 }
-      catch (error: any) {}
+      try {
+        seekSeconds = (await TranscoderJob.getVideoDuration(videoPath)) / 2
+      } catch (error: any) {}
 
       const command = ffmpeg(videoPath)
       command.outputOptions([...THUMBNAIL_ARGS, `-ss ${seekSeconds}`])
@@ -52,7 +56,7 @@ export default new class Thumbnails {
         delete this.generateCallbacks[thumbnailPath]
       })
 
-      command.on('error', error => {
+      command.on('error', (error) => {
         Logger.error('[Thumbnails] Error generating thumbnail:', error)
         const callbacks = this.generateCallbacks[thumbnailPath]
         if (!callbacks) return
@@ -70,13 +74,17 @@ export default new class Thumbnails {
   }
 
   // Handle thumbnail requests
-  async handleThumbnailRequest(req: IncomingMessage, res: ServerResponse, parsedUrl: UrlWithParsedQuery) {
+  async handleThumbnailRequest(
+    req: IncomingMessage,
+    res: ServerResponse,
+    parsedUrl: UrlWithParsedQuery
+  ) {
     try {
       const videoPath = parsedUrl.pathname?.replace('/thumbnails/', '')
       if (!videoPath) throw new Error('Could not parse video path from URL')
       const thumbnailPath = await this.generate(videoPath)
       if (!thumbnailPath) throw new Error(`No thumbnail path returned: ${videoPath}`)
-        
+
       // TODO: Investigate why this throws sometimes, even though we should be generating it right above this line
       if (!fs.existsSync(thumbnailPath)) {
         // throw new Error(`Thumbnail file not found: ${thumbnailPath}`)
@@ -89,11 +97,10 @@ export default new class Thumbnails {
       const file = fs.createReadStream(thumbnailPath)
       res.setHeader('Content-Type', 'image/png')
       file.pipe(res)
-    }
-    catch (error: any) {
+    } catch (error: any) {
       Logger.error('[Thumbnails] Error occurred handling thumbnail request:', error)
       res.statusCode = 404
       res.end()
     }
   }
-}
+})()

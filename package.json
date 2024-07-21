@@ -5,7 +5,8 @@
     "start": "cross-env NODE_ENV=production tsx src/index.ts",
     "dev": "tsx src/index.ts",
     "build": "next build",
-    "lint": "next lint"
+    "lint": "next lint",
+    "prettier": "prettier --write ."
   },
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
@@ -38,6 +39,7 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "prettier": "^3.3.3",
     "prisma": "^5.11.0",
     "typescript": "^5"
   }

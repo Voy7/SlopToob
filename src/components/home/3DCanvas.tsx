@@ -20,16 +20,13 @@ export default function Canvas3D() {
   } as const
 
   return (
-    <Canvas
-      style={loaded ? styles : { ...styles, opacity: 0 }}
-      onCreated={() => setLoaded(true)}
-    >
+    <Canvas style={loaded ? styles : { ...styles, opacity: 0 }} onCreated={() => setLoaded(true)}>
       <Camera />
       <pointLight position={[10, 10, 10]} />
       <ambientLight intensity={0.75} />
-      { [...Array(STARS_COUNT)].map((_, i) => (
+      {[...Array(STARS_COUNT)].map((_, i) => (
         <StarMesh key={i} />
-      )) }
+      ))}
     </Canvas>
   )
 }
@@ -69,16 +66,12 @@ function StarMesh() {
   useFrame((state, delta) => {
     ref.current.position.y = position[1]
   })
-  
+
   return (
-    <mesh
-      ref={ref}
-      position={position}
-      scale={0.05}
-    >
+    <mesh ref={ref} position={position} scale={0.05}>
       <boxGeometry />
       <meshStandardMaterial
-        color={"white"}
+        color={'white'}
         metalness={0.5}
         roughness={0.5}
         // wireframe={true}

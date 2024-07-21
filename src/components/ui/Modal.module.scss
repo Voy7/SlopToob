@@ -12,10 +12,16 @@
   // z-index: 1;
 
   @keyframes backgroundFadeIn {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
   }
-  &.show { opacity: 1; }
+  &.show {
+    opacity: 1;
+  }
 
   .modalContainer {
     position: fixed;
@@ -34,10 +40,19 @@
     overflow-y: auto;
 
     @keyframes modalFadeIn {
-      0% { top: calc(50% - 20px); opacity: 0; }
-      100% { top: 50%; opacity: 1; }
+      0% {
+        top: calc(50% - 20px);
+        opacity: 0;
+      }
+      100% {
+        top: 50%;
+        opacity: 1;
+      }
     }
-    &.show2 { top: 50%; opacity: 1; }
+    &.show2 {
+      top: 50%;
+      opacity: 1;
+    }
 
     .modalHeader {
       display: flex;

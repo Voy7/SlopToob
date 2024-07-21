@@ -8,41 +8,69 @@ $tooltipBackground: rgb(63, 63, 63);
   animation: fadeIn 150ms ease-in-out;
 
   @keyframes fadeIn {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
   }
 
   .arrow {
     position: absolute;
     width: 0;
     height: 0;
-    
+
     // Arrow on top
-    &.bottom, &.bottom-start, &.bottom-end {
+    &.bottom,
+    &.bottom-start,
+    &.bottom-end {
       border-left: 0.5rem solid transparent;
       border-right: 0.5rem solid transparent;
       border-bottom: 0.5rem solid $tooltipBackground;
-      
+
       // Arrow on top
-      &.bottom { top: -0.5rem; left: 50%; transform: translateX(-50%); }
+      &.bottom {
+        top: -0.5rem;
+        left: 50%;
+        transform: translateX(-50%);
+      }
       // Arrow on top-left
-      &.bottom-start { top: -0.5rem; left: 1rem; }
+      &.bottom-start {
+        top: -0.5rem;
+        left: 1rem;
+      }
       // Arrow on top-right
-      &.bottom-end { top: -0.5rem; right: 1rem; }
+      &.bottom-end {
+        top: -0.5rem;
+        right: 1rem;
+      }
     }
 
     // Arrow on bottom
-    &.top, &.top-start, &.top-end {
+    &.top,
+    &.top-start,
+    &.top-end {
       border-left: 0.5rem solid transparent;
       border-right: 0.5rem solid transparent;
       border-top: 0.5rem solid $tooltipBackground;
-  
+
       // Arrow on bottom
-      &.top { bottom: -0.5rem; left: 50%; transform: translateX(-50%); }
+      &.top {
+        bottom: -0.5rem;
+        left: 50%;
+        transform: translateX(-50%);
+      }
       // Arrow on bottom-left
-      &.top-start { bottom: -0.5rem; left: 1rem; }
+      &.top-start {
+        bottom: -0.5rem;
+        left: 1rem;
+      }
       // Arrow on bottom-right
-      &.top-end { bottom: -0.5rem; right: 1rem; }
+      &.top-end {
+        bottom: -0.5rem;
+        right: 1rem;
+      }
     }
 
     // Arrow on left
@@ -50,7 +78,9 @@ $tooltipBackground: rgb(63, 63, 63);
       border-top: 0.5rem solid transparent;
       border-bottom: 0.5rem solid transparent;
       border-left: 0.5rem solid $tooltipBackground;
-      right: -0.5rem; top: 50%; transform: translateY(-50%);
+      right: -0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
     }
 
     // Arrow or right
@@ -58,7 +88,9 @@ $tooltipBackground: rgb(63, 63, 63);
       border-top: 0.5rem solid transparent;
       border-bottom: 0.5rem solid transparent;
       border-right: 0.5rem solid $tooltipBackground;
-      left: -0.5rem; top: 50%; transform: translateY(-50%);
+      left: -0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
     }
   }
 }

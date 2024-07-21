@@ -6,7 +6,7 @@ export default function useToggleOption(settingKey: keyof SettingsList) {
   const settingID = `setting.${settingKey}`
 
   const { socket } = useStreamContext()
-  
+
   const [value, setValueState] = useState<number | null>(null)
 
   useEffect(() => {
@@ -16,7 +16,9 @@ export default function useToggleOption(settingKey: keyof SettingsList) {
       setValueState(value)
     })
 
-    return () => { socket.off(settingID) }
+    return () => {
+      socket.off(settingID)
+    }
   }, [socket])
 
   function setValue(value: number) {

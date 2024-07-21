@@ -19,7 +19,7 @@ export default async function middleware(req: NextRequest, event: NextFetchEvent
         signIn: '/'
       }
     })
-  
+
     return authMiddleware(req as any, event)
   }
 }

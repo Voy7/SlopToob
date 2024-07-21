@@ -6,8 +6,8 @@ import type { SocketClient } from '@/typings/socket'
 // Instead, use dynamic imports (except importing types is fine)
 
 type Setting = {
-  default: string | number | boolean,
-  onChange?: (value: any) => void,
+  default: string | number | boolean
+  onChange?: (value: any) => void
   clientValue?: () => any
 }
 
@@ -22,7 +22,7 @@ export const settingsList = {
     onChange: async (value: string, executedBy?: SocketClient) => {
       const { default: Player } = await import('@/stream/Player')
       Player.setActivePlaylistID(value, executedBy)
-    },
+    }
   },
 
   streamTheme: {
@@ -31,7 +31,7 @@ export const settingsList = {
       const { default: Player } = await import('@/stream/Player')
       return Player.listOptionThemes
     },
-    onChange: chatResync,
+    onChange: chatResync
   },
 
   // Is not a normal setting, just a persistant state for if the server restarts
@@ -105,7 +105,7 @@ export const settingsList = {
   videoPaddingSeconds: { default: 1 },
 
   // Advanced name parsing for common torrent filename patterns
-  torrentNameParsing: { default: false },
+  torrentNameParsing: { default: false }
 } satisfies Record<string, Setting>
 
 async function voteSkipResync() {

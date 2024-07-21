@@ -20,7 +20,7 @@ const SUFFIX_SEPERATORS = [
   'web',
   'xvid',
   'ac3',
-  'hdrip',
+  'hdrip'
 ]
 
 // Parse video name from path to client-friendly name
@@ -28,13 +28,16 @@ export default function parseVideoName(path: string): string {
   let name = basename(path) // File name
   if (name.includes('.')) name = name.substring(0, name.lastIndexOf('.')) // Remove extension if it exists
   name = name.replace(/_/g, ' ') // Underscores to spaces
-  
+
   if (Settings.torrentNameParsing) {
     // Periods to spaces
     name = name.replace(/\./g, ' ')
 
     // Capatalize every word
-    name = name.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase())
+    name = name.replace(
+      /\w\S*/g,
+      (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+    )
 
     // Remove common suffixes
     for (const seperator of SUFFIX_SEPERATORS) {

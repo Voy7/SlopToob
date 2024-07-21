@@ -21,7 +21,9 @@
     height: calc(100vw * 9 / 16);
   }
 
-  &.hideCursor { cursor: none; }
+  &.hideCursor {
+    cursor: none;
+  }
 
   video {
     width: 100%;

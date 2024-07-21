@@ -15,16 +15,22 @@ export type Placement =
 type FloatingProps = ReturnType<typeof useFloating>
 
 type Props = {
-  floatingRef: FloatingProps['refs']['setFloating'],
-  floatingStyles: FloatingProps['floatingStyles'],
-  isOpen: boolean,
-  placement: Placement,
+  floatingRef: FloatingProps['refs']['setFloating']
+  floatingStyles: FloatingProps['floatingStyles']
+  isOpen: boolean
+  placement: Placement
   children: React.ReactNode
 }
 
-export default function Tooltip({ floatingRef, floatingStyles, isOpen, placement, children }: Props) {
+export default function Tooltip({
+  floatingRef,
+  floatingStyles,
+  isOpen,
+  placement,
+  children
+}: Props) {
   if (!isOpen) return null
-  
+
   return createPortal(
     <div ref={floatingRef} style={floatingStyles} className={styles.tooltip}>
       {children}

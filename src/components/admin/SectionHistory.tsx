@@ -8,7 +8,15 @@ import useToggleOption from '@/hooks/useToggleOption'
 import useNumberOption from '@/hooks/useNumberOption'
 import Button from '@/components/ui/Button'
 import ActionModal from '@/components/ui/ActionModal'
-import { SettingGroup, Description, Header, ToggleOption, NumberOption, Gap, ButtonOption } from '@/components/admin/SettingsComponents'
+import {
+  SettingGroup,
+  Description,
+  Header,
+  ToggleOption,
+  NumberOption,
+  Gap,
+  ButtonOption
+} from '@/components/admin/SettingsComponents'
 
 export default function SectionHistory() {
   const { historyStatus } = useAdminContext()
@@ -33,15 +41,36 @@ export default function SectionHistory() {
       <SettingGroup>
         <Header icon="video-file">Shuffle History Settings</Header>
         <NumberOption label="Shuffle History Max Items" type="integer" {...historyMaxItems} />
-        <Description>Maximum number of videos to keep in internal history for smart-shuffle logic.</Description>
+        <Description>
+          Maximum number of videos to keep in internal history for smart-shuffle logic.
+        </Description>
         <Gap />
-        <ButtonOption label={`Internal history usage: ${historyStatus.currentCount} / ${historyStatus.totalCount}`} swapped>
-          <Button style="danger" icon="delete" loading={historyStatus.isDeleting} onClick={() => setShowHistoryModal(true)}>Clear History</Button>
+        <ButtonOption
+          label={`Internal history usage: ${historyStatus.currentCount} / ${historyStatus.totalCount}`}
+          swapped
+        >
+          <Button
+            style="danger"
+            icon="delete"
+            loading={historyStatus.isDeleting}
+            onClick={() => setShowHistoryModal(true)}
+          >
+            Clear History
+          </Button>
           <ActionModal
             title="Clear History"
             isOpen={showHistoryModal}
             setClose={() => setShowHistoryModal(false)}
-            button={<Button style="danger" icon="delete" loading={historyStatus.isDeleting} onClick={clearHistory}>Clear History</Button>}
+            button={
+              <Button
+                style="danger"
+                icon="delete"
+                loading={historyStatus.isDeleting}
+                onClick={clearHistory}
+              >
+                Clear History
+              </Button>
+            }
           >
             <p>Are you sure you want to clear the history?</p>
           </ActionModal>

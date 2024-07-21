@@ -18,8 +18,12 @@
   &.loading {
     opacity: 0.75;
     cursor: default;
-    .text { opacity: 0; }
-    .loadingContainer { display: flex; }
+    .text {
+      opacity: 0;
+    }
+    .loadingContainer {
+      display: flex;
+    }
   }
 
   .text {
@@ -33,8 +37,12 @@
     span {
       animation: fadeIn 300ms ease-in-out;
       @keyframes fadeIn {
-        0% { opacity: 0; }
-        100% { opacity: 1; }
+        0% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 1;
+        }
       }
     }
   }
@@ -50,10 +58,14 @@
     width: 1.5em;
     height: 1.5em;
     animation: loading 2s linear infinite;
-    
+
     @keyframes loading {
-      0% { rotate: 0deg; }
-      100% { rotate: 360deg; }
+      0% {
+        rotate: 0deg;
+      }
+      100% {
+        rotate: 360deg;
+      }
     }
   }
 }
@@ -63,7 +75,9 @@
   color: white;
   background: rgb(100, 100, 255);
   border: 1px solid rgb(100, 100, 255);
-  &:hover { background: rgb(80, 80, 255); }
+  &:hover {
+    background: rgb(80, 80, 255);
+  }
   &.disabled {
     opacity: 0.75;
   }
@@ -73,20 +87,31 @@
   color: rgb(220, 220, 220);
   background: var(--bg-color-2);
   border: 1px solid var(--border-color-1);
-  &:hover { color: white; background: rgb(50, 50, 50); }
-  &.disabled { background: var(--bg-color-2); }
+  &:hover {
+    color: white;
+    background: rgb(50, 50, 50);
+  }
+  &.disabled {
+    background: var(--bg-color-2);
+  }
 }
 
 .normal-highlight {
   color: rgb(220, 220, 220);
   background: var(--bg-color-2);
   border: 1px solid magenta;
-  &:hover { color: white; background: rgb(50, 50, 50); }
+  &:hover {
+    color: white;
+    background: rgb(50, 50, 50);
+  }
 }
 
 .danger {
   color: rgb(255, 95, 95);
   background: var(--bg-color-2);
   border: 1px solid var(--border-color-1);
-  &:hover { color: white; background: rgb(255, 95, 95); }
+  &:hover {
+    color: white;
+    background: rgb(255, 95, 95);
+  }
 }

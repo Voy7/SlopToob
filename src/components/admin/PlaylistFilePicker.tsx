@@ -20,20 +20,20 @@ export default function PlaylistFilePicker({ playlist }: { playlist: ClientPlayl
 }
 
 type ActiveTreeNode = {
-  path: string,
-  name: string,
-  active: boolean,
-  parent?: ActiveTreeNode,
+  path: string
+  name: string
+  active: boolean
+  parent?: ActiveTreeNode
   children?: ActiveTreeNode[]
 }
 
 // Stream page context
 type ContextProps = {
-  activeMap: Map<string, ActiveTreeNode>,
-  searchResults: Map<string, [number, number]> | null,
-  selectFolder: (folderPath: string) => void,
-  deselectFolder: (folderPath: string) => void,
-  selectFile: (filePath: string) => void,
+  activeMap: Map<string, ActiveTreeNode>
+  searchResults: Map<string, [number, number]> | null
+  selectFolder: (folderPath: string) => void
+  deselectFolder: (folderPath: string) => void
+  selectFile: (filePath: string) => void
   deselectFile: (filePath: string) => void
 }
 
@@ -60,8 +60,10 @@ function PlaylistFilePickerProvider({ playlist }: { playlist: ClientPlaylist }) 
         indexesMap.set(item.path, index)
         pathsArray.push(item.path)
         index++
-      }
-      else for (const child of item.children) { getPaths(child) }
+      } else
+        for (const child of item.children) {
+          getPaths(child)
+        }
     }
     getPaths(tree)
     return [indexesMap, pathsArray]
@@ -102,7 +104,7 @@ function PlaylistFilePickerProvider({ playlist }: { playlist: ClientPlaylist }) 
     // Sync active state of children with parent if all children are active
     for (const [_, node] of map) {
       if (!node.children) continue
-      const active = node.children.every(child => child.active)
+      const active = node.children.every((child) => child.active)
       node.active = active
     }
 
@@ -113,7 +115,7 @@ function PlaylistFilePickerProvider({ playlist }: { playlist: ClientPlaylist }) 
   function syncActiveState(node: ActiveTreeNode) {
     function check(node: ActiveTreeNode) {
       if (node.children) {
-        const active = node.children.every(child => child.active)
+        const active = node.children.every((child) => child.active)
         node.active = active
       }
       if (node.parent) check(node.parent)
@@ -128,7 +130,9 @@ function PlaylistFilePickerProvider({ playlist }: { playlist: ClientPlaylist }) 
     function selectChildren(node: ActiveTreeNode) {
       node.active = true
       if (!node.children) return
-      for (const child of node.children) { selectChildren(child) }
+      for (const child of node.children) {
+        selectChildren(child)
+      }
     }
     selectChildren(item)
     syncActiveState(item)
@@ -143,7 +147,9 @@ function PlaylistFilePickerProvider({ playlist }: { playlist: ClientPlaylist }) 
     function deselectChildren(node: ActiveTreeNode) {
       node.active = false
       if (!node.children) return
-      for (const child of node.children) { deselectChildren(child) }
+      for (const child of node.children) {
+        deselectChildren(child)
+      }
     }
     deselectChildren(item)
     syncActiveState(item)
@@ -180,8 +186,8 @@ function PlaylistFilePickerProvider({ playlist }: { playlist: ClientPlaylist }) 
     }
 
     // Update admin context playlists state
-    setPlaylists(playlists => {
-      return playlists.map(p => {
+    setPlaylists((playlists) => {
+      return playlists.map((p) => {
         if (playlist.id !== p.id) return p
         return { ...p, videoPaths: pathsIndex }
       })
@@ -211,32 +217,40 @@ function PlaylistFilePickerProvider({ playlist }: { playlist: ClientPlaylist }) 
       // Regex - match all characters in input in order, with any whitespace in between
       const regex = new RegExp(input.split('').join('\\s*'), 'i')
       let items = 0
-      for (const [_, node] of activeMap) { // First folders
+      for (const [_, node] of activeMap) {
+        // First folders
         if (results.size >= SEARCH_MAX_ITEMS) break
         if (!node.children) continue
         items += 1
-        if (items % SEARCH_ITEMS_PER_MS === 0) await new Promise(resolve => setTimeout(resolve, 1))
+        if (items % SEARCH_ITEMS_PER_MS === 0)
+          await new Promise((resolve) => setTimeout(resolve, 1))
         const matches = node.name.match(regex)
-        if (matches?.index !== undefined) results.set(node.path, [matches.index, matches.index + matches[0].length])
+        if (matches?.index !== undefined)
+          results.set(node.path, [matches.index, matches.index + matches[0].length])
       }
-      for (const [_, node] of activeMap) { // Then files
+      for (const [_, node] of activeMap) {
+        // Then files
         if (results.size >= SEARCH_MAX_ITEMS) break
         if (node.children) continue
         items += 1
-        if (items % SEARCH_ITEMS_PER_MS === 0) await new Promise(resolve => setTimeout(resolve, 1))
+        if (items % SEARCH_ITEMS_PER_MS === 0)
+          await new Promise((resolve) => setTimeout(resolve, 1))
         const matches = node.name.match(regex)
-        if (matches?.index !== undefined) results.set(node.path, [matches.index, matches.index + matches[0].length])
+        if (matches?.index !== undefined)
+          results.set(node.path, [matches.index, matches.index + matches[0].length])
       }
 
       // Sort results by folders first, and names naturally (case-insensitive)
-      const sortedResults = new Map([...results.entries()].sort((a, b) => {
-        const aNode = activeMap.get(a[0])!
-        const bNode = activeMap.get(b[0])!
-        if (aNode.children && !bNode.children) return -1
-        if (!aNode.children && bNode.children) return 1
-        return aNode.name.localeCompare(bNode.name, undefined, { sensitivity: 'base' })
-      }))
-      
+      const sortedResults = new Map(
+        [...results.entries()].sort((a, b) => {
+          const aNode = activeMap.get(a[0])!
+          const bNode = activeMap.get(b[0])!
+          if (aNode.children && !bNode.children) return -1
+          if (!aNode.children && bNode.children) return 1
+          return aNode.name.localeCompare(bNode.name, undefined, { sensitivity: 'base' })
+        })
+      )
+
       setSearchResults(sortedResults)
       setIsSearching(false)
     }, SEARCH_TIMEOUT_MS)
@@ -246,20 +260,23 @@ function PlaylistFilePickerProvider({ playlist }: { playlist: ClientPlaylist }) 
   const context: ContextProps = {
     activeMap,
     searchResults,
-    selectFolder, deselectFolder,
-    selectFile, deselectFile
+    selectFolder,
+    deselectFolder,
+    selectFile,
+    deselectFile
   }
 
   const rootNode = activeMap.get(tree.path)
   if (!rootNode) return null
 
   let rootElement: JSX.Element
-  if (isSearching) rootElement = (
-    <div className={styles.searchLoading}>
-      <Icon name="loading" />
-      <p>Searching Files...</p>
-    </div>
-  )
+  if (isSearching)
+    rootElement = (
+      <div className={styles.searchLoading}>
+        <Icon name="loading" />
+        <p>Searching Files...</p>
+      </div>
+    )
   else if (!searchResults) rootElement = <TreeFolder node={rootNode} depth={0} defaultOpen={true} />
   else rootElement = <SearchResultItems />
 
@@ -267,11 +284,19 @@ function PlaylistFilePickerProvider({ playlist }: { playlist: ClientPlaylist }) 
     <PlaylistFilePickerContext.Provider value={context}>
       <div className={styles.filePicker}>
         <div className={styles.searchBox}>
-          <input type="text" value={searchInput} onChange={event => searchFiles(event.target.value)} placeholder="Search files..." />
+          <input
+            type="text"
+            value={searchInput}
+            onChange={(event) => searchFiles(event.target.value)}
+            placeholder="Search files..."
+          />
           <Icon className={styles.searchIcon} name="search" />
           {searchResults !== null && (
             <div className={styles.resultsCount}>
-              <p>{searchResults.size}{searchResults.size === SEARCH_MAX_ITEMS ? '+' : null} Results</p>
+              <p>
+                {searchResults.size}
+                {searchResults.size === SEARCH_MAX_ITEMS ? '+' : null} Results
+              </p>
               <ClearResultsButton onClick={() => searchFiles('')} />
             </div>
           )}
@@ -290,7 +315,11 @@ function ClearResultsButton({ onClick }: { onClick: Function }) {
   const buttonTooltip = useTooltip('top-end')
   return (
     <>
-      <button {...buttonTooltip.anchorProps} onClick={() => onClick()} className={styles.clearResultsButton}>
+      <button
+        {...buttonTooltip.anchorProps}
+        onClick={() => onClick()}
+        className={styles.clearResultsButton}
+      >
         <Icon name="close" />
       </button>
       <Tooltip {...buttonTooltip.tooltipProps}>Clear search results</Tooltip>
@@ -312,15 +341,16 @@ function SearchResultItems() {
   return Array.from(searchResults).map(([path, highlightPos]) => {
     const node = activeMap.get(path)
     if (!node) return null
-    if (node.children) return <TreeFolder key={path} node={node} depth={0} highlightPos={highlightPos} />
+    if (node.children)
+      return <TreeFolder key={path} node={node} depth={0} highlightPos={highlightPos} />
     return <TreeFile key={path} node={node} depth={0} highlightPos={highlightPos} />
   })
 }
 
 type TreeFolderProps = {
-  node: ActiveTreeNode,
-  depth: number,
-  highlightPos?: [number, number],
+  node: ActiveTreeNode
+  depth: number
+  highlightPos?: [number, number]
   defaultOpen?: boolean
 }
 
@@ -331,15 +361,24 @@ function TreeFolder({ node, depth, highlightPos, defaultOpen = false }: TreeFold
 
   function toggleActive() {
     if (node.active) deselectFolder(node.path)
-    else selectFolder(node.path) 
+    else selectFolder(node.path)
   }
 
   return (
     <>
-      <div className={node.active ? `${styles.item} ${styles.selected}` : styles.item} onClick={() => setIsOpen(!isOpen)} style={depth === 0 ? undefined : { paddingLeft: `${depth * 1.25}rem` }}>
+      <div
+        className={node.active ? `${styles.item} ${styles.selected}` : styles.item}
+        onClick={() => setIsOpen(!isOpen)}
+        style={depth === 0 ? undefined : { paddingLeft: `${depth * 1.25}rem` }}
+      >
         <div className={styles.left}>
-        <input type="checkbox" checked={node.active} onChange={toggleActive} onClick={event => event.stopPropagation()} />
-        <Icon name={isOpen ? 'folder-open' : 'folder'} />
+          <input
+            type="checkbox"
+            checked={node.active}
+            onChange={toggleActive}
+            onClick={(event) => event.stopPropagation()}
+          />
+          <Icon name={isOpen ? 'folder-open' : 'folder'} />
           {!highlightPos ? (
             <p title={node.name}>{node.name}</p>
           ) : (
@@ -354,17 +393,19 @@ function TreeFolder({ node, depth, highlightPos, defaultOpen = false }: TreeFold
           <Icon name="down-chevron" className={isOpen ? styles.open : undefined} />
         </div>
       </div>
-      {isOpen && node.children && node.children.map(child => {
-        if (child.children) return <TreeFolder key={child.path} node={child} depth={depth + 1} />
-        return <TreeFile key={child.path} node={child} depth={depth + 1} />
-      })}
+      {isOpen &&
+        node.children &&
+        node.children.map((child) => {
+          if (child.children) return <TreeFolder key={child.path} node={child} depth={depth + 1} />
+          return <TreeFile key={child.path} node={child} depth={depth + 1} />
+        })}
     </>
   )
 }
 
 type TreeFileProps = {
-  node: ActiveTreeNode,
-  depth: number,
+  node: ActiveTreeNode
+  depth: number
   highlightPos?: [number, number]
 }
 
@@ -377,7 +418,10 @@ function TreeFile({ node, depth, highlightPos }: TreeFileProps) {
   }
 
   return (
-    <label className={node.active ? `${styles.item} ${styles.selected}` : styles.item} style={depth === 0 ? undefined : { paddingLeft: `${depth * 1.25}rem` }}>
+    <label
+      className={node.active ? `${styles.item} ${styles.selected}` : styles.item}
+      style={depth === 0 ? undefined : { paddingLeft: `${depth * 1.25}rem` }}
+    >
       <div className={styles.left}>
         <input type="checkbox" checked={node.active} onChange={toggleActive} />
         <Icon name="video-file" />

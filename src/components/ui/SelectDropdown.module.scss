@@ -17,9 +17,15 @@
     overflow: hidden;
     cursor: pointer;
 
-    &:hover { background: var(--bg-color-3); }
-    &.open { background: var(--bg-color-3); }
-    &.fullHeight { height: 100%; }
+    &:hover {
+      background: var(--bg-color-3);
+    }
+    &.open {
+      background: var(--bg-color-3);
+    }
+    &.fullHeight {
+      height: 100%;
+    }
 
     .arrow {
       flex-shrink: 0;
@@ -33,26 +39,34 @@
       white-space: nowrap;
     }
 
-    img { border-radius: 50%; }
+    img {
+      border-radius: 50%;
+    }
   }
 
   .dropdownContent {
     position: absolute;
     top: 100%;
-    left: 0;;
+    left: 0;
     width: max-content;
     min-width: 100%;
     max-height: calc(100vh - 120px); // 100px is the rough height of the header
     background: var(--bg-color-2);
     border: 1px solid var(--border-color-1);
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
     z-index: 1;
     overflow: auto;
     animation: slideDown 150ms ease-in-out;
 
     @keyframes slideDown {
-      0% { transform: translateY(-0.5rem); opacity: 0; }
-      100% { transform: translateY(0); opacity: 1; }
+      0% {
+        transform: translateY(-0.5rem);
+        opacity: 0;
+      }
+      100% {
+        transform: translateY(0);
+        opacity: 1;
+      }
     }
   }
 }

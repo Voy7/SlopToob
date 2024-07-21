@@ -35,11 +35,21 @@ function StateOverlay() {
   }
 
   if (streamInfo.state === StreamState.Paused) {
-    return <p className={styles.paused}><Icon name="pause" />STREAM PAUSED</p>
+    return (
+      <p className={styles.paused}>
+        <Icon name="pause" />
+        STREAM PAUSED
+      </p>
+    )
   }
 
   if (streamInfo.state === StreamState.Loading) {
-    return <p className={styles.loading}><Icon name="loading" />LOADING...</p>
+    return (
+      <p className={styles.loading}>
+        <Icon name="loading" />
+        LOADING...
+      </p>
+    )
   }
 
   if (streamInfo.state === StreamState.Error) {
@@ -71,19 +81,19 @@ function BumperOverlay() {
   if (remainingTime >= 60) {
     time = Math.floor(remainingTime / 60)
     unit = 'm'
-  }
-  else if (remainingTime > 5) { // Rounded up
+  } else if (remainingTime > 5) {
+    // Rounded up
     time = Math.ceil(remainingTime / 5) * 5
     unit = 's'
-  }
-  else {
+  } else {
     time = remainingTime
     unit = 's'
   }
 
   return (
     <div className={showControls ? `${styles.bumperTime} ${styles.offsetUp}` : styles.bumperTime}>
-      Ends in <span key={time}>{time}</span><span key={unit}>{unit}</span>
+      Ends in <span key={time}>{time}</span>
+      <span key={unit}>{unit}</span>
     </div>
   )
 }
@@ -92,7 +102,7 @@ function ActionPopupOverlay() {
   const { actionPopup } = useVideoContext()
 
   if (!actionPopup) return null
-  
+
   return (
     <div className={styles.actionPopup} key={actionPopup.id}>
       <Icon name={actionPopup.icon} />
@@ -106,5 +116,11 @@ function FoxNewsOverlay() {
 }
 
 function SaulGoodmanOverlay() {
-  return <img src="/theme-assets/saul-goodman-overlay.gif" alt="" className={styles.saulGoodmanOverlay} />
+  return (
+    <img
+      src="/theme-assets/saul-goodman-overlay.gif"
+      alt=""
+      className={styles.saulGoodmanOverlay}
+    />
+  )
 }

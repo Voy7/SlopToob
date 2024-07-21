@@ -17,236 +17,307 @@ import FileTreeHandler from '@/stream/FileTreeHandler'
 import VoteSkipHandler from '@/stream/VoteSkipHandler'
 import Chat from '@/stream/Chat'
 import type { Socket } from 'socket.io'
-import type { JoinStreamPayload, EditPlaylistNamePayload, EditPlaylistVideosPayload } from '@/typings/socket'
+import type {
+  JoinStreamPayload,
+  EditPlaylistNamePayload,
+  EditPlaylistVideosPayload
+} from '@/typings/socket'
 
 type EventOptions = {
-  allowUnauthenticated?: boolean, // Allow unauthenticated users to run this event (default: false)
-  adminOnly?: boolean, // Only allow admin users to run this event (default: false)
+  allowUnauthenticated?: boolean // Allow unauthenticated users to run this event (default: false)
+  adminOnly?: boolean // Only allow admin users to run this event (default: false)
   run: (socket: Socket, payload: any) => void
 }
 
 export const socketEvents: Record<string, EventOptions> = {
   // If client disconnects, remove them from the viewers list and broadcast new list
-  [Msg.Disconnect]: { run: (socket) => {
-    const existingClient = socketClients.find(c => c.socket === socket)
-    if (!existingClient) return
-    socketClients.splice(socketClients.indexOf(existingClient), 1)
+  [Msg.Disconnect]: {
+    run: (socket) => {
+      const existingClient = socketClients.find((c) => c.socket === socket)
+      if (!existingClient) return
+      socketClients.splice(socketClients.indexOf(existingClient), 1)
 
-    VoteSkipHandler.removeVote(socket.id)
-    VoteSkipHandler.resyncChanges()
-    SocketUtils.broadcastViewersList()
+      VoteSkipHandler.removeVote(socket.id)
+      VoteSkipHandler.resyncChanges()
+      SocketUtils.broadcastViewersList()
 
-    // Pause stream if 'pause when inactive' criteria is met
-    if (Settings.pauseWhenInactive && socketClients.length <= 0) Player.playing?.pause(false)
+      // Pause stream if 'pause when inactive' criteria is met
+      if (Settings.pauseWhenInactive && socketClients.length <= 0) Player.playing?.pause(false)
 
-    if (!Settings.sendLeftStream) return
-    Chat.send({
-      type: Chat.Type.Left,
-      message: `${existingClient.username} left the stream.`
-    })
-  }},
+      if (!Settings.sendLeftStream) return
+      Chat.send({
+        type: Chat.Type.Left,
+        message: `${existingClient.username} left the stream.`
+      })
+    }
+  },
 
   // Message sent from client on first connection, adds them to the viewers list
-  [Msg.JoinStream]: { allowUnauthenticated: true, run: (socket, payload: JoinStreamPayload) => {
-    const existingClient = socketClients.find(c => c.socket === socket)
-    if (existingClient) return
+  [Msg.JoinStream]: {
+    allowUnauthenticated: true,
+    run: (socket, payload: JoinStreamPayload) => {
+      const existingClient = socketClients.find((c) => c.socket === socket)
+      if (existingClient) return
 
-    const authRole = authRoleFromPassword(payload.password)
-    if (authRole === null) return
+      const authRole = authRoleFromPassword(payload.password)
+      if (authRole === null) return
 
-    socketClients.push({
-      socket: socket,
-      username: isNicknameValid(payload.username) === true ? payload.username : 'Anonymous',
-      image: `/api/avatar/${generateSecret()}`,
-      role: authRole
-    })
-    
-    VoteSkipHandler.resyncChanges()
-    SocketUtils.broadcastViewersList()
+      socketClients.push({
+        socket: socket,
+        username: isNicknameValid(payload.username) === true ? payload.username : 'Anonymous',
+        image: `/api/avatar/${generateSecret()}`,
+        role: authRole
+      })
 
-    socket.emit(Msg.StreamInfo, Player.clientStreamInfo)
-    socket.emit(Msg.JoinStream, true)
+      VoteSkipHandler.resyncChanges()
+      SocketUtils.broadcastViewersList()
 
-    // Unpause stream if 'pause when inactive' was active
-    if (Settings.pauseWhenInactive && !Settings.streamIsPaused) Player.unpause()
+      socket.emit(Msg.StreamInfo, Player.clientStreamInfo)
+      socket.emit(Msg.JoinStream, true)
 
-    if (!Settings.sendJoinedStream) return
-    Chat.send({
-      type: Chat.Type.Joined,
-      message: `${payload.username} joined the stream.`
-    })
-  }},
+      // Unpause stream if 'pause when inactive' was active
+      if (Settings.pauseWhenInactive && !Settings.streamIsPaused) Player.unpause()
+
+      if (!Settings.sendJoinedStream) return
+      Chat.send({
+        type: Chat.Type.Joined,
+        message: `${payload.username} joined the stream.`
+      })
+    }
+  },
 
   // Client changed their nickname
   // Respond true if successful, string if error
-  [Msg.ChangeNickname]: { run: (socket, newName: unknown) => {
-    try {
-      if (typeof newName !== 'string') throw new Error('Invalid payload.')
+  [Msg.ChangeNickname]: {
+    run: (socket, newName: unknown) => {
+      try {
+        if (typeof newName !== 'string') throw new Error('Invalid payload.')
 
-      const isValid = isNicknameValid(newName)
-      if (typeof isValid === 'string') throw new Error(isValid)
+        const isValid = isNicknameValid(newName)
+        if (typeof isValid === 'string') throw new Error(isValid)
 
-      const client = socketClients.find(c => c.socket === socket)
-      if (!client) throw new Error('Socket not found.') // Should never happen
+        const client = socketClients.find((c) => c.socket === socket)
+        if (!client) throw new Error('Socket not found.') // Should never happen
 
-      const oldName = client.username
-      client.username = newName
+        const oldName = client.username
+        client.username = newName
 
-      socket.emit(Msg.ChangeNickname, true)
-      SocketUtils.broadcastViewersList()
+        socket.emit(Msg.ChangeNickname, true)
+        SocketUtils.broadcastViewersList()
 
-      if (!Settings.sendChangedNickname) return
-      Chat.send({
-        type: Chat.Type.NicknameChange,
-        message: `${oldName} changed their nickname to: ${newName}`
-      })
+        if (!Settings.sendChangedNickname) return
+        Chat.send({
+          type: Chat.Type.NicknameChange,
+          message: `${oldName} changed their nickname to: ${newName}`
+        })
+      } catch (error: any) {
+        socket.emit(Msg.ChangeNickname, error.message)
+      }
     }
-
-    catch (error: any) { socket.emit(Msg.ChangeNickname, error.message) }
-  }},
+  },
 
   // Client sent a chat message, respond with string if error
-  [Msg.SendChatMessage]: { run: (socket, message: unknown) => {
-    try {
-      if (typeof message !== 'string') throw new Error('Invalid payload.')
+  [Msg.SendChatMessage]: {
+    run: (socket, message: unknown) => {
+      try {
+        if (typeof message !== 'string') throw new Error('Invalid payload.')
 
-      message = message.trim() // Remove leading/trailing whitespace
+        message = message.trim() // Remove leading/trailing whitespace
 
-      if (typeof message !== 'string' || message.length === 0) throw new Error('Message cannot be empty.')
-      if (message.length > Settings.chatMaxLength) throw new Error(`Max message length is ${Settings.chatMaxLength} characters.`)
+        if (typeof message !== 'string' || message.length === 0)
+          throw new Error('Message cannot be empty.')
+        if (message.length > Settings.chatMaxLength)
+          throw new Error(`Max message length is ${Settings.chatMaxLength} characters.`)
 
-      const client = socketClients.find(c => c.socket === socket)
-      if (!client) throw new Error('Socket not found.') // Should never happen
+        const client = socketClients.find((c) => c.socket === socket)
+        if (!client) throw new Error('Socket not found.') // Should never happen
 
-      Chat.send({
-        type: Chat.Type.UserChat,
-        username: client.username,
-        role: client.role,
-        image: client.image,
-        message: message
-      })
+        Chat.send({
+          type: Chat.Type.UserChat,
+          username: client.username,
+          role: client.role,
+          image: client.image,
+          message: message
+        })
+      } catch (error: any) {
+        socket.emit(Msg.SendChatMessage, error.message)
+      }
     }
-    catch (error: any) { socket.emit(Msg.SendChatMessage, error.message) }
-  }},
+  },
 
   // User votes to skip current video
-  [Msg.VoteSkipAdd]: { run: (socket) => {
-    VoteSkipHandler.addVote(socket.id)
-    socket.emit(Msg.VoteSkipStatus, VoteSkipHandler.hasVoted(socket.id))
-  }},
+  [Msg.VoteSkipAdd]: {
+    run: (socket) => {
+      VoteSkipHandler.addVote(socket.id)
+      socket.emit(Msg.VoteSkipStatus, VoteSkipHandler.hasVoted(socket.id))
+    }
+  },
 
   // User removes their vote to skip current video
-  [Msg.VoteSkipRemove]: { run: (socket) => {
-    VoteSkipHandler.removeVote(socket.id)
-    socket.emit(Msg.VoteSkipStatus, VoteSkipHandler.hasVoted(socket.id))
-  }},
+  [Msg.VoteSkipRemove]: {
+    run: (socket) => {
+      VoteSkipHandler.removeVote(socket.id)
+      socket.emit(Msg.VoteSkipStatus, VoteSkipHandler.hasVoted(socket.id))
+    }
+  },
 
   // Admin first admin panel load, send all needed data
-  [Msg.AdminRequestAllData]: { adminOnly: true, run: (socket) => {
-    const playlists = Player.clientPlaylists
-    const bumpers = getClientBumpers()
+  [Msg.AdminRequestAllData]: {
+    adminOnly: true,
+    run: (socket) => {
+      const playlists = Player.clientPlaylists
+      const bumpers = getClientBumpers()
 
-    socket.emit(Msg.AdminFileTree, FileTreeHandler.tree)
-    socket.emit(Msg.AdminPlaylists, playlists)
-    socket.emit(Msg.AdminBumpersList, bumpers)
-    socket.emit(Msg.AdminQueueList, Player.queue.map(video => video.clientVideo))
-    socket.emit(Msg.AdminTranscodeQueueList, TranscoderQueue.clientTranscodeList)
-    socket.emit(Msg.AdminHistoryStatus, PlayHistory.clientHistoryStatus)
-  }},
+      socket.emit(Msg.AdminFileTree, FileTreeHandler.tree)
+      socket.emit(Msg.AdminPlaylists, playlists)
+      socket.emit(Msg.AdminBumpersList, bumpers)
+      socket.emit(
+        Msg.AdminQueueList,
+        Player.queue.map((video) => video.clientVideo)
+      )
+      socket.emit(Msg.AdminTranscodeQueueList, TranscoderQueue.clientTranscodeList)
+      socket.emit(Msg.AdminHistoryStatus, PlayHistory.clientHistoryStatus)
+    }
+  },
 
   // Admin adds a new playlist
-  [Msg.AdminAddPlaylist]: { adminOnly: true, run: async (socket, newPlaylistName: string) => {
-    try {
-      const newPlaylistID = await Player.addPlaylist(newPlaylistName)
-      socket.emit(Msg.AdminAddPlaylist, newPlaylistID)
+  [Msg.AdminAddPlaylist]: {
+    adminOnly: true,
+    run: async (socket, newPlaylistName: string) => {
+      try {
+        const newPlaylistID = await Player.addPlaylist(newPlaylistName)
+        socket.emit(Msg.AdminAddPlaylist, newPlaylistID)
+      } catch (error: any) {
+        socket.emit(Msg.AdminAddPlaylist, { error: error.message })
+      }
     }
-    catch (error: any) { socket.emit(Msg.AdminAddPlaylist, { error: error.message }) }
-  }},
+  },
 
   // Admin deletes a playlist
-  [Msg.AdminDeletePlaylist]: { adminOnly: true, run: async (socket, playlistID: string) => {
-    const errorMsg = await Player.deletePlaylist(playlistID)
-    if (errorMsg) socket.emit(Msg.AdminDeletePlaylist, errorMsg)
-  }},
+  [Msg.AdminDeletePlaylist]: {
+    adminOnly: true,
+    run: async (socket, playlistID: string) => {
+      const errorMsg = await Player.deletePlaylist(playlistID)
+      if (errorMsg) socket.emit(Msg.AdminDeletePlaylist, errorMsg)
+    }
+  },
 
   // Admin edits a playlist name
-  [Msg.AdminEditPlaylistName]: { adminOnly: true, run: async (socket, payload: EditPlaylistNamePayload) => {
-    try { await Player.editPlaylistName(payload.playlistID, payload.newName) }
-    catch (error: any) { socket.emit(Msg.AdminEditPlaylistName, error.message) }
-  }},
+  [Msg.AdminEditPlaylistName]: {
+    adminOnly: true,
+    run: async (socket, payload: EditPlaylistNamePayload) => {
+      try {
+        await Player.editPlaylistName(payload.playlistID, payload.newName)
+      } catch (error: any) {
+        socket.emit(Msg.AdminEditPlaylistName, error.message)
+      }
+    }
+  },
 
   // Admin edits a playlist's videos, only send updated playlists to other admins
-  [Msg.AdminEditPlaylistVideos]: { adminOnly: true, run: async (socket, payload: EditPlaylistVideosPayload) => {
-    await Player.setPlaylistVideos(payload.playlistID, payload.newVideoPaths)
-    const senderClient = socketClients.find(c => c.socket === socket)
-    if (!senderClient) return
-    for (const client of socketClients) {
-      if (client === senderClient || client.role !== AuthRole.Admin) continue
-      client.socket.emit(Msg.AdminPlaylists, Player.clientPlaylists)
+  [Msg.AdminEditPlaylistVideos]: {
+    adminOnly: true,
+    run: async (socket, payload: EditPlaylistVideosPayload) => {
+      await Player.setPlaylistVideos(payload.playlistID, payload.newVideoPaths)
+      const senderClient = socketClients.find((c) => c.socket === socket)
+      if (!senderClient) return
+      for (const client of socketClients) {
+        if (client === senderClient || client.role !== AuthRole.Admin) continue
+        client.socket.emit(Msg.AdminPlaylists, Player.clientPlaylists)
+      }
     }
-  }},
+  },
 
   // Admin uploads a bumper
   // Respond true if successful, string if error
-  [Msg.AdminUploadBumper]: { adminOnly: true, run: async (socket, payload: unknown) => {
-    try {
-      if (!payload || typeof payload !== 'object') throw new Error('Invalid payload.')
-      if (!('name' in payload) || typeof payload.name !== 'string') throw new Error('Invalid payload.')
-      if (!('videoFile' in payload) || typeof payload.videoFile !== 'string') throw new Error('No video selected.')
-      if (payload.name.length <= 0) throw new Error('Bumper title cannot be empty.')
+  [Msg.AdminUploadBumper]: {
+    adminOnly: true,
+    run: async (socket, payload: unknown) => {
+      try {
+        if (!payload || typeof payload !== 'object') throw new Error('Invalid payload.')
+        if (!('name' in payload) || typeof payload.name !== 'string')
+          throw new Error('Invalid payload.')
+        if (!('videoFile' in payload) || typeof payload.videoFile !== 'string')
+          throw new Error('No video selected.')
+        if (payload.name.length <= 0) throw new Error('Bumper title cannot be empty.')
 
-      const bumperExt = payload.videoFile.split(';base64,')[0].split('/')[1]
-      const bumperName = `${payload.name}.${bumperExt}`
-      const bumperPath = path.join(Env.BUMPERS_PATH, bumperName)
-      const bumperExists = await fs.access(bumperPath).then(() => true).catch(() => false)
-      if (bumperExists) throw new Error('Bumper with that name already exists.')
-  
-      const base64 = payload.videoFile.split(';base64,').pop()
-      if (!base64) throw new Error('Invalid base64 data.')
-      await fs.writeFile(bumperPath, base64, { encoding: 'base64' })
-      socket.emit(Msg.AdminUploadBumper, true)
+        const bumperExt = payload.videoFile.split(';base64,')[0].split('/')[1]
+        const bumperName = `${payload.name}.${bumperExt}`
+        const bumperPath = path.join(Env.BUMPERS_PATH, bumperName)
+        const bumperExists = await fs
+          .access(bumperPath)
+          .then(() => true)
+          .catch(() => false)
+        if (bumperExists) throw new Error('Bumper with that name already exists.')
+
+        const base64 = payload.videoFile.split(';base64,').pop()
+        if (!base64) throw new Error('Invalid base64 data.')
+        await fs.writeFile(bumperPath, base64, { encoding: 'base64' })
+        socket.emit(Msg.AdminUploadBumper, true)
+      } catch (error: any) {
+        socket.emit(Msg.AdminUploadBumper, error.message)
+      }
     }
-    catch (error: any) { socket.emit(Msg.AdminUploadBumper, error.message) }
-  }},
+  },
 
   // Admin deletes a bumper
   // Respond true if successful, string if error
-  [Msg.AdminDeleteBumper]: { adminOnly: true, run: async (socket, filePath: string) => {
-    try {
-      if (!filePath.startsWith(Env.BUMPERS_PATH)) throw new Error('File is not in bumpers directory.')
-      await fs.rm(filePath)
-      Logger.debug(`Admin requested deleted bumper: ${filePath}`)
-      socket.emit(Msg.AdminDeleteBumper, true)
+  [Msg.AdminDeleteBumper]: {
+    adminOnly: true,
+    run: async (socket, filePath: string) => {
+      try {
+        if (!filePath.startsWith(Env.BUMPERS_PATH))
+          throw new Error('File is not in bumpers directory.')
+        await fs.rm(filePath)
+        Logger.debug(`Admin requested deleted bumper: ${filePath}`)
+        socket.emit(Msg.AdminDeleteBumper, true)
+      } catch (error: any) {
+        socket.emit(Msg.AdminDeleteBumper, error.message)
+      }
     }
-    catch (error: any) { socket.emit(Msg.AdminDeleteBumper, error.message) }
-  }},
+  },
 
   // Admin clears history
-  [Msg.AdminDeleteHistory]: { adminOnly: true, run: async (socket) => {
-    await PlayHistory.clearAllHistory()
-  }},
+  [Msg.AdminDeleteHistory]: {
+    adminOnly: true,
+    run: async (socket) => {
+      await PlayHistory.clearAllHistory()
+    }
+  },
 
   // Admin pauses the stream
-  [Msg.AdminPauseStream]: { adminOnly: true, run: (socket) => {
-    const wasSuccess = Player.pause()
-    const client = socketClients.find(c => c.socket === socket)
-    if (!client || !wasSuccess || !Settings.sendAdminPause) return
-    Chat.send({ type: Chat.Type.AdminPause, message: `${client.username} paused the stream.` })
-  }},
+  [Msg.AdminPauseStream]: {
+    adminOnly: true,
+    run: (socket) => {
+      const wasSuccess = Player.pause()
+      const client = socketClients.find((c) => c.socket === socket)
+      if (!client || !wasSuccess || !Settings.sendAdminPause) return
+      Chat.send({ type: Chat.Type.AdminPause, message: `${client.username} paused the stream.` })
+    }
+  },
 
   // Admin unpauses the stream
-  [Msg.AdminUnpauseStream]: { adminOnly: true, run: (socket) => {
-    const wasSuccess = Player.unpause()
-    const client = socketClients.find(c => c.socket === socket)
-    if (!client || !wasSuccess || !Settings.sendAdminUnpause) return
-    Chat.send({ type: Chat.Type.AdminUnpause, message: `${client.username} unpaused the stream.` })
-  }},
+  [Msg.AdminUnpauseStream]: {
+    adminOnly: true,
+    run: (socket) => {
+      const wasSuccess = Player.unpause()
+      const client = socketClients.find((c) => c.socket === socket)
+      if (!client || !wasSuccess || !Settings.sendAdminUnpause) return
+      Chat.send({
+        type: Chat.Type.AdminUnpause,
+        message: `${client.username} unpaused the stream.`
+      })
+    }
+  },
 
   // Admin skips the current video
-  [Msg.AdminSkipVideo]: { adminOnly: true, run: (socket) => {
-    Player.skip()
-    const client = socketClients.find(c => c.socket === socket)
-    if (!client || !Settings.sendAdminSkip) return
-    Chat.send({ type: Chat.Type.AdminSkip, message: `${client.username} skipped the video.` })
-  }},
+  [Msg.AdminSkipVideo]: {
+    adminOnly: true,
+    run: (socket) => {
+      Player.skip()
+      const client = socketClients.find((c) => c.socket === socket)
+      if (!client || !Settings.sendAdminSkip) return
+      Chat.send({ type: Chat.Type.AdminSkip, message: `${client.username} skipped the video.` })
+    }
+  }
 }

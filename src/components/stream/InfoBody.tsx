@@ -8,8 +8,8 @@ import styles from './InfoBody.module.scss'
 export default function InfoBody() {
   const { streamInfo } = useStreamContext()
 
-  const title = ('name' in streamInfo) ? streamInfo.name : '[No Video]'
-  const isBumper = ('isBumper' in streamInfo) ? streamInfo.isBumper : false
+  const title = 'name' in streamInfo ? streamInfo.name : '[No Video]'
+  const isBumper = 'isBumper' in streamInfo ? streamInfo.isBumper : false
 
   return (
     <div className={styles.infoBody}>

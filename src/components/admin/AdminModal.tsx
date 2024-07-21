@@ -18,18 +18,50 @@ import styles from './AdminModal.module.scss'
 
 // Admin panel sections
 export const sections = [
-  { name: 'Stream', icon: <Icon name="stream-settings" />, component: <SectionStream /> },
-  { name: 'Playlists', icon: <Icon name="playlist" />, component: <SectionPlaylists /> },
-  { name: 'Bumpers', icon: <Icon name="bumper" />, component: <SectionBumpers /> },
-  { name: 'Caching', icon: <Icon name="cache" />, component: <SectionCaching /> },
+  {
+    name: 'Stream',
+    icon: <Icon name="stream-settings" />,
+    component: <SectionStream />
+  },
+  {
+    name: 'Playlists',
+    icon: <Icon name="playlist" />,
+    component: <SectionPlaylists />
+  },
+  {
+    name: 'Bumpers',
+    icon: <Icon name="bumper" />,
+    component: <SectionBumpers />
+  },
+  {
+    name: 'Caching',
+    icon: <Icon name="cache" />,
+    component: <SectionCaching />
+  },
   { name: 'Chat', icon: <Icon name="chat" />, component: <SectionChat /> },
-  { name: 'History', icon: <Icon name="history" />, component: <SectionHistory /> },
-  { name: 'Vote Skip', icon: <Icon name="skip" />, component: <SectionVoteSkip /> },
-  { name: 'Monitor', icon: <Icon name="admin-panel" />, component: <SectionMonitor /> },
-  { name: 'Advanced', icon: <Icon name="settings" />, component: <SectionAdvanced /> },
+  {
+    name: 'History',
+    icon: <Icon name="history" />,
+    component: <SectionHistory />
+  },
+  {
+    name: 'Vote Skip',
+    icon: <Icon name="skip" />,
+    component: <SectionVoteSkip />
+  },
+  {
+    name: 'Monitor',
+    icon: <Icon name="admin-panel" />,
+    component: <SectionMonitor />
+  },
+  {
+    name: 'Advanced',
+    icon: <Icon name="settings" />,
+    component: <SectionAdvanced />
+  }
 ] as const
 
-export type SectionName = typeof sections[number]['name']
+export type SectionName = (typeof sections)[number]['name']
 
 // Admin panel modal
 export default function AdminModal() {

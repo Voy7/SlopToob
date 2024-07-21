@@ -6,19 +6,19 @@ import type { AuthUser } from '@/typings/types'
 process.env.NEXTAUTH_URL = process.env.SERVER_URL
 process.env.NEXTAUTH_SECRET = process.env.SECRET_KEY
 
-const authOptions: AuthOptions = ({ 
+const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
         password: { label: 'Password', type: 'password' }
       },
-      async authorize(credentials) {  
+      async authorize(credentials) {
         if (credentials?.password) {
           const authUser = getAuthUser(credentials.password)
           if (authUser) return authUser as any
         }
-        
+
         throw new Error('Invalid password provided.')
       }
     })
@@ -34,8 +34,7 @@ const authOptions: AuthOptions = ({
         const authUser = getAuthUser(tokenUser.password)
         if (authUser) session.user = authUser
         else session.user = undefined as any
-      }
-      else session.user = undefined as any
+      } else session.user = undefined as any
       return session
     }
   },
@@ -43,9 +42,9 @@ const authOptions: AuthOptions = ({
     signIn: '/',
     signOut: '/',
     error: '/', // Error code passed in query string as ?error=
-    newUser: '/stream',
+    newUser: '/stream'
   }
-})
+}
 
 function getAuthUser(password: string): AuthUser | null {
   const role = authRoleFromPassword(password)

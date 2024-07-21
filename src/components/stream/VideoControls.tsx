@@ -19,7 +19,15 @@ export default function VideoControls() {
   const session = useSession()
   const authUser = session.data?.user
 
-  const { isPaused, volume, showControls, setShowControls, videoElement, containerElement, showActionPopup } = useVideoContext()
+  const {
+    isPaused,
+    volume,
+    showControls,
+    setShowControls,
+    videoElement,
+    containerElement,
+    showActionPopup
+  } = useVideoContext()
   const { setShowClearChatModal, setShowKeybindsModal, setShowAdminModal } = useStreamContext()
 
   const { currentTimestamp, totalTimestamp, currentSeconds, totalSeconds } = useStreamTimestamp()
@@ -59,48 +67,70 @@ export default function VideoControls() {
 
     const keybinds = [
       // SPACE / K - Play/Pause
-      { key: [' ', 'k'], action: () => videoElement.paused ? videoElement.play() : videoElement.pause() },
-      
+      {
+        key: [' ', 'k'],
+        action: () => (videoElement.paused ? videoElement.play() : videoElement.pause())
+      },
+
       // UP / DOWN - Volume by 10%
-      { key: ['arrowup'], action: () => {
-        videoElement.volume = Math.min(videoElement.volume + VOLUME_STEP_PERCENT, 1)
-        showActionPopup('volume', `${Math.round(videoElement.volume * 100)}%`)
-      }},
-      { key: ['arrowdown'], action: () => {
-        videoElement.volume = Math.max(videoElement.volume - VOLUME_STEP_PERCENT, 0)
-        showActionPopup('volume', `${Math.round(videoElement.volume * 100)}%`)
-      }},
-      
+      {
+        key: ['arrowup'],
+        action: () => {
+          videoElement.volume = Math.min(videoElement.volume + VOLUME_STEP_PERCENT, 1)
+          showActionPopup('volume', `${Math.round(videoElement.volume * 100)}%`)
+        }
+      },
+      {
+        key: ['arrowdown'],
+        action: () => {
+          videoElement.volume = Math.max(videoElement.volume - VOLUME_STEP_PERCENT, 0)
+          showActionPopup('volume', `${Math.round(videoElement.volume * 100)}%`)
+        }
+      },
+
       // M - Toggle Mute
-      { key: ['m'], action: () => {
-        videoElement.muted = !videoElement.muted
-        showActionPopup(videoElement.muted ? 'no-volume' : 'volume', videoElement.muted ? 'MUTED' : 'UNMUTED')
-      }},
-      
+      {
+        key: ['m'],
+        action: () => {
+          videoElement.muted = !videoElement.muted
+          showActionPopup(
+            videoElement.muted ? 'no-volume' : 'volume',
+            videoElement.muted ? 'MUTED' : 'UNMUTED'
+          )
+        }
+      },
+
       // F - Toggle Fullscreen
       { key: ['f'], action: toggleFullscreen },
-      
+
       // C - Clear Chat
       { key: ['c'], action: () => setShowClearChatModal(true) },
 
       // V - Vote Skip
-      { key: ['v'], action: () => {
-        const voteSkipButton = document.querySelector('[data-vote-button]') as HTMLElement
-        if (voteSkipButton) voteSkipButton.click()
-      }},
-    
+      {
+        key: ['v'],
+        action: () => {
+          const voteSkipButton = document.querySelector('[data-vote-button]') as HTMLElement
+          if (voteSkipButton) voteSkipButton.click()
+        }
+      },
+
       // A - Show Admin Panel
       { key: ['a'], action: () => setShowAdminModal(true) },
 
       // '/' / L - Show keybinds list
-      { key: ['/', 'l'], action: () => setShowKeybindsModal(true) },
-    ] satisfies { key: string[], action: () => void }[]
+      { key: ['/', 'l'], action: () => setShowKeybindsModal(true) }
+    ] satisfies { key: string[]; action: () => void }[]
 
     function keydown(event: KeyboardEvent) {
       // No Ctrl/Alt/Shift keybinds
       if (event.ctrlKey || event.altKey || event.shiftKey) return
       // Only allow keybinds if not typing in an input
-      if (document.activeElement?.tagName === 'INPUT' && document.activeElement?.getAttribute('type') !== 'range') return
+      if (
+        document.activeElement?.tagName === 'INPUT' &&
+        document.activeElement?.getAttribute('type') !== 'range'
+      )
+        return
       if (document.activeElement?.tagName === 'TEXTAREA') return
 
       for (const keybind of keybinds) {
@@ -121,17 +151,29 @@ export default function VideoControls() {
   }
 
   return (
-    <div className={showControls ? `${styles.controlsBar} ${styles.show}` : styles.controlsBar} onClick={event => event.stopPropagation()}>
+    <div
+      className={showControls ? `${styles.controlsBar} ${styles.show}` : styles.controlsBar}
+      onClick={(event) => event.stopPropagation()}
+    >
       <progress value={currentSeconds} max={totalSeconds || 1}></progress>
       <div className={styles.controls}>
         <div className={styles.group}>
           <PausePlayButton />
-          <p>{currentTimestamp} / {totalTimestamp}</p>
+          <p>
+            {currentTimestamp} / {totalTimestamp}
+          </p>
           <button className={`${styles.actionButton} ${styles.volumeButton}`}>
-            <Icon name={volume === 0 ? 'no-volume' : 'volume'} onClick={() => videoElement.muted = !videoElement.muted} />
+            <Icon
+              name={volume === 0 ? 'no-volume' : 'volume'}
+              onClick={() => (videoElement.muted = !videoElement.muted)}
+            />
             {/* {volume === 0 ? <Icon name="no-volume" /> : <Icon name="volume" />} */}
             <div className={styles.volumeContainer}>
-              <input type="range" value={volume} onChange={event => videoElement.volume = parseInt(event.target.value) / 100} />
+              <input
+                type="range"
+                value={volume}
+                onChange={(event) => (videoElement.volume = parseInt(event.target.value) / 100)}
+              />
             </div>
           </button>
         </div>

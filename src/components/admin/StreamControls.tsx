@@ -25,8 +25,12 @@ export default function StreamControls() {
         <Icon name="skip" />
       </button>
       <div className={styles.text}>
-        <h6 className={isError ? `${styles.name} ${styles.error}` : styles.name} title={name}>{name}</h6>
-        <p className={styles.timestamp}>{currentTimestamp} / {totalTimestamp}</p>
+        <h6 className={isError ? `${styles.name} ${styles.error}` : styles.name} title={name}>
+          {name}
+        </h6>
+        <p className={styles.timestamp}>
+          {currentTimestamp} / {totalTimestamp}
+        </p>
       </div>
     </div>
   )

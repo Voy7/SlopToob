@@ -10,12 +10,12 @@ import type Video from '@/stream/Video'
 // The reason why this logic is not in the Video class is because there can be
 // multiple of the same video, videos that are deleted while transcoding, etc.
 // Also allows for a queue system to prevent multiple transcodes of the same video
-export default new class TranscoderQueue {
+export default new (class TranscoderQueue {
   jobs: TranscoderJob[] = []
 
   // Create a new job if it doesn't exist, otherwise return the existing job
   newJob(video: Video): TranscoderJob {
-    const existingJob = this.jobs.find(item => item.video.inputPath === video.inputPath)
+    const existingJob = this.jobs.find((item) => item.video.inputPath === video.inputPath)
     if (existingJob) {
       existingJob.videos.push(video)
       return existingJob
@@ -27,10 +27,10 @@ export default new class TranscoderQueue {
 
   async processQueue() {
     SocketUtils.broadcastAdmin(Msg.AdminTranscodeQueueList, this.clientTranscodeList)
-    const transcodingJobs = this.jobs.filter(item => item.state === JobState.Transcoding)
+    const transcodingJobs = this.jobs.filter((item) => item.state === JobState.Transcoding)
     if (transcodingJobs.length >= Settings.maxTranscodingJobs) return
 
-    const nextJob = this.jobs.find(item => item.state === JobState.AwaitingTranscode)
+    const nextJob = this.jobs.find((item) => item.state === JobState.AwaitingTranscode)
     if (!nextJob) return
 
     await nextJob.transcode()
@@ -52,4 +52,4 @@ export default new class TranscoderQueue {
     }
     return list
   }
-}
+})()

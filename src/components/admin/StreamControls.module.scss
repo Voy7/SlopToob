@@ -17,8 +17,13 @@
     border-radius: 50%;
     cursor: pointer;
 
-    &.error { background: var(--error-color); cursor: not-allowed; }
-    &.loading { cursor: not-allowed; }
+    &.error {
+      background: var(--error-color);
+      cursor: not-allowed;
+    }
+    &.loading {
+      cursor: not-allowed;
+    }
   }
 
   .text {
@@ -37,7 +42,9 @@
       color: var(--text-color-2);
       cursor: default;
 
-      &.error { color: var(--error-color); }
+      &.error {
+        color: var(--error-color);
+      }
     }
 
     .timestamp {

@@ -6,10 +6,10 @@ import Icon, { IconNames } from '@/components/ui/Icon'
 import styles from './SelectDropdown.module.scss'
 
 type Props = {
-  text: string,
-  icon?: IconNames,
-  image?: string,
-  isFullHeight?: boolean,
+  text: string
+  icon?: IconNames
+  image?: string
+  isFullHeight?: boolean
   children: React.ReactNode
 }
 

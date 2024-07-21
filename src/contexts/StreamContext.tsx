@@ -4,7 +4,7 @@ import { useState, useContext, createContext, useEffect } from 'react'
 import { useSocketContext } from '@/contexts/SocketContext'
 import useSocketOn from '@/hooks/useSocketOn'
 import LoadingPage from '@/components/stream/LoadingPage'
-import {  Msg } from '@/lib/enums'
+import { Msg } from '@/lib/enums'
 import type { Socket } from 'socket.io-client'
 import type { AuthUser } from '@/typings/types'
 import type { JoinStreamPayload, Viewer, ChatMessage, StreamInfo } from '@/typings/socket'
@@ -13,23 +13,28 @@ const MAX_CHAT_MESSAGES = 250 // Max to display in chat / remove from array
 
 // Stream page context
 type ContextProps = {
-  viewers: Viewer[],
-  nickname: string, setNickname: React.Dispatch<React.SetStateAction<string>>,
-  showNicknameModal: boolean, setShowNicknameModal: React.Dispatch<React.SetStateAction<boolean>>,
-  showAdminModal: boolean, setShowAdminModal: React.Dispatch<React.SetStateAction<boolean>>,
-  showKeybindsModal: boolean, setShowKeybindsModal: React.Dispatch<React.SetStateAction<boolean>>,
-  showClearChatModal: boolean, setShowClearChatModal: React.Dispatch<React.SetStateAction<boolean>>,
-  chatMessages: (ChatMessage & { time: number })[],
-  addChatMessage: (message: ChatMessage) => void,
-  clearChatMessages: () => void,
-  streamInfo: StreamInfo,
-  lastStreamUpdateTimestamp: number | null,
+  viewers: Viewer[]
+  nickname: string
+  setNickname: React.Dispatch<React.SetStateAction<string>>
+  showNicknameModal: boolean
+  setShowNicknameModal: React.Dispatch<React.SetStateAction<boolean>>
+  showAdminModal: boolean
+  setShowAdminModal: React.Dispatch<React.SetStateAction<boolean>>
+  showKeybindsModal: boolean
+  setShowKeybindsModal: React.Dispatch<React.SetStateAction<boolean>>
+  showClearChatModal: boolean
+  setShowClearChatModal: React.Dispatch<React.SetStateAction<boolean>>
+  chatMessages: (ChatMessage & { time: number })[]
+  addChatMessage: (message: ChatMessage) => void
+  clearChatMessages: () => void
+  streamInfo: StreamInfo
+  lastStreamUpdateTimestamp: number | null
   socket: Socket
 }
 
-type Props =  {
-  authUser: AuthUser,
-  cookieUsername: string,
+type Props = {
+  authUser: AuthUser
+  cookieUsername: string
   children: React.ReactNode
 }
 
@@ -49,7 +54,7 @@ export function StreamProvider({ authUser, cookieUsername, children }: Props) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
 
   useEffect(() => {
-    socket.emit(Msg.JoinStream,  {
+    socket.emit(Msg.JoinStream, {
       username: cookieUsername,
       password: authUser.password
     } satisfies JoinStreamPayload)
@@ -67,9 +72,11 @@ export function StreamProvider({ authUser, cookieUsername, children }: Props) {
   useSocketOn(Msg.ViewersList, (viewers: Viewer[]) => setViewers(viewers))
 
   function addChatMessage(message: ChatMessage) {
-    setChatMessages(prev => {
+    setChatMessages((prev) => {
       const newMessages = [{ ...message, time: Date.now() }, ...prev]
-      return newMessages.length > MAX_CHAT_MESSAGES ? newMessages.slice(0, MAX_CHAT_MESSAGES) : newMessages
+      return newMessages.length > MAX_CHAT_MESSAGES
+        ? newMessages.slice(0, MAX_CHAT_MESSAGES)
+        : newMessages
     })
   }
 
@@ -77,17 +84,22 @@ export function StreamProvider({ authUser, cookieUsername, children }: Props) {
     setChatMessages([])
     setShowClearChatModal(false)
   }
-  
+
   if (!isAuthenticated) return <LoadingPage text="Authenticating..." />
   if (!streamInfo) return <LoadingPage text="Fetching stream info..." />
 
   const context: ContextProps = {
     viewers,
-    nickname, setNickname,
-    showNicknameModal, setShowNicknameModal,
-    showAdminModal, setShowAdminModal,
-    showKeybindsModal, setShowKeybindsModal,
-    showClearChatModal, setShowClearChatModal,
+    nickname,
+    setNickname,
+    showNicknameModal,
+    setShowNicknameModal,
+    showAdminModal,
+    setShowAdminModal,
+    showKeybindsModal,
+    setShowKeybindsModal,
+    showClearChatModal,
+    setShowClearChatModal,
     chatMessages,
     addChatMessage,
     clearChatMessages,

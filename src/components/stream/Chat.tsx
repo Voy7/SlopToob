@@ -14,7 +14,7 @@ import styles from './Chat.module.scss'
 // Name colors for different roles
 const roleColors = {
   [AuthRole.Normal]: '#00ff73',
-  [AuthRole.Admin]: '#ff4545',
+  [AuthRole.Admin]: '#ff4545'
 }
 
 const eventIcons = {
@@ -26,11 +26,23 @@ const eventIcons = {
   [ChatType.AdminPause]: <Icon name="pause" style={{ color: 'rgb(255, 95, 95)' }} />,
   [ChatType.AdminUnpause]: <Icon name="play" style={{ color: 'rgb(255, 95, 95)' }} />,
   [ChatType.AdminSkip]: <Icon name="skip" style={{ color: 'rgb(255, 95, 95)' }} />,
-  [ChatType.AdminChangePlaylist]: <Icon name="playlist" style={{ color: 'rgb(255, 95, 95)' }} />,
+  [ChatType.AdminChangePlaylist]: <Icon name="playlist" style={{ color: 'rgb(255, 95, 95)' }} />
 }
 
 export default function Chat() {
-  const { socket, streamInfo, showClearChatModal, setShowClearChatModal, chatMessages, addChatMessage, clearChatMessages, viewers, nickname, showNicknameModal, setShowNicknameModal } = useStreamContext()
+  const {
+    socket,
+    streamInfo,
+    showClearChatModal,
+    setShowClearChatModal,
+    chatMessages,
+    addChatMessage,
+    clearChatMessages,
+    viewers,
+    nickname,
+    showNicknameModal,
+    setShowNicknameModal
+  } = useStreamContext()
 
   const [message, setMessage] = useState<string>('')
   const [showViewersList, setShowViewersList] = useState<boolean>(false)
@@ -57,7 +69,9 @@ export default function Chat() {
   useEffect(() => {
     if (messagesRef.current) {
       const messagesContainer = messagesRef.current
-      const isScrolledToBottom = messagesContainer.scrollHeight - messagesContainer.clientHeight <= messagesContainer.scrollTop + 1
+      const isScrolledToBottom =
+        messagesContainer.scrollHeight - messagesContainer.clientHeight <=
+        messagesContainer.scrollTop + 1
 
       if (isScrolledToBottom) {
         messagesContainer.scrollTop = messagesContainer.scrollHeight
@@ -70,11 +84,14 @@ export default function Chat() {
       <div className={styles.chat}>
         <div className={styles.header}>
           <button
-            className={showViewersList ? `${styles.viewersButton} ${styles.active}` : styles.viewersButton}
+            className={
+              showViewersList ? `${styles.viewersButton} ${styles.active}` : styles.viewersButton
+            }
             onClick={() => setShowViewersList(!showViewersList)}
             {...viewersTooltip.anchorProps}
           >
-            <Icon name="users" />{viewers.length}
+            <Icon name="users" />
+            {viewers.length}
           </button>
           {!showViewersList && (
             <Tooltip {...viewersTooltip.tooltipProps}>Open Viewers List</Tooltip>
@@ -84,7 +101,8 @@ export default function Chat() {
             onClick={() => setShowNicknameModal(true)}
             {...nicknameTooltip.anchorProps}
           >
-            {nickname}<Icon name="edit" />
+            {nickname}
+            <Icon name="edit" />
           </button>
           {!showNicknameModal && (
             <Tooltip {...nicknameTooltip.tooltipProps}>Change Nickname</Tooltip>
@@ -94,14 +112,14 @@ export default function Chat() {
             <div className={styles.viewersList}>
               <header>
                 <h3>{viewers.length} Viewers</h3>
-                <button onClick={() => setShowViewersList(false)}><Icon name="close" /></button>
+                <button onClick={() => setShowViewersList(false)}>
+                  <Icon name="close" />
+                </button>
               </header>
               <ul>
                 {viewers.map((viewer, index) => (
                   <li key={index}>
-                    {streamInfo.chat.showIdenticons && (
-                      <img src={viewer.image} alt="" />
-                    )}
+                    {streamInfo.chat.showIdenticons && <img src={viewer.image} alt="" />}
                     <span style={{ color: roleColors[viewer.role] }}>{viewer.username}</span>
                   </li>
                 ))}
@@ -110,49 +128,59 @@ export default function Chat() {
           )}
         </div>
         <div className={styles.messages} ref={messagesRef}>
-          {chatMessages.length > 0 ? chatMessages.map((chat, index) => {
-            // Timestamp format: HH:MM AM/PM
-            const timestamp = new Date(chat.time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
-            const fullTimestamp = new Date(chat.time).toLocaleString('en-US')
+          {chatMessages.length > 0 ? (
+            chatMessages.map((chat, index) => {
+              // Timestamp format: HH:MM AM/PM
+              const timestamp = new Date(chat.time).toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit'
+              })
+              const fullTimestamp = new Date(chat.time).toLocaleString('en-US')
 
-            // Normal user chat message
-            if (chat.type === ChatType.UserChat) {
-              const nameColor = roleColors[chat.role]
-              return (
-                <div key={chatMessages.length - index} className={styles.message}>
-                  <div>
-                    {streamInfo.chat.showIdenticons && (
-                      <img src={chat.image} alt="" className={styles.image} />
+              // Normal user chat message
+              if (chat.type === ChatType.UserChat) {
+                const nameColor = roleColors[chat.role]
+                return (
+                  <div key={chatMessages.length - index} className={styles.message}>
+                    <div>
+                      {streamInfo.chat.showIdenticons && (
+                        <img src={chat.image} alt="" className={styles.image} />
+                      )}
+                      <p>
+                        <span style={{ color: nameColor }}>{chat.username}:</span> {chat.message}
+                      </p>
+                    </div>
+                    {streamInfo.chat.showTimestamps && (
+                      <Timestamp hoverText={fullTimestamp}>{timestamp}</Timestamp>
                     )}
-                    <p><span style={{ color: nameColor }}>{chat.username}:</span> {chat.message}</p>
                   </div>
+                )
+              }
+
+              // Is error, use different styling
+              if (chat.type === ChatType.Error) {
+                return (
+                  <div key={chatMessages.length - index} className={styles.error}>
+                    <p>{chat.message}</p>
+                  </div>
+                )
+              }
+
+              // Chat event message
+              const icon = eventIcons[chat.type]
+              return (
+                <div key={chatMessages.length - index} className={styles.event}>
+                  <p>
+                    {icon && icon}
+                    {chat.message}
+                  </p>
                   {streamInfo.chat.showTimestamps && (
                     <Timestamp hoverText={fullTimestamp}>{timestamp}</Timestamp>
                   )}
                 </div>
               )
-            }
-
-            // Is error, use different styling
-            if (chat.type === ChatType.Error) {
-              return (
-                <div key={chatMessages.length - index} className={styles.error}>
-                  <p>{chat.message}</p>
-                </div>
-              )
-            }
-
-            // Chat event message
-            const icon = eventIcons[chat.type]
-            return (
-              <div key={chatMessages.length - index} className={styles.event}>
-                <p>{icon && icon}{chat.message}</p>
-                {streamInfo.chat.showTimestamps && (
-                  <Timestamp hoverText={fullTimestamp}>{timestamp}</Timestamp>
-                )}
-              </div>
-            )
-          }) : (
+            })
+          ) : (
             <div className={styles.noMessages}>
               <Icon name="chat" />
               <p>No messages, send one below.</p>
@@ -160,7 +188,12 @@ export default function Chat() {
           )}
         </div>
         <form onSubmit={submitMessage} className={styles.inputContainer}>
-          <input type="text" value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Type a message..." />
+          <input
+            type="text"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Type a message..."
+          />
           <button>
             <Icon name="send" />
           </button>
@@ -170,7 +203,11 @@ export default function Chat() {
         title="Clear Chat"
         isOpen={showClearChatModal}
         setClose={() => setShowClearChatModal(false)}
-        button={<Button style="main" icon="delete" onClick={clearChatMessages} isSubmit autoFocus>Clear Chat</Button>}
+        button={
+          <Button style="main" icon="delete" onClick={clearChatMessages} isSubmit autoFocus>
+            Clear Chat
+          </Button>
+        }
         width={380}
       >
         <p>Are you sure you want to clear {chatMessages.length} messages?</p>
@@ -179,12 +216,14 @@ export default function Chat() {
   )
 }
 
-function Timestamp({ hoverText, children }: { hoverText: string, children: string }) {
+function Timestamp({ hoverText, children }: { hoverText: string; children: string }) {
   const timestampTooltip = useTooltip('top-end')
 
   return (
     <>
-      <span className={styles.timestamp} {...timestampTooltip.anchorProps}>{children}</span>
+      <span className={styles.timestamp} {...timestampTooltip.anchorProps}>
+        {children}
+      </span>
       <Tooltip {...timestampTooltip.tooltipProps}>{hoverText}</Tooltip>
     </>
   )

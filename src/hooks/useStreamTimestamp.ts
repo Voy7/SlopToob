@@ -4,9 +4,9 @@ import { StreamState } from '@/lib/enums'
 import parseTimestamp from '@/lib/parseTimestamp'
 
 type Return = {
-  currentTimestamp: string,
-  totalTimestamp: string,
-  currentSeconds: number,
+  currentTimestamp: string
+  totalTimestamp: string
+  currentSeconds: number
   totalSeconds: number
 }
 
@@ -20,10 +20,11 @@ export default function useStreamTimestamp(): Return {
     let interval: NodeJS.Timeout | undefined
 
     function updateTimestamp() {
-      if (!('currentSeconds' in streamInfo) || !('totalSeconds' in streamInfo)) return setTimeStamp(0)
+      if (!('currentSeconds' in streamInfo) || !('totalSeconds' in streamInfo))
+        return setTimeStamp(0)
       if (streamInfo.state === StreamState.Paused) return setTimeStamp(streamInfo.currentSeconds)
       if (!lastStreamUpdateTimestamp) return setTimeStamp(streamInfo.currentSeconds)
-      const diff = ((Date.now() - lastStreamUpdateTimestamp) / 1000) + streamInfo.currentSeconds
+      const diff = (Date.now() - lastStreamUpdateTimestamp) / 1000 + streamInfo.currentSeconds
       setTimeStamp(diff)
     }
 
@@ -37,8 +38,8 @@ export default function useStreamTimestamp(): Return {
 
   return {
     currentTimestamp: parseTimestamp(timestamp),
-    totalTimestamp: ('totalSeconds' in streamInfo) ? parseTimestamp(streamInfo.totalSeconds) : '0:00',
+    totalTimestamp: 'totalSeconds' in streamInfo ? parseTimestamp(streamInfo.totalSeconds) : '0:00',
     currentSeconds: timestamp,
-    totalSeconds: ('totalSeconds' in streamInfo) ? streamInfo.totalSeconds : 0
+    totalSeconds: 'totalSeconds' in streamInfo ? streamInfo.totalSeconds : 0
   }
 }

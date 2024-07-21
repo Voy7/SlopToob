@@ -4,7 +4,7 @@
   // Search bar container
   .searchBox {
     position: relative;
-  
+
     input {
       resize: none;
       width: 100%;
@@ -14,14 +14,14 @@
       color: var(--text-color-3);
       background: var(--bg-color-2);
       border: 1px solid transparent;
-  
+
       &:focus {
         outline: none;
         color: var(--text-color-1);
         border-color: var(--border-color-1);
       }
     }
-  
+
     .searchIcon {
       position: absolute;
       top: 50%;
@@ -31,7 +31,7 @@
       color: rgb(127, 127, 127);
       pointer-events: none;
     }
-  
+
     .resultsCount {
       position: absolute;
       top: 1px;
@@ -44,7 +44,7 @@
       color: var(--text-color-3);
       background: var(--bg-color-2);
       cursor: default;
-  
+
       button {
         display: flex;
         align-items: center;
@@ -55,8 +55,10 @@
         background: none;
         border: none;
         cursor: pointer;
-  
-        &:hover { color: var(--text-color-1); }
+
+        &:hover {
+          color: var(--text-color-1);
+        }
       }
     }
   }
@@ -66,8 +68,10 @@
     padding: 0.25rem 0;
     border-top: 1px solid var(--border-color-1);
     overflow: hidden;
-    
-    label.item { cursor: pointer !important; }
+
+    label.item {
+      cursor: pointer !important;
+    }
 
     .item {
       display: flex;
@@ -79,17 +83,22 @@
       overflow: hidden;
       cursor: -webkit-grab;
       cursor: -moz-grab;
-    
-      &:hover { background: var(--bg-color-2); }
-      &.selected { color: var(--text-color-1); background: var(--bg-color-3); }
-    
+
+      &:hover {
+        background: var(--bg-color-2);
+      }
+      &.selected {
+        color: var(--text-color-1);
+        background: var(--bg-color-3);
+      }
+
       .left {
         display: flex;
         align-items: center;
         gap: 0.3rem;
         overflow: hidden;
-        
-        input[type="checkbox"] {
+
+        input[type='checkbox'] {
           appearance: none;
           position: relative;
           width: 1rem;
@@ -97,15 +106,18 @@
           border: 1px solid var(--border-color-1);
           border-radius: 0.25rem;
           cursor: pointer;
-      
-          &:hover { background: var(--bg-color-1); border-color: var(--select-color); }
-      
+
+          &:hover {
+            background: var(--bg-color-1);
+            border-color: var(--select-color);
+          }
+
           &:checked {
             background: var(--select-color);
             border-color: var(--select-color);
-      
+
             &:after {
-              content: "✔";
+              content: '✔';
               display: block;
               position: absolute;
               top: 50%;
@@ -120,15 +132,17 @@
             }
           }
         }
-      
+
         p {
           flex: 1;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
-      
+
           // Highlight search results
-          span { background: rgba(255, 255, 0, 0.25); }
+          span {
+            background: rgba(255, 255, 0, 0.25);
+          }
         }
       }
 
@@ -144,13 +158,14 @@
         svg {
           transition: 150ms ease-in-out;
           transform: rotate(270deg);
-          &.open { transform: rotate(360deg); }
+          &.open {
+            transform: rotate(360deg);
+          }
         }
       }
     }
   }
 }
-
 
 .searchLoading {
   display: flex;
@@ -163,6 +178,8 @@
   letter-spacing: 1px;
   color: var(--text-color-3);
   cursor: default;
-  
-  svg { font-size: 1.5rem; }
+
+  svg {
+    font-size: 1.5rem;
+  }
 }

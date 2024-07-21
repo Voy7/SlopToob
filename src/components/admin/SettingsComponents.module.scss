@@ -20,7 +20,9 @@
   color: var(--text-color-3);
 }
 
-.gap { height: 1rem; }
+.gap {
+  height: 1rem;
+}
 
 // Universal option styles
 $optionPadding: 0.35rem;
@@ -37,16 +39,20 @@ $optionPadding: 0.35rem;
   cursor: pointer;
   transition: border-color 150ms ease-in-out;
 
-  &:hover { background: var(--bg-color-3); }
+  &:hover {
+    background: var(--bg-color-3);
+  }
   // &.active { border-color: var(--select-color); }
 
-  .loadingIcon { color: var(--text-color-3); }
+  .loadingIcon {
+    color: var(--text-color-3);
+  }
 
   .right {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-  
+
     .valueLabel {
       display: flex;
       align-items: center;
@@ -58,8 +64,12 @@ $optionPadding: 0.35rem;
         animation: valueFade 150ms ease-in-out;
 
         @keyframes valueFade {
-          0% { opacity: 0; }
-          100% { opacity: 1; }
+          0% {
+            opacity: 0;
+          }
+          100% {
+            opacity: 1;
+          }
         }
       }
     }
@@ -76,11 +86,18 @@ $optionPadding: 0.35rem;
   padding-bottom: 0;
   padding-right: 0;
 
-  &.isEditing { transition: background 150ms; background: var(--bg-color-4); }
+  &.isEditing {
+    transition: background 150ms;
+    background: var(--bg-color-4);
+  }
 
-  svg { margin: $optionPadding; color: var(--text-color-3); }
+  svg {
+    margin: $optionPadding;
+    color: var(--text-color-3);
+  }
 
-  p { // Error
+  p {
+    // Error
     display: flex;
     align-items: center;
     gap: 0.2em;
@@ -90,8 +107,14 @@ $optionPadding: 0.35rem;
     scale: 0.9;
     transition: 150ms ease-in-out;
 
-    &.show { transform: translateX(0); opacity: 1; scale: 1; }
-    svg { color: inherit; }
+    &.show {
+      transform: translateX(0);
+      opacity: 1;
+      scale: 1;
+    }
+    svg {
+      color: inherit;
+    }
   }
 
   input {
@@ -121,10 +144,14 @@ $optionPadding: 0.35rem;
 
   &.active {
     // border-color: var(--select-color);
-    svg { color: var(--select-color); }
+    svg {
+      color: var(--select-color);
+    }
   }
 
-  svg { color: var(--text-color-3); }
+  svg {
+    color: var(--text-color-3);
+  }
 }
 
 .buttonOption {
@@ -137,5 +164,7 @@ $optionPadding: 0.35rem;
   background: var(--bg-color-2);
   border-radius: 0.25rem;
 
-  &.swapped { flex-direction: row-reverse; }
+  &.swapped {
+    flex-direction: row-reverse;
+  }
 }

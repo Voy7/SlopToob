@@ -12,7 +12,7 @@ const CHECKS = {
   httpServerReady: 'HTTP Server',
   socketServerReady: 'Web Socket Server',
   nextAppReady: 'Next.js App',
-  playerReady: 'Stream Player',
+  playerReady: 'Stream Player'
 } as const
 
 enum CheckStatus {
@@ -30,40 +30,51 @@ for (const checkKey in CHECKS) {
   checks[check] = CheckStatus.Pending
 }
 
-const MAX_CHECK_LENGTH = Math.max(...Object.values(CHECKS).map(v => v.length)) // Length of longest check name
+const MAX_CHECK_LENGTH = Math.max(...Object.values(CHECKS).map((v) => v.length)) // Length of longest check name
 const HEADER_LINES = HEADER_MSG.split('\n').length + 2 // +2 for padding
 const START_TIME = Date.now()
 const LOADING_DOTS_POS = 32
 
 // Methods to update check status and print to console
-export default new class Checklist {
+export default new (class Checklist {
   running(check: CheckKey, message: string = '') {
     checks[check] = CheckStatus.Running
-    updateCheckLine(check, `  > `.yellow + `${CHECKS[check].padEnd(MAX_CHECK_LENGTH, ' ')}` + ` | ${message}`.gray)
+    updateCheckLine(
+      check,
+      `  > `.yellow + `${CHECKS[check].padEnd(MAX_CHECK_LENGTH, ' ')}` + ` | ${message}`.gray
+    )
   }
 
   pass(check: CheckKey, message: string = '') {
     checks[check] = CheckStatus.Passed
-    updateCheckLine(check, `  √ `.green + `${CHECKS[check].padEnd(MAX_CHECK_LENGTH, ' ')}` + ` | ${message}`.gray)
+    updateCheckLine(
+      check,
+      `  √ `.green + `${CHECKS[check].padEnd(MAX_CHECK_LENGTH, ' ')}` + ` | ${message}`.gray
+    )
 
     // If all checks have passed, print success message
-    if (Object.values(checks).some(v => v !== CheckStatus.Passed)) return
+    if (Object.values(checks).some((v) => v !== CheckStatus.Passed)) return
     const elapsedSeconds = ((Date.now() - START_TIME) / 1000).toFixed(2)
     printStatus(`All checks passed in ${elapsedSeconds}s`.green)
   }
 
   fail(check: CheckKey, message: string = '') {
     checks[check] = CheckStatus.Failed
-    updateCheckLine(check, `  X `.red + `${CHECKS[check].padEnd(MAX_CHECK_LENGTH, ' ')}` + ` | ${message}`.gray)
+    updateCheckLine(
+      check,
+      `  X `.red + `${CHECKS[check].padEnd(MAX_CHECK_LENGTH, ' ')}` + ` | ${message}`.gray
+    )
     printStatus(`Initialization failed, aborting startup!`.red)
     process.exit(1) // Exit process on failure
   }
-}
+})()
 
 console.clear()
 console.log(
   `\n  ${HEADER_MSG}\n\n` +
-  `${Object.values(CHECKS).map(check => `  ○ `.gray + check).join('\n')}\n\n\n`
+    `${Object.values(CHECKS)
+      .map((check) => `  ○ `.gray + check)
+      .join('\n')}\n\n\n`
 )
 
 function updateCheckLine(check: CheckKey, text: string) {

@@ -8,8 +8,8 @@ export default function useTooltip(placement: Placement = 'bottom') {
     placement: placement,
     middleware: [offset(10)]
   })
-  
-  return ({
+
+  return {
     anchorProps: {
       ref: floating.refs.setReference,
       onMouseEnter: () => setIsOpen(true),
@@ -21,5 +21,5 @@ export default function useTooltip(placement: Placement = 'bottom') {
       isOpen: isOpen,
       placement: placement
     }
-  })
+  }
 }

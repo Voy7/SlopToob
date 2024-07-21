@@ -19,8 +19,14 @@
     animation: sectionFadeIn 300ms ease-in-out;
 
     @keyframes sectionFadeIn {
-      from { opacity: 0; transform: translateY(-1rem); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(-1rem);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     h2 {

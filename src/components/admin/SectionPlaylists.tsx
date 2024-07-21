@@ -31,7 +31,8 @@ export default function SectionPlaylists() {
 
   useSocketOn(Msg.AdminAddPlaylist, (response: string | { error: string }) => {
     setAddLoading(false)
-    if (typeof response === 'string') { // New playlist ID
+    if (typeof response === 'string') {
+      // New playlist ID
       setShowAddModal(false)
       setSelectedPlaylist(response)
       return
@@ -39,7 +40,7 @@ export default function SectionPlaylists() {
     setAddError(response.error)
   })
 
-  const activePlaylist = playlists.find(playlist => playlist.id === selectedPlaylist)
+  const activePlaylist = playlists.find((playlist) => playlist.id === selectedPlaylist)
 
   return (
     <>
@@ -47,22 +48,43 @@ export default function SectionPlaylists() {
         <div className={styles.addFirstPlaylist}>
           <Icon name="playlist-add" className={styles.icon} />
           <p>No playlists yet, add one.</p>
-          <Button style="main" icon="playlist-add" loading={addLoading} onClick={() => setShowAddModal(true)}>Add Playlist</Button>
+          <Button
+            style="main"
+            icon="playlist-add"
+            loading={addLoading}
+            onClick={() => setShowAddModal(true)}
+          >
+            Add Playlist
+          </Button>
         </div>
       ) : (
         <>
           <h2>Playlists ({playlists.length})</h2>
           <div className={styles.playlistNavbar}>
             <SelectDropdown text={activePlaylist?.name || 'None Selected'} icon="playlist">
-              {playlists.map(playlist => (
+              {playlists.map((playlist) => (
                 <button
                   key={playlist.id}
-                  className={selectedPlaylist === playlist.id ? `${styles.playlistItem} ${styles.selected}` : styles.playlistItem}
+                  className={
+                    selectedPlaylist === playlist.id
+                      ? `${styles.playlistItem} ${styles.selected}`
+                      : styles.playlistItem
+                  }
                   onClick={() => setSelectedPlaylist(playlist.id)}
-                >{playlist.name}<span>{playlist.videoPaths.length.toLocaleString()} Videos</span></button>
+                >
+                  {playlist.name}
+                  <span>{playlist.videoPaths.length.toLocaleString()} Videos</span>
+                </button>
               ))}
             </SelectDropdown>
-            <Button style="main" icon="playlist-add" loading={addLoading} onClick={() => setShowAddModal(true)}>Add Playlist</Button>
+            <Button
+              style="main"
+              icon="playlist-add"
+              loading={addLoading}
+              onClick={() => setShowAddModal(true)}
+            >
+              Add Playlist
+            </Button>
           </div>
           {activePlaylist && <PlaylistEditor key={activePlaylist.id} playlist={activePlaylist} />}
         </>
@@ -73,7 +95,11 @@ export default function SectionPlaylists() {
         isOpen={showAddModal}
         setClose={() => setShowAddModal(false)}
         width={360}
-        button={<Button style="main" icon="playlist-add" loading={addLoading} isSubmit>Add Playlist</Button>}
+        button={
+          <Button style="main" icon="playlist-add" loading={addLoading} isSubmit>
+            Add Playlist
+          </Button>
+        }
         error={addError}
         formOnSubmit={submitAddPlaylist}
       >

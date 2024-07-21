@@ -67,7 +67,9 @@ export default function BumpersList() {
     <>
       <SettingGroup>
         <ButtonOption label="Upload a bumper video file">
-          <Button style="main" icon="add" onClick={() => setShowAddModal(true)}>Upload Bumper</Button>
+          <Button style="main" icon="add" onClick={() => setShowAddModal(true)}>
+            Upload Bumper
+          </Button>
         </ButtonOption>
         <Gap />
         <Header icon="list">Bumpers List ({bumpers.length.toLocaleString()})</Header>
@@ -78,7 +80,12 @@ export default function BumpersList() {
                 <span>{index + 1}.</span>
                 <p>{bumper.name}</p>
               </div>
-              <button onClick={() => { setShowDeleteModal(true); setDeleteBumperSelected(bumper) }}>
+              <button
+                onClick={() => {
+                  setShowDeleteModal(true)
+                  setDeleteBumperSelected(bumper)
+                }}
+              >
                 <Icon name="delete" />
               </button>
             </div>
@@ -90,7 +97,11 @@ export default function BumpersList() {
         title="Upload Bumper"
         isOpen={showAddModal}
         setClose={() => setShowAddModal(false)}
-        button={<Button style="main" icon="add" loading={addBumperLoading} isSubmit>Upload</Button>}
+        button={
+          <Button style="main" icon="add" loading={addBumperLoading} isSubmit>
+            Upload
+          </Button>
+        }
         error={addBumperError}
         formOnSubmit={addBumperSubmit}
       >
@@ -110,7 +121,16 @@ export default function BumpersList() {
           title="Delete Bumper"
           isOpen={showDeleteModal}
           setClose={() => setShowDeleteModal(false)}
-          button={<Button style="danger" icon="delete" loading={deleteBumperLoading} onClick={deleteBumper}>Delete</Button>}
+          button={
+            <Button
+              style="danger"
+              icon="delete"
+              loading={deleteBumperLoading}
+              onClick={deleteBumper}
+            >
+              Delete
+            </Button>
+          }
           error={deleteBumperError}
         >
           <p>Are you sure you want to delete "{deleteBumperSelected.name}"?</p>

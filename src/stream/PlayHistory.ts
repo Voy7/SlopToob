@@ -14,12 +14,14 @@ import type { ClientHistoryItem, ClientHistoryStatus } from '@/typings/socket'
 import type Video from '@/stream/Video'
 
 // Video history handler
-export default new class PlayHistory {
+export default new (class PlayHistory {
   private internalHistory: string[] = []
   private displayHistory: DBPlayHistory[] = []
   private isDeleting: boolean = false
 
-  constructor() { this.populateHistory() }
+  constructor() {
+    this.populateHistory()
+  }
 
   // Populate history with last N videos
   private async populateHistory() {
@@ -30,10 +32,10 @@ export default new class PlayHistory {
       orderBy: { createdAt: 'desc' }
     })
 
-    this.internalHistory = history.map(h => h.path)
+    this.internalHistory = history.map((h) => h.path)
 
     this.displayHistory = history
-      .filter(h => Settings.historyDisplayBumpers || !h.path.startsWith(Env.BUMPERS_PATH))
+      .filter((h) => Settings.historyDisplayBumpers || !h.path.startsWith(Env.BUMPERS_PATH))
       .slice(0, Settings.historyDisplayItems + 1)
 
     Logger.debug(`[History] Populated history with ${this.internalHistory.length} items.`)
@@ -42,7 +44,7 @@ export default new class PlayHistory {
   // Add a video path to the history
   async add(video: Video) {
     this.internalHistory.unshift(video.inputPath)
-    
+
     if (this.internalHistory.length > Settings.historyMaxItems) {
       this.internalHistory.pop()
     }
@@ -73,7 +75,10 @@ export default new class PlayHistory {
     inputPaths = [...new Set(inputPaths)]
 
     // Use history AND queue items for algorithm
-    const historyItems = [...this.internalHistory, ...TranscoderQueue.jobs.map(j => j.video.inputPath)]
+    const historyItems = [
+      ...this.internalHistory,
+      ...TranscoderQueue.jobs.map((j) => j.video.inputPath)
+    ]
 
     // Count how many times each item has been played
     const countMap = new Map<string, number>()
@@ -88,12 +93,12 @@ export default new class PlayHistory {
     let minCount = 0
     if (countMap.size >= inputPaths.length) {
       minCount = Infinity
-      countMap.forEach(count => {
+      countMap.forEach((count) => {
         if (count < minCount) minCount = count
       })
     }
 
-    // Pool is all inputPaths 
+    // Pool is all inputPaths
     const pool: string[] = []
     for (const path of inputPaths) {
       const playCount = countMap.get(path)
@@ -128,10 +133,11 @@ export default new class PlayHistory {
     if (!Settings.historyDisplayEnabled) return null
 
     // Don't include the current video
-    const items = Player.playing?.inputPath === this.displayHistory[0]?.path
-      ? this.displayHistory.slice(1)
-      : this.displayHistory.slice(0, Settings.historyDisplayItems)
-    return  items.map(item => ({
+    const items =
+      Player.playing?.inputPath === this.displayHistory[0]?.path
+        ? this.displayHistory.slice(1)
+        : this.displayHistory.slice(0, Settings.historyDisplayItems)
+    return items.map((item) => ({
       name: parseVideoName(item.path),
       totalDuration: parseTimestamp(item.totalDuration),
       thumbnailURL: Thumbnails.getURL(item.path),
@@ -146,4 +152,4 @@ export default new class PlayHistory {
       isDeleting: this.isDeleting
     }
   }
-}
+})()

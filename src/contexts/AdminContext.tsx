@@ -10,19 +10,19 @@ import useSocketOn from '@/hooks/useSocketOn'
 
 // Stream page context
 type ContextProps = {
-  section: typeof sections[number],
-  setSection: (sectionName: SectionName) => void,
-  fileTree: FileTreeNode | null,
-  playlists: ClientPlaylist[],
-  setPlaylists: React.Dispatch<React.SetStateAction<ClientPlaylist[]>>,
-  selectedPlaylist: string | null,
-  setSelectedPlaylist: React.Dispatch<React.SetStateAction<string | null>>,
-  lastReceivedPlaylistsDate: number,
-  bumpers: ClientBumper[],
-  queue: ClientVideo[],
-  transcodeQueue: TranscodeClientVideo[],
-  historyStatus: ClientHistoryStatus | null,
-  videosCacheStatus: ClientCacheStatus | null,
+  section: (typeof sections)[number]
+  setSection: (sectionName: SectionName) => void
+  fileTree: FileTreeNode | null
+  playlists: ClientPlaylist[]
+  setPlaylists: React.Dispatch<React.SetStateAction<ClientPlaylist[]>>
+  selectedPlaylist: string | null
+  setSelectedPlaylist: React.Dispatch<React.SetStateAction<string | null>>
+  lastReceivedPlaylistsDate: number
+  bumpers: ClientBumper[]
+  queue: ClientVideo[]
+  transcodeQueue: TranscodeClientVideo[]
+  historyStatus: ClientHistoryStatus | null
+  videosCacheStatus: ClientCacheStatus | null
   bumpersCacheStatus: ClientCacheStatus | null
 }
 
@@ -30,7 +30,7 @@ type ContextProps = {
 export function AdminProvider({ children }: { children: React.ReactNode }) {
   const { socket } = useStreamContext()
 
-  const [section, setSectionState] = useState<typeof sections[number]>(sections[0])
+  const [section, setSectionState] = useState<(typeof sections)[number]>(sections[0])
   const [fileTree, setFileTree] = useState<FileTreeNode | null>(null)
   const [playlists, setPlaylists] = useState<ClientPlaylist[]>([])
   const [selectedPlaylist, setSelectedPlaylist] = useState<string | null>(null)
@@ -43,7 +43,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [bumpersCacheStatus, setBumpersCacheStatus] = useState<ClientCacheStatus | null>(null)
 
   function setSection(sectionName: SectionName) {
-    const sec = sections.find(s => s.name === sectionName)
+    const sec = sections.find((s) => s.name === sectionName)
     if (sec) setSectionState(sec)
   }
 
@@ -53,16 +53,25 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   useSocketOn(Msg.AdminFileTree, (tree: FileTreeNode) => setFileTree(tree))
-  useSocketOn(Msg.AdminPlaylists, (playlists: ClientPlaylist[]) => { setPlaylists(playlists); setLastReceivedPlaylistsDate(Date.now()) })
+  useSocketOn(Msg.AdminPlaylists, (playlists: ClientPlaylist[]) => {
+    setPlaylists(playlists)
+    setLastReceivedPlaylistsDate(Date.now())
+  })
   useSocketOn(Msg.AdminBumpersList, (bumpers: ClientBumper[]) => setBumpers(bumpers))
   useSocketOn(Msg.AdminQueueList, (queue: ClientVideo[]) => setQueue(queue))
-  useSocketOn(Msg.AdminTranscodeQueueList, (queue: TranscodeClientVideo[]) => setTranscodeQueue(queue))
+  useSocketOn(Msg.AdminTranscodeQueueList, (queue: TranscodeClientVideo[]) =>
+    setTranscodeQueue(queue)
+  )
   useSocketOn(Msg.AdminHistoryStatus, (status: ClientHistoryStatus) => setHistoryStatus(status))
-  useSocketOn(Msg.AdminVideosCacheStatus, (status: ClientCacheStatus) => setVideosCacheStatus(status))
-  useSocketOn(Msg.AdminBumpersCacheStatus, (status: ClientCacheStatus) => setBumpersCacheStatus(status))
+  useSocketOn(Msg.AdminVideosCacheStatus, (status: ClientCacheStatus) =>
+    setVideosCacheStatus(status)
+  )
+  useSocketOn(Msg.AdminBumpersCacheStatus, (status: ClientCacheStatus) =>
+    setBumpersCacheStatus(status)
+  )
 
   useEffect(() => {
-    const isPlaylistSelected = playlists.some(playlist => playlist.id === selectedPlaylist)
+    const isPlaylistSelected = playlists.some((playlist) => playlist.id === selectedPlaylist)
     if (!isPlaylistSelected && playlists[0]) setSelectedPlaylist(playlists[0].id)
   }, [selectedPlaylist, playlists])
 
@@ -70,8 +79,10 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     section,
     setSection,
     fileTree,
-    playlists, setPlaylists,
-    selectedPlaylist, setSelectedPlaylist,
+    playlists,
+    setPlaylists,
+    selectedPlaylist,
+    setSelectedPlaylist,
     lastReceivedPlaylistsDate,
     bumpers,
     queue,

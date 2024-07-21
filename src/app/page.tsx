@@ -24,7 +24,7 @@ export default function Home() {
 
     try {
       const result = await signIn('credentials', { password, redirect: false })
-      
+
       if (!result) return
 
       if (result.error) {
@@ -34,12 +34,11 @@ export default function Home() {
       setSuccess(true)
 
       // Wait for animation to finish
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      await new Promise((resolve) => setTimeout(resolve, 1500))
 
       // Not using Next.js router, due to some weird caching issues
       window.location.href = '/stream'
-    }
-    catch (error: unknown) {
+    } catch (error: unknown) {
       if (!(error instanceof Error)) return
       setError(error.message)
       setLoading(false)
@@ -51,24 +50,31 @@ export default function Home() {
       <Canvas3D />
       <form onSubmit={submit}>
         <Image src="/logo.png" alt="Logo" width={110} height={110} />
-        <h1><span>Slop</span>Toob</h1>
-        <p className={styles.blurb}>
-          Enter the password to access infinite slop!
-        </p>
+        <h1>
+          <span>Slop</span>Toob
+        </h1>
+        <p className={styles.blurb}>Enter the password to access infinite slop!</p>
         <div className={styles.password}>
           <input
             type="password"
             placeholder="Enter password..."
             value={password}
-            onChange={event => {
+            onChange={(event) => {
               setPassword(event.target.value)
               setError(null)
             }}
             autoFocus
           />
-          <Button style="main" loading={loading} active={password.length > 0} isSubmit>Go {'>'}</Button>
+          <Button style="main" loading={loading} active={password.length > 0} isSubmit>
+            Go {'>'}
+          </Button>
         </div>
-        {error && <p className={styles.error}><Icon name="warning" />{error}</p>}
+        {error && (
+          <p className={styles.error}>
+            <Icon name="warning" />
+            {error}
+          </p>
+        )}
       </form>
     </div>
   )

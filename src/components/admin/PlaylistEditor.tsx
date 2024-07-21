@@ -4,7 +4,13 @@ import { useEffect, useState } from 'react'
 import { useStreamContext } from '@/contexts/StreamContext'
 import useSocketOn from '@/hooks/useSocketOn'
 import { Msg } from '@/lib/enums'
-import { SettingGroup, Header, Description, StringOption, ButtonOption } from '@/components/admin/SettingsComponents'
+import {
+  SettingGroup,
+  Header,
+  Description,
+  StringOption,
+  ButtonOption
+} from '@/components/admin/SettingsComponents'
 import Button from '@/components/ui/Button'
 import PlaylistFilePicker from '@/components/admin/PlaylistFilePicker'
 import ActionModal from '@/components/ui/ActionModal'
@@ -73,12 +79,23 @@ export default function PlaylistEditor({ playlist }: { playlist: ClientPlaylist 
         />
       </SettingGroup>
       <SettingGroup>
-        <Header icon="files">Selected Videos ({playlist.videoPaths.length.toLocaleString()})</Header>
+        <Header icon="files">
+          Selected Videos ({playlist.videoPaths.length.toLocaleString()})
+        </Header>
         <PlaylistFilePicker key={playlist.id} playlist={playlist} />
       </SettingGroup>
       <SettingGroup>
         <ButtonOption label="Permanently delete this playlist." swapped={true}>
-          <Button style="danger" icon="delete" onClick={() => { setShowDeleteModal(true); setDeletePlaylistError(null) }}>Delete Playlist</Button>
+          <Button
+            style="danger"
+            icon="delete"
+            onClick={() => {
+              setShowDeleteModal(true)
+              setDeletePlaylistError(null)
+            }}
+          >
+            Delete Playlist
+          </Button>
         </ButtonOption>
       </SettingGroup>
 
@@ -86,7 +103,16 @@ export default function PlaylistEditor({ playlist }: { playlist: ClientPlaylist 
         title="Delete Playlist"
         isOpen={showDeleteModal}
         setClose={() => setShowDeleteModal(false)}
-        button={<Button style="danger" icon="delete" loading={deletePlaylistLoading} onClick={deletePlaylist}>Delete</Button>}
+        button={
+          <Button
+            style="danger"
+            icon="delete"
+            loading={deletePlaylistLoading}
+            onClick={deletePlaylist}
+          >
+            Delete
+          </Button>
+        }
         error={deletePlaylistError}
       >
         <p>Are you sure you want to delete the playlist "{playlist.name}"?</p>

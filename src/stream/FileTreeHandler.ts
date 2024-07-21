@@ -10,7 +10,7 @@ import type { FileTreeNode } from '@/typings/types'
 
 const VALID_EXTENSIONS = ['.mp4', '.mkv', '.avi', '.mov', '.flv', '.wmv', '.webm', '.m2ts']
 
-export default new class FileTreeHandler {
+export default new (class FileTreeHandler {
   private _tree: FileTreeNode | null = null
   private paths: string[] = []
   private onTreeChangeCallbacks: Function[] = []
@@ -18,7 +18,9 @@ export default new class FileTreeHandler {
   private refreshTimeout: NodeJS.Timeout | null = null
   private pathIndexesMap: Map<string, number> = new Map()
 
-  constructor() { this.initialize() }
+  constructor() {
+    this.initialize()
+  }
 
   private async initialize() {
     const startDate = Date.now()
@@ -80,7 +82,7 @@ export default new class FileTreeHandler {
 
         // If it's a directory, remove all files inside it
         if (isDirectory) {
-          const files = this.paths.filter(p => p.startsWith(fullPath + '/'))
+          const files = this.paths.filter((p) => p.startsWith(fullPath + '/'))
           for (const file of files) {
             const fileIndex = this.paths.indexOf(file)
             if (fileIndex !== -1) this.paths.splice(fileIndex, 1)
@@ -103,13 +105,13 @@ export default new class FileTreeHandler {
   private buildTreeObject(logDone: boolean) {
     const rootPath = Env.VIDEOS_PATH
     const rootName = rootPath.slice(rootPath.lastIndexOf('/') + 1)
-    
+
     const tree: FileTreeNode = {
       name: rootName,
       path: '',
       children: []
     }
-    
+
     for (const pathn of this.paths) {
       const parts = pathn.replace(rootPath, '').split('/')
       let parent = tree
@@ -118,7 +120,7 @@ export default new class FileTreeHandler {
         const part = parts[i]
         currentPath += `/${part}`
 
-        let child = parent.children?.find(c => c.name === part)
+        let child = parent.children?.find((c) => c.name === part)
         if (!child) {
           child = { name: part, path: `${currentPath}` }
           if (i < parts.length - 1) child.children = []
@@ -140,7 +142,7 @@ export default new class FileTreeHandler {
         if (child.children) sortChildren(child.children)
       }
     }
-    
+
     if (tree.children) sortChildren(tree.children)
 
     this._tree = tree
@@ -158,8 +160,10 @@ export default new class FileTreeHandler {
       if (!item.children) {
         map.set(`${Env.VIDEOS_PATH}${item.path}`, index)
         index++
-      }
-      else for (const child of item.children) { buildIndexesMap(child) }
+      } else
+        for (const child of item.children) {
+          buildIndexesMap(child)
+        }
     }
     buildIndexesMap(tree)
     return map
@@ -180,7 +184,7 @@ export default new class FileTreeHandler {
 
   async onReady() {
     if (this._tree) return
-    return new Promise<void>(resolve => {
+    return new Promise<void>((resolve) => {
       this.onReadyCallback = resolve
     })
   }
@@ -189,4 +193,4 @@ export default new class FileTreeHandler {
     if (!this._tree) throw new Error('Tried to get file tree before it was initialized.')
     return this._tree
   }
-}
+})()

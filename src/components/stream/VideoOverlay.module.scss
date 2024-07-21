@@ -1,6 +1,10 @@
 @keyframes fadeIn {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 // Big play button overlay
@@ -27,7 +31,8 @@
   }
 }
 
-.paused, .loading {
+.paused,
+.loading {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -65,8 +70,14 @@
   cursor: default;
 
   @keyframes errorFadeIn {
-    0% { background: rgb(80, 80, 80); opacity: 0; }
-    100% { background: rgb(0, 0, 0); opacity: 1; }
+    0% {
+      background: rgb(80, 80, 80);
+      opacity: 0;
+    }
+    100% {
+      background: rgb(0, 0, 0);
+      opacity: 1;
+    }
   }
 
   svg {
@@ -97,8 +108,12 @@
   span {
     animation: fadeIn 300ms ease-in-out;
     @keyframes fadeIn {
-      0% { opacity: 0; }
-      100% { opacity: 1; }
+      0% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
     }
   }
 }
@@ -125,8 +140,14 @@
     animation: iconFadeOut 500ms ease-out forwards;
 
     @keyframes iconFadeOut {
-      0% { opacity: 1; scale: 1; }
-      100% { opacity: 0; scale: 1.5; }
+      0% {
+        opacity: 1;
+        scale: 1;
+      }
+      100% {
+        opacity: 0;
+        scale: 1.5;
+      }
     }
   }
 
@@ -138,8 +159,12 @@
     animation-delay: 500ms;
 
     @keyframes textFadeOut {
-      0% { opacity: 1; }
-      100% { opacity: 0; }
+      0% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+      }
     }
   }
 }

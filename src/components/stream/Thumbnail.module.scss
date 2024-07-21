@@ -10,9 +10,15 @@
 
   // Pulsing loading background
   @keyframes loading {
-    0% { background: rgb(63, 63, 63); }
-    50% { background: rgb(80, 80, 80); }
-    100% { background: rgb(63, 63, 63); }
+    0% {
+      background: rgb(63, 63, 63);
+    }
+    50% {
+      background: rgb(80, 80, 80);
+    }
+    100% {
+      background: rgb(63, 63, 63);
+    }
   }
 
   img {
@@ -26,6 +32,8 @@
   &.loaded {
     animation: none;
     background: black;
-    img { opacity: 1; }
+    img {
+      opacity: 1;
+    }
   }
 }

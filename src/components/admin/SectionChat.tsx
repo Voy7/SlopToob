@@ -2,14 +2,21 @@
 
 import useToggleOption from '@/hooks/useToggleOption'
 import useNumberOption from '@/hooks/useNumberOption'
-import { SettingGroup, Header, Description, Gap, ToggleOption, NumberOption } from '@/components/admin/SettingsComponents'
+import {
+  SettingGroup,
+  Header,
+  Description,
+  Gap,
+  ToggleOption,
+  NumberOption
+} from '@/components/admin/SettingsComponents'
 
 export default function SectionChat() {
   const chatMaxLength = useNumberOption('chatMaxLength')
-  
+
   const showChatTimestamps = useToggleOption('showChatTimestamps')
   const showChatIdenticons = useToggleOption('showChatIdenticons')
-  
+
   const sendJoinedStream = useToggleOption('sendJoinedStream')
   const sendLeftStream = useToggleOption('sendLeftStream')
   const sendChangedNickname = useToggleOption('sendChangedNickname')
@@ -54,7 +61,9 @@ export default function SectionChat() {
       <SettingGroup>
         <Header icon="user">Chat Nicknames</Header>
         <ToggleOption label="Only Alphanumeric" {...nicknameOnlyAlphanumeric} />
-        <Description>Can nickname only contain letters, numbers, underscores, and spaces.</Description>
+        <Description>
+          Can nickname only contain letters, numbers, underscores, and spaces.
+        </Description>
         <Gap />
         <NumberOption label="Minimum Length" type="integer" {...nicknameMinLength} />
         <NumberOption label="Maximum Length" type="integer" {...nicknameMaxLength} />

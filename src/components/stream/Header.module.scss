@@ -17,13 +17,17 @@
     gap: 0.5rem;
     text-decoration: none;
 
-    img { border-radius: 50%; }
+    img {
+      border-radius: 50%;
+    }
 
     h1 {
       font-weight: 700;
       font-size: 1.3rem;
       color: var(--text-color-1);
-      span { color: var(--logo-color-1); }
+      span {
+        color: var(--logo-color-1);
+      }
     }
   }
 

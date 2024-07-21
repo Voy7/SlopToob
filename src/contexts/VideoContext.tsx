@@ -9,11 +9,15 @@ import type { IconNames } from '@/components/ui/Icon'
 
 // Video player context
 type ContextProps = {
-  isPaused: boolean, setIsPaused: React.Dispatch<React.SetStateAction<boolean>>,
-  volume: number, setVolume: React.Dispatch<React.SetStateAction<number>>,
-  showControls: boolean, setShowControls: React.Dispatch<React.SetStateAction<boolean>>,
-  actionPopup: { id: number, icon: IconNames, text?: string } | null, showActionPopup: (icon: IconNames, text?: string) => void,
-  videoElement: HTMLVideoElement,
+  isPaused: boolean
+  setIsPaused: React.Dispatch<React.SetStateAction<boolean>>
+  volume: number
+  setVolume: React.Dispatch<React.SetStateAction<number>>
+  showControls: boolean
+  setShowControls: React.Dispatch<React.SetStateAction<boolean>>
+  actionPopup: { id: number; icon: IconNames; text?: string } | null
+  showActionPopup: (icon: IconNames, text?: string) => void
+  videoElement: HTMLVideoElement
   containerElement: HTMLDivElement
 }
 
@@ -25,7 +29,11 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
   const [volume, setVolume] = useState<number>(100)
   const [showControls, setShowControls] = useState<boolean>(false)
   const [prevState, setPrevState] = useState<StreamState>(StreamState.Loading)
-  const [actionPopup, setActionPopup] = useState<{ id: number, icon: IconNames, text?: string } | null>(null)
+  const [actionPopup, setActionPopup] = useState<{
+    id: number
+    icon: IconNames
+    text?: string
+  } | null>(null)
 
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -46,10 +54,10 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
   // Handle stream state/url changes
   useEffect(() => {
     if (streamInfo.state !== StreamState.Playing && streamInfo.state !== StreamState.Paused) return
-    
+
     // If hls's current source is the same as the new source, don't reload (avoids flickering)
     if (sourceURL === streamInfo.path) return
-    
+
     setSourceURL(streamInfo.path)
     hls.loadSource(streamInfo.path)
   }, [streamInfo, sourceURL])
@@ -57,7 +65,7 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
   // Handle video element events
   useEffect(() => {
     const video = videoRef.current!
-    
+
     // Sync isPaused state with video
     video.onplay = (event) => {
       if (streamInfo.state !== StreamState.Playing) {
@@ -69,7 +77,7 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
 
       // Seek to current time
       if (!lastStreamUpdateTimestamp) return
-      const diff = ((Date.now() - lastStreamUpdateTimestamp) / 1000) + streamInfo.currentSeconds
+      const diff = (Date.now() - lastStreamUpdateTimestamp) / 1000 + streamInfo.currentSeconds
       video.currentTime = diff
     }
 
@@ -83,8 +91,7 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
       if (video.muted) {
         setVolume(0)
         if (video.volume === 0) video.volume = 1
-      }
-      else setVolume(video.volume * 100)
+      } else setVolume(video.volume * 100)
     }
   }, [streamInfo, lastStreamUpdateTimestamp])
 
@@ -126,10 +133,14 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
   }
 
   const context: ContextProps = {
-    isPaused, setIsPaused,
-    volume, setVolume,
-    showControls, setShowControls,
-    actionPopup, showActionPopup,
+    isPaused,
+    setIsPaused,
+    volume,
+    setVolume,
+    showControls,
+    setShowControls,
+    actionPopup,
+    showActionPopup,
     videoElement: videoRef.current!,
     containerElement: containerRef.current!
   }

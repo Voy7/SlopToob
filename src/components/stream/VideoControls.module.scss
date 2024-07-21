@@ -22,9 +22,15 @@
     appearance: none;
     transition: 150ms;
 
-    &::-webkit-progress-bar { background: transparent; }
-    &::-webkit-progress-value { background: var(--select-color); }
-    &::-moz-progress-bar { background: var(--select-color); }
+    &::-webkit-progress-bar {
+      background: transparent;
+    }
+    &::-webkit-progress-value {
+      background: var(--select-color);
+    }
+    &::-moz-progress-bar {
+      background: var(--select-color);
+    }
   }
 
   .controls {
@@ -62,7 +68,10 @@
 
     .volumeButton {
       &:hover {
-        .volumeContainer { width: 5rem; opacity: 1; }
+        .volumeContainer {
+          width: 5rem;
+          opacity: 1;
+        }
       }
 
       .volumeContainer {
@@ -73,7 +82,7 @@
         opacity: 0;
         transition: 150ms ease-in-out;
 
-        input[type="range"] {
+        input[type='range'] {
           width: 100%;
           height: 5px;
           background: rgb(75, 75, 75);
@@ -81,16 +90,26 @@
           appearance: none;
           transition: 150ms;
 
-          &::-webkit-progress-bar { background: transparent; }
-          &::-webkit-progress-value { background: var(--select-color); }
-          &::-moz-progress-bar { background: var(--select-color); }
-          &::-moz-range-progress { background: var(--select-color); }
+          &::-webkit-progress-bar {
+            background: transparent;
+          }
+          &::-webkit-progress-value {
+            background: var(--select-color);
+          }
+          &::-moz-progress-bar {
+            background: var(--select-color);
+          }
+          &::-moz-range-progress {
+            background: var(--select-color);
+          }
 
           &::-webkit-slider-runnable-track {
             width: 100%;
             height: 8.4px;
             cursor: pointer;
-            box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+            box-shadow:
+              1px 1px 1px #000000,
+              0px 0px 1px #0d0d0d;
             background: #3071a9;
             border-radius: 1.3px;
             border: 0.2px solid #010101;

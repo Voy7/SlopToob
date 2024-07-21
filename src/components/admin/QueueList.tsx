@@ -5,7 +5,7 @@ import { VideoState } from '@/lib/enums'
 import { SettingGroup, Header } from '@/components/admin/SettingsComponents'
 import styles from './QueueList.module.scss'
 
-const states: Record<VideoState, { name: string, color: string }> = {
+const states: Record<VideoState, { name: string; color: string }> = {
   [VideoState.NotReady]: { name: 'Not Ready', color: 'gray' },
   [VideoState.Ready]: { name: 'Ready', color: 'lime' },
   [VideoState.Preparing]: { name: 'Transcoding', color: 'aqua' },

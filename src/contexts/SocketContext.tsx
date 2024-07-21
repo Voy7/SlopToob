@@ -6,7 +6,7 @@ import LoadingPage from '@/components/stream/LoadingPage'
 
 // Stream page context
 type ContextProps = {
-  socket: Socket,
+  socket: Socket
 }
 
 // Context provider wrapper component
@@ -15,11 +15,13 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const socket = io()
-    
+
     socket.on('connect', () => setSocket(socket))
     socket.on('disconnect', () => setSocket(null))
 
-    return () => { socket.disconnect() }
+    return () => {
+      socket.disconnect()
+    }
   }, [])
 
   if (!socket) return <LoadingPage text="Connecting..." />

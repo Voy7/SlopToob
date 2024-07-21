@@ -40,7 +40,7 @@ function handleSocketEvent(socket: Socket, eventID: string, payload?: any) {
   const event = socketEvents[eventID]
   if (!event) return
 
-  const client = socketClients.find(c => c.socket === socket)
+  const client = socketClients.find((c) => c.socket === socket)
   if (!event.allowUnauthenticated && !client) {
     Logger.warn('Unauthorized socket event', { eventID, payload })
     return
@@ -57,19 +57,24 @@ function handleSocketEvent(socket: Socket, eventID: string, payload?: any) {
 }
 
 // Handle getting & setting settings from the client
-async function handleSettingEvent(socket: Socket, settingKey: keyof typeof settingsList, payload: any) {
+async function handleSettingEvent(
+  socket: Socket,
+  settingKey: keyof typeof settingsList,
+  payload: any
+) {
   const setting = settingsList[settingKey]
   if (!setting) return
 
-  const client = socketClients.find(c => c.socket === socket)
+  const client = socketClients.find((c) => c.socket === socket)
   if (!client || client.role < AuthRole.Admin) {
     Logger.warn('Unauthorized setting event', { settingKey, value: payload })
     return
   }
-  
+
   // If value is undefined, they are just requesting the current value
   if (payload === undefined) {
-    const clientValue = ('clientValue' in setting) ? await setting.clientValue() : Settings[settingKey]
+    const clientValue =
+      'clientValue' in setting ? await setting.clientValue() : Settings[settingKey]
     // console.log(setting, clientValue)
     socket.emit(`setting.${settingKey}`, clientValue)
     return

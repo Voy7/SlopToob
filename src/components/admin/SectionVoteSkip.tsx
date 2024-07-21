@@ -2,7 +2,14 @@
 
 import useToggleOption from '@/hooks/useToggleOption'
 import useNumberOption from '@/hooks/useNumberOption'
-import { SettingGroup, Header, Description, Gap, ToggleOption,NumberOption } from '@/components/admin/SettingsComponents'
+import {
+  SettingGroup,
+  Header,
+  Description,
+  Gap,
+  ToggleOption,
+  NumberOption
+} from '@/components/admin/SettingsComponents'
 
 export default function SectionVoteSkip() {
   const voteSkipEnabled = useToggleOption('enableVoteSkip')
@@ -23,7 +30,9 @@ export default function SectionVoteSkip() {
         <Description>Percentage of users needed for vote to pass.</Description>
         <Gap />
         <NumberOption label="Vote Skip Delay in Seconds" type="integer" {...voteSkipDelaySeconds} />
-        <Description>How long video needs to be playing for before vote skipping is allowed.</Description>
+        <Description>
+          How long video needs to be playing for before vote skipping is allowed.
+        </Description>
         <Gap />
         <ToggleOption label="Allow Vote Skipping if Bumper" {...canVoteSkipIfBumper} />
         <Description>Allow vote skipping during bumper videos.</Description>

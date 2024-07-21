@@ -38,8 +38,7 @@ async function nextRequestHandler(req: IncomingMessage, res: ServerResponse) {
     }
 
     await handle(req, res, parsedUrl)
-  }
-  catch (error: any) {
+  } catch (error: any) {
     Logger.error('[Next] Error occurred handling', req.url, error)
     res.statusCode = 500
     res.end('internal server error')

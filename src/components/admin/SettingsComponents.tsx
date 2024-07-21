@@ -10,8 +10,13 @@ export function SettingGroup({ children }: { children: React.ReactNode }) {
   return <div className={styles.settingGroup}>{children}</div>
 }
 
-export function Header({ icon, children }: { icon: IconNames, children: React.ReactNode }) {
-  return <h4 className={styles.header}>{icon ? <Icon name={icon} /> : null}{children}</h4>
+export function Header({ icon, children }: { icon: IconNames; children: React.ReactNode }) {
+  return (
+    <h4 className={styles.header}>
+      {icon ? <Icon name={icon} /> : null}
+      {children}
+    </h4>
+  )
 }
 
 export function Description({ children }: { children: React.ReactNode }) {
@@ -23,8 +28,8 @@ export function Gap() {
 }
 
 type ToggleProps = {
-  label: string,
-  value: boolean | null,
+  label: string
+  value: boolean | null
   setValue: (value: boolean) => void
 }
 
@@ -36,30 +41,34 @@ export function ToggleOption({ label, value, setValue }: ToggleProps) {
         <div className={styles.right}>
           <div className={styles.valueLabel}>
             <p key={`${value}`}>{value ? 'Enabled' : 'Disabled'}</p>
-            <Slider value={value} onChange={event => setValue(event.target.checked)} />
+            <Slider value={value} onChange={(event) => setValue(event.target.checked)} />
           </div>
         </div>
-      ) : <Icon name="loading" className={styles.loadingIcon} /> }
+      ) : (
+        <Icon name="loading" className={styles.loadingIcon} />
+      )}
     </label>
   )
 }
 
 type StringOptionProps = {
-  label: string,
-  value: string | null,
-  setValue: (value: string) => void,
+  label: string
+  value: string | null
+  setValue: (value: string) => void
   error?: string | null
 }
 
-export function StringOption({ label, value, setValue, error }:StringOptionProps) {
+export function StringOption({ label, value, setValue, error }: StringOptionProps) {
   const [input, setInput] = useState<string | null>(null)
   const [isEditing, setIsEditing] = useState<boolean>(false)
 
   const inputRef = useRef<HTMLInputElement>(null)
 
   // Update input when value changes from server
-  useEffect(() => { setInput(value) }, [value])
-  
+  useEffect(() => {
+    setInput(value)
+  }, [value])
+
   // Update width of input based on value
   useEffect(() => {
     if (!inputRef.current) return
@@ -81,27 +90,35 @@ export function StringOption({ label, value, setValue, error }:StringOptionProps
         {value !== null && input !== null ? (
           <div className={styles.right}>
             <div className={styles.valueLabel}>
-              <p key={`${error}`} className={typeof error ==='string' ? styles.show : undefined}><Icon name="warning" />{error}</p>
+              <p key={`${error}`} className={typeof error === 'string' ? styles.show : undefined}>
+                <Icon name="warning" />
+                {error}
+              </p>
               <input
                 ref={inputRef}
                 type="text"
                 value={`${input}`}
-                onChange={event => setInput(event.target.value)}
+                onChange={(event) => setInput(event.target.value)}
                 onFocus={() => setIsEditing(true)}
-                onBlur={() => { setIsEditing(false); onSubmit() }}
+                onBlur={() => {
+                  setIsEditing(false)
+                  onSubmit()
+                }}
               />
             </div>
           </div>
-        ) : <Icon name="loading" className={styles.loadingIcon} /> }
+        ) : (
+          <Icon name="loading" className={styles.loadingIcon} />
+        )}
       </label>
     </form>
   )
 }
 
 type NumberOptionProps = {
-  label: string,
-  type: 'integer' | 'float' | 'percentage',
-  value: number | null,
+  label: string
+  type: 'integer' | 'float' | 'percentage'
+  value: number | null
   setValue: (value: number) => void
 }
 
@@ -117,7 +134,7 @@ export function NumberOption({ label, type, value, setValue }: NumberOptionProps
     setInput(value !== null ? `${value}` : null)
     setIsValid(value !== null ? checkIsValid(`${value}`) : null)
   }, [value])
-  
+
   // Update width of input based on value
   useEffect(() => {
     if (!inputRef.current) return
@@ -140,7 +157,8 @@ export function NumberOption({ label, type, value, setValue }: NumberOptionProps
     if (value === '') return 'Empty value.'
     if (type === 'float') return !isNaN(Number(value)) || 'Not a number.'
     if (type === 'integer') return Number.isInteger(Number(value)) || 'Not an integer.'
-    if (type === 'percentage') { // Is integer between 0 and 100
+    if (type === 'percentage') {
+      // Is integer between 0 and 100
       const number = Number(value)
       return (Number.isInteger(number) && number >= 0 && number <= 100) || 'Not between 0 - 100.'
     }
@@ -154,42 +172,58 @@ export function NumberOption({ label, type, value, setValue }: NumberOptionProps
         {value !== null && input !== null ? (
           <div className={styles.right}>
             <div className={styles.valueLabel}>
-              <p key={`${isValid}`} className={typeof isValid ==='string' ? styles.show : undefined}><Icon name="warning" />{isValid}</p>
+              <p
+                key={`${isValid}`}
+                className={typeof isValid === 'string' ? styles.show : undefined}
+              >
+                <Icon name="warning" />
+                {isValid}
+              </p>
               <input
                 ref={inputRef}
                 type="text"
                 value={`${input}`}
-                onChange={event => setInput(event.target.value)}
+                onChange={(event) => setInput(event.target.value)}
                 onFocus={() => setIsEditing(true)}
-                onBlur={() => { setIsEditing(false); onSubmit() }}
+                onBlur={() => {
+                  setIsEditing(false)
+                  onSubmit()
+                }}
               />
             </div>
           </div>
-        ) : <Icon name="loading" className={styles.loadingIcon} /> }
+        ) : (
+          <Icon name="loading" className={styles.loadingIcon} />
+        )}
       </label>
     </form>
   )
 }
 
 type ListOptionProps = {
-  value: ListOption | null,
+  value: ListOption | null
   setValue: (value: string) => void
 }
 
 export function ListOption({ value, setValue }: ListOptionProps) {
-  if (!value) return (
-    <label className={styles.listOption}>
-      Loading options...
-      <Icon name="loading" className={styles.loadingIcon} />
-    </label>
-  )
+  if (!value)
+    return (
+      <label className={styles.listOption}>
+        Loading options...
+        <Icon name="loading" className={styles.loadingIcon} />
+      </label>
+    )
 
   return (
     <>
-      {value.list.map(option => (
+      {value.list.map((option) => (
         <label
           key={option.id}
-          className={option.id === value.selectedID ? `${styles.listOption} ${styles.active}` : styles.listOption}
+          className={
+            option.id === value.selectedID
+              ? `${styles.listOption} ${styles.active}`
+              : styles.listOption
+          }
           onClick={() => setValue(option.id)}
         >
           {option.name}
@@ -199,7 +233,9 @@ export function ListOption({ value, setValue }: ListOptionProps) {
                 <p>Selected</p>
                 <Icon name="radio-checked" />
               </div>
-            ) : <Icon name="radio-unchecked" /> }
+            ) : (
+              <Icon name="radio-unchecked" />
+            )}
           </div>
         </label>
       ))}
@@ -208,8 +244,8 @@ export function ListOption({ value, setValue }: ListOptionProps) {
 }
 
 type ButtonOptionProps = {
-  label: string,
-  swapped?: boolean,
+  label: string
+  swapped?: boolean
   children: React.ReactNode
 }
 

@@ -39,7 +39,7 @@ export const enum Msg {
   AdminBumpersCacheStatus = 'admin-bumpers-cache-status',
   AdminPauseStream = 'admin-pause-stream',
   AdminUnpauseStream = 'admin-unpause-stream',
-  AdminSkipVideo = 'admin-skip-video',
+  AdminSkipVideo = 'admin-skip-video'
 }
 
 export const enum StreamState {

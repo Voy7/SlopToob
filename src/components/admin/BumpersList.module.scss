@@ -10,9 +10,12 @@
     gap: 1rem;
     font-size: 1rem;
     color: var(--text-color-2);
-    
-    &:hover { color: var(--text-color-1); background-color: var(--bg-color-2); }
-    
+
+    &:hover {
+      color: var(--text-color-1);
+      background-color: var(--bg-color-2);
+    }
+
     .left {
       display: flex;
       align-items: center;
@@ -45,7 +48,10 @@
       transition: 150ms ease-in-out;
       cursor: pointer;
 
-      &:hover { color: var(--text-color-1); background: var(--error-color); }
+      &:hover {
+        color: var(--text-color-1);
+        background: var(--error-color);
+      }
     }
   }
 }

@@ -18,7 +18,7 @@ export function initializeHlsServer() {
         const id = segments[2]
         const filename = segments[3]
         const ext = filename.split('.').pop()
-  
+
         if (ext !== 'm3u8' && ext !== 'ts') {
           return cb(null, true)
         }
@@ -30,7 +30,7 @@ export function initializeHlsServer() {
         }
 
         const filePath = `${video.outputPath}/${filename}`
-  
+
         fs.access(filePath, fs.constants.F_OK, function (err) {
           if (err) {
             // console.log('File not exist')
@@ -66,7 +66,7 @@ function getFile(req: any) {
 
   const filePath = `${video.outputPath}/${filename}`
   // console.log(`Reading file: ${filePath}`.yellow)
-  
+
   const stream = fs.createReadStream(filePath)
 
   return stream

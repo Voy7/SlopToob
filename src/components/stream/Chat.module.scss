@@ -31,8 +31,14 @@
       border: none;
       cursor: pointer;
 
-      &:hover { color: var(--text-color-1); background: var(--bg-color-2); }
-      &.active { color: var(--text-color-1); background: var(--bg-color-3); }
+      &:hover {
+        color: var(--text-color-1);
+        background: var(--bg-color-2);
+      }
+      &.active {
+        color: var(--text-color-1);
+        background: var(--bg-color-3);
+      }
     }
 
     .usernameButton {
@@ -45,9 +51,15 @@
       border: none;
       cursor: pointer;
 
-      &:hover { color: var(--text-color-1); background: var(--bg-color-2); }
+      &:hover {
+        color: var(--text-color-1);
+        background: var(--bg-color-2);
+      }
 
-      svg { font-size: 0.6rem; transform: translateY(-0.5em); }
+      svg {
+        font-size: 0.6rem;
+        transform: translateY(-0.5em);
+      }
     }
   }
 
@@ -60,7 +72,9 @@
     overflow-x: hidden;
     overflow-y: auto;
 
-    .message, .error, .event {
+    .message,
+    .error,
+    .event {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
@@ -69,11 +83,19 @@
       animation: chatMessage 150ms ease-in-out;
 
       @keyframes chatMessage {
-        0% { transform: translateY(0.5rem); opacity: 0; }
-        100% { transform: translateY(0); opacity: 1; }
+        0% {
+          transform: translateY(0.5rem);
+          opacity: 0;
+        }
+        100% {
+          transform: translateY(0);
+          opacity: 1;
+        }
       }
 
-      &:hover { background: var(--bg-color-2);}
+      &:hover {
+        background: var(--bg-color-2);
+      }
 
       div {
         display: flex;
@@ -138,7 +160,9 @@
       color: var(--text-color-3);
       cursor: default;
 
-      svg { font-size: 1.5em }
+      svg {
+        font-size: 1.5em;
+      }
     }
   }
 
@@ -205,14 +229,20 @@
   animation: fadeIn 150ms ease-in-out;
 
   @keyframes fadeIn {
-    0% { bottom: 1rem; opacity: 0; }
-    100% { bottom: 0; opacity: 1; }
+    0% {
+      bottom: 1rem;
+      opacity: 0;
+    }
+    100% {
+      bottom: 0;
+      opacity: 1;
+    }
   }
 
   @media (max-width: 767px) {
     max-height: 12rem;
   }
-  
+
   header {
     display: flex;
     justify-content: space-between;
@@ -261,7 +291,9 @@
       overflow: hidden;
       cursor: default;
 
-      &:hover { background: var(--bg-color-3); }
+      &:hover {
+        background: var(--bg-color-3);
+      }
 
       img {
         width: 1.4rem;

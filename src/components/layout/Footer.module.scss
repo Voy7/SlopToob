@@ -9,7 +9,9 @@
 
   @media (max-width: 768px) {
     flex-direction: column;
-    .github { flex-direction: row-reverse; }
+    .github {
+      flex-direction: row-reverse;
+    }
   }
 
   .createdBy {
@@ -29,8 +31,12 @@
     text-decoration: none;
     color: var(--select-color);
 
-    &:hover { text-decoration: underline; }
+    &:hover {
+      text-decoration: underline;
+    }
 
-    img { border-radius: 50%; }
+    img {
+      border-radius: 50%;
+    }
   }
 }

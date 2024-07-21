@@ -41,7 +41,9 @@ export default function NicknameModal() {
       await setNicknameCookie(name)
     })
 
-    return () => { socket.off(Msg.ChangeNickname) }
+    return () => {
+      socket.off(Msg.ChangeNickname)
+    }
   }, [name])
 
   return (
@@ -49,7 +51,11 @@ export default function NicknameModal() {
       title="Set Nickname"
       isOpen={showNicknameModal}
       setClose={() => setShowNicknameModal(false)}
-      button={<Button style="main" icon="edit" loading={loading} active={name.length > 0} isSubmit>Save Nickname</Button>}
+      button={
+        <Button style="main" icon="edit" loading={loading} active={name.length > 0} isSubmit>
+          Save Nickname
+        </Button>
+      }
       error={error}
       formOnSubmit={submit}
       width={380}
@@ -57,9 +63,11 @@ export default function NicknameModal() {
       <p>Enter a nickname to be displayed in chat.</p>
       <label>
         <input
-          type="text" name="nickname"
+          type="text"
+          name="nickname"
           placeholder="Enter a nickname..."
-          value={name} onChange={event => setName(event.target.value)}
+          value={name}
+          onChange={(event) => setName(event.target.value)}
           autoFocus
         />
       </label>

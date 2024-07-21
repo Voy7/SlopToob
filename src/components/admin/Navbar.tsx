@@ -9,7 +9,7 @@ export default function Navbar() {
   const { section, setSection } = useAdminContext()
   return (
     <nav className={styles.navbar}>
-      {sections.map(sec => {
+      {sections.map((sec) => {
         const isActive = sec.name === section.name
         return (
           <button

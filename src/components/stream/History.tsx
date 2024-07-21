@@ -29,7 +29,12 @@ export default function History() {
                 <p className={styles.title}>{video.name}</p>
                 <div className={styles.row}>
                   <p className={styles.duration}>{video.totalDuration}</p>
-                  {video.isBumper && <p className={styles.bumper}><Icon name="bumper" />Bumper</p>}
+                  {video.isBumper && (
+                    <p className={styles.bumper}>
+                      <Icon name="bumper" />
+                      Bumper
+                    </p>
+                  )}
                 </div>
               </div>
             </li>

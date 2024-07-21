@@ -25,13 +25,15 @@ fs.watch(Env.BUMPERS_PATH, { recursive: true }, (_, filename) => {
 // Add all files in bumpers directory, and populate nextBumper on startup
 fs.readdir(Env.BUMPERS_PATH, { recursive: true }, (error, files) => {
   if (error) return Logger.error(`Error reading bumpers directory: ${error.message}`)
-  for (const file of files) { syncCheckBumper(path.join(Env.BUMPERS_PATH, file.toString()).replace(/\\/g, '/')) }
+  for (const file of files) {
+    syncCheckBumper(path.join(Env.BUMPERS_PATH, file.toString()).replace(/\\/g, '/'))
+  }
   nextBumper = getRandomBumper()
 })
 
 // Handle changes to bumpers directory
 function syncCheckBumper(pathName: string) {
-  const existingBumper = bumperPaths.find(bumperPath => bumperPath === pathName)
+  const existingBumper = bumperPaths.find((bumperPath) => bumperPath === pathName)
   const fileExists = fs.existsSync(pathName)
 
   // File was deleted
@@ -53,8 +55,8 @@ function syncCheckBumper(pathName: string) {
   // ... Handle future cases
 }
 
-export function getClientBumpers():ClientBumper[] {
-  return bumperPaths.map(path => {
+export function getClientBumpers(): ClientBumper[] {
+  return bumperPaths.map((path) => {
     const name = (path.split('/').pop() || 'Unknown').split('.')[0]
     return { path, name }
   })

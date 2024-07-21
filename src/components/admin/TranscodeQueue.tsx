@@ -5,7 +5,7 @@ import { JobState } from '@/lib/enums'
 import { SettingGroup, Header } from '@/components/admin/SettingsComponents'
 import styles from './QueueList.module.scss'
 
-const states: Record<JobState, { name: string, color: string }> = {
+const states: Record<JobState, { name: string; color: string }> = {
   [JobState.Initializing]: { name: 'Initializing', color: 'gray' },
   [JobState.Idle]: { name: 'Idle', color: 'gray' },
   [JobState.AwaitingTranscode]: { name: 'Awaiting Transcode', color: 'magenta' },

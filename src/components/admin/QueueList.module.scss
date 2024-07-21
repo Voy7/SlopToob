@@ -13,11 +13,19 @@
     animation: itemFadeIn 300ms ease-in-out forwards;
 
     @keyframes itemFadeIn {
-      from { opacity: 0; transform: translateY(1rem); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(1rem);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
-    &:hover { background: var(--bg-color-2); }
+    &:hover {
+      background: var(--bg-color-2);
+    }
 
     .number {
       font-size: 0.9rem;
@@ -30,7 +38,9 @@
       gap: 0.25rem;
     }
 
-    .name { font-size: 1rem; }
+    .name {
+      font-size: 1rem;
+    }
 
     .state {
       display: flex;

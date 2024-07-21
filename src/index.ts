@@ -9,7 +9,7 @@ async function main() {
 
   const { default: Settings } = await import('@/stream/Settings')
   await Settings.onReady()
-  
+
   const { default: FileTreeHandler } = await import('@/stream/FileTreeHandler')
   await FileTreeHandler.onReady()
 

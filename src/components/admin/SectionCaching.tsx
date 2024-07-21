@@ -1,7 +1,14 @@
 'use client'
 
 import useToggleOption from '@/hooks/useToggleOption'
-import { SettingGroup, Header, Description, ToggleOption, ListOption, NumberOption } from '@/components/admin/SettingsComponents'
+import {
+  SettingGroup,
+  Header,
+  Description,
+  ToggleOption,
+  ListOption,
+  NumberOption
+} from '@/components/admin/SettingsComponents'
 
 export default function SectionStream() {
   const cacheVideos = useToggleOption('cacheVideos')

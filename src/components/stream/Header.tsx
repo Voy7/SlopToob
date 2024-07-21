@@ -20,12 +20,28 @@ export default function Header() {
     <div className={styles.header}>
       <Link className={styles.logo} href="/home">
         <Image src="/logo.png" alt="Logo" width={30} height={30} />
-        <h1><span>Slop</span>Toob</h1>
+        <h1>
+          <span>Slop</span>Toob
+        </h1>
       </Link>
       <div className={styles.right}>
-        <Button style="normal" icon="logout" onClick={() => signOut()} className={styles.signOutButton}>Sign Out</Button>
+        <Button
+          style="normal"
+          icon="logout"
+          onClick={() => signOut()}
+          className={styles.signOutButton}
+        >
+          Sign Out
+        </Button>
         {authUser && authUser.role >= AuthRole.Admin && (
-          <Button style="main" icon="admin-panel" onClick={() => setShowAdminModal(true)} className={styles.adminPanelButton}>Admin Panel</Button>
+          <Button
+            style="main"
+            icon="admin-panel"
+            onClick={() => setShowAdminModal(true)}
+            className={styles.adminPanelButton}
+          >
+            Admin Panel
+          </Button>
         )}
       </div>
     </div>

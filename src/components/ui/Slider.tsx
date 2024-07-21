@@ -1,7 +1,7 @@
 import styles from './Slider.module.scss'
 
 type Props = {
-  value: boolean,
+  value: boolean
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
 }
 
@@ -9,11 +9,7 @@ type Props = {
 export default function Slider({ value, onChange }: Props) {
   return (
     <div className={styles.switch}>
-      <input
-        type="checkbox"
-        checked={value}
-        onChange={onChange}
-      />
+      <input type="checkbox" checked={value} onChange={onChange} />
       <span className={styles.slider}></span>
     </div>
   )

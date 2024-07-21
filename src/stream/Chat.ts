@@ -3,7 +3,7 @@ import Player from '@/stream/Player'
 import { ChatType, Msg } from '@/lib/enums'
 import type { ChatMessage } from '@/typings/socket'
 
-export default new class Chat {
+export default new (class Chat {
   readonly Type = ChatType
 
   send(message: ChatMessage) {
@@ -13,4 +13,4 @@ export default new class Chat {
   resyncChanges() {
     SocketUtils.broadcast(Msg.StreamInfo, Player.clientStreamInfo)
   }
-}
+})()

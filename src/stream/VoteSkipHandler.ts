@@ -6,7 +6,7 @@ import Chat from '@/stream/Chat'
 import { socketClients } from '@/server/socketClients'
 import { Msg, VideoState } from '@/lib/enums'
 
-export default new class VoteSkipHandler {
+export default new (class VoteSkipHandler {
   private _isAllowed: boolean = false
   private voterIDs: string[] = []
   private persistVoterIDs: string[] = []
@@ -48,11 +48,11 @@ export default new class VoteSkipHandler {
 
     if (!this.persistVoterIDs.includes(socketID)) {
       this.persistVoterIDs.push(socketID)
-      const client = socketClients.find(client => client.socket.id === socketID)
+      const client = socketClients.find((client) => client.socket.id === socketID)
       if (!client || !Settings.sendVotedToSkip) return
       Chat.send({
         type: Chat.Type.VotedToSkip,
-        message: `${client.username} voted to skip the video.`,
+        message: `${client.username} voted to skip the video.`
       })
     }
 
@@ -70,10 +70,12 @@ export default new class VoteSkipHandler {
     return this.voterIDs.includes(socketID)
   }
 
-  get currentCount(): number { return this.voterIDs.length }
+  get currentCount(): number {
+    return this.voterIDs.length
+  }
 
   get requiredCount(): number {
-    const required = Math.ceil(socketClients.length * Settings.voteSkipPercentage / 100)
+    const required = Math.ceil((socketClients.length * Settings.voteSkipPercentage) / 100)
     return Math.max(1, required)
   }
 
@@ -96,13 +98,12 @@ export default new class VoteSkipHandler {
     if (!Settings.sendVoteSkipPassed) return
     Chat.send({
       type: Chat.Type.VoteSkipPassed,
-      message: `Vote skip passed! Skipping video... (${this.currentCount}/${socketClients.length})`,
+      message: `Vote skip passed! Skipping video... (${this.currentCount}/${socketClients.length})`
     })
 
     this.voterIDs = []
     this.persistVoterIDs = []
     Player.skip()
-
   }
 
   // Called when settings change, client join/leaves, etc
@@ -111,4 +112,4 @@ export default new class VoteSkipHandler {
     if (this.currentCount < this.requiredCount) return
     this.passVote()
   }
-}
+})()

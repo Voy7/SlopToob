@@ -6,22 +6,32 @@
   background: radial-gradient(
     circle at 50% 50%,
     rgba(35, 95, 85, 0.65) 30%,
-    rgba(25, 25, 35, 0.1) 90%,
+    rgba(25, 25, 35, 0.1) 90%
   );
 
   &.fadeOutAnimation {
     animation: fadeOut 1000ms ease-in-out forwards;
     animation-delay: 500ms;
     @keyframes fadeOut {
-      from { opacity: 1; }
-      to { opacity: 0; }
+      from {
+        opacity: 1;
+      }
+      to {
+        opacity: 0;
+      }
     }
 
     form {
       animation: fadeOut2 500ms ease-out forwards;
       @keyframes fadeOut2 {
-        from { opacity: 1; scale: 1; }
-        to { opacity: 0; scale: 1.5; }
+        from {
+          opacity: 1;
+          scale: 1;
+        }
+        to {
+          opacity: 0;
+          scale: 1.5;
+        }
       }
     }
   }
@@ -39,17 +49,27 @@
     animation: fadeIn 500ms ease-out forwards;
 
     @keyframes fadeIn {
-      from { opacity: 0; scale: 0.9; }
-      to { opacity: 1; scale: 1; }
+      from {
+        opacity: 0;
+        scale: 0.9;
+      }
+      to {
+        opacity: 1;
+        scale: 1;
+      }
     }
 
-    img { border-radius: 50%; }
+    img {
+      border-radius: 50%;
+    }
 
     h1 {
       font-weight: 700;
       font-size: 2rem;
       color: var(--text-color-1);
-      span { color: var(--logo-color-1); }
+      span {
+        color: var(--logo-color-1);
+      }
     }
 
     .blurb {
@@ -72,17 +92,24 @@
         border-radius: 0.5rem 0 0 0.5rem;
         border-right: none;
 
-        &:focus { outline: none; border-color: var(--select-color); }
+        &:focus {
+          outline: none;
+          border-color: var(--select-color);
+        }
 
         // Remove autofill styles
-        &:-webkit-autofill, &:-webkit-autofill:hover, &:-webkit-autofill:focus, &:-webkit-autofill:active {
+        &:-webkit-autofill,
+        &:-webkit-autofill:hover,
+        &:-webkit-autofill:focus,
+        &:-webkit-autofill:active {
           color: var(--text-color-1);
           -webkit-text-fill-color: var(--text-color-1);
           -webkit-box-shadow: 0 0 0 30px var(--bg-color-3) inset;
         }
       }
 
-      button { // Overrite fancy button styles
+      button {
+        // Overrite fancy button styles
         border-radius: 0 0.5rem 0.5rem 0;
         border-left: none;
       }
