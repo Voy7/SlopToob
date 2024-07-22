@@ -1,5 +1,6 @@
 'use client'
 
+import { useSocketContext } from '@/contexts/SocketContext'
 import { useStreamContext } from '@/contexts/StreamContext'
 import { Msg, StreamState } from '@/lib/enums'
 import useStreamTimestamp from '@/hooks/useStreamTimestamp'
@@ -8,7 +9,9 @@ import styles from './StreamControls.module.scss'
 
 // Admin stream controls
 export default function StreamControls() {
-  const { socket, streamInfo } = useStreamContext()
+  // return null
+  const { socket } = useSocketContext()
+  const { streamInfo } = useStreamContext()
 
   const { currentTimestamp, totalTimestamp } = useStreamTimestamp()
 
@@ -37,7 +40,8 @@ export default function StreamControls() {
 }
 
 function ActionButton() {
-  const { socket, streamInfo } = useStreamContext()
+  const { socket } = useSocketContext()
+  const { streamInfo } = useStreamContext()
 
   if (streamInfo.state === StreamState.Playing) {
     return (

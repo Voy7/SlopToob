@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
-import { useStreamContext } from '@/contexts/StreamContext'
+import { useSocketContext } from '@/contexts/SocketContext'
 import type { SettingsList } from '@/stream/Settings'
 
 export default function useToggleOption(settingKey: keyof SettingsList) {
   const settingID = `setting.${settingKey}`
 
-  const { socket } = useStreamContext()
+  const { socket } = useSocketContext()
 
   const [value, setValueState] = useState<number | null>(null)
 

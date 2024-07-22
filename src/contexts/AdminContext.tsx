@@ -7,6 +7,7 @@ import { Msg } from '@/lib/enums'
 import { ClientBumper, ClientPlaylist, ClientVideo, FileTreeNode } from '@/typings/types'
 import { ClientCacheStatus, ClientHistoryStatus, TranscodeClientVideo } from '@/typings/socket'
 import useSocketOn from '@/hooks/useSocketOn'
+import { useSocketContext } from './SocketContext'
 
 // Stream page context
 type ContextProps = {
@@ -28,7 +29,7 @@ type ContextProps = {
 
 // Context provider wrapper component
 export function AdminProvider({ children }: { children: React.ReactNode }) {
-  const { socket } = useStreamContext()
+  const { socket } = useSocketContext()
 
   const [section, setSectionState] = useState<(typeof sections)[number]>(sections[0])
   const [fileTree, setFileTree] = useState<FileTreeNode | null>(null)

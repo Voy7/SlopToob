@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useStreamContext } from '@/contexts/StreamContext'
+import { useSocketContext } from '@/contexts/SocketContext'
 import useSocketOn from '@/hooks/useSocketOn'
 import { Msg } from '@/lib/enums'
 import {
@@ -19,7 +19,7 @@ import type { ClientPlaylist } from '@/typings/types'
 import type { EditPlaylistNamePayload } from '@/typings/socket'
 
 export default function PlaylistEditor({ playlist }: { playlist: ClientPlaylist }) {
-  const { socket } = useStreamContext()
+  const { socket } = useSocketContext()
 
   const [playlistName, setPlaylistName] = useState<string>(playlist.name)
   const [playlistNameError, setPlaylistNameError] = useState<string | null>(null)

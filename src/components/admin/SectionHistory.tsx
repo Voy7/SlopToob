@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useAdminContext } from '@/contexts/AdminContext'
-import { useStreamContext } from '@/contexts/StreamContext'
+import { useSocketContext } from '@/contexts/SocketContext'
 import { Msg } from '@/lib/enums'
 import useToggleOption from '@/hooks/useToggleOption'
 import useNumberOption from '@/hooks/useNumberOption'
@@ -20,7 +20,7 @@ import {
 
 export default function SectionHistory() {
   const { historyStatus } = useAdminContext()
-  const { socket } = useStreamContext()
+  const { socket } = useSocketContext()
   if (!historyStatus) return null
 
   const [showHistoryModal, setShowHistoryModal] = useState<boolean>(false)

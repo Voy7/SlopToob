@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useSocketContext } from '@/contexts/SocketContext'
 import { useStreamContext } from '@/contexts/StreamContext'
 import useSocketOn from '@/hooks/useSocketOn'
 import useTooltip from '@/hooks/useTooltip'
@@ -30,18 +31,15 @@ const eventIcons = {
 }
 
 export default function Chat() {
+  const { socket, nickname, showNicknameModal, setShowNicknameModal } = useSocketContext()
   const {
-    socket,
     streamInfo,
     showClearChatModal,
     setShowClearChatModal,
     chatMessages,
     addChatMessage,
     clearChatMessages,
-    viewers,
-    nickname,
-    showNicknameModal,
-    setShowNicknameModal
+    viewers
   } = useStreamContext()
 
   const [message, setMessage] = useState<string>('')

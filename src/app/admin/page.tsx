@@ -14,15 +14,14 @@ import InfoBody from '@/components/stream/InfoBody'
 import History from '@/components/stream/History'
 import KeybindsListModal from '@/components/stream/KeybindsListModal'
 import StreamControls from '@/components/admin/StreamControls'
-import styles from './Stream.module.scss'
 
-const NicknameModal = dynamic(() => import('@/components/stream/NicknameModal'), { ssr: false })
 const AdminModal = dynamic(() => import('@/components/admin/AdminModal'), { ssr: true })
 
-export default async function StreamPage() {
+export default async function AdminPage() {
   const session = await getServerSession(authOptions)
   const authUser = session?.user
   if (!authUser) return <AuthExpired />
+  if (authUser.role < AuthRole.Admin) return <h1>No permission</h1>
 
   const cookieStore = cookies()
   const username = cookieStore.get('nickname')?.value
@@ -30,23 +29,9 @@ export default async function StreamPage() {
 
   return (
     <SocketProvider authUser={authUser} cookieUsername={cookieUsername}>
-      <StreamProvider>
-        <NicknameModal />
-        {authUser.role >= AuthRole.Admin && (
-          <AdminProvider>
-            <AdminModal />
-          </AdminProvider>
-        )}
-        <Header />
-        <div className={styles.videoAndChat}>
-          <Video />
-          <Chat />
-        </div>
-        <InfoBody />
-        <History />
-        <KeybindsListModal />
-        {/* {authUser.role >= AuthRole.Admin && <StreamControls />} */}
-      </StreamProvider>
+      <AdminProvider>
+        <AdminModal />
+      </AdminProvider>
     </SocketProvider>
   )
 }

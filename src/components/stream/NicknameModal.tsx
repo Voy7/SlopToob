@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useStreamContext } from '@/contexts/StreamContext'
+import { useSocketContext } from '@/contexts/SocketContext'
 import { setNicknameCookie } from '@/app/actions'
 import { Msg } from '@/lib/enums'
 import ActionModal from '@/components/ui/ActionModal'
@@ -9,7 +9,7 @@ import Button from '@/components/ui/Button'
 
 // Change username modal prompt
 export default function NicknameModal() {
-  const { socket, setNickname, showNicknameModal, setShowNicknameModal } = useStreamContext()
+  const { socket, setNickname, showNicknameModal, setShowNicknameModal } = useSocketContext()
 
   const [name, setName] = useState<string>('')
   const [error, setError] = useState<string | null>(null)

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useStreamContext } from '@/contexts/StreamContext'
+import { useSocketContext } from '@/contexts/SocketContext'
 import { useAdminContext } from '@/contexts/AdminContext'
 import useSocketOn from '@/hooks/useSocketOn'
 import { Msg } from '@/lib/enums'
@@ -13,7 +13,7 @@ import styles from './BumpersList.module.scss'
 import type { ClientBumper } from '@/typings/types'
 
 export default function BumpersList() {
-  const { socket } = useStreamContext()
+  const { socket } = useSocketContext()
   const { bumpers } = useAdminContext()
 
   const [showAddModal, setShowAddModal] = useState<boolean>(false)

@@ -152,14 +152,35 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
   return (
     <VideoContext.Provider value={context}>
       <div ref={containerRef} className={containerClass} onClick={backgroundClick}>
-        <video ref={videoRef} autoPlay>
+        <video ref={videoRef} autoPlay playsInline>
           Your browser does not support the video tag.
         </video>
         {streamInfo.streamTheme === 'Zoomer' && (
           <>
-            <video src="/theme-assets/zoomer-1.mp4" autoPlay loop muted></video>
-            <video src="/theme-assets/zoomer-2.mp4" autoPlay loop muted></video>
-            <video src="/theme-assets/zoomer-3.mp4" autoPlay loop muted></video>
+            <video
+              src="/theme-assets/zoomer-1.mp4"
+              autoPlay
+              loop
+              muted
+              playsInline
+              controls={false}
+            />
+            <video
+              src="/theme-assets/zoomer-2.mp4"
+              autoPlay
+              loop
+              muted
+              playsInline
+              controls={false}
+            />
+            <video
+              src="/theme-assets/zoomer-3.mp4"
+              autoPlay
+              loop
+              muted
+              playsInline
+              controls={false}
+            />
           </>
         )}
         {children}

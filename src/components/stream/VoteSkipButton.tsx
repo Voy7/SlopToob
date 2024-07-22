@@ -1,7 +1,7 @@
 'use client'
 
 import Button from '@/components/ui/Button'
-import styles from './VoteSkipButton.module.scss'
+import { useSocketContext } from '@/contexts/SocketContext'
 import { useStreamContext } from '@/contexts/StreamContext'
 import { useEffect, useState } from 'react'
 import { Msg } from '@/lib/enums'
@@ -9,7 +9,8 @@ import useSocketOn from '@/hooks/useSocketOn'
 
 // Vote skip button
 export default function VoteSkipButton() {
-  const { socket, streamInfo } = useStreamContext()
+  const { socket } = useSocketContext()
+  const { streamInfo } = useStreamContext()
 
   const [hasVoted, setHasVoted] = useState<boolean>(false)
   const [allowedInSeconds, setAllowedInSeconds] = useState<number>(-1)

@@ -1,6 +1,6 @@
 import dotenv from 'dotenv'
 import path from 'path'
-import Checklist from '@/server/Checklist'
+// import Checklist from '@/server/Checklist'
 
 const { parsed } = dotenv.config()
 const dirname = path.resolve()
@@ -52,15 +52,15 @@ export function checkRequiredVariables() {
 
   // If any required variables are missing, fail the check
   if (missing.length) {
-    Checklist.fail(
-      'environmentVariables',
-      'Missing required environment variables. ' +
-        '\n\n  Please create a .env file in the root directory with the following variables:\n'
-          .white +
-        missing.map((variable) => '  ■ '.gray + variable.yellow).join('\n')
-    )
+    // Checklist.fail(
+    //   'environmentVariables',
+    //   'Missing required environment variables. ' +
+    //     '\n\n  Please create a .env file in the root directory with the following variables:\n'
+    //       .white +
+    //     missing.map((variable) => '  ■ '.gray + variable.yellow).join('\n')
+    // )
     return
   }
 
-  Checklist.pass('environmentVariables', 'All required environment variables are set.')
+  // Checklist.pass('environmentVariables', 'All required environment variables are set.')
 }

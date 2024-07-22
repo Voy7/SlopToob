@@ -5,19 +5,14 @@ import { useSocketContext } from '@/contexts/SocketContext'
 import useSocketOn from '@/hooks/useSocketOn'
 import LoadingPage from '@/components/stream/LoadingPage'
 import { Msg } from '@/lib/enums'
-import type { Socket } from 'socket.io-client'
 import type { AuthUser } from '@/typings/types'
-import type { JoinStreamPayload, Viewer, ChatMessage, StreamInfo } from '@/typings/socket'
+import type { Viewer, ChatMessage, StreamInfo } from '@/typings/socket'
 
 const MAX_CHAT_MESSAGES = 250 // Max to display in chat / remove from array
 
 // Stream page context
 type ContextProps = {
   viewers: Viewer[]
-  nickname: string
-  setNickname: React.Dispatch<React.SetStateAction<string>>
-  showNicknameModal: boolean
-  setShowNicknameModal: React.Dispatch<React.SetStateAction<boolean>>
   showAdminModal: boolean
   setShowAdminModal: React.Dispatch<React.SetStateAction<boolean>>
   showKeybindsModal: boolean
@@ -29,22 +24,13 @@ type ContextProps = {
   clearChatMessages: () => void
   streamInfo: StreamInfo
   lastStreamUpdateTimestamp: number | null
-  socket: Socket
-}
-
-type Props = {
-  authUser: AuthUser
-  cookieUsername: string
-  children: React.ReactNode
 }
 
 // Context provider wrapper component
-export function StreamProvider({ authUser, cookieUsername, children }: Props) {
+export function StreamProvider({ children }: { children: React.ReactNode }) {
   const { socket } = useSocketContext()
 
   const [viewers, setViewers] = useState<Viewer[]>([])
-  const [nickname, setNickname] = useState<string>(cookieUsername)
-  const [showNicknameModal, setShowNicknameModal] = useState<boolean>(nickname === 'Anonymous')
   const [showAdminModal, setShowAdminModal] = useState<boolean>(false)
   const [showKeybindsModal, setShowKeybindsModal] = useState<boolean>(false)
   const [showClearChatModal, setShowClearChatModal] = useState<boolean>(false)
@@ -54,10 +40,7 @@ export function StreamProvider({ authUser, cookieUsername, children }: Props) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
 
   useEffect(() => {
-    socket.emit(Msg.JoinStream, {
-      username: cookieUsername,
-      password: authUser.password
-    } satisfies JoinStreamPayload)
+    socket.emit(Msg.JoinStream)
   }, [])
 
   useSocketOn(Msg.JoinStream, (isAuthenticated: boolean) => setIsAuthenticated(isAuthenticated))
@@ -90,10 +73,6 @@ export function StreamProvider({ authUser, cookieUsername, children }: Props) {
 
   const context: ContextProps = {
     viewers,
-    nickname,
-    setNickname,
-    showNicknameModal,
-    setShowNicknameModal,
     showAdminModal,
     setShowAdminModal,
     showKeybindsModal,
@@ -104,8 +83,7 @@ export function StreamProvider({ authUser, cookieUsername, children }: Props) {
     addChatMessage,
     clearChatMessages,
     streamInfo,
-    lastStreamUpdateTimestamp,
-    socket
+    lastStreamUpdateTimestamp
   }
 
   return <StreamContext.Provider value={context}>{children}</StreamContext.Provider>

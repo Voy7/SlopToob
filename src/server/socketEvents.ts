@@ -18,7 +18,7 @@ import VoteSkipHandler from '@/stream/VoteSkipHandler'
 import Chat from '@/stream/Chat'
 import type { Socket } from 'socket.io'
 import type {
-  JoinStreamPayload,
+  AuthenticatePayload,
   EditPlaylistNamePayload,
   EditPlaylistVideosPayload
 } from '@/typings/socket'
@@ -52,10 +52,10 @@ export const socketEvents: Record<string, EventOptions> = {
     }
   },
 
-  // Message sent from client on first connection, adds them to the viewers list
-  [Msg.JoinStream]: {
+  // First connection, only authenticates user, not in the stream / viewers list yet
+  [Msg.Authenticate]: {
     allowUnauthenticated: true,
-    run: (socket, payload: JoinStreamPayload) => {
+    run: (socket, payload: AuthenticatePayload) => {
       const existingClient = socketClients.find((c) => c.socket === socket)
       if (existingClient) return
 
@@ -65,9 +65,22 @@ export const socketEvents: Record<string, EventOptions> = {
       socketClients.push({
         socket: socket,
         username: isNicknameValid(payload.username) === true ? payload.username : 'Anonymous',
+        role: authRole,
         image: `/api/avatar/${generateSecret()}`,
-        role: authRole
+        isWatching: false
       })
+
+      socket.emit(Msg.Authenticate, true)
+    }
+  },
+
+  // Subscribe to get stream info updates, show on viewers list, etc.
+  [Msg.JoinStream]: {
+    run: (socket) => {
+      const client = socketClients.find((c) => c.socket === socket)
+      if (!client) return
+
+      client.isWatching = true
 
       VoteSkipHandler.resyncChanges()
       SocketUtils.broadcastViewersList()
@@ -81,7 +94,7 @@ export const socketEvents: Record<string, EventOptions> = {
       if (!Settings.sendJoinedStream) return
       Chat.send({
         type: Chat.Type.Joined,
-        message: `${payload.username} joined the stream.`
+        message: `${client.username} joined the stream.`
       })
     }
   },

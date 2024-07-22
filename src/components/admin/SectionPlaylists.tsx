@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useStreamContext } from '@/contexts/StreamContext'
+import { useSocketContext } from '@/contexts/SocketContext'
 import { useAdminContext } from '@/contexts/AdminContext'
 import { Msg } from '@/lib/enums'
 import Icon from '@/components/ui/Icon'
@@ -14,7 +14,7 @@ import useSocketOn from '@/hooks/useSocketOn'
 
 export default function SectionPlaylists() {
   const { playlists, selectedPlaylist, setSelectedPlaylist } = useAdminContext()
-  const { socket } = useStreamContext()
+  const { socket } = useSocketContext()
 
   const [showAddModal, setShowAddModal] = useState<boolean>(false)
   const [addLoading, setAddLoading] = useState<boolean>(false)

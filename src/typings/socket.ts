@@ -56,8 +56,9 @@ export type StreamInfo = (StreamPlaying | StreamPaused | StreamLoading | StreamE
 export type SocketClient = {
   socket: Socket
   username: string
-  image: string
   role: AuthRole
+  image: string
+  isWatching: boolean
 }
 
 export type Viewer = {
@@ -80,7 +81,7 @@ export type ChatMessage =
       message: string
     }
 
-export type JoinStreamPayload = {
+export type AuthenticatePayload = {
   username: string
   password: string
 }

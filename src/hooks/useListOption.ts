@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
-import { useStreamContext } from '@/contexts/StreamContext'
+import { useSocketContext } from '@/contexts/SocketContext'
 import type { SettingsList } from '@/stream/Settings'
 import type { ListOption } from '@/typings/types'
 
 export default function useListOption(settingKey: keyof SettingsList) {
   const settingID = `setting.${settingKey}`
 
-  const { socket } = useStreamContext()
+  const { socket } = useSocketContext()
 
   const [value, setValueState] = useState<ListOption | null>(null)
 

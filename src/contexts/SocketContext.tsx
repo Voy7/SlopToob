@@ -3,30 +3,63 @@
 import { useState, useContext, createContext, useEffect } from 'react'
 import io, { type Socket } from 'socket.io-client'
 import LoadingPage from '@/components/stream/LoadingPage'
+import { Msg } from '@/lib/enums'
+import type { AuthUser } from '@/typings/types'
+import type { AuthenticatePayload } from '@/typings/socket'
 
 // Stream page context
 type ContextProps = {
   socket: Socket
+  nickname: string
+  setNickname: React.Dispatch<React.SetStateAction<string>>
+  showNicknameModal: boolean
+  setShowNicknameModal: React.Dispatch<React.SetStateAction<boolean>>
+}
+
+type Props = {
+  authUser: AuthUser
+  cookieUsername: string
+  children: React.ReactNode
 }
 
 // Context provider wrapper component
-export function SocketProvider({ children }: { children: React.ReactNode }) {
-  const [socket, setSocket] = useState<Socket | null>(null)
+export function SocketProvider({ authUser, cookieUsername, children }: Props) {
+  const [socket, setSocket] = useState<Socket | null | false>(null)
+  const [nickname, setNickname] = useState<string>(cookieUsername)
+  const [showNicknameModal, setShowNicknameModal] = useState<boolean>(nickname === 'Anonymous')
 
   useEffect(() => {
     const socket = io()
 
-    socket.on('connect', () => setSocket(socket))
+    socket.on('connect', () => {
+      socket.emit(Msg.Authenticate, {
+        username: cookieUsername,
+        password: authUser.password
+      } satisfies AuthenticatePayload)
+    })
+
     socket.on('disconnect', () => setSocket(null))
+
+    socket.on(Msg.Authenticate, (isAuthenticated: boolean) => {
+      if (isAuthenticated) setSocket(socket)
+      else setSocket(false)
+    })
 
     return () => {
       socket.disconnect()
     }
   }, [])
 
-  if (!socket) return <LoadingPage text="Connecting..." />
+  if (socket === null) return <LoadingPage text="Connecting..." />
+  if (socket === false) return <LoadingPage text="Authentication failed." />
 
-  const context: ContextProps = { socket }
+  const context: ContextProps = {
+    socket,
+    nickname,
+    setNickname,
+    showNicknameModal,
+    setShowNicknameModal
+  }
 
   return <SocketContext.Provider value={context}>{children}</SocketContext.Provider>
 }

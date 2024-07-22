@@ -9,6 +9,7 @@ export const enum Msg {
   Disconnect = 'disconnect',
 
   // Normal client events
+  Authenticate = 'authenticate',
   JoinStream = 'join-stream',
   ChangeNickname = 'change-nickname',
   ViewersList = 'viewers-list',

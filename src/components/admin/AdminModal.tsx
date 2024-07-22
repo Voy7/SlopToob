@@ -65,14 +65,16 @@ export type SectionName = (typeof sections)[number]['name']
 
 // Admin panel modal
 export default function AdminModal() {
-  const { showAdminModal, setShowAdminModal } = useStreamContext()
+  // const { showAdminModal, setShowAdminModal } = useStreamContext()
   const { section } = useAdminContext()
 
   return (
     <Modal
       title="Admin Panel"
-      isOpen={showAdminModal}
-      setClose={() => setShowAdminModal(false)}
+      isOpen={true}
+      setClose={() => {}}
+      // isOpen={showAdminModal}
+      // setClose={() => setShowAdminModal(false)}
       canEscapeKeyClose={false}
     >
       <div className={styles.adminModal}>

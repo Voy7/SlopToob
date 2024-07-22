@@ -2,7 +2,7 @@
 
 import { useState, useContext, createContext, useEffect, useMemo } from 'react'
 import { useAdminContext } from '@/contexts/AdminContext'
-import { useStreamContext } from '@/contexts/StreamContext'
+import { useSocketContext } from '@/contexts/SocketContext'
 import useTooltip from '@/hooks/useTooltip'
 import { Msg } from '@/lib/enums'
 import Icon from '@/components/ui/Icon'
@@ -42,7 +42,7 @@ function PlaylistFilePickerProvider({ playlist }: { playlist: ClientPlaylist }) 
   const { fileTree: tree, setPlaylists, lastReceivedPlaylistsDate } = useAdminContext()
   if (!tree) return null
 
-  const { socket } = useStreamContext()
+  const { socket } = useSocketContext()
 
   const [activeMap, setActiveMap] = useState<Map<string, ActiveTreeNode>>(new Map())
   const [isSearching, setIsSearching] = useState<boolean>(false)
