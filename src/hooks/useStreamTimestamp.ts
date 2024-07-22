@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { useStreamContext } from '@/contexts/StreamContext'
 import { StreamState } from '@/lib/enums'
 import parseTimestamp from '@/lib/parseTimestamp'
+import type { BaseStreamInfo } from '@/typings/socket'
 
 type Return = {
   currentTimestamp: string
@@ -11,9 +11,10 @@ type Return = {
 }
 
 // Hook to get the current stream timestamp
-export default function useStreamTimestamp(): Return {
-  const { streamInfo, lastStreamUpdateTimestamp } = useStreamContext()
-
+export default function useStreamTimestamp(
+  streamInfo: BaseStreamInfo,
+  lastStreamUpdateTimestamp: number | null
+): Return {
   const [timestamp, setTimeStamp] = useState<number>(0)
 
   useEffect(() => {

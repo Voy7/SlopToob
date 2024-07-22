@@ -21,6 +21,7 @@ export const enum Msg {
   VoteSkipStatus = 'vote-skip-status',
 
   // Admin events
+  AdminStreamInfo = 'admin-stream-info',
   AdminRequestAllData = 'admin-request-all-data',
   AdminFileTree = 'admin-file-tree',
   AdminPlaylists = 'admin-playlists',

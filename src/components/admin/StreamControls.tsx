@@ -1,7 +1,7 @@
 'use client'
 
 import { useSocketContext } from '@/contexts/SocketContext'
-import { useStreamContext } from '@/contexts/StreamContext'
+import { useAdminContext } from '@/contexts/AdminContext'
 import { Msg, StreamState } from '@/lib/enums'
 import useStreamTimestamp from '@/hooks/useStreamTimestamp'
 import Icon from '@/components/ui/Icon'
@@ -9,11 +9,13 @@ import styles from './StreamControls.module.scss'
 
 // Admin stream controls
 export default function StreamControls() {
-  return null
   const { socket } = useSocketContext()
-  const { streamInfo } = useStreamContext()
+  const { streamInfo, lastReceivedPlaylistsDate } = useAdminContext()
 
-  const { currentTimestamp, totalTimestamp } = useStreamTimestamp()
+  const { currentTimestamp, totalTimestamp } = useStreamTimestamp(
+    streamInfo,
+    lastReceivedPlaylistsDate
+  )
 
   let name = 'Unknown State'
   if ('name' in streamInfo && streamInfo.name) name = streamInfo.name
@@ -41,7 +43,7 @@ export default function StreamControls() {
 
 function ActionButton() {
   const { socket } = useSocketContext()
-  const { streamInfo } = useStreamContext()
+  const { streamInfo } = useAdminContext()
 
   if (streamInfo.state === StreamState.Playing) {
     return (

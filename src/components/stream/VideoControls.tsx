@@ -28,9 +28,18 @@ export default function VideoControls() {
     containerElement,
     showActionPopup
   } = useVideoContext()
-  const { setShowClearChatModal, setShowKeybindsModal, setShowAdminModal } = useStreamContext()
+  const {
+    streamInfo,
+    lastStreamUpdateTimestamp,
+    setShowClearChatModal,
+    setShowKeybindsModal,
+    setShowAdminModal
+  } = useStreamContext()
 
-  const { currentTimestamp, totalTimestamp, currentSeconds, totalSeconds } = useStreamTimestamp()
+  const { currentTimestamp, totalTimestamp, currentSeconds, totalSeconds } = useStreamTimestamp(
+    streamInfo,
+    lastStreamUpdateTimestamp
+  )
 
   // Show overlay when mouse is moved on it, keep it visible for 3 seconds
   // when mouse is moved out or stops moving, hide it after 3 seconds

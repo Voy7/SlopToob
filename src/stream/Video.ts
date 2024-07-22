@@ -66,7 +66,7 @@ export default class Video {
   }
   private set state(newState: State) {
     this._state = newState
-    if (Player.playing === this) SocketUtils.broadcast(Msg.StreamInfo, Player.clientStreamInfo)
+    if (Player.playing === this) Player.broadcastStreamInfo()
     else
       SocketUtils.broadcastAdmin(
         Msg.AdminQueueList,
@@ -107,7 +107,7 @@ export default class Video {
 
       if (this.state === State.Errored) {
         this.finishedTimeout = setTimeout(() => this.end(), Settings.errorDisplaySeconds * 1000)
-        SocketUtils.broadcast(Msg.StreamInfo, Player.clientStreamInfo)
+        Player.broadcastStreamInfo()
         return
       }
 

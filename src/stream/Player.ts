@@ -12,7 +12,13 @@ import { getNextBumper } from '@/stream/bumpers'
 import { themes } from '@/stream/themes'
 import { StreamState, Msg, VideoState } from '@/lib/enums'
 import type { RichPlaylist, ClientPlaylist, ListOption, FileTreeNode } from '@/typings/types'
-import type { SocketClient, StreamInfo, StreamOptions } from '@/typings/socket'
+import type {
+  SocketClient,
+  ViewerStreamInfo,
+  StreamOptions,
+  BaseStreamInfo,
+  AdminStreamInfo
+} from '@/typings/socket'
 import packageJSON from '@package' assert { type: 'json' }
 import FileTreeHandler from './FileTreeHandler'
 
@@ -65,7 +71,7 @@ export default new (class Player {
 
     if (this.queue.length === 0) {
       // Display 'no videos' error
-      SocketUtils.broadcast(Msg.StreamInfo, this.clientStreamInfo)
+      this.broadcastStreamInfo()
       return
     }
 
@@ -174,20 +180,23 @@ export default new (class Player {
     )
   }
 
-  get clientStreamInfo(): StreamInfo {
+  broadcastStreamInfo() {
+    SocketUtils.broadcast(Msg.StreamInfo, this.clientStreamInfo)
+    SocketUtils.broadcastAdmin(Msg.AdminStreamInfo, this.adminStreamInfo)
+  }
+
+  private get baseStreamInfo(): BaseStreamInfo {
     if (!this.playing && this.queue.length === 0) {
       return {
         state: StreamState.Error,
-        error: 'No videos in queue.',
-        ...this.clientStreamOptions
+        error: 'No videos in queue.'
       }
     }
 
     if (!this.playing) {
       return {
         state: StreamState.Error,
-        error: 'No video playing.',
-        ...this.clientStreamOptions
+        error: 'No video playing.'
       }
     }
 
@@ -195,8 +204,7 @@ export default new (class Player {
       return {
         state: StreamState.Error,
         name: this.playing.name,
-        error: this.playing.error || 'Unknown error occurred.', // Should never be null, but just in case
-        ...this.clientStreamOptions
+        error: this.playing.error || 'Unknown error occurred.' // Should never be null, but just in case
       }
     }
 
@@ -208,19 +216,31 @@ export default new (class Player {
         path: `/stream-data/${this.playing.id}/video.m3u8`,
         isBumper: this.playing.isBumper,
         currentSeconds: this.playing.currentSeconds,
-        totalSeconds: this.playing.durationSeconds,
-        ...this.clientStreamOptions
+        totalSeconds: this.playing.durationSeconds
       }
     }
 
     return {
       state: StreamState.Loading,
-      name: this.playing.name,
+      name: this.playing.name
+    }
+  }
+
+  get clientStreamInfo(): ViewerStreamInfo {
+    return {
+      ...this.baseStreamInfo,
       ...this.clientStreamOptions
     }
   }
 
-  get clientStreamOptions(): StreamOptions {
+  get adminStreamInfo(): AdminStreamInfo {
+    return {
+      extraTEMP: true,
+      ...this.baseStreamInfo
+    }
+  }
+
+  private get clientStreamOptions(): StreamOptions {
     return {
       version: packageJSON.version,
       streamTheme: Settings.streamTheme,

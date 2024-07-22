@@ -183,6 +183,7 @@ export const socketEvents: Record<string, EventOptions> = {
       const playlists = Player.clientPlaylists
       const bumpers = getClientBumpers()
 
+      socket.emit(Msg.AdminStreamInfo, Player.adminStreamInfo)
       socket.emit(Msg.AdminFileTree, FileTreeHandler.tree)
       socket.emit(Msg.AdminPlaylists, playlists)
       socket.emit(Msg.AdminBumpersList, bumpers)

@@ -6,7 +6,7 @@ import useSocketOn from '@/hooks/useSocketOn'
 import LoadingPage from '@/components/stream/LoadingPage'
 import { Msg } from '@/lib/enums'
 import type { AuthUser } from '@/typings/types'
-import type { Viewer, ChatMessage, StreamInfo } from '@/typings/socket'
+import type { Viewer, ChatMessage, ViewerStreamInfo } from '@/typings/socket'
 
 const MAX_CHAT_MESSAGES = 250 // Max to display in chat / remove from array
 
@@ -22,7 +22,7 @@ type ContextProps = {
   chatMessages: (ChatMessage & { time: number })[]
   addChatMessage: (message: ChatMessage) => void
   clearChatMessages: () => void
-  streamInfo: StreamInfo
+  streamInfo: ViewerStreamInfo
   lastStreamUpdateTimestamp: number | null
 }
 
@@ -35,7 +35,7 @@ export function StreamProvider({ children }: { children: React.ReactNode }) {
   const [showKeybindsModal, setShowKeybindsModal] = useState<boolean>(false)
   const [showClearChatModal, setShowClearChatModal] = useState<boolean>(false)
   const [chatMessages, setChatMessages] = useState<(ChatMessage & { time: number })[]>([])
-  const [streamInfo, setStreamInfo] = useState<StreamInfo | null>(null)
+  const [streamInfo, setStreamInfo] = useState<ViewerStreamInfo | null>(null)
   const [lastStreamUpdateTimestamp, setLastStreamUpdateTimestamp] = useState<number | null>(null)
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
 
@@ -45,7 +45,7 @@ export function StreamProvider({ children }: { children: React.ReactNode }) {
 
   useSocketOn(Msg.JoinStream, (isAuthenticated: boolean) => setIsAuthenticated(isAuthenticated))
 
-  useSocketOn(Msg.StreamInfo, (info: StreamInfo) => {
+  useSocketOn(Msg.StreamInfo, (info: ViewerStreamInfo) => {
     setStreamInfo(info)
     setLastStreamUpdateTimestamp(Date.now())
   })

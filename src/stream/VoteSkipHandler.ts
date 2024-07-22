@@ -26,7 +26,7 @@ export default new (class VoteSkipHandler {
     this.allowedInTimeout = setTimeout(() => {
       this._isAllowed = true
       this.allowedInDate = null
-      SocketUtils.broadcast(Msg.StreamInfo, Player.clientStreamInfo)
+      Player.broadcastStreamInfo()
     }, Settings.voteSkipDelaySeconds * 1000)
   }
 
@@ -89,7 +89,7 @@ export default new (class VoteSkipHandler {
   }
 
   private processVotes() {
-    SocketUtils.broadcast(Msg.StreamInfo, Player.clientStreamInfo)
+    Player.broadcastStreamInfo()
     if (this.currentCount < this.requiredCount) return
     this.passVote()
   }
@@ -108,7 +108,7 @@ export default new (class VoteSkipHandler {
 
   // Called when settings change, client join/leaves, etc
   resyncChanges() {
-    SocketUtils.broadcast(Msg.StreamInfo, Player.clientStreamInfo)
+    Player.broadcastStreamInfo()
     if (this.currentCount < this.requiredCount) return
     this.passVote()
   }

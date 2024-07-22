@@ -50,8 +50,13 @@ export type StreamOptions = {
   }
 }
 
-export type StreamInfo = (StreamPlaying | StreamPaused | StreamLoading | StreamError) &
-  StreamOptions
+export type BaseStreamInfo = StreamPlaying | StreamPaused | StreamLoading | StreamError
+
+export type ViewerStreamInfo = BaseStreamInfo & StreamOptions
+
+export type AdminStreamInfo = {
+  extraTEMP: boolean
+} & BaseStreamInfo
 
 export type SocketClient = {
   socket: Socket

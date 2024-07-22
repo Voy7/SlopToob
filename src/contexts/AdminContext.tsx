@@ -5,7 +5,12 @@ import { sections, type SectionName } from '@/components/admin/AdminPanel'
 import { useStreamContext } from './StreamContext'
 import { Msg } from '@/lib/enums'
 import { ClientBumper, ClientPlaylist, ClientVideo, FileTreeNode } from '@/typings/types'
-import { ClientCacheStatus, ClientHistoryStatus, TranscodeClientVideo } from '@/typings/socket'
+import {
+  AdminStreamInfo,
+  ClientCacheStatus,
+  ClientHistoryStatus,
+  TranscodeClientVideo
+} from '@/typings/socket'
 import useSocketOn from '@/hooks/useSocketOn'
 import { useSocketContext } from './SocketContext'
 
@@ -13,6 +18,8 @@ import { useSocketContext } from './SocketContext'
 type ContextProps = {
   section: (typeof sections)[number]
   setSection: (sectionName: SectionName) => void
+  streamInfo: AdminStreamInfo
+  lastStreamUpdateTimestamp: number | null
   fileTree: FileTreeNode | null
   playlists: ClientPlaylist[]
   setPlaylists: React.Dispatch<React.SetStateAction<ClientPlaylist[]>>
@@ -32,6 +39,8 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const { socket } = useSocketContext()
 
   const [section, setSectionState] = useState<(typeof sections)[number]>(sections[0])
+  const [streamInfo, setStreamInfo] = useState<AdminStreamInfo | null>(null)
+  const [lastStreamUpdateTimestamp, setLastStreamUpdateTimestamp] = useState<number | null>(null)
   const [fileTree, setFileTree] = useState<FileTreeNode | null>(null)
   const [playlists, setPlaylists] = useState<ClientPlaylist[]>([])
   const [selectedPlaylist, setSelectedPlaylist] = useState<string | null>(null)
@@ -53,6 +62,10 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     socket.emit(Msg.AdminRequestAllData)
   }, [])
 
+  useSocketOn(Msg.AdminStreamInfo, (info: AdminStreamInfo) => {
+    setStreamInfo(info)
+    setLastStreamUpdateTimestamp(Date.now())
+  })
   useSocketOn(Msg.AdminFileTree, (tree: FileTreeNode) => setFileTree(tree))
   useSocketOn(Msg.AdminPlaylists, (playlists: ClientPlaylist[]) => {
     setPlaylists(playlists)
@@ -76,9 +89,14 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     if (!isPlaylistSelected && playlists[0]) setSelectedPlaylist(playlists[0].id)
   }, [selectedPlaylist, playlists])
 
+  // TODO: Add meaningful loading state
+  if (!streamInfo) return null
+
   const context: ContextProps = {
     section,
     setSection,
+    streamInfo,
+    lastStreamUpdateTimestamp,
     fileTree,
     playlists,
     setPlaylists,

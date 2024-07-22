@@ -65,10 +65,10 @@ function StateOverlay() {
 }
 
 function BumperOverlay() {
-  const { streamInfo } = useStreamContext()
+  const { streamInfo, lastStreamUpdateTimestamp } = useStreamContext()
   const { showControls } = useVideoContext()
 
-  const { currentSeconds, totalSeconds } = useStreamTimestamp()
+  const { currentSeconds, totalSeconds } = useStreamTimestamp(streamInfo, lastStreamUpdateTimestamp)
 
   // Only show if stream video is a bumper
   if (!('isBumper' in streamInfo) || !streamInfo.isBumper) return null

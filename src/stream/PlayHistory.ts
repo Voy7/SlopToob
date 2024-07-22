@@ -115,7 +115,7 @@ export default new (class PlayHistory {
   // Sync new display history settings
   async resyncChanges() {
     await this.populateHistory()
-    SocketUtils.broadcast(Msg.StreamInfo, Player.clientStreamInfo)
+    Player.broadcastStreamInfo()
     SocketUtils.broadcastAdmin(Msg.AdminHistoryStatus, this.clientHistoryStatus)
   }
 

@@ -1,5 +1,6 @@
 import { socketClients } from '@/server/socketClients'
 import { Msg, AuthRole } from '@/lib/enums'
+import Player from '@/stream/Player'
 import type { Viewer } from '@/typings/socket'
 
 // Server-side socket utilities

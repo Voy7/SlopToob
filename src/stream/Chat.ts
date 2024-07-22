@@ -11,6 +11,6 @@ export default new (class Chat {
   }
 
   resyncChanges() {
-    SocketUtils.broadcast(Msg.StreamInfo, Player.clientStreamInfo)
+    Player.broadcastStreamInfo()
   }
 })()
