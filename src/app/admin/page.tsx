@@ -7,15 +7,9 @@ import { AuthRole } from '@/lib/enums'
 import dynamic from 'next/dynamic'
 import { AdminProvider } from '@/contexts/AdminContext'
 import AuthExpired from '@/components/stream/AuthExpired'
-import Header from '@/components/stream/Header'
-import Video from '@/components/stream/Video'
-import Chat from '@/components/stream/Chat'
-import InfoBody from '@/components/stream/InfoBody'
-import History from '@/components/stream/History'
-import KeybindsListModal from '@/components/stream/KeybindsListModal'
-import StreamControls from '@/components/admin/StreamControls'
+import AdminPanel from '@/components/admin/AdminPanel'
 
-const AdminModal = dynamic(() => import('@/components/admin/AdminModal'), { ssr: true })
+// const AdminModal = dynamic(() => import('@/components/admin/AdminModal'), { ssr: true })
 
 export default async function AdminPage() {
   const session = await getServerSession(authOptions)
@@ -30,7 +24,7 @@ export default async function AdminPage() {
   return (
     <SocketProvider authUser={authUser} cookieUsername={cookieUsername}>
       <AdminProvider>
-        <AdminModal />
+        <AdminPanel />
       </AdminProvider>
     </SocketProvider>
   )

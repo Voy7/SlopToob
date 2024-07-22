@@ -23,6 +23,7 @@ export default class SocketUtils {
   static broadcastViewersList() {
     const viewers: Viewer[] = []
     for (const client of socketClients) {
+      if (!client.isWatching) continue
       viewers.push({
         socketID: client.socket.id,
         username: client.username,

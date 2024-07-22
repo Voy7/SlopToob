@@ -16,7 +16,6 @@ import KeybindsListModal from '@/components/stream/KeybindsListModal'
 import StreamControls from '@/components/admin/StreamControls'
 import styles from './Stream.module.scss'
 
-const NicknameModal = dynamic(() => import('@/components/stream/NicknameModal'), { ssr: false })
 const AdminModal = dynamic(() => import('@/components/admin/AdminModal'), { ssr: true })
 
 export default async function StreamPage() {
@@ -31,7 +30,6 @@ export default async function StreamPage() {
   return (
     <SocketProvider authUser={authUser} cookieUsername={cookieUsername}>
       <StreamProvider>
-        <NicknameModal />
         {authUser.role >= AuthRole.Admin && (
           <AdminProvider>
             <AdminModal />

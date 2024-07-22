@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useContext, createContext, useEffect } from 'react'
-import { sections, type SectionName } from '@/components/admin/AdminModal'
+import { sections, type SectionName } from '@/components/admin/AdminPanel'
 import { useStreamContext } from './StreamContext'
 import { Msg } from '@/lib/enums'
 import { ClientBumper, ClientPlaylist, ClientVideo, FileTreeNode } from '@/typings/types'

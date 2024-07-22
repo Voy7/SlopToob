@@ -9,7 +9,7 @@ import styles from './StreamControls.module.scss'
 
 // Admin stream controls
 export default function StreamControls() {
-  // return null
+  return null
   const { socket } = useSocketContext()
   const { streamInfo } = useStreamContext()
 

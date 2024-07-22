@@ -37,6 +37,8 @@ export const socketEvents: Record<string, EventOptions> = {
       if (!existingClient) return
       socketClients.splice(socketClients.indexOf(existingClient), 1)
 
+      if (!existingClient.isWatching) return
+
       VoteSkipHandler.removeVote(socket.id)
       VoteSkipHandler.resyncChanges()
       SocketUtils.broadcastViewersList()
@@ -78,7 +80,7 @@ export const socketEvents: Record<string, EventOptions> = {
   [Msg.JoinStream]: {
     run: (socket) => {
       const client = socketClients.find((c) => c.socket === socket)
-      if (!client) return
+      if (!client || client.isWatching) return
 
       client.isWatching = true
 

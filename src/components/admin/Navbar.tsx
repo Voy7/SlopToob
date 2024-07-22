@@ -1,7 +1,7 @@
 'use client'
 
 import { useAdminContext } from '@/contexts/AdminContext'
-import { sections } from '@/components/admin/AdminModal'
+import { sections } from '@/components/admin/AdminPanel'
 import styles from './Navbar.module.scss'
 
 // Admin modal navbar

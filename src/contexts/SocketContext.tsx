@@ -1,11 +1,14 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { useState, useContext, createContext, useEffect } from 'react'
 import io, { type Socket } from 'socket.io-client'
 import LoadingPage from '@/components/stream/LoadingPage'
 import { Msg } from '@/lib/enums'
 import type { AuthUser } from '@/typings/types'
 import type { AuthenticatePayload } from '@/typings/socket'
+
+const NicknameModal = dynamic(() => import('@/components/stream/NicknameModal'), { ssr: false })
 
 // Stream page context
 type ContextProps = {
@@ -61,7 +64,12 @@ export function SocketProvider({ authUser, cookieUsername, children }: Props) {
     setShowNicknameModal
   }
 
-  return <SocketContext.Provider value={context}>{children}</SocketContext.Provider>
+  return (
+    <SocketContext.Provider value={context}>
+      <NicknameModal />
+      {children}
+    </SocketContext.Provider>
+  )
 }
 
 // Create the context and custom hook for it
