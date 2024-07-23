@@ -26,7 +26,8 @@ export default function VideoControls() {
     setShowControls,
     videoElement,
     containerElement,
-    showActionPopup
+    showActionPopup,
+    toggleFullscreen
   } = useVideoContext()
   const {
     streamInfo,
@@ -69,95 +70,6 @@ export default function VideoControls() {
       clearTimeout(timeout)
     }
   }, [isPaused, containerElement])
-
-  // Keyboard shortcuts
-  useEffect(() => {
-    if (!containerElement || !videoElement) return
-
-    const keybinds = [
-      // SPACE / K - Play/Pause
-      {
-        key: [' ', 'k'],
-        action: () => (videoElement.paused ? videoElement.play() : videoElement.pause())
-      },
-
-      // UP / DOWN - Volume by 10%
-      {
-        key: ['arrowup'],
-        action: () => {
-          videoElement.volume = Math.min(videoElement.volume + VOLUME_STEP_PERCENT, 1)
-          showActionPopup('volume', `${Math.round(videoElement.volume * 100)}%`)
-        }
-      },
-      {
-        key: ['arrowdown'],
-        action: () => {
-          videoElement.volume = Math.max(videoElement.volume - VOLUME_STEP_PERCENT, 0)
-          showActionPopup('volume', `${Math.round(videoElement.volume * 100)}%`)
-        }
-      },
-
-      // M - Toggle Mute
-      {
-        key: ['m'],
-        action: () => {
-          videoElement.muted = !videoElement.muted
-          showActionPopup(
-            videoElement.muted ? 'no-volume' : 'volume',
-            videoElement.muted ? 'MUTED' : 'UNMUTED'
-          )
-        }
-      },
-
-      // F - Toggle Fullscreen
-      { key: ['f'], action: toggleFullscreen },
-
-      // C - Clear Chat
-      { key: ['c'], action: () => setShowClearChatModal(true) },
-
-      // V - Vote Skip
-      {
-        key: ['v'],
-        action: () => {
-          const voteSkipButton = document.querySelector('[data-vote-button]') as HTMLElement
-          if (voteSkipButton) voteSkipButton.click()
-        }
-      },
-
-      // A - Show Admin Panel
-      { key: ['a'], action: () => setShowAdminModal(true) },
-
-      // '/' / L - Show keybinds list
-      { key: ['/', 'l'], action: () => setShowKeybindsModal(true) }
-    ] satisfies { key: string[]; action: () => void }[]
-
-    function keydown(event: KeyboardEvent) {
-      // No Ctrl/Alt/Shift keybinds
-      if (event.ctrlKey || event.altKey || event.shiftKey) return
-      // Only allow keybinds if not typing in an input
-      if (
-        document.activeElement?.tagName === 'INPUT' &&
-        document.activeElement?.getAttribute('type') !== 'range'
-      )
-        return
-      if (document.activeElement?.tagName === 'TEXTAREA') return
-
-      for (const keybind of keybinds) {
-        if (!keybind.key.includes(event.key.toLowerCase())) continue
-        keybind.action()
-        event.preventDefault()
-      }
-    }
-
-    document.addEventListener('keydown', keydown)
-
-    return () => document.removeEventListener('keydown', keydown)
-  }, [containerElement, videoElement])
-
-  function toggleFullscreen() {
-    if (document.fullscreenElement) document.exitFullscreen()
-    else containerElement.requestFullscreen()
-  }
 
   return (
     <div

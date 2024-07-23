@@ -17,6 +17,7 @@ type ContextProps = {
   setShowControls: React.Dispatch<React.SetStateAction<boolean>>
   actionPopup: { id: number; icon: IconNames; text?: string } | null
   showActionPopup: (icon: IconNames, text?: string) => void
+  toggleFullscreen: () => void
   videoElement: HTMLVideoElement
   containerElement: HTMLDivElement
 }
@@ -132,6 +133,11 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
     setActionPopup({ id: Date.now(), icon, text })
   }
 
+  function toggleFullscreen() {
+    if (document.fullscreenElement) document.exitFullscreen()
+    else containerRef.current?.requestFullscreen()
+  }
+
   const context: ContextProps = {
     isPaused,
     setIsPaused,
@@ -141,6 +147,7 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
     setShowControls,
     actionPopup,
     showActionPopup,
+    toggleFullscreen,
     videoElement: videoRef.current!,
     containerElement: containerRef.current!
   }
