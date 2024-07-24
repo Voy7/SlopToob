@@ -12,14 +12,19 @@ const config: Config = {
         text1: 'var(--text-color-1)',
         text2: 'var(--text-color-2)',
         text3: 'var(--text-color-3)',
-        text4: 'var(--text-color-4)',
+
         bg1: 'var(--bg-color-1)',
         bg2: 'var(--bg-color-2)',
         bg3: 'var(--bg-color-3)',
         bg4: 'var(--bg-color-4)',
+
         border1: 'var(--border-color-1)',
         border2: 'var(--border-color-2)',
-        border3: 'var(--border-color-3)'
+        border3: 'var(--border-color-3)',
+
+        error: 'var(--error-color)',
+        success: 'var(--success-color)',
+        select: 'var(--select-color)'
       },
       backgroundImage: {
         // vertical  gradient where bottom 10% is red, rest is black
