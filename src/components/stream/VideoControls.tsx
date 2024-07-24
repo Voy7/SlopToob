@@ -10,6 +10,7 @@ import useTooltip from '@/hooks/useTooltip'
 import Icon from '@/components/ui/Icon'
 import Tooltip from '@/components/ui/Tooltip'
 import { twMerge } from 'tailwind-merge'
+import RangeSliderInput from '../ui/RangeSliderInput'
 
 const OVERLAY_MOUSE_TIMEOUT = 3000
 
@@ -33,6 +34,12 @@ export default function VideoControls() {
     streamInfo,
     lastStreamUpdateTimestamp
   )
+
+  const volumeBtnTooltip = useTooltip('top', 25)
+  const volumeSliderTooltip = useTooltip('top', 25)
+  const fullscreenTooltip = useTooltip('top-end', 25)
+
+  // const nicknameTooltip = useTooltip('bottom-end')
 
   // Show overlay when mouse is moved on it, keep it visible for 3 seconds
   // when mouse is moved out or stops moving, hide it after 3 seconds
@@ -66,7 +73,7 @@ export default function VideoControls() {
   return (
     <div
       className={twMerge(
-        'absolute bottom-0 left-0 flex w-full flex-col shadow-[0_0.5rem_1rem_rgba(0,0,0,0.5)] transition-[150ms]',
+        'absolute bottom-0 left-0 flex w-full flex-col bg-[rgba(0,0,0,0.5)] shadow-[0_0.5rem_1rem_rgba(0,0,0,0.5)] transition-[150ms]',
         !showControls && 'translate-y-full opacity-0'
       )}
       onClick={(event) => event.stopPropagation()}
@@ -88,20 +95,24 @@ export default function VideoControls() {
           <p>
             {currentTimestamp} / {totalTimestamp}
           </p>
-          <ActionButton className="group gap-1">
-            <Icon
-              name={volume === 0 ? 'no-volume' : 'volume'}
-              onClick={() => (videoElement.muted = !videoElement.muted)}
-            />
-            <div className="flex w-0 items-center gap-2 opacity-0 transition-[150ms] ease-in-out group-hover:w-20 group-hover:opacity-100">
-              <input
-                className="h-full w-full appearance-none border-[none] text-base transition-[150ms] ease-in-out [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-red-500 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-slate-500"
-                type="range"
+          <div className="group flex items-center gap-1">
+            <div {...volumeBtnTooltip.anchorProps}>
+              <Tooltip {...volumeBtnTooltip.tooltipProps}>Toggle Volume (m)</Tooltip>
+              <ActionButton onClick={() => (videoElement.muted = !videoElement.muted)}>
+                <Icon name={volume === 0 ? 'no-volume' : 'volume'} />
+              </ActionButton>
+            </div>
+            <div {...volumeSliderTooltip.anchorProps}>
+              <Tooltip {...volumeSliderTooltip.tooltipProps}>
+                Volume - {Math.round(volume)}%
+              </Tooltip>
+              <RangeSliderInput
                 value={volume}
-                onChange={(event) => (videoElement.volume = parseInt(event.target.value) / 100)}
+                onChange={(value) => (videoElement.volume = value / 100)}
+                className="h-12 w-0 opacity-0 transition-[150ms] ease-in-out group-hover:w-20 group-hover:opacity-100"
               />
             </div>
-          </ActionButton>
+          </div>
         </div>
         {authUser && authUser.role >= AuthRole.Admin && (
           <div className="flex items-center gap-2">
@@ -110,7 +121,8 @@ export default function VideoControls() {
             </button> */}
           </div>
         )}
-        <div className="flex items-center gap-2">
+        <div {...fullscreenTooltip.anchorProps}>
+          <Tooltip {...fullscreenTooltip.tooltipProps}>Toggle Fullscreen (f)</Tooltip>
           <ActionButton onClick={toggleFullscreen}>
             <Icon name="fullscreen" />
           </ActionButton>
@@ -120,14 +132,11 @@ export default function VideoControls() {
   )
 }
 
-function ActionButton({ ...props }: React.ComponentProps<'button'>) {
+function ActionButton({ className, ...props }: React.ComponentProps<'button'>) {
   return (
     <button
       {...props}
-      className={twMerge(
-        'flex cursor-pointer items-center justify-center border-[none] p-2 text-[2rem] text-[white]',
-        props.className
-      )}
+      className={twMerge('border-[none] p-2 text-[2rem] text-[white]', className)}
     />
   )
 }
@@ -136,34 +145,36 @@ function PausePlayButton() {
   const { isPaused, videoElement } = useVideoContext()
   const { streamInfo } = useStreamContext()
 
+  const tooltip = useTooltip('top-start', 25)
+
   if (streamInfo.state === StreamState.Playing) {
     if (isPaused) {
       return (
-        <ActionButton onClick={() => videoElement.play()}>
-          <Icon name="play" />
-        </ActionButton>
+        <div {...tooltip.anchorProps}>
+          <Tooltip {...tooltip.tooltipProps}>Unpause (k)</Tooltip>
+          <ActionButton onClick={() => videoElement.play()}>
+            <Icon name="play" />
+          </ActionButton>
+        </div>
       )
     }
 
     return (
-      <ActionButton onClick={() => videoElement.pause()}>
-        <Icon name="pause" />
-      </ActionButton>
+      <div {...tooltip.anchorProps}>
+        <Tooltip {...tooltip.tooltipProps}>Pause - Only for you (k)</Tooltip>
+        <ActionButton onClick={() => videoElement.pause()}>
+          <Icon name="pause" />
+        </ActionButton>
+      </div>
     )
   }
 
-  return <StreamPausedButton />
-}
-
-function StreamPausedButton() {
-  const tooltip = useTooltip('top-start')
-
   return (
-    <>
-      <ActionButton className="text-error cursor-not-allowed" {...tooltip.anchorProps}>
+    <div {...tooltip.anchorProps}>
+      <Tooltip {...tooltip.tooltipProps}>Stream Paused - Wait for Admin</Tooltip>
+      <ActionButton className="cursor-not-allowed text-error">
         <Icon name="pause" />
       </ActionButton>
-      <Tooltip {...tooltip.tooltipProps}>Stream Paused</Tooltip>
-    </>
+    </div>
   )
 }

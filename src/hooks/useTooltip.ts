@@ -2,11 +2,11 @@ import { useState } from 'react'
 import { useFloating, offset } from '@floating-ui/react-dom'
 import type { Placement } from '@/components/ui/Tooltip'
 
-export default function useTooltip(placement: Placement = 'bottom') {
+export default function useTooltip(placement: Placement = 'bottom', mainOffset: number = 10) {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const floating = useFloating({
     placement: placement,
-    middleware: [offset(10)]
+    middleware: [offset(mainOffset)]
   })
 
   return {
