@@ -4,6 +4,7 @@ const config: Config = {
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/contexts/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}'
   ],
   theme: {
@@ -33,6 +34,10 @@ const config: Config = {
         // horizontal gradient aqua -> magenta
         'navbar-underline-gradient': 'linear-gradient(to right, #00FFFF, #FF00FF)',
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))'
+      },
+      spacing: {
+        'desktop-video-width': 'calc(100% - var(--chat-width))',
+        'mobile-video-height': 'calc(100vw * 9 / 16)'
       }
     }
   },

@@ -4,8 +4,9 @@ import Hls from 'hls.js'
 import { useContext, createContext, useState, useRef, useEffect } from 'react'
 import { useStreamContext } from '@/contexts/StreamContext'
 import { StreamState } from '@/lib/enums'
-import styles from '@/components/stream/video/Video.module.scss'
+// import styles from '@/components/stream/video/Video.module.scss'
 import type { IconNames } from '@/components/ui/Icon'
+import { twMerge } from 'tailwind-merge'
 
 // Video player context
 type ContextProps = {
@@ -152,13 +153,17 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
     containerElement: containerRef.current!
   }
 
-  let containerClass: string = styles.videoContainer
-  if (hideCursor) containerClass += ` ${styles.hideCursor}`
-  if (streamInfo.streamTheme === 'Zoomer') containerClass += ` ${styles.zoomerThemeGrid}`
-
   return (
     <VideoContext.Provider value={context}>
-      <div ref={containerRef} className={containerClass} onClick={backgroundClick}>
+      <div
+        ref={containerRef}
+        className={twMerge(
+          'h-mobile-video-height md:w-desktop-video-width relative flex w-full items-center justify-center overflow-hidden bg-black md:h-full',
+          hideCursor && 'cursor-none',
+          streamInfo.streamTheme === 'Zoomer' && 'grid grid-cols-[1fr_1fr] grid-rows-[1fr_1fr]'
+        )}
+        onClick={backgroundClick}
+      >
         <video ref={videoRef} autoPlay playsInline>
           Your browser does not support the video tag.
         </video>
