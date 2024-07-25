@@ -10,12 +10,12 @@ import useTooltip from '@/hooks/useTooltip'
 import Icon from '@/components/ui/Icon'
 import Tooltip from '@/components/ui/Tooltip'
 import { twMerge } from 'tailwind-merge'
-import RangeSliderInput from '../ui/RangeSliderInput'
+import RangeSliderInput from '../../ui/RangeSliderInput'
 
 const OVERLAY_MOUSE_TIMEOUT = 3000
 
 // Video bottom controls
-export default function VideoControls() {
+export default function VideoControls({ scrubber }: { scrubber: JSX.Element }) {
   const session = useSession()
   const authUser = session.data?.user
 
@@ -78,24 +78,14 @@ export default function VideoControls() {
       )}
       onClick={(event) => event.stopPropagation()}
     >
-      {/* <progress
-        className="webkit h-[5px] w-full appearance-none border-[none] bg-[rgba(136,136,136,0.5)] transition-[150ms]"
-        value={currentSeconds}
-        max={totalSeconds || 1}
-      /> */}
-      <div className="h-[0.5rem] w-full bg-[rgba(136,136,136,0.5)]">
-        <div
-          className="h-full bg-blue-500 transition-[width] duration-150"
-          style={{ width: `${(currentSeconds / totalSeconds) * 100}%` }}
-        />
-      </div>
+      {scrubber}
       <div className="flex items-center justify-between p-2">
         <div className="flex items-center gap-2">
           <PausePlayButton />
-          <p>
+          <p className="cursor-default text-lg text-slate-200">
             {currentTimestamp} / {totalTimestamp}
           </p>
-          <div className="group flex items-center gap-1">
+          <div className="group flex items-center pr-8">
             <div {...volumeBtnTooltip.anchorProps}>
               <Tooltip {...volumeBtnTooltip.tooltipProps}>Toggle Volume (m)</Tooltip>
               <ActionButton onClick={() => (videoElement.muted = !videoElement.muted)}>
@@ -108,8 +98,11 @@ export default function VideoControls() {
               </Tooltip>
               <RangeSliderInput
                 value={volume}
-                onChange={(value) => (videoElement.volume = value / 100)}
-                className="h-12 w-0 opacity-0 transition-[150ms] ease-in-out group-hover:w-20 group-hover:opacity-100"
+                onChange={(value) => {
+                  videoElement.volume = value / 100
+                  videoElement.muted = false
+                }}
+                className="h-[3.5rem] w-0 opacity-0 transition-[150ms] ease-in-out group-hover:w-20 group-hover:opacity-100"
               />
             </div>
           </div>
@@ -136,7 +129,7 @@ function ActionButton({ className, ...props }: React.ComponentProps<'button'>) {
   return (
     <button
       {...props}
-      className={twMerge('border-[none] p-2 text-[2rem] text-[white]', className)}
+      className={twMerge('border-[none] p-2 text-4xl text-slate-200 hover:text-white', className)}
     />
   )
 }
@@ -172,7 +165,7 @@ function PausePlayButton() {
   return (
     <div {...tooltip.anchorProps}>
       <Tooltip {...tooltip.tooltipProps}>Stream Paused - Wait for Admin</Tooltip>
-      <ActionButton className="cursor-not-allowed text-error">
+      <ActionButton className="cursor-not-allowed text-error hover:text-error">
         <Icon name="pause" />
       </ActionButton>
     </div>

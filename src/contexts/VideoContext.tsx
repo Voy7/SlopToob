@@ -4,7 +4,7 @@ import Hls from 'hls.js'
 import { useContext, createContext, useState, useRef, useEffect } from 'react'
 import { useStreamContext } from '@/contexts/StreamContext'
 import { StreamState } from '@/lib/enums'
-import styles from '@/components/stream/Video.module.scss'
+import styles from '@/components/stream/video/Video.module.scss'
 import type { IconNames } from '@/components/ui/Icon'
 
 // Video player context
