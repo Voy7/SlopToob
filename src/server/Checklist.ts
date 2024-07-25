@@ -1,5 +1,6 @@
 import 'colors'
 import packageJSON from '@package' assert { type: 'json' }
+import Logger from './Logger'
 
 const HEADER_MSG = `Starting up SlopToob v${packageJSON.version}...`.cyan
 
@@ -55,16 +56,17 @@ export default new (class Checklist {
     // If all checks have passed, print success message
     if (Object.values(checks).some((v) => v !== CheckStatus.Passed)) return
     const elapsedSeconds = ((Date.now() - START_TIME) / 1000).toFixed(2)
-    printStatus(`All checks passed in ${elapsedSeconds}s`.green)
+    printStatus(`All checks passed in ${elapsedSeconds}s.`.white.bgGreen)
   }
 
-  fail(check: CheckKey, message: string = '') {
+  fail(check: CheckKey, message: string = '', detailedError?: any) {
     checks[check] = CheckStatus.Failed
     updateCheckLine(
       check,
-      `  X `.red + `${CHECKS[check].padEnd(MAX_CHECK_LENGTH, ' ')}` + ` | ${message}`.gray
+      `  X `.red + `${CHECKS[check].padEnd(MAX_CHECK_LENGTH, ' ')}` + ' | '.gray + `${message}`.red
     )
-    printStatus(`Initialization failed, aborting startup!`.red)
+    printStatus(`Initialization failed, aborting startup!`.white.bgRed)
+    if (detailedError) Logger.error(detailedError)
     process.exit(1) // Exit process on failure
   }
 })()
@@ -73,7 +75,7 @@ console.clear()
 console.log(
   `\n  ${HEADER_MSG}\n\n` +
     `${Object.values(CHECKS)
-      .map((check) => `  ○ `.gray + check)
+      .map((check) => `  ○ `.gray + check.padEnd(MAX_CHECK_LENGTH, ' ') + ' | '.gray)
       .join('\n')}\n\n\n`
 )
 
@@ -110,6 +112,8 @@ let loadingInterval = setInterval(() => {
 
 function printStatus(message: string) {
   process.stdout.write('\u001b[s')
+  process.stdout.cursorTo(0, STATUS_LINE)
+  process.stdout.write(' '.repeat(100)) // Clear line
   process.stdout.cursorTo(0, STATUS_LINE)
   process.stdout.write(`  ${message}`)
   process.stdout.write('\u001b[u')

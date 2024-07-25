@@ -5,7 +5,7 @@ import 'colors'
 // Start servers once following checks are passed
 async function main() {
   const { checkRequiredVariables } = await import('@/EnvVariables')
-  checkRequiredVariables()
+  await checkRequiredVariables()
 
   const { default: Settings } = await import('@/stream/Settings')
   await Settings.onReady()

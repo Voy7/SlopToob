@@ -29,7 +29,7 @@ export default function AdminScrubber() {
         const rect = event.currentTarget.getBoundingClientRect()
         const x = event.clientX - rect.left
         const percentage = x / rect.width
-        setSelectedSeconds(Math.round(percentage * totalSeconds))
+        setSelectedSeconds(percentage * totalSeconds)
       }}
       onClick={(event) => {
         const rect = event.currentTarget.getBoundingClientRect()
@@ -58,7 +58,7 @@ export default function AdminScrubber() {
             {parseTimestamp(selectedSeconds)}
           </div>
           <div
-            className="pointer-events-none absolute top-0 h-full w-1 -translate-x-1/2 transform bg-white"
+            className="pointer-events-none absolute top-0 h-full w-[2px] -translate-x-1/2 transform bg-black"
             style={{ left: `${(selectedSeconds / totalSeconds) * 100}%` }}
           />
         </>
