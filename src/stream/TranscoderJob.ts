@@ -1,15 +1,15 @@
 import fs from 'fs'
 import fsAsync from 'fs/promises'
 import path from 'path'
-import ffmpeg, { TRANSCODE_ARGS } from '@/lib/ffmpeg'
 import generateSecret from '@/lib/generateSecret'
-import Env from '@/EnvVariables'
+import ffmpeg from '@/lib/ffmpeg'
 import Logger from '@/server/Logger'
+import TranscoderCommand from '@/stream/TranscoderCommand'
 import TranscoderQueue from '@/stream/TranscoderQueue'
 import Settings from './Settings'
-import type Video from '@/stream/Video'
 import SocketUtils from '@/lib/SocketUtils'
 import { JobState, Msg } from '@/lib/enums'
+import type Video from '@/stream/Video'
 import type { FfmpegCommand } from 'fluent-ffmpeg'
 
 // Represents a transcoding job
@@ -19,7 +19,7 @@ export default class TranscoderJob {
   // isTranscoding: boolean = false
   duration: number = 0
   progressPercentage: number = 0
-  private ffmpegCommand: FfmpegCommand = null as any // Typescript is dumb, this is initialized in constructor
+  private command: TranscoderCommand = null as any // Typescript is dumb, this is initialized in constructor
   private onInitializedCallbacks: Array<() => void> = []
   private onStreamableReadyCallbacks: Array<() => void> = []
   private onTranscodeFinishedCallbacks: Array<() => void> = []
@@ -51,10 +51,9 @@ export default class TranscoderJob {
   initialize() {
     this.state = JobState.Initializing
 
-    this.ffmpegCommand = ffmpeg(this.video.inputPath).addOptions(TRANSCODE_ARGS)
-    this.ffmpegCommand.output(path.join(this.video.outputPath, '/video.m3u8'))
+    this.command = new TranscoderCommand(this)
 
-    this.ffmpegCommand.on('end', async () => {
+    this.command.onEnd(async () => {
       // For some stupid reason, 'error' fires after 'end'. So wait a couple ms to make sure errors are handled
       await new Promise((resolve) => setTimeout(resolve, 1000))
       // console.log(`ffmpeg end`.yellow, this.error)
@@ -88,7 +87,7 @@ export default class TranscoderJob {
     })
 
     // If ffmpeg error occurs, Note this gets called after 'end' event
-    this.ffmpegCommand.on('error', async (error) => {
+    this.command.onError(async (error) => {
       Logger.error(`[Video] Transcoding error ${this.video.name}:`, error)
       this.error = 'Transcoding error occurred. :('
 
@@ -99,7 +98,7 @@ export default class TranscoderJob {
     })
 
     // When first segment is created
-    this.ffmpegCommand.on('progress', async (progress) => {
+    this.command.onProgress(async (progress) => {
       if (!this.isReady) {
         if (!fs.existsSync(this.m3u8Path)) return
         this.isReady = true
@@ -191,7 +190,7 @@ export default class TranscoderJob {
       this.onError(resolve)
 
       fs.mkdirSync(this.video.outputPath, { recursive: true })
-      this.ffmpegCommand.run()
+      this.command.run()
     })
   }
 
@@ -209,7 +208,7 @@ export default class TranscoderJob {
 
     if (this.state === JobState.Transcoding) {
       this.state = JobState.CleaningUp
-      this.ffmpegCommand.kill('SIGKILL')
+      this.command.kill()
       return // Cleanup will be called again when ffmpeg command finishes
     }
 

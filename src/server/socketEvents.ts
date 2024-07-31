@@ -335,5 +335,13 @@ export const socketEvents: Record<string, EventOptions> = {
       if (!client || !Settings.sendAdminSkip) return
       Chat.send({ type: Chat.Type.AdminSkip, message: `${client.username} skipped the video.` })
     }
+  },
+
+  // Admin seeks to a specific time (seconds) in the video
+  [Msg.AdminSeekTo]: {
+    adminOnly: true,
+    run: (socket, seconds: number) => {
+      Player.pause()
+    }
   }
 }

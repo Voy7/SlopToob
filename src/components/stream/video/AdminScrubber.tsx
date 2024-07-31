@@ -2,11 +2,14 @@
 
 import { useState } from 'react'
 import { useStreamContext } from '@/contexts/StreamContext'
+import { useSocketContext } from '@/contexts/SocketContext'
 import useStreamTimestamp from '@/hooks/useStreamTimestamp'
 import parseTimestamp from '@/lib/parseTimestamp'
+import { Msg } from '@/lib/enums'
 
 export default function AdminScrubber() {
   const { streamInfo, lastStreamUpdateTimestamp } = useStreamContext()
+  const { socket } = useSocketContext()
 
   const { currentSeconds, totalSeconds } = useStreamTimestamp(streamInfo, lastStreamUpdateTimestamp)
 
@@ -36,7 +39,7 @@ export default function AdminScrubber() {
         const x = event.clientX - rect.left
         const percentage = x / rect.width
         const seconds = percentage * totalSeconds
-        console.log('Seek to', seconds)
+        socket.emit(Msg.AdminSeekTo, seconds)
       }}
     >
       {isHovered && (
