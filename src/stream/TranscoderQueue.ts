@@ -46,8 +46,7 @@ export default new (class TranscoderQueue {
         id: job.id,
         state: job.state,
         name: job.video.name,
-        inputPath: job.video.inputPath,
-        progressPercentage: job.progressPercentage
+        inputPath: job.video.inputPath
       })
     }
     return list

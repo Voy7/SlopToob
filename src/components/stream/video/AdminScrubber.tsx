@@ -1,14 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { useStreamContext } from '@/contexts/StreamContext'
 import { useSocketContext } from '@/contexts/SocketContext'
 import useStreamTimestamp from '@/hooks/useStreamTimestamp'
 import parseTimestamp from '@/lib/parseTimestamp'
 import { Msg } from '@/lib/enums'
+import { useAdminContext } from '@/contexts/AdminContext'
 
 export default function AdminScrubber() {
-  const { streamInfo, lastStreamUpdateTimestamp } = useStreamContext()
+  const { streamInfo, lastStreamUpdateTimestamp } = useAdminContext()
   const { socket } = useSocketContext()
 
   const { currentSeconds, totalSeconds } = useStreamTimestamp(streamInfo, lastStreamUpdateTimestamp)
@@ -16,7 +16,9 @@ export default function AdminScrubber() {
   const [isHovered, setIsHovered] = useState<boolean>(false)
   const [selectedSeconds, setSelectedSeconds] = useState<number>(0)
 
-  const transcodedPercent = 50
+  const transcodedPercent = streamInfo.transcodedSeconds
+    ? (streamInfo.transcodedSeconds / totalSeconds) * 100
+    : 0
 
   // Limit max left/right to avoid overflowing scrubber
   let hoverTimestampPos = (selectedSeconds / totalSeconds) * 100

@@ -6,16 +6,12 @@ export type AuthUser = {
   role: AuthRole
 }
 
-export type StreamState = {
-  playingID: string | null
-  timeSeconds: number
-  isPaused: boolean
-  canSkip: boolean
-}
-
-export type ChangeUsernamePayload = {
-  username: string
-  socketID: string
+export type ProgressInfo = {
+  percent: number
+  availableSeconds: number
+  availableTimestamp: string
+  fpsRate: number
+  frames: number
 }
 
 export type FileTreeNode = {
@@ -46,11 +42,6 @@ export type ClientBumper = {
   name: string
   path: string
 }
-
-// export type ListOption0 = {
-//   name: string,
-//   id: string
-// }
 
 export type ListOption = {
   list: {

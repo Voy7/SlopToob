@@ -26,7 +26,7 @@ export default class Video {
   private passedDurationSeconds: number = 0
   private finishedCallbacks: (() => void)[] = []
   private finishedTimeout: NodeJS.Timeout | null = null
-  private job: TranscoderJob
+  readonly job: TranscoderJob
 
   constructor(
     path: string,

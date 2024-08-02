@@ -29,20 +29,34 @@ export default async function StreamPage() {
   return (
     <SocketProvider authUser={authUser} cookieUsername={cookieUsername}>
       <StreamProvider>
-        {authUser.role >= AuthRole.Admin && (
-          <AdminProvider>
-            <AdminModal />
-          </AdminProvider>
-        )}
-        <Header />
-        <div className={styles.videoAndChat}>
-          <Video />
-          <Chat />
-        </div>
-        <InfoBody />
-        <History />
-        {/* {authUser.role >= AuthRole.Admin && <StreamControls />} */}
+        <AdminProviderWrapper authRole={authUser.role}>
+          <Header />
+          <div className={styles.videoAndChat}>
+            <Video />
+            <Chat />
+          </div>
+          <InfoBody />
+          <History />
+          {/* {authUser.role >= AuthRole.Admin && <StreamControls />} */}
+        </AdminProviderWrapper>
       </StreamProvider>
     </SocketProvider>
+  )
+}
+
+function AdminProviderWrapper({
+  authRole,
+  children
+}: {
+  authRole: AuthRole
+  children: React.ReactNode
+}) {
+  if (authRole < AuthRole.Admin) return children
+
+  return (
+    <AdminProvider>
+      <AdminModal />
+      {children}
+    </AdminProvider>
   )
 }

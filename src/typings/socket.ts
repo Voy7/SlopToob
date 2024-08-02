@@ -55,7 +55,7 @@ export type BaseStreamInfo = StreamPlaying | StreamPaused | StreamLoading | Stre
 export type ViewerStreamInfo = BaseStreamInfo & StreamOptions
 
 export type AdminStreamInfo = {
-  extraTEMP: boolean
+  transcodedSeconds?: number
 } & BaseStreamInfo
 
 export type SocketClient = {
@@ -107,7 +107,6 @@ export type TranscodeClientVideo = {
   state: JobState
   name: string
   inputPath: string
-  progressPercentage: number
 }
 
 export type ClientHistoryItem = {

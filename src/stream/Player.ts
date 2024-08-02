@@ -234,10 +234,11 @@ export default new (class Player {
   }
 
   get adminStreamInfo(): AdminStreamInfo {
-    return {
-      extraTEMP: true,
-      ...this.baseStreamInfo
+    const info: AdminStreamInfo = { ...this.baseStreamInfo }
+    if (this.playing) {
+      info.transcodedSeconds = this.playing.job.availableSeconds
     }
+    return info
   }
 
   private get clientStreamOptions(): StreamOptions {

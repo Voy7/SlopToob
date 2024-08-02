@@ -11,6 +11,8 @@ import SocketUtils from '@/lib/SocketUtils'
 import { JobState, Msg } from '@/lib/enums'
 import type Video from '@/stream/Video'
 import type { FfmpegCommand } from 'fluent-ffmpeg'
+import { ProgressInfo } from '@/typings/types'
+import Player from './Player'
 
 // Represents a transcoding job
 export default class TranscoderJob {
@@ -18,7 +20,7 @@ export default class TranscoderJob {
   isReady: boolean = false
   // isTranscoding: boolean = false
   duration: number = 0
-  progressPercentage: number = 0
+  // progressPercentage: number = 0
   private command: TranscoderCommand = null as any // Typescript is dumb, this is initialized in constructor
   private onInitializedCallbacks: Array<() => void> = []
   private onStreamableReadyCallbacks: Array<() => void> = []
@@ -26,7 +28,8 @@ export default class TranscoderJob {
   private onErrorCallbacks: Array<(error: string) => void> = []
   private onProgressCallbacks: Array<(percentage: number) => void> = []
   private cleanUpCallback: (() => void) | null = null
-  private m3u8Path: string
+  m3u8Path: string
+  lastProgressInfo: ProgressInfo | null = null
 
   private _state: JobState = JobState.Initializing
   videos: Video[] = []
@@ -86,6 +89,12 @@ export default class TranscoderJob {
       }
     })
 
+    this.command.onProgress((progress) => {
+      console.log(progress)
+      this.lastProgressInfo = progress
+      SocketUtils.broadcastAdmin(Msg.AdminStreamInfo, Player.adminStreamInfo)
+    })
+
     // If ffmpeg error occurs, Note this gets called after 'end' event
     this.command.onError(async (error) => {
       Logger.error(`[Video] Transcoding error ${this.video.name}:`, error)
@@ -98,12 +107,10 @@ export default class TranscoderJob {
     })
 
     // When first segment is created
-    this.command.onProgress(async (progress) => {
-      if (!this.isReady) {
-        if (!fs.existsSync(this.m3u8Path)) return
-        this.isReady = true
-        for (const callback of this.onStreamableReadyCallbacks) callback()
-      }
+    this.command.onFirstChunk(async () => {
+      if (this.isReady) return
+      this.isReady = true
+      for (const callback of this.onStreamableReadyCallbacks) callback()
     })
 
     const asyncInit = async () => {
@@ -317,5 +324,11 @@ export default class TranscoderJob {
         resolve(duration + Settings.videoPaddingSeconds)
       })
     })
+  }
+
+  get availableSeconds(): number {
+    if (this.state === JobState.Finished) return this.duration
+    if (!this.lastProgressInfo) return 0
+    return this.lastProgressInfo.availableSeconds
   }
 }
