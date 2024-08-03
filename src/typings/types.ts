@@ -8,6 +8,8 @@ export type AuthUser = {
 
 export type ProgressInfo = {
   percent: number
+  processedSeconds: number
+  processedTimestamp: string
   availableSeconds: number
   availableTimestamp: string
   fpsRate: number

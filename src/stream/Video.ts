@@ -151,7 +151,7 @@ export default class Video {
   }
 
   // Pause video, boolean return is if successful
-  pause(persistPause = true): boolean {
+  pause(persistPause: boolean = true): boolean {
     if (this.state !== State.Playing || !this.playingDate) return false
     if (this.finishedTimeout) clearTimeout(this.finishedTimeout)
     this.passedDurationSeconds += (new Date().getTime() - this.playingDate.getTime()) / 1000
@@ -171,6 +171,19 @@ export default class Video {
     this.state = State.Playing
     Settings.setSetting('streamIsPaused', false)
     return true
+  }
+
+  seekTo(seconds: number) {
+    if (this.state !== State.Playing && this.state !== State.Paused) return
+    console.debug(`[Video] Seeking to ${seconds}s: ${this.name}`)
+    this.playingDate = new Date()
+    this.passedDurationSeconds = seconds
+    if (this.state === State.Paused) return
+    if (this.finishedTimeout) {
+      clearTimeout(this.finishedTimeout)
+      this.finishedTimeout = setTimeout(() => this.end(), (this.durationSeconds - seconds) * 1000)
+    }
+    Player.broadcastStreamInfo()
   }
 
   private resolveReadyCallbacks() {

@@ -34,11 +34,13 @@ export default class TranscoderJob {
   private _state: JobState = JobState.Initializing
   videos: Video[] = []
   error: string | null = null
+  seekSeconds: number = 0
 
   get state() {
     return this._state
   }
   private set state(value: JobState) {
+    if (this._state === value) return
     this._state = value
     SocketUtils.broadcastAdmin(Msg.AdminTranscodeQueueList, TranscoderQueue.clientTranscodeList)
   }
@@ -49,6 +51,10 @@ export default class TranscoderJob {
     this.videos.push(this.video)
     this.m3u8Path = path.join(this.video.outputPath, '/video.m3u8')
     this.initialize()
+  }
+
+  seekTo(seconds: number) {
+    this.seekSeconds = seconds
   }
 
   initialize() {
@@ -90,6 +96,7 @@ export default class TranscoderJob {
     })
 
     this.command.onProgress((progress) => {
+      console.log(progress)
       this.lastProgressInfo = progress
       SocketUtils.broadcastAdmin(Msg.AdminStreamInfo, Player.adminStreamInfo)
       SocketUtils.broadcastAdmin(Msg.AdminTranscodeQueueList, TranscoderQueue.clientTranscodeList)

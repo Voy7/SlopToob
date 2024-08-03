@@ -98,17 +98,24 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
   }, [streamInfo, lastStreamUpdateTimestamp])
 
   // Play/pause video based on stream state
+  // And sync video time with stream time
   useEffect(() => {
     const video = videoRef.current!
 
-    if (streamInfo.state === prevState) return
-    setPrevState(streamInfo.state)
+    if (streamInfo.state !== prevState) {
+      setPrevState(streamInfo.state)
 
-    if (streamInfo.state === StreamState.Playing) {
-      video.play().catch(() => {})
-      return
+      if (streamInfo.state === StreamState.Playing) {
+        video.play().catch(() => {})
+        return
+      }
+      video.pause()
     }
-    video.pause()
+
+    // Time sync logic, only sync if the difference is greater than 1 second
+    if (!('currentSeconds' in streamInfo)) return
+    const diff = Math.abs(video.currentTime - streamInfo.currentSeconds)
+    if (diff > 1) video.currentTime = streamInfo.currentSeconds
   }, [streamInfo, prevState, lastStreamUpdateTimestamp])
 
   // Sync video title with document title
@@ -158,7 +165,7 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
       <div
         ref={containerRef}
         className={twMerge(
-          'h-mobile-video-height md:w-desktop-video-width relative flex w-full items-center justify-center overflow-hidden bg-black md:h-full',
+          'relative flex h-mobile-video-height w-full items-center justify-center overflow-hidden bg-black md:h-full md:w-desktop-video-width',
           hideCursor && 'cursor-none',
           streamInfo.streamTheme === 'Zoomer' && 'grid grid-cols-[1fr_1fr] grid-rows-[1fr_1fr]'
         )}

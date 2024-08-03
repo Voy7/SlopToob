@@ -342,7 +342,7 @@ export const socketEvents: Record<string, EventOptions> = {
   [Msg.AdminSeekTo]: {
     adminOnly: true,
     run: (socket, seconds: number) => {
-      Player.pause()
+      Player.playing?.seekTo(seconds)
     }
   }
 }
