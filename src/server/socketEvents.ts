@@ -22,6 +22,7 @@ import type {
   EditPlaylistNamePayload,
   EditPlaylistVideosPayload
 } from '@/typings/socket'
+import Playlists from '@/stream/Playlists'
 
 type EventOptions = {
   allowUnauthenticated?: boolean // Allow unauthenticated users to run this event (default: false)
@@ -201,7 +202,7 @@ export const socketEvents: Record<string, EventOptions> = {
     adminOnly: true,
     run: async (socket, newPlaylistName: string) => {
       try {
-        const newPlaylistID = await Player.addPlaylist(newPlaylistName)
+        const newPlaylistID = await Playlists.addPlaylist(newPlaylistName)
         socket.emit(Msg.AdminAddPlaylist, newPlaylistID)
       } catch (error: any) {
         socket.emit(Msg.AdminAddPlaylist, { error: error.message })
@@ -213,7 +214,7 @@ export const socketEvents: Record<string, EventOptions> = {
   [Msg.AdminDeletePlaylist]: {
     adminOnly: true,
     run: async (socket, playlistID: string) => {
-      const errorMsg = await Player.deletePlaylist(playlistID)
+      const errorMsg = await Playlists.deletePlaylist(playlistID)
       if (errorMsg) socket.emit(Msg.AdminDeletePlaylist, errorMsg)
     }
   },
@@ -223,7 +224,7 @@ export const socketEvents: Record<string, EventOptions> = {
     adminOnly: true,
     run: async (socket, payload: EditPlaylistNamePayload) => {
       try {
-        await Player.editPlaylistName(payload.playlistID, payload.newName)
+        await Playlists.editPlaylistName(payload.playlistID, payload.newName)
       } catch (error: any) {
         socket.emit(Msg.AdminEditPlaylistName, error.message)
       }
@@ -234,7 +235,7 @@ export const socketEvents: Record<string, EventOptions> = {
   [Msg.AdminEditPlaylistVideos]: {
     adminOnly: true,
     run: async (socket, payload: EditPlaylistVideosPayload) => {
-      await Player.setPlaylistVideos(payload.playlistID, payload.newVideoPaths)
+      await Playlists.setPlaylistVideos(payload.playlistID, payload.newVideoPaths)
       const senderClient = socketClients.find((c) => c.socket === socket)
       if (!senderClient) return
       for (const client of socketClients) {

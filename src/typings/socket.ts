@@ -107,6 +107,10 @@ export type TranscodeClientVideo = {
   state: JobState
   name: string
   inputPath: string
+  totalSeconds: number
+  availableSeconds: number
+  fpsRate: number
+  frames: number
 }
 
 export type ClientHistoryItem = {

@@ -1,17 +1,17 @@
-import prisma from '@/lib/prisma'
-import Env from '@/EnvVariables'
 import Logger from '@/server/Logger'
 import Checklist from '@/server/Checklist'
+import Playlists from '@/stream/Playlists'
 import Video from '@/stream/Video'
 import PlayHistory from '@/stream/PlayHistory'
 import VoteSkipHandler from '@/stream/VoteSkipHandler'
+import FileTreeHandler from '@/stream/FileTreeHandler'
 import Settings from '@/stream/Settings'
 import SocketUtils from '@/lib/SocketUtils'
 import Chat from '@/stream/Chat'
 import { getNextBumper } from '@/stream/bumpers'
 import { themes } from '@/stream/themes'
 import { StreamState, Msg, VideoState } from '@/lib/enums'
-import type { RichPlaylist, ClientPlaylist, ListOption, FileTreeNode } from '@/typings/types'
+import type { RichPlaylist, ClientPlaylist, ListOption } from '@/typings/types'
 import type {
   SocketClient,
   ViewerStreamInfo,
@@ -20,20 +20,19 @@ import type {
   AdminStreamInfo
 } from '@/typings/socket'
 import packageJSON from '@package' assert { type: 'json' }
-import FileTreeHandler from './FileTreeHandler'
 
-// Main player (video) handler, singleton
+// Main video player handler, singleton
 export default new (class Player {
   playing: Video | null = null
   queue: Video[] = []
-  private playlists: RichPlaylist[] = []
-  private activePlaylist: RichPlaylist | null = null
+  playlists: RichPlaylist[] = []
+  activePlaylist: RichPlaylist | null = null
   private lastBumperDate: Date = new Date()
 
   // Get all playlists on startup
   async initialize() {
     Logger.debug('Initializing player handler...')
-    await this.populatePlaylists()
+    await Playlists.populatePlaylists()
     await this.setActivePlaylistID(Settings.activePlaylistID)
     Checklist.pass('playerReady', 'Stream player handler ready.')
 
@@ -94,6 +93,16 @@ export default new (class Player {
     this.playNext()
   }
 
+  addVideo(video: Video) {
+    Logger.debug('Adding video to queue:', video.name)
+    this.queue.push(video)
+    if (!this.playing) this.playNext()
+    SocketUtils.broadcastAdmin(
+      Msg.AdminQueueList,
+      this.queue.map((video) => video.clientVideo)
+    )
+  }
+
   // Fill queue with random videos from active playlist
   populateRandomToQueue() {
     if (!this.activePlaylist) return
@@ -142,38 +151,6 @@ export default new (class Player {
     this.populateRandomToQueue()
 
     SocketUtils.broadcastAdmin(Msg.AdminPlaylists, this.clientPlaylists)
-    SocketUtils.broadcastAdmin(
-      Msg.AdminQueueList,
-      this.queue.map((video) => video.clientVideo)
-    )
-  }
-
-  get clientPlaylists(): ClientPlaylist[] {
-    return this.playlists.map((playlist) => ({
-      id: playlist.id,
-      name: playlist.name,
-      videoPaths: playlist.videoIndexes
-    }))
-  }
-
-  get listOptionPlaylists(): ListOption {
-    return {
-      list: this.playlists.map((playlist) => ({ name: playlist.name, id: playlist.id })),
-      selectedID: Settings.activePlaylistID
-    }
-  }
-
-  get listOptionThemes(): ListOption {
-    return {
-      list: themes,
-      selectedID: Settings.streamTheme
-    }
-  }
-
-  addVideo(video: Video) {
-    Logger.debug('Adding video to queue:', video.name)
-    this.queue.push(video)
-    if (!this.playing) this.playNext()
     SocketUtils.broadcastAdmin(
       Msg.AdminQueueList,
       this.queue.map((video) => video.clientVideo)
@@ -241,7 +218,7 @@ export default new (class Player {
     return info
   }
 
-  private get clientStreamOptions(): StreamOptions {
+  get clientStreamOptions(): StreamOptions {
     return {
       version: packageJSON.version,
       streamTheme: Settings.streamTheme,
@@ -260,111 +237,25 @@ export default new (class Player {
     }
   }
 
-  private async populatePlaylists() {
-    const dbPlaylists = await prisma.playlist.findMany()
-
-    // Parse video paths & sort playlists by name
-    this.playlists = dbPlaylists
-      .map((playlist) => {
-        const paths = playlist.videoPaths.replace(/\\/g, '/').split('|')
-        return {
-          ...playlist,
-          videoPaths: undefined,
-          videos: paths,
-          videoIndexes: FileTreeHandler.getPathIndexes(paths)
-        }
-      })
-      .sort((a, b) => a.name.localeCompare(b.name))
-
-    SocketUtils.broadcastAdmin(Msg.AdminPlaylists, this.clientPlaylists)
+  get clientPlaylists(): ClientPlaylist[] {
+    return this.playlists.map((playlist) => ({
+      id: playlist.id,
+      name: playlist.name,
+      videoPaths: playlist.videoIndexes
+    }))
   }
 
-  // Create new blank playlist, return ID
-  async addPlaylist(name: string): Promise<string> {
-    this.checkPlaylistNameValid(name)
-    const playlist = await prisma.playlist.create({
-      data: { name }
-    })
-
-    this.playlists.push({ ...playlist, videos: [], videoIndexes: [] })
-    this.playlists = this.playlists.sort((a, b) => a.name.localeCompare(b.name))
-
-    SocketUtils.broadcastAdmin(Msg.AdminPlaylists, this.clientPlaylists)
-    Logger.debug('Playlist added:', name)
-    return playlist.id
-  }
-
-  // Delete playlist by ID, return error as string if failed
-  async deletePlaylist(playlistID: string): Promise<string | void> {
-    try {
-      await prisma.playlist.delete({
-        where: { id: playlistID }
-      })
-
-      this.playlists = this.playlists.filter((playlist) => playlist.id !== playlistID)
-
-      SocketUtils.broadcastAdmin(Msg.AdminPlaylists, this.clientPlaylists)
-      Logger.debug('Playlist deleted:', playlistID)
-    } catch (error: any) {
-      return error.message
+  get listOptionPlaylists(): ListOption {
+    return {
+      list: this.playlists.map((playlist) => ({ name: playlist.name, id: playlist.id })),
+      selectedID: Settings.activePlaylistID
     }
   }
 
-  // Change playlist name, return error as string if failed
-  async editPlaylistName(playlistID: string, newName: string) {
-    this.checkPlaylistNameValid(newName)
-    await prisma.playlist.update({
-      where: { id: playlistID },
-      data: { name: newName }
-    })
-
-    const playlist = this.playlists.find((playlist) => playlist.id === playlistID)
-    if (playlist) playlist.name = newName
-
-    SocketUtils.broadcastAdmin(Msg.AdminPlaylists, this.clientPlaylists)
-    Logger.debug(`Playlist (${playlistID}) name updated:`, newName)
-  }
-
-  private checkPlaylistNameValid(name: string) {
-    if (name.length < 3) throw new Error('Name must be at least 3 characters long.')
-    if (name.length > 30) throw new Error('Name must be at most 30 characters long.')
-    if (this.playlists.find((playlist) => playlist.name === name))
-      throw new Error('Playlist name already taken.')
-  }
-
-  // Set new videos for playlist
-  async setPlaylistVideos(playlistID: string, newVideoPathsIndex: number[]) {
-    newVideoPathsIndex = Array.from(new Set(newVideoPathsIndex)) // Remove duplicate paths
-
-    const pathIndexes: string[] = []
-    let index = 0
-    function getPaths(item: FileTreeNode) {
-      if (!item.children) {
-        pathIndexes[index] = `${Env.VIDEOS_PATH}${item.path}`
-        index++
-      } else
-        for (const child of item.children) {
-          getPaths(child)
-        }
+  get listOptionThemes(): ListOption {
+    return {
+      list: themes,
+      selectedID: Settings.streamTheme
     }
-    getPaths(FileTreeHandler.tree)
-
-    const newVideoPaths = newVideoPathsIndex
-      .map((index) => pathIndexes[index])
-      .filter((path) => path) // Remove undefined paths
-
-    const playlist = this.playlists.find((playlist) => playlist.id === playlistID)
-    if (!playlist)
-      return Logger.warn(`Tried to set videos for non-existent playlist: ${playlistID}`)
-
-    playlist.videos = newVideoPaths
-    playlist.videoIndexes = newVideoPathsIndex
-
-    await prisma.playlist.update({
-      where: { id: playlistID },
-      data: { videoPaths: newVideoPaths.join('|') }
-    })
-
-    Logger.debug(`Playlist (${playlistID}) videos updated: ${newVideoPaths.length}`)
   }
 })()

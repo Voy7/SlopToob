@@ -46,7 +46,11 @@ export default new (class TranscoderQueue {
         id: job.id,
         state: job.state,
         name: job.video.name,
-        inputPath: job.video.inputPath
+        inputPath: job.video.inputPath,
+        totalSeconds: job.duration,
+        availableSeconds: job.availableSeconds,
+        fpsRate: job.lastProgressInfo?.fpsRate || 0,
+        frames: job.lastProgressInfo?.frames || 0
       })
     }
     return list

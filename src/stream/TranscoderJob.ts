@@ -90,9 +90,9 @@ export default class TranscoderJob {
     })
 
     this.command.onProgress((progress) => {
-      console.log(progress)
       this.lastProgressInfo = progress
       SocketUtils.broadcastAdmin(Msg.AdminStreamInfo, Player.adminStreamInfo)
+      SocketUtils.broadcastAdmin(Msg.AdminTranscodeQueueList, TranscoderQueue.clientTranscodeList)
     })
 
     // If ffmpeg error occurs, Note this gets called after 'end' event
