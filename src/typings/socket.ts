@@ -10,6 +10,8 @@ export type StreamPlaying = {
   isBumper: boolean
   currentSeconds: number
   totalSeconds: number
+  trueCurrentSeconds: number
+  trueTotalSeconds: number
 }
 
 export type StreamPaused = {
@@ -20,6 +22,8 @@ export type StreamPaused = {
   isBumper: boolean
   currentSeconds: number
   totalSeconds: number
+  trueCurrentSeconds: number
+  trueTotalSeconds: number
 }
 
 export type StreamLoading = {

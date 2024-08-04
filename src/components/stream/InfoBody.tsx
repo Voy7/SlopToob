@@ -10,12 +10,15 @@ export default function InfoBody() {
 
   const title = 'name' in streamInfo ? streamInfo.name : '[No Video]'
   const isBumper = 'isBumper' in streamInfo ? streamInfo.isBumper : false
+  const id = 'path' in streamInfo ? streamInfo.path : 'None'
 
   return (
     <div className={styles.infoBody}>
       <div className={styles.title}>
         {isBumper && <span className={styles.bumper}>Bumper</span>}
-        <h2>{title}</h2>
+        <h2>
+          {title} |{id}|
+        </h2>
       </div>
       <VoteSkipButton />
     </div>

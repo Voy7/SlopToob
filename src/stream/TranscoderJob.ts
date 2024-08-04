@@ -17,6 +17,7 @@ import Player from './Player'
 // Represents a transcoding job
 export default class TranscoderJob {
   readonly id: string = generateSecret()
+  streamID: string = generateSecret()
   isReady: boolean = false
   // isTranscoding: boolean = false
   duration: number = 0
@@ -34,7 +35,7 @@ export default class TranscoderJob {
   private _state: JobState = JobState.Initializing
   videos: Video[] = []
   error: string | null = null
-  seekSeconds: number = 0
+  transcodedStartSeconds: number = 0
 
   get state() {
     return this._state
@@ -53,8 +54,16 @@ export default class TranscoderJob {
     this.initialize()
   }
 
-  seekTo(seconds: number) {
-    this.seekSeconds = seconds
+  async seekTranscodeTo(seconds: number) {
+    this.transcodedStartSeconds = seconds
+    if (this.state !== JobState.Transcoding && this.state !== JobState.Finished) return
+    this.isReady = false
+    this.command.kill()
+    await fsAsync.rm(this.video.outputPath, { recursive: true, force: true })
+    this.streamID = generateSecret()
+    Player.broadcastStreamInfo()
+    await this.transcode()
+    Player.broadcastStreamInfo()
   }
 
   initialize() {
@@ -67,10 +76,10 @@ export default class TranscoderJob {
       await new Promise((resolve) => setTimeout(resolve, 1000))
       // console.log(`ffmpeg end`.yellow, this.error)
 
-      if (this.state === JobState.CleaningUp) {
-        await this.cleanup()
-        return
-      }
+      // if (this.state === JobState.CleaningUp) {
+      //   await this.cleanup()
+      //   return
+      // }
 
       if (this.error) {
         this.state = JobState.Errored
@@ -79,7 +88,7 @@ export default class TranscoderJob {
 
       if (this.state === JobState.Finished) {
         // Was killed due to no more videos remaining
-        await this.cleanup()
+        // await this.cleanup()
         return
       }
 
@@ -96,7 +105,7 @@ export default class TranscoderJob {
     })
 
     this.command.onProgress((progress) => {
-      console.log(progress)
+      // console.log(progress)
       this.lastProgressInfo = progress
       SocketUtils.broadcastAdmin(Msg.AdminStreamInfo, Player.adminStreamInfo)
       SocketUtils.broadcastAdmin(Msg.AdminTranscodeQueueList, TranscoderQueue.clientTranscodeList)
@@ -107,17 +116,19 @@ export default class TranscoderJob {
       Logger.error(`[Video] Transcoding error ${this.video.name}:`, error)
       this.error = 'Transcoding error occurred. :('
 
-      if (this.state === JobState.CleaningUp) {
-        await this.cleanup()
-        return
-      }
+      // if (this.state === JobState.CleaningUp) {
+      //   await this.cleanup()
+      //   return
+      // }
     })
 
     // When first segment is created
     this.command.onFirstChunk(async () => {
+      console.log('First chunk' + this.video.outputPath)
       if (this.isReady) return
       this.isReady = true
       for (const callback of this.onStreamableReadyCallbacks) callback()
+      Player.broadcastStreamInfo()
     })
 
     const asyncInit = async () => {
@@ -142,7 +153,7 @@ export default class TranscoderJob {
               '[Video] Partial transcoded files existed, deleting cache:',
               this.video.outputPath
             )
-            await fsAsync.rm(this.video.outputPath, { recursive: true })
+            await fsAsync.rm(this.video.outputPath, { recursive: true, force: true })
           }
         }
       } catch (error: any) {
@@ -193,10 +204,10 @@ export default class TranscoderJob {
   }
 
   // Actually start the transcoding process
-  // Should only be called once
+  // Should only be called once - (TODO ADJUSTING)
   async transcode(): Promise<void> {
-    if (this.state !== JobState.AwaitingTranscode)
-      throw new Error('Transcoding job is not in the correct state to start transcoding.')
+    // if (this.state !== JobState.AwaitingTranscode)
+    //   throw new Error('[TranscoderJob] Job is not in the correct state to start transcoding.')
     this.state = JobState.Transcoding
 
     return new Promise<void>((resolve: any) => {
@@ -217,13 +228,12 @@ export default class TranscoderJob {
   // Clean up job and stop transcoding if it's still running
   // This should be called when video has finished playing, or when it's removed from the queue
   async cleanup() {
-    // If no more videos in job, do cleanup
-    if (this.videos.length > 0) return
+    if (this.videos.length > 0) return // If no more videos in job, do cleanup
 
     if (this.state === JobState.Transcoding) {
       this.state = JobState.CleaningUp
       this.command.kill()
-      return // Cleanup will be called again when ffmpeg command finishes
+      //return // Cleanup will be called again when ffmpeg command finishes
     }
 
     this.isReady = false
@@ -233,7 +243,7 @@ export default class TranscoderJob {
 
     if (!keepCache) {
       try {
-        fs.rmSync(this.video.outputPath, { recursive: true })
+        fs.rmSync(this.video.outputPath, { recursive: true, force: true })
       } catch (error) {
         Logger.warn(`[Video] Error deleting video cache: ${this.video.outputPath}`)
       }
@@ -336,6 +346,6 @@ export default class TranscoderJob {
   get availableSeconds(): number {
     if (this.state === JobState.Finished) return this.duration
     if (!this.lastProgressInfo) return 0
-    return this.lastProgressInfo.availableSeconds
+    return this.lastProgressInfo.availableSeconds + this.transcodedStartSeconds
   }
 }

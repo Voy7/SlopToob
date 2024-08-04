@@ -11,6 +11,7 @@ const states: Record<VideoState, { name: string; color: string }> = {
   [VideoState.Preparing]: { name: 'Transcoding', color: 'aqua' },
   [VideoState.Playing]: { name: 'Playing', color: 'lime' },
   [VideoState.Paused]: { name: 'Paused', color: 'white' },
+  [VideoState.Seeking]: { name: 'Seeking', color: 'white' },
   [VideoState.Finished]: { name: 'Finished', color: 'white' },
   [VideoState.Errored]: { name: 'Errored', color: 'red' }
 }

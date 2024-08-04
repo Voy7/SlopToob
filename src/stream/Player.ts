@@ -190,10 +190,12 @@ export default new (class Player {
         state: this.playing.state === VideoState.Playing ? StreamState.Playing : StreamState.Paused,
         id: this.playing.id,
         name: this.playing.name,
-        path: `/stream-data/${this.playing.id}/video.m3u8`,
+        path: `/stream-data/${this.playing.job.streamID}/video.m3u8`,
         isBumper: this.playing.isBumper,
         currentSeconds: this.playing.currentSeconds,
-        totalSeconds: this.playing.durationSeconds
+        totalSeconds: this.playing.durationSeconds,
+        trueCurrentSeconds: this.playing.currentSeconds - this.playing.job.transcodedStartSeconds,
+        trueTotalSeconds: this.playing.durationSeconds - this.playing.job.transcodedStartSeconds
       }
     }
 

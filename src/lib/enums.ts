@@ -58,6 +58,7 @@ export const enum VideoState {
   Ready,
   Playing,
   Paused,
+  Seeking,
   Finished,
   Errored
 }

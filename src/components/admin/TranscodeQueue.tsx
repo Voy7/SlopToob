@@ -27,7 +27,7 @@ export default function QueueList() {
           <div key={video.name} className={styles.queueItem}>
             <span className={styles.number}>{index + 1}.</span>
             <div className="">
-              <p>as: {video.availableSeconds}</p>
+              <p>{video.name}</p>
               <div className={styles.state}>
                 <div className={styles.dot} style={{ background: states[video.state].color }} />
                 <p>{states[video.state].name}</p>

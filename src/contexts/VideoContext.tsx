@@ -4,9 +4,8 @@ import Hls from 'hls.js'
 import { useContext, createContext, useState, useRef, useEffect } from 'react'
 import { useStreamContext } from '@/contexts/StreamContext'
 import { StreamState } from '@/lib/enums'
-// import styles from '@/components/stream/video/Video.module.scss'
-import type { IconNames } from '@/components/ui/Icon'
 import { twMerge } from 'tailwind-merge'
+import type { IconNames } from '@/components/ui/Icon'
 
 // Video player context
 type ContextProps = {
@@ -79,7 +78,7 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
 
       // Seek to current time
       if (!lastStreamUpdateTimestamp) return
-      const diff = (Date.now() - lastStreamUpdateTimestamp) / 1000 + streamInfo.currentSeconds
+      const diff = (Date.now() - lastStreamUpdateTimestamp) / 1000 + streamInfo.trueCurrentSeconds
       video.currentTime = diff
     }
 
@@ -113,9 +112,9 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
     }
 
     // Time sync logic, only sync if the difference is greater than 1 second
-    if (!('currentSeconds' in streamInfo)) return
-    const diff = Math.abs(video.currentTime - streamInfo.currentSeconds)
-    if (diff > 1) video.currentTime = streamInfo.currentSeconds
+    if (!('trueCurrentSeconds' in streamInfo)) return
+    const diff = Math.abs(video.currentTime - streamInfo.trueCurrentSeconds)
+    if (diff > 1) video.currentTime = streamInfo.trueCurrentSeconds
   }, [streamInfo, prevState, lastStreamUpdateTimestamp])
 
   // Sync video title with document title

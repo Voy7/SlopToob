@@ -24,7 +24,7 @@ export function initializeHlsServer() {
         }
 
         const video = Player.playing
-        if (!video || video.id !== id) {
+        if (!video || video.job.streamID !== id) {
           // console.log('No video playing with ID:', id)
           return cb(null, false)
         }
@@ -59,7 +59,7 @@ function getFile(req: any) {
   const filename = segments[3]
 
   const video = Player.playing
-  if (!video || video.id !== id) {
+  if (!video || video.job.streamID !== id) {
     Logger.warn('No video playing with ID:', id)
     return null
   }

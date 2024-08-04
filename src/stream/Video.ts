@@ -27,6 +27,7 @@ export default class Video {
   private finishedCallbacks: (() => void)[] = []
   private finishedTimeout: NodeJS.Timeout | null = null
   readonly job: TranscoderJob
+  private playAfterSeek: boolean = true
 
   constructor(
     path: string,
@@ -38,15 +39,25 @@ export default class Video {
     this.job = TranscoderQueue.newJob(this)
 
     this.job.onStreamableReady(() => {
-      this.durationSeconds = this.job.duration
-      // if (this.state === State.Preparing) this.state = State.Ready
-      // this.state = State.Ready
-      if (
-        this.state !== State.Playing &&
-        this.state !== State.Paused &&
-        this.state !== State.Errored
-      )
+      console.log('Streamable ready'.yellow + ' ' + this.name)
+      if (this.state === State.Errored) return
+      // New stream is ready, aka seeking to new time
+      if (this.state === State.Seeking) {
+        if (this.playAfterSeek) {
+          this.playingDate = new Date()
+          if (this.finishedTimeout) clearTimeout(this.finishedTimeout)
+          this.finishedTimeout = setTimeout(
+            () => this.end(),
+            (this.durationSeconds - this.passedDurationSeconds) * 1000
+          )
+          this.state = State.Playing
+        } else this.state = State.Paused
+      }
+      // Video is ready, but not playing
+      else if (this.state !== State.Playing && this.state !== State.Paused) {
+        this.durationSeconds = this.job.duration
         this.state = State.Ready
+      }
       this.resolveReadyCallbacks()
     })
 
@@ -175,20 +186,29 @@ export default class Video {
 
   seekTo(seconds: number) {
     if (this.state !== State.Playing && this.state !== State.Paused) return
-    console.debug(`[Video] Seeking to ${seconds}s: ${this.name}`)
-    this.playingDate = new Date()
+    Logger.debug(`[Video] Seeking to ${seconds}s: ${this.name}`)
     this.passedDurationSeconds = seconds
-    if (this.state === State.Paused) return
-    if (this.finishedTimeout) {
-      clearTimeout(this.finishedTimeout)
-      this.finishedTimeout = setTimeout(() => this.end(), (this.durationSeconds - seconds) * 1000)
+    // If seek target is not transcoded yet, update transcoder job
+    if (seconds < this.job.transcodedStartSeconds || seconds > this.job.availableSeconds) {
+      this.playAfterSeek = this.state === State.Playing
+      this.state = State.Seeking
+      if (this.finishedTimeout) clearTimeout(this.finishedTimeout)
+      this.job.seekTranscodeTo(seconds)
+    }
+    // If seek target is already transcoded
+    else {
+      if (this.state === State.Playing) {
+        this.playingDate = new Date()
+        if (this.finishedTimeout) clearTimeout(this.finishedTimeout)
+        this.finishedTimeout = setTimeout(() => this.end(), (this.durationSeconds - seconds) * 1000)
+      }
     }
     Player.broadcastStreamInfo()
   }
 
   private resolveReadyCallbacks() {
     for (const callback of this.readyCallbacks) callback()
-    this.readyCallbacks = []
+    // this.readyCallbacks = []
   }
 
   private resolveFinishedCallbacks() {
