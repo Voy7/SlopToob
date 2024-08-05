@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useSocketContext } from '@/contexts/SocketContext'
-import type { SettingsList } from '@/stream/Settings'
+import type { SettingsList } from '@/server/Settings'
 
 export default function useToggleOption(settingKey: keyof SettingsList) {
   const settingID = `setting.${settingKey}`

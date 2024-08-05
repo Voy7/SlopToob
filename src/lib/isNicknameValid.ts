@@ -1,4 +1,4 @@
-import Settings from '@/stream/Settings'
+import Settings from '@/server/Settings'
 
 // Check if given nickname is valid given the rules
 // Returns true if valid, or an error message if invalid

@@ -1,5 +1,5 @@
 import { basename } from 'path'
-import Settings from '@/stream/Settings'
+import Settings from '@/server/Settings'
 
 // If a title contains any of these, remove everything after it
 const SUFFIX_SEPERATORS = [

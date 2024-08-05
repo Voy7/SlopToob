@@ -1,13 +1,13 @@
 import next from 'next'
 import { parse } from 'url'
 import { httpServer } from '@/server/httpServer'
-import { initializeSocketServer } from '@/server/socket'
-import { initializeHlsServer } from '@/server/hls'
-import Env from '@/EnvVariables'
+import { initializeSocketServer } from '@/server/socket/socket'
+import { initializeHlsHandler } from '@/server/hlsHandler'
+import Env from '@/server/EnvVariables'
 import Logger from '@/server/Logger'
 import Checklist from '@/server/Checklist'
-import Player from '@/stream/Player'
-import Thumbnails from '@/stream/Thumbnails'
+import Player from '@/server/stream/Player'
+import Thumbnails from '@/server/stream/Thumbnails'
 import type { IncomingMessage, ServerResponse } from 'http'
 
 const app = next({
@@ -23,7 +23,7 @@ app.prepare().then(() => {
   Checklist.pass('nextAppReady', 'Next.js app ready.')
   httpServer.on('request', nextRequestHandler)
   initializeSocketServer()
-  initializeHlsServer()
+  initializeHlsHandler()
   Player.initialize()
 })
 

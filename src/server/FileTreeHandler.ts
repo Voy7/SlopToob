@@ -1,10 +1,10 @@
 import fs from 'fs'
 import fsAsync from 'fs/promises'
 import path from 'path'
-import Env from '@/EnvVariables'
+import Env from '@/server/EnvVariables'
 import Logger from '@/server/Logger'
 import Checklist from '@/server/Checklist'
-import SocketUtils from '@/lib/SocketUtils'
+import SocketUtils from '@/server/socket/SocketUtils'
 import { Msg } from '@/lib/enums'
 import type { FileTreeNode } from '@/typings/types'
 

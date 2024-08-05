@@ -4,13 +4,13 @@ import 'colors'
 
 // Start servers once following checks are passed
 async function main() {
-  const { checkRequiredVariables } = await import('@/EnvVariables')
+  const { checkRequiredVariables } = await import('@/server/EnvVariables')
   await checkRequiredVariables()
 
-  const { default: Settings } = await import('@/stream/Settings')
+  const { default: Settings } = await import('@/server/Settings')
   await Settings.onReady()
 
-  const { default: FileTreeHandler } = await import('@/stream/FileTreeHandler')
+  const { default: FileTreeHandler } = await import('@/server/FileTreeHandler')
   await FileTreeHandler.onReady()
 
   import('@/server/nextServer')

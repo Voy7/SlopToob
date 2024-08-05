@@ -1,4 +1,4 @@
-import Env from '@/EnvVariables'
+import Env from '@/server/EnvVariables'
 import generateSecret from '@/lib/generateSecret'
 
 // Fake file tree data for testing purposes

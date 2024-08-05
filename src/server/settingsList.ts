@@ -16,11 +16,11 @@ export const settingsList = {
   activePlaylistID: {
     default: 'None',
     clientValue: async (): Promise<ListOption> => {
-      const { default: Player } = await import('@/stream/Player')
+      const { default: Player } = await import('@/server/stream/Player')
       return Player.listOptionPlaylists
     },
     onChange: async (value: string, executedBy?: SocketClient) => {
-      const { default: Player } = await import('@/stream/Player')
+      const { default: Player } = await import('@/server/stream/Player')
       Player.setActivePlaylistID(value, executedBy)
     }
   },
@@ -28,7 +28,7 @@ export const settingsList = {
   streamTheme: {
     default: 'None',
     clientValue: async (): Promise<ListOption> => {
-      const { default: Player } = await import('@/stream/Player')
+      const { default: Player } = await import('@/server/stream/Player')
       return Player.listOptionThemes
     },
     onChange: chatResync
@@ -52,7 +52,7 @@ export const settingsList = {
   targetQueueSize: {
     default: 3,
     onChange: async (value: number) => {
-      const { default: Player } = await import('@/stream/Player')
+      const { default: Player } = await import('@/server/stream/Player')
       Player.populateRandomToQueue()
     }
   },
@@ -109,16 +109,16 @@ export const settingsList = {
 } satisfies Record<string, Setting>
 
 async function voteSkipResync() {
-  const { default: VoteSkipHandler } = await import('@/stream/VoteSkipHandler')
+  const { default: VoteSkipHandler } = await import('@/server/stream/VoteSkipHandler')
   VoteSkipHandler.resyncChanges()
 }
 
 async function chatResync() {
-  const { default: Chat } = await import('@/stream/Chat')
+  const { default: Chat } = await import('@/server/stream/Chat')
   Chat.resyncChanges()
 }
 
 async function historyResync() {
-  const { default: PlayHistory } = await import('@/stream/PlayHistory')
+  const { default: PlayHistory } = await import('@/server/stream/PlayHistory')
   PlayHistory.resyncChanges()
 }

@@ -1,5 +1,5 @@
 import { Server } from 'http'
-import Env from '@/EnvVariables'
+import Env from '@/server/EnvVariables'
 import Checklist from '@/server/Checklist'
 
 export const httpServer = new Server()

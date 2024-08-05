@@ -1,5 +1,5 @@
-import SocketUtils from '@/lib/SocketUtils'
-import Player from '@/stream/Player'
+import SocketUtils from '@/server/socket/SocketUtils'
+import Player from '@/server/stream/Player'
 import { ChatType, Msg } from '@/lib/enums'
 import type { ChatMessage } from '@/typings/socket'
 

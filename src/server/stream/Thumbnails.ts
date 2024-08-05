@@ -1,9 +1,9 @@
 import fs from 'fs'
 import path from 'path'
 import ffmpeg, { THUMBNAIL_ARGS } from '@/lib/ffmpeg'
-import Env from '@/EnvVariables'
+import Env from '@/server/EnvVariables'
 import Logger from '@/server/Logger'
-import TranscoderJob from '@/stream/TranscoderJob'
+import TranscoderJob from '@/server/stream/TranscoderJob'
 import type { IncomingMessage, ServerResponse } from 'http'
 import type { UrlWithParsedQuery } from 'url'
 

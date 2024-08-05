@@ -2,9 +2,9 @@ import { Server, type Socket } from 'socket.io'
 import { httpServer } from '@/server/httpServer'
 import Logger from '@/server/Logger'
 import Checklist from '@/server/Checklist'
-import Settings, { settingsList } from '@/stream/Settings'
-import { socketClients } from '@/server/socketClients'
-import { socketEvents } from '@/server/socketEvents'
+import Settings, { settingsList } from '@/server/Settings'
+import { socketClients } from '@/server/socket/socketClients'
+import { socketEvents } from '@/server/socket/socketEvents'
 import { AuthRole } from '@/lib/enums'
 
 let io: Server | null = null

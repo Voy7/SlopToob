@@ -1,9 +1,9 @@
 import Logger from '@/server/Logger'
-import Settings from '@/stream/Settings'
-import Player from '@/stream/Player'
-import SocketUtils from '@/lib/SocketUtils'
-import Chat from '@/stream/Chat'
-import { socketClients } from '@/server/socketClients'
+import Settings from '@/server/Settings'
+import Player from '@/server/stream/Player'
+import SocketUtils from '@/server/socket/SocketUtils'
+import Chat from '@/server/stream/Chat'
+import { socketClients } from '@/server/socket/socketClients'
 import { Msg, VideoState } from '@/lib/enums'
 
 export default new (class VoteSkipHandler {

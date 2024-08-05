@@ -1,4 +1,4 @@
-import Env from '@/EnvVariables'
+import Env from '@/server/EnvVariables'
 import { AuthRole } from '@/lib/enums'
 
 // Get the auth role based on given password, return null if invalid.

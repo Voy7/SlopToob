@@ -1,28 +1,28 @@
 import fs from 'fs/promises'
 import path from 'path'
-import { socketClients } from '@/server/socketClients'
+import { socketClients } from '@/server/socket/socketClients'
 import { AuthRole, Msg } from '@/lib/enums'
-import { getClientBumpers } from '@/stream/bumpers'
+import { getClientBumpers } from '@/server/stream/bumpers'
 import generateSecret from '@/lib/generateSecret'
 import authRoleFromPassword from '@/lib/authRoleFromPassword'
 import isNicknameValid from '@/lib/isNicknameValid'
-import Env from '@/EnvVariables'
+import Env from '@/server/EnvVariables'
 import Logger from '@/server/Logger'
-import Player from '@/stream/Player'
-import TranscoderQueue from '@/stream/TranscoderQueue'
-import PlayHistory from '@/stream/PlayHistory'
-import SocketUtils from '@/lib/SocketUtils'
-import Settings from '@/stream/Settings'
-import FileTreeHandler from '@/stream/FileTreeHandler'
-import VoteSkipHandler from '@/stream/VoteSkipHandler'
-import Chat from '@/stream/Chat'
+import Player from '@/server/stream/Player'
+import TranscoderQueue from '@/server/stream/TranscoderQueue'
+import PlayHistory from '@/server/stream/PlayHistory'
+import SocketUtils from '@/server/socket/SocketUtils'
+import Settings from '@/server/Settings'
+import FileTreeHandler from '@/server/FileTreeHandler'
+import VoteSkipHandler from '@/server/stream/VoteSkipHandler'
+import Chat from '@/server/stream/Chat'
 import type { Socket } from 'socket.io'
 import type {
   AuthenticatePayload,
   EditPlaylistNamePayload,
   EditPlaylistVideosPayload
 } from '@/typings/socket'
-import Playlists from '@/stream/Playlists'
+import Playlists from '@/server/stream/Playlists'
 
 type EventOptions = {
   allowUnauthenticated?: boolean // Allow unauthenticated users to run this event (default: false)
@@ -188,10 +188,7 @@ export const socketEvents: Record<string, EventOptions> = {
       socket.emit(Msg.AdminFileTree, FileTreeHandler.tree)
       socket.emit(Msg.AdminPlaylists, playlists)
       socket.emit(Msg.AdminBumpersList, bumpers)
-      socket.emit(
-        Msg.AdminQueueList,
-        Player.queue.map((video) => video.clientVideo)
-      )
+      socket.emit(Msg.AdminQueueList, Player.clientVideoQueue)
       socket.emit(Msg.AdminTranscodeQueueList, TranscoderQueue.clientTranscodeList)
       socket.emit(Msg.AdminHistoryStatus, PlayHistory.clientHistoryStatus)
     }

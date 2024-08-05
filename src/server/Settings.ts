@@ -1,8 +1,8 @@
 import prisma from '@/lib/prisma'
 import Logger from '@/server/Logger'
 import Checklist from '@/server/Checklist'
-import SocketUtils from '@/lib/SocketUtils'
-import { settingsList } from '@/stream/settingsList'
+import SocketUtils from '@/server/socket/SocketUtils'
+import { settingsList } from '@/server/settingsList'
 import type { SocketClient } from '@/typings/socket'
 
 export { settingsList }

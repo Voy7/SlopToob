@@ -1,10 +1,10 @@
 import Logger from '@/server/Logger'
-import Settings from '@/stream/Settings'
-import TranscoderJob from '@/stream/TranscoderJob'
-import SocketUtils from '@/lib/SocketUtils'
+import Settings from '@/server/Settings'
+import TranscoderJob from '@/server/stream/TranscoderJob'
+import SocketUtils from '@/server/socket/SocketUtils'
 import { JobState, Msg } from '@/lib/enums'
 import type { TranscodeClientVideo } from '@/typings/socket'
-import type Video from '@/stream/Video'
+import type Video from '@/server/stream/Video'
 
 // Handles all transcoding operations
 // The reason why this logic is not in the Video class is because there can be

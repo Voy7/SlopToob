@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useSocketContext } from '@/contexts/SocketContext'
-import type { SettingsList } from '@/stream/Settings'
+import type { SettingsList } from '@/server/Settings'
 import type { ListOption } from '@/typings/types'
 
 export default function useListOption(settingKey: keyof SettingsList) {

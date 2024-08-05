@@ -1,4 +1,4 @@
-import Env from '@/EnvVariables'
+import Env from '@/server/EnvVariables'
 
 // Logger class, singleton
 export default new (class Logger {

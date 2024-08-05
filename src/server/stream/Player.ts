@@ -1,23 +1,23 @@
 import Logger from '@/server/Logger'
 import Checklist from '@/server/Checklist'
-import Playlists from '@/stream/Playlists'
-import Video from '@/stream/Video'
-import PlayHistory from '@/stream/PlayHistory'
-import VoteSkipHandler from '@/stream/VoteSkipHandler'
-import FileTreeHandler from '@/stream/FileTreeHandler'
-import Settings from '@/stream/Settings'
-import SocketUtils from '@/lib/SocketUtils'
-import Chat from '@/stream/Chat'
-import { getNextBumper } from '@/stream/bumpers'
-import { themes } from '@/stream/themes'
+import Playlists from '@/server/stream/Playlists'
+import Video from '@/server/stream/Video'
+import PlayHistory from '@/server/stream/PlayHistory'
+import VoteSkipHandler from '@/server/stream/VoteSkipHandler'
+import FileTreeHandler from '@/server/FileTreeHandler'
+import Settings from '@/server/Settings'
+import SocketUtils from '@/server/socket/SocketUtils'
+import Chat from '@/server/stream/Chat'
+import { getNextBumper } from '@/server/stream/bumpers'
+import { themes } from '@/server/stream/themes'
 import { StreamState, Msg, VideoState } from '@/lib/enums'
-import type { RichPlaylist, ClientPlaylist, ListOption } from '@/typings/types'
+import type { RichPlaylist, ClientPlaylist, ClientVideo, ListOption } from '@/typings/types'
 import type {
   SocketClient,
-  ViewerStreamInfo,
-  StreamOptions,
   BaseStreamInfo,
-  AdminStreamInfo
+  ViewerStreamInfo,
+  AdminStreamInfo,
+  StreamOptions
 } from '@/typings/socket'
 import packageJSON from '@package' assert { type: 'json' }
 
@@ -69,13 +69,12 @@ export default new (class Player {
     }
 
     if (this.queue.length === 0) {
-      // Display 'no videos' error
       this.broadcastStreamInfo()
       return
     }
 
     if (this.playing) {
-      Logger.warn('Tried to play next video while one is already playing:', this.playing.name)
+      Logger.warn('[Player] Tried to play video while one is already playing:', this.playing.name)
       return
     }
 
@@ -93,14 +92,12 @@ export default new (class Player {
     this.playNext()
   }
 
+  // Add video to end of queue
   addVideo(video: Video) {
-    Logger.debug('Adding video to queue:', video.name)
+    Logger.debug('[Player] Adding video to queue:', video.name)
     this.queue.push(video)
     if (!this.playing) this.playNext()
-    SocketUtils.broadcastAdmin(
-      Msg.AdminQueueList,
-      this.queue.map((video) => video.clientVideo)
-    )
+    SocketUtils.broadcastAdmin(Msg.AdminQueueList, this.clientVideoQueue)
   }
 
   // Fill queue with random videos from active playlist
@@ -110,10 +107,7 @@ export default new (class Player {
 
     if (this.queue.length > Settings.targetQueueSize) {
       this.queue = this.queue.slice(0, Settings.targetQueueSize)
-      SocketUtils.broadcastAdmin(
-        Msg.AdminQueueList,
-        this.queue.map((video) => video.clientVideo)
-      )
+      SocketUtils.broadcastAdmin(Msg.AdminQueueList, this.clientVideoQueue)
       return
     }
 
@@ -130,7 +124,7 @@ export default new (class Player {
   // Set playlist as active, and start playing it
   async setActivePlaylistID(playlistID: string, executedBy?: SocketClient) {
     const playlist = this.playlists.find((playlist) => playlist.id === playlistID) || null
-    Logger.debug('Setting active playlist:', playlist?.name || 'None')
+    Logger.debug('[Player] Setting active playlist:', playlist?.name || 'None')
 
     const sendChangedMessage = () => {
       if (!Settings.sendAdminChangePlaylist) return
@@ -151,10 +145,7 @@ export default new (class Player {
     this.populateRandomToQueue()
 
     SocketUtils.broadcastAdmin(Msg.AdminPlaylists, this.clientPlaylists)
-    SocketUtils.broadcastAdmin(
-      Msg.AdminQueueList,
-      this.queue.map((video) => video.clientVideo)
-    )
+    SocketUtils.broadcastAdmin(Msg.AdminQueueList, this.clientVideoQueue)
   }
 
   broadcastStreamInfo() {
@@ -245,6 +236,10 @@ export default new (class Player {
       name: playlist.name,
       videoPaths: playlist.videoIndexes
     }))
+  }
+
+  get clientVideoQueue(): ClientVideo[] {
+    return this.queue.map((video) => video.clientVideo)
   }
 
   get listOptionPlaylists(): ListOption {

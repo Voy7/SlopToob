@@ -4,39 +4,35 @@ import path from 'path'
 import generateSecret from '@/lib/generateSecret'
 import ffmpeg from '@/lib/ffmpeg'
 import Logger from '@/server/Logger'
-import TranscoderCommand from '@/stream/TranscoderCommand'
-import TranscoderQueue from '@/stream/TranscoderQueue'
-import Settings from './Settings'
-import SocketUtils from '@/lib/SocketUtils'
+import Settings from '@/server/Settings'
+import Player from '@/server/stream/Player'
+import TranscoderCommand from '@/server/stream/TranscoderCommand'
+import TranscoderQueue from '@/server/stream/TranscoderQueue'
+import SocketUtils from '@/server/socket/SocketUtils'
 import { JobState, Msg } from '@/lib/enums'
-import type Video from '@/stream/Video'
-import type { FfmpegCommand } from 'fluent-ffmpeg'
-import { ProgressInfo } from '@/typings/types'
-import Player from './Player'
+import type { ProgressInfo } from '@/typings/types'
+import type Video from '@/server/stream/Video'
 
 // Represents a transcoding job
 export default class TranscoderJob {
   readonly id: string = generateSecret()
   streamID: string = generateSecret()
+  videos: Video[] = []
+  readonly m3u8Path: string
   isReady: boolean = false
-  // isTranscoding: boolean = false
   duration: number = 0
-  // progressPercentage: number = 0
-  private command: TranscoderCommand = null as any // Typescript is dumb, this is initialized in constructor
+  error?: string
+  lastProgressInfo?: ProgressInfo
+  transcodedStartSeconds: number = 0
+
+  private command: TranscoderCommand
   private onInitializedCallbacks: Array<() => void> = []
   private onStreamableReadyCallbacks: Array<() => void> = []
   private onTranscodeFinishedCallbacks: Array<() => void> = []
   private onErrorCallbacks: Array<(error: string) => void> = []
-  private onProgressCallbacks: Array<(percentage: number) => void> = []
-  private cleanUpCallback: (() => void) | null = null
-  m3u8Path: string
-  lastProgressInfo: ProgressInfo | null = null
+  private cleanUpCallback?: () => void
 
   private _state: JobState = JobState.Initializing
-  videos: Video[] = []
-  error: string | null = null
-  transcodedStartSeconds: number = 0
-
   get state() {
     return this._state
   }
@@ -46,40 +42,19 @@ export default class TranscoderJob {
     SocketUtils.broadcastAdmin(Msg.AdminTranscodeQueueList, TranscoderQueue.clientTranscodeList)
   }
 
-  // Running completeJob() will see if the transcoded files already exist, if so the job is already done
-  // If an error is thrown, that means we need to start transcoding logic
   constructor(public video: Video) {
     this.videos.push(this.video)
     this.m3u8Path = path.join(this.video.outputPath, '/video.m3u8')
+    this.command = new TranscoderCommand(this)
     this.initialize()
-  }
-
-  async seekTranscodeTo(seconds: number) {
-    this.transcodedStartSeconds = seconds
-    if (this.state !== JobState.Transcoding && this.state !== JobState.Finished) return
-    this.isReady = false
-    this.command.kill()
-    await fsAsync.rm(this.video.outputPath, { recursive: true, force: true })
-    this.streamID = generateSecret()
-    Player.broadcastStreamInfo()
-    await this.transcode()
-    Player.broadcastStreamInfo()
   }
 
   initialize() {
     this.state = JobState.Initializing
 
-    this.command = new TranscoderCommand(this)
-
     this.command.onEnd(async () => {
       // For some stupid reason, 'error' fires after 'end'. So wait a couple ms to make sure errors are handled
       await new Promise((resolve) => setTimeout(resolve, 1000))
-      // console.log(`ffmpeg end`.yellow, this.error)
-
-      // if (this.state === JobState.CleaningUp) {
-      //   await this.cleanup()
-      //   return
-      // }
 
       if (this.error) {
         this.state = JobState.Errored
@@ -105,7 +80,6 @@ export default class TranscoderJob {
     })
 
     this.command.onProgress((progress) => {
-      // console.log(progress)
       this.lastProgressInfo = progress
       SocketUtils.broadcastAdmin(Msg.AdminStreamInfo, Player.adminStreamInfo)
       SocketUtils.broadcastAdmin(Msg.AdminTranscodeQueueList, TranscoderQueue.clientTranscodeList)
@@ -124,7 +98,6 @@ export default class TranscoderJob {
 
     // When first segment is created
     this.command.onFirstChunk(async () => {
-      console.log('First chunk' + this.video.outputPath)
       if (this.isReady) return
       this.isReady = true
       for (const callback of this.onStreamableReadyCallbacks) callback()
@@ -253,7 +226,6 @@ export default class TranscoderJob {
 
     if (this.videos.length > 0) {
       this.initialize()
-      // this.activate()
       this.cleanUpCallback?.()
       return
     }
@@ -262,8 +234,21 @@ export default class TranscoderJob {
     const index = TranscoderQueue.jobs.findIndex((item) => item === this)
     if (index !== -1) TranscoderQueue.jobs.splice(index, 1)
 
-    // console.log(`Finished - ${this.video.name}`)
     this.initialize()
+  }
+
+  // Restart the transcoding process from specified time
+  // This can also be used to update ffmpeg options on the fly
+  async seekTranscodeTo(seconds: number) {
+    this.transcodedStartSeconds = seconds
+    if (this.state !== JobState.Transcoding && this.state !== JobState.Finished) return
+    this.isReady = false
+    this.command.kill()
+    await fsAsync.rm(this.video.outputPath, { recursive: true, force: true })
+    this.streamID = generateSecret()
+    Player.broadcastStreamInfo()
+    await this.transcode()
+    Player.broadcastStreamInfo()
   }
 
   onInitialized(callback: () => void) {
@@ -287,11 +272,6 @@ export default class TranscoderJob {
   onError(callback: (error: string) => void) {
     if (this.state === JobState.Errored && this.error) return callback(this.error)
     this.onErrorCallbacks.push(callback)
-  }
-
-  // Called when progress is made during transcoding
-  onProgress(callback: (percentage: number) => void) {
-    this.onProgressCallbacks.push(callback)
   }
 
   private resolveInitializedCallbacks() {
