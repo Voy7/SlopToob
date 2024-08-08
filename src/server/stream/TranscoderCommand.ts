@@ -29,10 +29,12 @@ export default class TranscoderCommand {
     this.ffmpegCommand.output(path.join(this.job.m3u8Path))
 
     this.ffmpegCommand.on('end', () => {
+      console.log(`Transcoder end: ${this.job.video.name}`.green)
       this.onEndCallback?.()
     })
 
     this.ffmpegCommand.on('error', (error) => {
+      console.log(`Transcoder error: ${this.job.video.name}`.bgRed)
       this.onErrorCallback?.(error)
     })
 
@@ -77,8 +79,14 @@ export default class TranscoderCommand {
   }
 
   kill() {
+    fs.unwatchFile(this.job.m3u8Path)
     this.ffmpegCommand?.removeAllListeners()
     this.ffmpegCommand?.on('error', () => {}) // Prevent error from being thrown
+    this.ffmpegCommand?.kill('SIGKILL')
+  }
+
+  TEMPforceKill() {
+    fs.unwatchFile(this.job.m3u8Path)
     this.ffmpegCommand?.kill('SIGKILL')
   }
 
