@@ -1,15 +1,16 @@
 import path from 'path'
 import generateSecret from '@/lib/generateSecret'
 import parseVideoName from '@/lib/parseVideoName'
-import Player from '@/server/stream/Player'
+import parseTimestamp from '@/lib/parseTimestamp'
 import Env from '@/server/EnvVariables'
 import Logger from '@/server/Logger'
-import TranscoderQueue from '@/server/stream/TranscoderQueue'
+import Player from '@/server/stream/Player'
 import TranscoderJob from '@/server/stream/TranscoderJob'
+import TranscoderQueue from '@/server/stream/TranscoderQueue'
 import Settings from '@/server/Settings'
 import SocketUtils from '@/server/socket/SocketUtils'
-import VoteSkipHandler from '@/server/stream/VoteSkipHandler'
 import PlayHistory from '@/server/stream/PlayHistory'
+import VoteSkipHandler from '@/server/stream/VoteSkipHandler'
 import { socketClients } from '@/server/socket/socketClients'
 import { Msg, VideoState as State } from '@/lib/enums'
 import type { ClientVideo } from '@/typings/types'
@@ -41,11 +42,6 @@ export default class Video {
     else SocketUtils.broadcastAdmin(Msg.AdminQueueList, Player.clientVideoQueue)
   }
 
-  get isPlaying(): boolean {
-    return Player.playing === this
-  }
-  isReadyToPlay: boolean = false
-
   constructor(filePath: string, isBumper: boolean = false) {
     this.name = parseVideoName(filePath)
     this.isBumper = isBumper
@@ -61,48 +57,50 @@ export default class Video {
 
     this.durationSeconds = this.job.duration
 
+    // Fires when job has fatal error, fires immediately if already errored
+    this.job.onError((error) => {
+      this.error = 'Internal transcoding error occurred.'
+      this.state = State.Errored
+      this.startErrorDisplayTimeout()
+    })
+
     // This wwill fire immediately if job is already ready/streamable
+    // Can fire multiple times during Video's lifetime, usually because of seeking
     this.job.onStreamableReady(() => {
+      if (this.error) return
+
       this.durationSeconds = this.job.duration
 
-      if (!this.isPlaying) return
-      if (this.state === State.Errored) return
+      // Video is not playing, but is now ready
+      if (Player.playing !== this) {
+        this.state = State.Ready
+        this.resolveReadyCallbacks()
+        return
+      }
 
-      // Video is being played & was waiting for transcode
+      // Video is being played & was waiting for transcode to play
       if (this.state === State.Preparing) {
         return this.initPlaying()
       }
 
-      // Rare chance timeout ends before this fires, end video
-      // if (this.state === State.Finished) return this.end()
-
-      // New stream is ready, aka seeking to new time
+      // Video is being played & new files/stream is ready (aka seeking to new time)
       if (this.state === State.Seeking) {
         if (this.playAfterSeek) {
-          this.startFinishTimeout()
           this.state = State.Playing
-        } else {
-          this.state = State.Paused
+          this.startFinishTimeout()
+          this.resolveReadyCallbacks()
+          return
         }
+        this.state = State.Paused
+        this.resolveReadyCallbacks()
       }
-      // Video is ready, but not playing
-      else if (this.state !== State.Playing && this.state !== State.Paused) {
-        // this.durationSeconds = this.job.duration
-        this.state = State.Ready
-      }
-      this.resolveReadyCallbacks()
-    })
-
-    this.job.onError(async (error) => {
-      this.error = error
-      this.state = State.Errored
-      this.resolveFinishedCallback()
     })
   }
 
   // Resolves once video is ready to play, or immediately if already ready
   // Can be called multiple times, typically by Player to try and prepare it ahead of when it's needed
   async prepare(): Promise<void> {
+    if (this.error) return
     if (this.job.isStreamableReady) return
 
     return new Promise<void>((resolve) => {
@@ -116,12 +114,9 @@ export default class Video {
     })
   }
 
+  // Resolves once video is finished playing, including if it was skipped or errored
+  // Should only be called once per video & only when in `Player.playing` state
   async play() {
-    console.log(`play() ${this.name} ${this.id}`.bgGreen)
-    if (this.state === State.Finished) return
-    // await this.prepare()
-
-    // Callback when finished playing
     return new Promise<void>(async (resolve) => {
       this.finishedPlayingCallback = () => {
         VoteSkipHandler.disable()
@@ -133,15 +128,15 @@ export default class Video {
     })
   }
 
+  // Start playing video for FIRST time (not part of seeking or resuming)
   private initPlaying() {
-    // if (this.state === State.Playing || this.state === State.Paused) return
-    Logger.debug(`[Video] Playing video: ${this.name}`, this.state)
+    Logger.debug(`[Video] Playing video: ${this.name}`)
 
     PlayHistory.add(this)
 
-    if (this.state === State.Errored) {
-      this.finishedTimeout = setTimeout(() => this.end(), Settings.errorDisplaySeconds * 1000)
-      Player.broadcastStreamInfo()
+    // If there's an error before playing started, show error screen
+    if (this.error) {
+      this.startErrorDisplayTimeout()
       return
     }
 
@@ -165,14 +160,14 @@ export default class Video {
   // Must be called before being removed from the queue or Player
   // This is primarily so the TranscoderHandler can clean up shared jobs properly
   end() {
-    if (this.finishedTimeout) clearTimeout(this.finishedTimeout)
+    Logger.debug(`[Video] Finished playing: ${this.name}`)
 
-    Logger.debug(`[Video] Finished playing: ${this.name}`, this)
-    delete this.error
+    if (this.finishedTimeout) clearTimeout(this.finishedTimeout)
     delete this.playingDate
     this.durationSeconds = 0
     this.passedDurationSeconds = 0
     this.state = State.Finished
+
     this.job.unlink(this)
     Settings.setSetting('streamIsPaused', false)
     this.resolveFinishedCallback()
@@ -200,7 +195,8 @@ export default class Video {
   // Set video to a specific time in seconds
   seekTo(seconds: number) {
     if (this.state !== State.Playing && this.state !== State.Paused) return
-    Logger.debug(`[Video] Seeking to ${seconds}s: ${this.name}`)
+    Logger.debug(`[Video] Seeking to ${parseTimestamp(seconds)}: ${this.name}`)
+
     this.passedDurationSeconds = seconds
 
     // If seek target is not transcoded yet, update transcoder job
@@ -218,13 +214,23 @@ export default class Video {
     }
   }
 
+  // Start video playing timer normally, starting from this.passedDurationSeconds
   private startFinishTimeout() {
     this.playingDate = new Date()
     if (this.finishedTimeout) clearTimeout(this.finishedTimeout)
     this.finishedTimeout = setTimeout(
       () => this.end(),
-      (this.durationSeconds - this.passedDurationSeconds) * 1000
+      (this.durationSeconds - this.passedDurationSeconds + Settings.videoPaddingSeconds) * 1000
     )
+  }
+
+  // Start video playing timer for error display
+  // It's ok to call this even if video is not playing, it checks first
+  private startErrorDisplayTimeout() {
+    if (Player.playing !== this) return
+    if (this.finishedTimeout) clearTimeout(this.finishedTimeout)
+    this.finishedTimeout = setTimeout(() => this.end(), Settings.errorDisplaySeconds * 1000)
+    Player.broadcastStreamInfo()
   }
 
   private resolveReadyCallbacks() {
@@ -237,14 +243,14 @@ export default class Video {
     delete this.finishedPlayingCallback
   }
 
-  get clientVideo(): ClientVideo {
-    return { id: this.id, state: this.state, name: this.name, path: this.inputPath }
-  }
-
   // Current time of whole video in seconds (not considering transcoded video time)
   get currentSeconds(): number {
     if (!this.playingDate) return 0
     if (this.state === State.Paused) return this.passedDurationSeconds
     return (new Date().getTime() - this.playingDate.getTime()) / 1000 + this.passedDurationSeconds
+  }
+
+  get clientVideo(): ClientVideo {
+    return { id: this.id, state: this.state, name: this.name, path: this.inputPath }
   }
 }

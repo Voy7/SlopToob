@@ -42,7 +42,11 @@ export const enum Msg {
   AdminPauseStream = 'admin-pause-stream',
   AdminUnpauseStream = 'admin-unpause-stream',
   AdminSkipVideo = 'admin-skip-video',
-  AdminSeekTo = 'admin-seek-to'
+  AdminSeekTo = 'admin-seek-to',
+  AdminTerminateJob = 'admin-terminate-job',
+  AdminRemoveQueueVideo = 'admin-remove-queue-item',
+  AdminDebugJob = 'admin-debug-job',
+  AdminDebugVideo = 'admin-debug-video'
 }
 
 export const enum StreamState {

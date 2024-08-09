@@ -17,8 +17,10 @@ export default function SectionMonitor() {
     <>
       <h2>Dev Monitor Panel</h2>
       <StreamControls />
-      <QueueList />
-      <TranscodeQueue />
+      <div className="grid grid-cols-2 gap-4">
+        <QueueList />
+        <TranscodeQueue />
+      </div>
     </>
   )
 }

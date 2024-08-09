@@ -24,12 +24,20 @@ export default class TranscoderCommand {
 
   // Construct and run ffmpeg command, with seek time
   run() {
+    fs.mkdirSync(this.job.video.outputPath, { recursive: true })
+
     this.ffmpegCommand = ffmpeg(this.job.video.inputPath).addOptions(TRANSCODE_ARGS)
     this.ffmpegCommand.inputOptions([`-ss ${this.job.transcodedStartSeconds}`])
     this.ffmpegCommand.output(path.join(this.job.m3u8Path))
 
+    let firstChunkReady = false
+    let availableSeconds = 0
+
     this.ffmpegCommand.on('end', () => {
-      console.log(`Transcoder end: ${this.job.video.name}`.green)
+      if (!firstChunkReady) {
+        firstChunkReady = true
+        this.onFirstChunkCallback?.()
+      }
       this.onEndCallback?.()
     })
 
@@ -37,9 +45,6 @@ export default class TranscoderCommand {
       console.log(`Transcoder error: ${this.job.video.name}`.bgRed)
       this.onErrorCallback?.(error)
     })
-
-    let availableSeconds = 0
-    let firstChunkReady = false
 
     fs.watchFile(this.job.m3u8Path, { interval: 1000 }, async () => {
       try {
@@ -82,11 +87,6 @@ export default class TranscoderCommand {
     fs.unwatchFile(this.job.m3u8Path)
     this.ffmpegCommand?.removeAllListeners()
     this.ffmpegCommand?.on('error', () => {}) // Prevent error from being thrown
-    this.ffmpegCommand?.kill('SIGKILL')
-  }
-
-  TEMPforceKill() {
-    fs.unwatchFile(this.job.m3u8Path)
     this.ffmpegCommand?.kill('SIGKILL')
   }
 

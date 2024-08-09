@@ -41,7 +41,6 @@ export default new (class TranscoderQueue {
   get clientTranscodeList(): TranscodeClientVideo[] {
     const list: TranscodeClientVideo[] = []
     for (const job of this.jobs) {
-      // if (job.state !== JobState.AwaitingTranscode && job.state !== JobState.Transcoding) continue
       list.push({
         id: job.id,
         state: job.state,

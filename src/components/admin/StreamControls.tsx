@@ -35,14 +35,14 @@ export default function StreamControls() {
       <div className="ml-2 flex flex-col gap-1 overflow-hidden">
         <h6
           className={twMerge(
-            'text-text2 cursor-default overflow-hidden text-ellipsis whitespace-nowrap text-base font-normal',
+            'cursor-default overflow-hidden text-ellipsis whitespace-nowrap text-base font-normal text-text2',
             isError && 'text-error'
           )}
           title={name}
         >
-          {name}
+          _{streamInfo.state}_ {name}
         </h6>
-        <p className="text-text3 cursor-default text-sm">
+        <p className="cursor-default text-sm text-text3">
           {currentTimestamp} / {totalTimestamp}
         </p>
       </div>
@@ -72,7 +72,7 @@ function ActionButton() {
 
   if (streamInfo.state === StreamState.Error) {
     return (
-      <button className={twMerge(actionButtonStyles, 'bg-error cursor-not-allowed')}>
+      <button className={twMerge(actionButtonStyles, 'cursor-not-allowed bg-error')}>
         <Icon name="warning" />
       </button>
     )

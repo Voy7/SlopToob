@@ -341,5 +341,39 @@ export const socketEvents: Record<string, EventOptions> = {
     run: (socket, seconds: number) => {
       Player.playing?.seekTo(seconds)
     }
+  },
+
+  [Msg.AdminTerminateJob]: {
+    adminOnly: true,
+    run: (socket, jobID: string) => {
+      const job = TranscoderQueue.jobs.find((j) => j.id === jobID)
+      // if (job) job.terminate()
+    }
+  },
+
+  [Msg.AdminRemoveQueueVideo]: {
+    adminOnly: true,
+    run: (socket, videoID: string) => {
+      const video = Player.queue.find((v) => v.id === videoID)
+      if (!video) return
+      video.end()
+      Player.queue.splice(Player.queue.indexOf(video), 1)
+    }
+  },
+
+  [Msg.AdminDebugJob]: {
+    adminOnly: true,
+    run: (socket, jobID: string) => {
+      const job = TranscoderQueue.jobs.find((j) => j.id === jobID)
+      if (job) Logger.debug(job)
+    }
+  },
+
+  [Msg.AdminDebugVideo]: {
+    adminOnly: true,
+    run: (socket, videoID: string) => {
+      const video = Player.playing || Player.queue.find((v) => v.id === videoID)
+      if (video) Logger.debug(video)
+    }
   }
 }

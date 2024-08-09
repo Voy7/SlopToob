@@ -8,7 +8,7 @@ import styles from './QueueList.module.scss'
 const states: Record<VideoState, { name: string; color: string }> = {
   [VideoState.NotReady]: { name: 'Not Ready', color: 'gray' },
   [VideoState.Ready]: { name: 'Ready', color: 'lime' },
-  [VideoState.Preparing]: { name: 'Transcoding', color: 'aqua' },
+  [VideoState.Preparing]: { name: 'Preparing', color: 'aqua' },
   [VideoState.Playing]: { name: 'Playing', color: 'lime' },
   [VideoState.Paused]: { name: 'Paused', color: 'white' },
   [VideoState.Seeking]: { name: 'Seeking', color: 'white' },
