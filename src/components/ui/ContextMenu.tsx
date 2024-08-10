@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useMemo, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { twMerge } from 'tailwind-merge'
 
@@ -10,42 +10,43 @@ type Props = {
 export default function ContextMenu({ show, className, ...props }: Props) {
   if (typeof window === 'undefined') return null
 
+  const anchorRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const [position, setPosition] = useState<[number, number] | null>(null)
+  const position = useMemo(() => {
+    if (!anchorRef.current) return null
+    const parent = anchorRef.current.parentElement
+    if (!parent) return null
 
-  useEffect(() => {
-    const container = containerRef.current
-    if (!container) return
-    const parent = container.parentElement
-    if (!parent) return
-
-    // Top y of parent should match y of container
-    // If there is room to the right of the parent, show on the right
-    // Otherwise, show on the left
     const parentRect = parent.getBoundingClientRect()
-    const containerRect = container.getBoundingClientRect()
 
-    // Amount of pixels to the right of the parent in viewport
-    const rightSpace = window.innerWidth - parentRect.right
-    const leftSpace = parentRect.left
+    if (containerRef.current) {
+      // TODO: This doesn't work, need to find a way to let the container render first in order to get it's width
+      const containerRect = containerRef.current.getBoundingClientRect()
 
-    // If there is enough space to the right, show on the right
-    if (rightSpace > containerRect.width) {
-      setPosition([parentRect.right, parentRect.top])
-    } else {
-      setPosition([parentRect.left - containerRect.width, parentRect.top])
+      const rightSpace = window.innerWidth - parentRect.right
+      console.log(rightSpace, containerRect.width)
+      const leftSpace = parentRect.left
+
+      if (rightSpace > containerRect.width) {
+        return [parentRect.right, parentRect.top]
+      } else {
+        return [parentRect.left - containerRect.width, parentRect.top]
+      }
     }
-  }, [])
+
+    return [parentRect.right, parentRect.top]
+  }, [show])
 
   return (
-    <div ref={containerRef} onClick={(event) => event.stopPropagation()}>
+    <div ref={anchorRef} onClick={(event) => event.stopPropagation()}>
       {position &&
         show &&
         createPortal(
           <div
+            ref={containerRef}
             className={twMerge(
-              'absolute z-50 rounded-lg border border-border2 bg-bg1 py-2 shadow-lg',
+              'fixed z-50 rounded-lg border border-border2 bg-bg1 py-2 shadow-lg',
               className
             )}
             style={{

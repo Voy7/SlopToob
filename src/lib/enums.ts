@@ -46,7 +46,9 @@ export const enum Msg {
   AdminTerminateJob = 'admin-terminate-job',
   AdminRemoveQueueVideo = 'admin-remove-queue-item',
   AdminDebugJob = 'admin-debug-job',
-  AdminDebugVideo = 'admin-debug-video'
+  AdminDebugVideo = 'admin-debug-video',
+  AdminSendAllLogs = 'admin-send-all-logs',
+  AdminNewLog = 'admin-new-log'
 }
 
 export const enum StreamState {

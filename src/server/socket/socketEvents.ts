@@ -191,6 +191,7 @@ export const socketEvents: Record<string, EventOptions> = {
       socket.emit(Msg.AdminQueueList, Player.clientVideoQueue)
       socket.emit(Msg.AdminTranscodeQueueList, TranscoderQueue.clientTranscodeList)
       socket.emit(Msg.AdminHistoryStatus, PlayHistory.clientHistoryStatus)
+      socket.emit(Msg.AdminSendAllLogs, Logger.logs)
     }
   },
 
@@ -347,7 +348,7 @@ export const socketEvents: Record<string, EventOptions> = {
     adminOnly: true,
     run: (socket, jobID: string) => {
       const job = TranscoderQueue.jobs.find((j) => j.id === jobID)
-      // if (job) job.terminate()
+      if (job) job.forceKill()
     }
   },
 

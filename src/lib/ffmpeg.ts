@@ -12,9 +12,9 @@ export const TRANSCODE_ARGS = [
   '-preset veryfast',
   // `-vf "scale='min(1920,iw)':-2"`,
   '-c:v libx264',
-  '-crf 23',
   '-pix_fmt yuv420p',
   '-map 0:v:0',
+  '-crf 23',
   '-c:a aac',
   '-ac 2',
   '-b:a 192k',
@@ -26,7 +26,7 @@ export const TRANSCODE_ARGS = [
 ]
 
 export const THUMBNAIL_ARGS = [
-  '-vf scale=-1:420', // Scale to 420p height
+  '-vf scale=-1:480', // Scale to 420p height
   '-vframes 1', // Only 1 frame
   '-q:v 2' // Quality level
 ]

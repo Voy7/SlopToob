@@ -133,7 +133,7 @@ export default class TranscoderJob {
 
   // Add this job to the queue
   activate() {
-    console.log(`${this.video.name} activate()`.bgBlue, this)
+    // console.log(`${this.video.name} activate()`.bgBlue, this)
     if (this.error) return
 
     if (this.state === JobState.Idle) {
@@ -228,6 +228,11 @@ export default class TranscoderJob {
       Logger.error('[TranscoderJob] Error seeking transcoded video:', error)
       this.throwError(error.message)
     }
+  }
+
+  // Force kill job and transcoding process
+  forceKill() {
+    this.command.forceKill()
   }
 
   // Called when the video has been transcoded enough to start playing while the rest is still transcoding

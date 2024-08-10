@@ -5,7 +5,6 @@ import { useSocketContext } from '@/contexts/SocketContext'
 import useSocketOn from '@/hooks/useSocketOn'
 import LoadingPage from '@/components/stream/LoadingPage'
 import { Msg } from '@/lib/enums'
-import type { AuthUser } from '@/typings/types'
 import type { Viewer, ChatMessage, ViewerStreamInfo } from '@/typings/socket'
 
 const MAX_CHAT_MESSAGES = 250 // Max to display in chat / remove from array

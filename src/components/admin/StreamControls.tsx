@@ -13,11 +13,11 @@ const actionButtonStyles =
 // Admin stream controls
 export default function StreamControls() {
   const { socket } = useSocketContext()
-  const { streamInfo, lastReceivedPlaylistsDate } = useAdminContext()
+  const { streamInfo, lastStreamUpdateTimestamp } = useAdminContext()
 
   const { currentTimestamp, totalTimestamp } = useStreamTimestamp(
     streamInfo,
-    lastReceivedPlaylistsDate
+    lastStreamUpdateTimestamp
   )
 
   let name = 'Unknown State'
@@ -38,9 +38,8 @@ export default function StreamControls() {
             'cursor-default overflow-hidden text-ellipsis whitespace-nowrap text-base font-normal text-text2',
             isError && 'text-error'
           )}
-          title={name}
-        >
-          _{streamInfo.state}_ {name}
+          title={name}>
+          {name}
         </h6>
         <p className="cursor-default text-sm text-text3">
           {currentTimestamp} / {totalTimestamp}

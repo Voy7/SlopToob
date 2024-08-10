@@ -42,8 +42,7 @@ export default function AdminScrubber() {
         const percentage = x / rect.width
         const seconds = percentage * totalSeconds
         socket.emit(Msg.AdminSeekTo, seconds)
-      }}
-    >
+      }}>
       {isHovered && (
         <div
           className="pointer-events-none absolute h-full bg-slate-500 transition-[width] duration-150"
@@ -58,8 +57,7 @@ export default function AdminScrubber() {
         <>
           <div
             className="pointer-events-none absolute top-[-20px] -translate-x-1/2 -translate-y-1/2 transform rounded-md bg-[rgb(63,63,63)] px-2 py-1 text-white shadow-md"
-            style={{ left: `${hoverTimestampPos}%` }}
-          >
+            style={{ left: `${hoverTimestampPos}%` }}>
             {parseTimestamp(selectedSeconds)}
           </div>
           <div

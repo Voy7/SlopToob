@@ -30,7 +30,7 @@ export default function VideoControls({ scrubber }: { scrubber: JSX.Element }) {
   } = useVideoContext()
   const { streamInfo, lastStreamUpdateTimestamp } = useStreamContext()
 
-  const { currentTimestamp, totalTimestamp, currentSeconds, totalSeconds } = useStreamTimestamp(
+  const { currentTimestamp, totalTimestamp } = useStreamTimestamp(
     streamInfo,
     lastStreamUpdateTimestamp
   )
@@ -76,8 +76,7 @@ export default function VideoControls({ scrubber }: { scrubber: JSX.Element }) {
         'absolute bottom-0 left-0 flex w-full flex-col bg-[rgba(0,0,0,0.5)] shadow-[0_0.5rem_1rem_rgba(0,0,0,0.5)] transition-[150ms]',
         !showControls && 'translate-y-full opacity-0'
       )}
-      onClick={(event) => event.stopPropagation()}
-    >
+      onClick={(event) => event.stopPropagation()}>
       {scrubber}
       <div className="flex items-center justify-between p-2">
         <div className="flex items-center gap-2">

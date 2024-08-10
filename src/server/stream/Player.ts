@@ -31,7 +31,7 @@ export default new (class Player {
 
   // Get all playlists on startup
   async initialize() {
-    Logger.debug('Initializing player handler...')
+    Logger.debug('[Player] Initializing player handler...')
     await Playlists.populatePlaylists()
     await this.setActivePlaylistID(Settings.activePlaylistID)
     Checklist.pass('playerReady', 'Stream player handler ready.')
@@ -106,7 +106,9 @@ export default new (class Player {
     if (this.queue.length == Settings.targetQueueSize) return
 
     if (this.queue.length > Settings.targetQueueSize) {
-      this.queue = this.queue.slice(0, Settings.targetQueueSize)
+      while (this.queue.length > Settings.targetQueueSize) {
+        this.queue.pop()?.end()
+      }
       SocketUtils.broadcastAdmin(Msg.AdminQueueList, this.clientVideoQueue)
       return
     }
@@ -204,7 +206,7 @@ export default new (class Player {
   }
 
   get adminStreamInfo(): AdminStreamInfo {
-    const info: AdminStreamInfo = { ...this.baseStreamInfo }
+    const info: AdminStreamInfo = { ...this.baseStreamInfo, version: packageJSON.version }
     if (this.playing) {
       info.transcodedSeconds = this.playing.job.availableSeconds
     }
@@ -213,7 +215,6 @@ export default new (class Player {
 
   get clientStreamOptions(): StreamOptions {
     return {
-      version: packageJSON.version,
       streamTheme: Settings.streamTheme,
       history: PlayHistory.clientHistory,
       chat: {

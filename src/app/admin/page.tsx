@@ -2,14 +2,10 @@ import { cookies } from 'next/headers'
 import { getServerSession } from 'next-auth'
 import authOptions from '@/lib/authOptions'
 import { SocketProvider } from '@/contexts/SocketContext'
-import { StreamProvider } from '@/contexts/StreamContext'
 import { AuthRole } from '@/lib/enums'
-import dynamic from 'next/dynamic'
 import { AdminProvider } from '@/contexts/AdminContext'
 import AuthExpired from '@/components/stream/AuthExpired'
 import AdminPanel from '@/components/admin/AdminPanel'
-
-// const AdminModal = dynamic(() => import('@/components/admin/AdminModal'), { ssr: true })
 
 export default async function AdminPage() {
   const session = await getServerSession(authOptions)
@@ -24,7 +20,12 @@ export default async function AdminPage() {
   return (
     <SocketProvider authUser={authUser} cookieUsername={cookieUsername}>
       <AdminProvider>
-        <AdminPanel />
+        <div className="grid min-h-screen grid-cols-[1fr] gap-6 p-6">
+          <div className="border-[1px] border-border1">
+            <AdminPanel />
+          </div>
+          {/* <div className="w-full bg-slate-500">SIDEBAR</div> */}
+        </div>
       </AdminProvider>
     </SocketProvider>
   )

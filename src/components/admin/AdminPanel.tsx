@@ -2,7 +2,7 @@
 
 import { useAdminContext } from '@/contexts/AdminContext'
 import Navbar from '@/components/admin/Navbar'
-import Icon, { type IconNames } from '@/components/ui/Icon'
+import Icon from '@/components/ui/Icon'
 import SectionStream from '@/components/admin/SectionStream'
 import SectionPlaylists from '@/components/admin/SectionPlaylists'
 import SectionBumpers from '@/components/admin/SectionBumpers'
@@ -10,9 +10,8 @@ import SectionCaching from '@/components/admin/SectionCaching'
 import SectionChat from '@/components/admin/SectionChat'
 import SectionHistory from '@/components/admin/SectionHistory'
 import SectionVoteSkip from '@/components/admin/SectionVoteSkip'
-import SectionMonitor from '@/components/admin/SectionMonitor'
+import SectionDebug from '@/components/admin/SectionDebug'
 import SectionAdvanced from '@/components/admin/SectionAdvanced'
-import styles from './AdminModal.module.scss'
 
 // Admin panel sections
 export const sections = [
@@ -50,7 +49,7 @@ export const sections = [
   {
     name: 'Monitor',
     icon: <Icon name="admin-panel" />,
-    component: <SectionMonitor />
+    component: <SectionDebug />
   },
   {
     name: 'Advanced',
@@ -66,9 +65,11 @@ export default function AdminPanel() {
   const { section } = useAdminContext()
 
   return (
-    <div className={styles.adminModal}>
+    <div className="flex flex-col lg:flex-row">
       <Navbar />
-      <div key={section.name} className={styles.section}>
+      <div
+        key={section.name}
+        className="sectionFadeInAnimation flex w-full flex-col gap-4 overflow-x-hidden p-4">
         {section.component}
       </div>
     </div>

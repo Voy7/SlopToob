@@ -59,6 +59,48 @@ body {
   scrollbar-color: var(--border-color-1) var(--bg-color-1);
 }
 
+// Modal animations
+.modalBackgroundAnimation {
+  animation: modalBackgroundFadeIn 300ms ease-in-out;
+  @keyframes modalBackgroundFadeIn {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+}
+
+.modalContainerAnimation {
+  animation: modalContainerFadeIn 300ms ease-in-out;
+  @keyframes modalContainerFadeIn {
+    0% {
+      top: calc(50% - 20px);
+      opacity: 0;
+    }
+    100% {
+      top: 50%;
+      opacity: 1;
+    }
+  }
+}
+
+// Admin panel section animation
+.sectionFadeInAnimation {
+  animation: sectionFadeIn 300ms ease-in-out;
+  @keyframes sectionFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-1rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
 // Loading icon animation
 [data-loading-icon] {
   animation: loading 1s linear infinite;

@@ -38,7 +38,6 @@ export type StreamError = {
 }
 
 export type StreamOptions = {
-  version: string
   streamTheme: string
   history: ClientHistoryItem[] | null
   chat: {
@@ -60,6 +59,7 @@ export type ViewerStreamInfo = BaseStreamInfo & StreamOptions
 
 export type AdminStreamInfo = {
   transcodedSeconds?: number
+  version: string
 } & BaseStreamInfo
 
 export type SocketClient = {

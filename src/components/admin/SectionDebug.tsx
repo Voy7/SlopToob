@@ -1,18 +1,11 @@
 'use client'
 
-import {
-  SettingGroup,
-  Header,
-  Description,
-  ToggleOption,
-  ListOption,
-  NumberOption
-} from '@/components/admin/SettingsComponents'
 import StreamControls from '@/components/admin/StreamControls'
 import QueueList from '@/components/admin/QueueList'
 import TranscodeQueue from '@/components/admin/TranscodeQueue'
+import ConsoleLogs from '@/components/admin/ConsoleLogs'
 
-export default function SectionMonitor() {
+export default function SectionDebug() {
   return (
     <>
       <h2>Dev Monitor Panel</h2>
@@ -21,6 +14,7 @@ export default function SectionMonitor() {
         <QueueList />
         <TranscodeQueue />
       </div>
+      <ConsoleLogs />
     </>
   )
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useStreamContext } from '@/contexts/StreamContext'
+import { useAdminContext } from '@/contexts/AdminContext'
 import useToggleOption from '@/hooks/useToggleOption'
 import useNumberOption from '@/hooks/useNumberOption'
 import {
@@ -14,7 +14,7 @@ import {
 } from '@/components/admin/SettingsComponents'
 
 export default function SectionAdvanced() {
-  const { streamInfo } = useStreamContext()
+  const { streamInfo } = useAdminContext()
 
   const pauseWhenInactive = useToggleOption('pauseWhenInactive')
   const maxTranscodingJobs = useNumberOption('maxTranscodingJobs')

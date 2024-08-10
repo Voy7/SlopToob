@@ -15,7 +15,12 @@ export default new (class Thumbnails {
     videoPath = decodeURIComponent(videoPath) // Parse special characters (like %20)
 
     if (!videoPath.startsWith(Env.VIDEOS_PATH) && !videoPath.startsWith(Env.BUMPERS_PATH)) {
-      Logger.error('Video path is not in the videos or bumpers folder.')
+      Logger.error('[Thumbnails] Video path is not in the videos or bumpers folder.', videoPath)
+      return null
+    }
+
+    if (!fs.existsSync(videoPath)) {
+      Logger.error('[Thumbnails] Video file not found:', videoPath)
       return null
     }
 
@@ -34,6 +39,8 @@ export default new (class Thumbnails {
       }
       this.generateCallbacks[thumbnailPath] = [resolve]
 
+      const startTime = Date.now()
+
       // Create thumbnail directory if it doesn't exist
       if (!fs.existsSync(Env.THUMBNAILS_OUTPUT_PATH)) {
         fs.mkdirSync(Env.THUMBNAILS_OUTPUT_PATH, { recursive: true })
@@ -42,14 +49,16 @@ export default new (class Thumbnails {
       let seekSeconds = 5
       try {
         seekSeconds = (await TranscoderJob.getVideoDuration(videoPath)) / 2
-      } catch (error: any) {}
+      } catch (error) {}
 
       const command = ffmpeg(videoPath)
-      command.outputOptions([...THUMBNAIL_ARGS, `-ss ${seekSeconds}`])
+      command.inputOptions([`-ss ${seekSeconds}`])
+      command.outputOptions([...THUMBNAIL_ARGS])
       command.output(thumbnailPath)
 
       command.on('end', () => {
-        Logger.debug(`[Thumbnails] Generated thumbnail at: ${thumbnailPath}`)
+        const seconds = ((Date.now() - startTime) / 1000).toFixed(2)
+        Logger.debug(`[Thumbnails] Generated thumbnail in ${seconds}s, at: ${thumbnailPath}`)
         const callbacks = this.generateCallbacks[thumbnailPath]
         if (!callbacks) return
         for (const callback of callbacks) callback(thumbnailPath)
@@ -57,7 +66,7 @@ export default new (class Thumbnails {
       })
 
       command.on('error', (error) => {
-        Logger.error('[Thumbnails] Error generating thumbnail:', error)
+        Logger.error(`[Thumbnails] Error generating thumbnail: ${thumbnailPath}`, error)
         const callbacks = this.generateCallbacks[thumbnailPath]
         if (!callbacks) return
         for (const callback of callbacks) callback(null)
@@ -81,14 +90,13 @@ export default new (class Thumbnails {
   ) {
     try {
       const videoPath = parsedUrl.pathname?.replace('/thumbnails/', '')
-      if (!videoPath) throw new Error('Could not parse video path from URL')
+      if (!videoPath) throw new Error(`Could not parse video path from URL (${parsedUrl.pathname})`)
       const thumbnailPath = await this.generate(videoPath)
-      if (!thumbnailPath) throw new Error(`No thumbnail path returned: ${videoPath}`)
+      if (!thumbnailPath) throw new Error(`No path returned (${videoPath})`)
 
       // TODO: Investigate why this throws sometimes, even though we should be generating it right above this line
       if (!fs.existsSync(thumbnailPath)) {
-        // throw new Error(`Thumbnail file not found: ${thumbnailPath}`)
-        Logger.warn(`Thumbnail file not found: ${thumbnailPath}`)
+        Logger.warn(`[Thumbnails] File not found: ${thumbnailPath}`)
         res.statusCode = 404
         res.end()
         return
@@ -98,7 +106,7 @@ export default new (class Thumbnails {
       res.setHeader('Content-Type', 'image/png')
       file.pipe(res)
     } catch (error: any) {
-      Logger.error('[Thumbnails] Error occurred handling thumbnail request:', error)
+      Logger.warn('[Thumbnails] Could not handle thumbnail request:', error.message)
       res.statusCode = 404
       res.end()
     }

@@ -32,6 +32,7 @@ type ContextProps = {
   historyStatus: ClientHistoryStatus | null
   videosCacheStatus: ClientCacheStatus | null
   bumpersCacheStatus: ClientCacheStatus | null
+  logs: string[]
 }
 
 // Context provider wrapper component
@@ -51,6 +52,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [historyStatus, setHistoryStatus] = useState<ClientHistoryStatus | null>(null)
   const [videosCacheStatus, setVideosCacheStatus] = useState<ClientCacheStatus | null>(null)
   const [bumpersCacheStatus, setBumpersCacheStatus] = useState<ClientCacheStatus | null>(null)
+  const [logs, setLogs] = useState<string[]>([])
 
   function setSection(sectionName: SectionName) {
     const sec = sections.find((s) => s.name === sectionName)
@@ -84,6 +86,15 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     setBumpersCacheStatus(status)
   )
 
+  useSocketOn(Msg.AdminSendAllLogs, (logs: string[]) => setLogs(logs))
+
+  useSocketOn(Msg.AdminNewLog, (log: string) => {
+    setLogs((prev) => {
+      if (prev.length >= 500) prev.shift()
+      return [...prev, log]
+    })
+  })
+
   useEffect(() => {
     const isPlaylistSelected = playlists.some((playlist) => playlist.id === selectedPlaylist)
     if (!isPlaylistSelected && playlists[0]) setSelectedPlaylist(playlists[0].id)
@@ -108,7 +119,8 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     transcodeQueue,
     historyStatus,
     videosCacheStatus,
-    bumpersCacheStatus
+    bumpersCacheStatus,
+    logs
   }
 
   return <AdminContext.Provider value={context}>{children}</AdminContext.Provider>
