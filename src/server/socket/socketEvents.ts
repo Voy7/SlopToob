@@ -23,6 +23,7 @@ import type {
   EditPlaylistVideosPayload
 } from '@/typings/socket'
 import Playlists from '@/server/stream/Playlists'
+import CacheHandler from '../stream/CacheHandler'
 
 type EventOptions = {
   allowUnauthenticated?: boolean // Allow unauthenticated users to run this event (default: false)
@@ -191,6 +192,9 @@ export const socketEvents: Record<string, EventOptions> = {
       socket.emit(Msg.AdminQueueList, Player.clientVideoQueue)
       socket.emit(Msg.AdminTranscodeQueueList, TranscoderQueue.clientTranscodeList)
       socket.emit(Msg.AdminHistoryStatus, PlayHistory.clientHistoryStatus)
+      socket.emit(Msg.AdminCacheStatus, CacheHandler.getClientCacheStatus('videos'))
+      socket.emit(Msg.AdminCacheStatus, CacheHandler.getClientCacheStatus('bumpers'))
+      socket.emit(Msg.AdminCacheStatus, CacheHandler.getClientCacheStatus('thumbnails'))
       socket.emit(Msg.AdminSendAllLogs, Logger.logs)
     }
   },
@@ -375,6 +379,14 @@ export const socketEvents: Record<string, EventOptions> = {
     run: (socket, videoID: string) => {
       const video = Player.playing || Player.queue.find((v) => v.id === videoID)
       if (video) Logger.debug(video)
+    }
+  },
+
+  [Msg.AdminDeleteCache]: {
+    adminOnly: true,
+    run: async (socket, cacheID: unknown) => {
+      if (!CacheHandler.isCacheID(cacheID)) return
+      CacheHandler.deleteAll(cacheID)
     }
   }
 }

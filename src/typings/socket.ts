@@ -1,6 +1,9 @@
 import type { AuthRole, JobState } from '@/lib/enums'
 import type { Socket } from 'socket.io'
+import type { CacheID } from '@/server/stream/CacheHandler'
 import { StreamState, ChatType } from '@/lib/enums'
+
+export type { CacheID }
 
 export type StreamPlaying = {
   state: StreamState.Playing
@@ -131,6 +134,7 @@ export type ClientHistoryStatus = {
 }
 
 export type ClientCacheStatus = {
+  cacheID: CacheID
   filesCount: number
   size: string
   isDeleting: boolean

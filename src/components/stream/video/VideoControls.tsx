@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useSession } from 'next-auth/react'
 import { useVideoContext } from '@/contexts/VideoContext'
 import { useStreamContext } from '@/contexts/StreamContext'
@@ -30,6 +30,8 @@ export default function VideoControls({ scrubber }: { scrubber: JSX.Element }) {
   } = useVideoContext()
   const { streamInfo, lastStreamUpdateTimestamp } = useStreamContext()
 
+  const controlsContainerRef = useRef<HTMLDivElement>(null)
+
   const { currentTimestamp, totalTimestamp } = useStreamTimestamp(
     streamInfo,
     lastStreamUpdateTimestamp
@@ -39,14 +41,30 @@ export default function VideoControls({ scrubber }: { scrubber: JSX.Element }) {
   const volumeSliderTooltip = useTooltip('top', 25)
   const fullscreenTooltip = useTooltip('top-end', 25)
 
-  // const nicknameTooltip = useTooltip('bottom-end')
-
   // Show overlay when mouse is moved on it, keep it visible for 3 seconds
   // when mouse is moved out or stops moving, hide it after 3 seconds
   useEffect(() => {
-    if (!containerElement) return
+    const controlsElement = controlsContainerRef.current
+
+    if (!controlsElement || !containerElement) return
 
     let timeout: NodeJS.Timeout
+    let hoveredControls = false
+    let hoveredContainer = false
+
+    function check() {
+      if (hoveredControls) {
+        clearTimeout(timeout)
+        setShowControls(true)
+        return
+      }
+      if (hoveredContainer) {
+        startTimer()
+        return
+      }
+      clearTimeout(timeout)
+      setShowControls(false)
+    }
 
     function startTimer() {
       setShowControls(true)
@@ -56,22 +74,36 @@ export default function VideoControls({ scrubber }: { scrubber: JSX.Element }) {
 
     if (!isPaused) startTimer()
 
-    containerElement.onmousemove = startTimer
-
+    containerElement.onmousemove = () => {
+      hoveredContainer = true
+      check()
+    }
     containerElement.onmouseleave = () => {
-      clearTimeout(timeout)
-      setShowControls(false)
+      hoveredContainer = false
+      check()
+    }
+
+    controlsElement.onmousemove = () => {
+      hoveredControls = true
+      check()
+    }
+    controlsElement.onmouseleave = () => {
+      hoveredControls = false
+      check()
     }
 
     return () => {
       containerElement.onmousemove = null
       containerElement.onmouseleave = null
+      controlsElement.onmousemove = null
+      controlsElement.onmouseleave = null
       clearTimeout(timeout)
     }
   }, [isPaused, containerElement])
 
   return (
     <div
+      ref={controlsContainerRef}
       className={twMerge(
         'absolute bottom-0 left-0 flex w-full flex-col bg-[rgba(0,0,0,0.5)] shadow-[0_0.5rem_1rem_rgba(0,0,0,0.5)] transition-[150ms]',
         !showControls && 'translate-y-full opacity-0'

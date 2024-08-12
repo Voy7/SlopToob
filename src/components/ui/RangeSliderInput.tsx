@@ -7,6 +7,7 @@ type Props = {
   min?: number
   max?: number
   step?: number
+  scrollStep?: number
   className?: string
   trackClassName?: string
   progressClassName?: string
@@ -19,6 +20,7 @@ export default function RangeSliderInput({
   min = 0,
   max = 100,
   step = 1,
+  scrollStep = 5,
   className,
   trackClassName,
   progressClassName,
@@ -57,14 +59,21 @@ export default function RangeSliderInput({
       if (isDragging) updateValue(event)
     }
 
+    function mouseWheel(event: WheelEvent) {
+      event.preventDefault()
+      onChange(Math.min(max, Math.max(min, value + (event.deltaY > 0 ? -scrollStep : scrollStep))))
+    }
+
     containerElement.addEventListener('mousedown', startDrag)
     containerElement.addEventListener('mousemove', drag)
     document.addEventListener('mouseup', stopDrag)
+    containerElement.addEventListener('wheel', mouseWheel)
 
     return () => {
       containerElement.removeEventListener('mousedown', startDrag)
       containerElement.removeEventListener('mousemove', drag)
       document.removeEventListener('mouseup', stopDrag)
+      containerElement.removeEventListener('wheel', mouseWheel)
     }
   }, [containerRef, isDragging, onChange, min, max, step])
 
@@ -77,14 +86,12 @@ export default function RangeSliderInput({
       aria-valuemax={max}
       aria-valuenow={value}
       aria-orientation="horizontal"
-      tabIndex={0}
-    >
+      tabIndex={0}>
       <div
         className={twMerge(
           'absolute top-1/2 h-[0.5rem] w-full -translate-y-1/2 transform overflow-hidden rounded-full bg-[rgba(136,136,136,0.5)] shadow-md',
           trackClassName
-        )}
-      >
+        )}>
         <div
           className={twMerge('h-full bg-white', progressClassName)}
           style={{ width: `${(value / max) * 100}%` }}

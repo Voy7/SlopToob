@@ -29,9 +29,10 @@ type ContextProps = {
   bumpers: ClientBumper[]
   queue: ClientVideo[]
   transcodeQueue: TranscodeClientVideo[]
-  historyStatus: ClientHistoryStatus | null
-  videosCacheStatus: ClientCacheStatus | null
-  bumpersCacheStatus: ClientCacheStatus | null
+  historyStatus: ClientHistoryStatus
+  videosCacheStatus: ClientCacheStatus
+  bumpersCacheStatus: ClientCacheStatus
+  thumbnailsCacheStatus: ClientCacheStatus
   logs: string[]
 }
 
@@ -52,6 +53,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [historyStatus, setHistoryStatus] = useState<ClientHistoryStatus | null>(null)
   const [videosCacheStatus, setVideosCacheStatus] = useState<ClientCacheStatus | null>(null)
   const [bumpersCacheStatus, setBumpersCacheStatus] = useState<ClientCacheStatus | null>(null)
+  const [thumbnailsCacheStatus, setThumbnailsCacheStatus] = useState<ClientCacheStatus | null>(null)
   const [logs, setLogs] = useState<string[]>([])
 
   function setSection(sectionName: SectionName) {
@@ -79,12 +81,11 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     setTranscodeQueue(queue)
   )
   useSocketOn(Msg.AdminHistoryStatus, (status: ClientHistoryStatus) => setHistoryStatus(status))
-  useSocketOn(Msg.AdminVideosCacheStatus, (status: ClientCacheStatus) =>
-    setVideosCacheStatus(status)
-  )
-  useSocketOn(Msg.AdminBumpersCacheStatus, (status: ClientCacheStatus) =>
-    setBumpersCacheStatus(status)
-  )
+  useSocketOn(Msg.AdminCacheStatus, (status: ClientCacheStatus) => {
+    if (status.cacheID === 'videos') setVideosCacheStatus(status)
+    if (status.cacheID === 'bumpers') setBumpersCacheStatus(status)
+    if (status.cacheID === 'thumbnails') setThumbnailsCacheStatus(status)
+  })
 
   useSocketOn(Msg.AdminSendAllLogs, (logs: string[]) => setLogs(logs))
 
@@ -102,6 +103,10 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
   // TODO: Add meaningful loading state
   if (!streamInfo) return null
+  if (!historyStatus) return null
+  if (!videosCacheStatus) return null
+  if (!bumpersCacheStatus) return null
+  if (!thumbnailsCacheStatus) return null
 
   const context: ContextProps = {
     section,
@@ -120,6 +125,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     historyStatus,
     videosCacheStatus,
     bumpersCacheStatus,
+    thumbnailsCacheStatus,
     logs
   }
 

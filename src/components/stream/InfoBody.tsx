@@ -16,9 +16,7 @@ export default function InfoBody() {
     <div className={styles.infoBody}>
       <div className={styles.title}>
         {isBumper && <span className={styles.bumper}>Bumper</span>}
-        <h2>
-          {title} |{id}|
-        </h2>
+        <h2>{title}</h2>
       </div>
       <VoteSkipButton />
     </div>

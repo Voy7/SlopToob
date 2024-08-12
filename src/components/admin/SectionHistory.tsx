@@ -21,7 +21,6 @@ import {
 export default function SectionHistory() {
   const { historyStatus } = useAdminContext()
   const { socket } = useSocketContext()
-  if (!historyStatus) return null
 
   const [showHistoryModal, setShowHistoryModal] = useState<boolean>(false)
 
@@ -47,14 +46,12 @@ export default function SectionHistory() {
         <Gap />
         <ButtonOption
           label={`Internal history usage: ${historyStatus.currentCount} / ${historyStatus.totalCount}`}
-          swapped
-        >
+          swapped>
           <Button
             style="danger"
             icon="delete"
             loading={historyStatus.isDeleting}
-            onClick={() => setShowHistoryModal(true)}
-          >
+            onClick={() => setShowHistoryModal(true)}>
             Clear History
           </Button>
           <ActionModal
@@ -66,12 +63,10 @@ export default function SectionHistory() {
                 style="danger"
                 icon="delete"
                 loading={historyStatus.isDeleting}
-                onClick={clearHistory}
-              >
+                onClick={clearHistory}>
                 Clear History
               </Button>
-            }
-          >
+            }>
             <p>Are you sure you want to clear the history?</p>
           </ActionModal>
         </ButtonOption>

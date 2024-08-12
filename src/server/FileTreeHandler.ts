@@ -103,6 +103,8 @@ export default new (class FileTreeHandler {
 
   // Transform paths array to a tree structure
   private buildTreeObject(logDone: boolean) {
+    const startTime = Date.now()
+
     const rootPath = Env.VIDEOS_PATH
     const rootName = rootPath.slice(rootPath.lastIndexOf('/') + 1)
 
@@ -149,7 +151,10 @@ export default new (class FileTreeHandler {
     this.pathIndexesMap = this.treeToIndexesMap(tree)
     for (const callback of this.onTreeChangeCallbacks) callback()
 
-    if (logDone) Logger.debug('File tree object reconstructed.')
+    if (logDone) {
+      const passedSeconds = ((Date.now() - startTime) / 1000).toFixed(3)
+      Logger.debug(`[FileTreeHandler] Main tree object reconstructed in ${passedSeconds}s.`)
+    }
     SocketUtils.broadcastAdmin(Msg.AdminFileTree, this.tree)
   }
 
