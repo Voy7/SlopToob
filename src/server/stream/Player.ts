@@ -116,7 +116,7 @@ export default new (class Player {
     const randomVideo = PlayHistory.getRandom(this.activePlaylist.videos)
     if (!randomVideo) return
 
-    this.addVideo(new Video(randomVideo))
+    this.addVideo(new Video(randomVideo, false, this.activePlaylist.id))
 
     if (this.queue.length < Settings.targetQueueSize) {
       this.populateRandomToQueue()
@@ -175,6 +175,7 @@ export default new (class Player {
       return {
         state: StreamState.Error,
         name: this.playing.name,
+        fromPlaylistName: this.playing.fromPlaylistName || undefined,
         error: this.playing.error || 'Unknown error occurred.' // Should never be null, but just in case
       }
     }
@@ -184,6 +185,7 @@ export default new (class Player {
         state: this.playing.state === VideoState.Playing ? StreamState.Playing : StreamState.Paused,
         id: this.playing.id,
         name: this.playing.name,
+        fromPlaylistName: this.playing.fromPlaylistName || undefined,
         path: `/stream-data/${this.playing.job.streamID}/video.m3u8`,
         isBumper: this.playing.isBumper,
         currentSeconds: this.playing.currentSeconds,
@@ -195,7 +197,8 @@ export default new (class Player {
 
     return {
       state: StreamState.Loading,
-      name: this.playing.name
+      name: this.playing.name,
+      fromPlaylistName: this.playing.fromPlaylistName || undefined
     }
   }
 

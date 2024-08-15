@@ -56,7 +56,9 @@ export type StreamOptions = {
   }
 }
 
-export type BaseStreamInfo = StreamPlaying | StreamPaused | StreamLoading | StreamError
+export type BaseStreamInfo = {
+  fromPlaylistName?: string
+} & (StreamPlaying | StreamPaused | StreamLoading | StreamError)
 
 export type ViewerStreamInfo = BaseStreamInfo & StreamOptions
 

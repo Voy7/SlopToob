@@ -71,8 +71,11 @@ export default new (class Playlists {
     const playlist = Player.playlists.find((playlist) => playlist.id === playlistID)
     if (playlist) playlist.name = newName
 
-    SocketUtils.broadcastAdmin(Msg.AdminPlaylists, Player.clientPlaylists)
     Logger.debug(`Playlist (${playlistID}) name updated:`, newName)
+    SocketUtils.broadcastAdmin(Msg.AdminPlaylists, Player.clientPlaylists)
+    if (playlist === Player.activePlaylist) {
+      Player.broadcastStreamInfo() // Update 'fromPlaylistName' streamInfo
+    }
   }
 
   private checkPlaylistNameValid(name: string) {

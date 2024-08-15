@@ -31,6 +31,7 @@ export default class Video {
   private readyCallbacks: Array<() => void> = []
   private finishedPlayingCallback?: () => void
   private playAfterSeek: boolean = true
+  private readonly fromPlaylistID?: string
 
   private _state: State = State.NotReady
   get state() {
@@ -42,9 +43,10 @@ export default class Video {
     else SocketUtils.broadcastAdmin(Msg.AdminQueueList, Player.clientVideoQueue)
   }
 
-  constructor(filePath: string, isBumper: boolean = false) {
+  constructor(filePath: string, isBumper: boolean = false, fromPlaylistID?: string) {
     this.name = parseVideoName(filePath)
     this.isBumper = isBumper
+    this.fromPlaylistID = fromPlaylistID
 
     this.inputPath = path.resolve(filePath).replace(/\\/g, '/')
 
@@ -252,5 +254,10 @@ export default class Video {
 
   get clientVideo(): ClientVideo {
     return { id: this.id, state: this.state, name: this.name, path: this.inputPath }
+  }
+
+  get fromPlaylistName(): string | null {
+    if (!this.fromPlaylistID) return null
+    return Player.playlists.find((pl) => pl.id === this.fromPlaylistID)?.name || null
   }
 }

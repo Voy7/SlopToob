@@ -25,10 +25,12 @@ export default function InfoBody() {
             {title}
           </h2>
         </div>
-        <p className="mt-[-0.25rem] flex items-center gap-1 text-text3">
-          <Icon name="playlist" />
-          Playlist Name
-        </p>
+        {streamInfo.fromPlaylistName && (
+          <p className="mt-[-0.25rem] flex items-center gap-1 text-text3">
+            <Icon name="playlist" />
+            {streamInfo.fromPlaylistName}
+          </p>
+        )}
       </div>
       <VoteSkipButton />
     </div>
