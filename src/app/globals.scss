@@ -24,11 +24,13 @@
 
   --header-height: 55px;
   --chat-width: Max(380px, 25vw);
+  --info-body-height: 4.5rem;
 }
 
 body {
   color: var(--text-color-1);
   background: var(--bg-color-1);
+  overflow-x: hidden;
 }
 
 *,

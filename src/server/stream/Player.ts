@@ -148,6 +148,7 @@ export default new (class Player {
 
     SocketUtils.broadcastAdmin(Msg.AdminPlaylists, this.clientPlaylists)
     SocketUtils.broadcastAdmin(Msg.AdminQueueList, this.clientVideoQueue)
+    SocketUtils.broadcastAdmin(Msg.AdminStreamInfo, this.adminStreamInfo)
   }
 
   broadcastStreamInfo() {
@@ -206,7 +207,12 @@ export default new (class Player {
   }
 
   get adminStreamInfo(): AdminStreamInfo {
-    const info: AdminStreamInfo = { ...this.baseStreamInfo, version: packageJSON.version }
+    const info: AdminStreamInfo = {
+      ...this.baseStreamInfo,
+      activePlaylistID: this.activePlaylist?.id || 'None',
+      activeThemeID: Settings.streamTheme,
+      version: packageJSON.version
+    }
     if (this.playing) {
       info.transcodedSeconds = this.playing.job.availableSeconds
     }

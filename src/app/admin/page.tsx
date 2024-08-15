@@ -22,7 +22,9 @@ export default async function AdminPage() {
       <AdminProvider>
         <div className="grid min-h-screen grid-cols-[1fr] gap-6 p-6">
           <div className="border-[1px] border-border1">
-            <AdminPanel />
+            <div className="flex flex-col lg:flex-row">
+              <AdminPanel />
+            </div>
           </div>
           {/* <div className="w-full bg-slate-500">SIDEBAR</div> */}
         </div>
