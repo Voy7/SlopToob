@@ -4,11 +4,10 @@ import { useEffect, useRef, useState } from 'react'
 import { useSocketContext } from '@/contexts/SocketContext'
 import { useStreamContext } from '@/contexts/StreamContext'
 import useSocketOn from '@/hooks/useSocketOn'
-import useTooltip from '@/hooks/useTooltip'
 import { AuthRole, ChatType, Msg } from '@/lib/enums'
 import Icon from '@/components/ui/Icon'
 import Button from '@/components/ui/Button'
-import Tooltip from '@/components/ui/Tooltip'
+import HoverTooltip from '@/components/ui/HoverTooltip'
 import ActionModal from '@/components/ui/ActionModal'
 import styles from './Chat.module.scss'
 
@@ -47,9 +46,6 @@ export default function Chat() {
 
   const messagesRef = useRef<HTMLDivElement>(null)
 
-  const viewersTooltip = useTooltip('bottom-start')
-  const nicknameTooltip = useTooltip('bottom-end')
-
   async function submitMessage(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (message.length === 0) return
@@ -85,26 +81,20 @@ export default function Chat() {
             className={
               showViewersList ? `${styles.viewersButton} ${styles.active}` : styles.viewersButton
             }
-            onClick={() => setShowViewersList(!showViewersList)}
-            {...viewersTooltip.anchorProps}
-          >
+            onClick={() => setShowViewersList(!showViewersList)}>
+            {!showViewersList && (
+              <HoverTooltip placement="bottom-start">Open Viewers List</HoverTooltip>
+            )}
             <Icon name="users" />
             {viewers.length}
           </button>
-          {!showViewersList && (
-            <Tooltip {...viewersTooltip.tooltipProps}>Open Viewers List</Tooltip>
-          )}
-          <button
-            className={styles.usernameButton}
-            onClick={() => setShowNicknameModal(true)}
-            {...nicknameTooltip.anchorProps}
-          >
+          <button className={styles.usernameButton} onClick={() => setShowNicknameModal(true)}>
+            {!showNicknameModal && (
+              <HoverTooltip placement="bottom-end">Change Nickname</HoverTooltip>
+            )}
             {nickname}
             <Icon name="edit" />
           </button>
-          {!showNicknameModal && (
-            <Tooltip {...nicknameTooltip.tooltipProps}>Change Nickname</Tooltip>
-          )}
 
           {showViewersList && (
             <div className={styles.viewersList}>
@@ -206,8 +196,7 @@ export default function Chat() {
             Clear Chat
           </Button>
         }
-        width={380}
-      >
+        width={380}>
         <p>Are you sure you want to clear {chatMessages.length} messages?</p>
       </ActionModal>
     </>
@@ -215,14 +204,10 @@ export default function Chat() {
 }
 
 function Timestamp({ hoverText, children }: { hoverText: string; children: string }) {
-  const timestampTooltip = useTooltip('top-end')
-
   return (
-    <>
-      <span className={styles.timestamp} {...timestampTooltip.anchorProps}>
-        {children}
-      </span>
-      <Tooltip {...timestampTooltip.tooltipProps}>{hoverText}</Tooltip>
-    </>
+    <span className={styles.timestamp}>
+      <HoverTooltip placement="top">{hoverText}</HoverTooltip>
+      {children}
+    </span>
   )
 }

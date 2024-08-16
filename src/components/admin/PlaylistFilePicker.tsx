@@ -3,10 +3,9 @@
 import { useState, useContext, createContext, useEffect, useMemo } from 'react'
 import { useAdminContext } from '@/contexts/AdminContext'
 import { useSocketContext } from '@/contexts/SocketContext'
-import useTooltip from '@/hooks/useTooltip'
 import { Msg } from '@/lib/enums'
 import Icon from '@/components/ui/Icon'
-import Tooltip from '@/components/ui/Tooltip'
+import HoverTooltip from '@/components/ui/HoverTooltip'
 import styles from './PlaylistFilePicker.module.scss'
 import type { ClientPlaylist, FileTreeNode } from '@/typings/types'
 import type { EditPlaylistVideosPayload } from '@/typings/socket'
@@ -312,18 +311,11 @@ const PlaylistFilePickerContext = createContext<ContextProps>(null as any)
 const usePlaylistFilePickerContext = () => useContext(PlaylistFilePickerContext)
 
 function ClearResultsButton({ onClick }: { onClick: Function }) {
-  const buttonTooltip = useTooltip('top-end')
   return (
-    <>
-      <button
-        {...buttonTooltip.anchorProps}
-        onClick={() => onClick()}
-        className={styles.clearResultsButton}
-      >
-        <Icon name="close" />
-      </button>
-      <Tooltip {...buttonTooltip.tooltipProps}>Clear search results</Tooltip>
-    </>
+    <button onClick={() => onClick()} className={styles.clearResultsButton}>
+      <HoverTooltip placement="top">Clear search results</HoverTooltip>
+      <Icon name="close" />
+    </button>
   )
 }
 
@@ -369,8 +361,7 @@ function TreeFolder({ node, depth, highlightPos, defaultOpen = false }: TreeFold
       <div
         className={node.active ? `${styles.item} ${styles.selected}` : styles.item}
         onClick={() => setIsOpen(!isOpen)}
-        style={depth === 0 ? undefined : { paddingLeft: `${depth * 1.25}rem` }}
-      >
+        style={depth === 0 ? undefined : { paddingLeft: `${depth * 1.25}rem` }}>
         <div className={styles.left}>
           <input
             type="checkbox"
@@ -420,8 +411,7 @@ function TreeFile({ node, depth, highlightPos }: TreeFileProps) {
   return (
     <label
       className={node.active ? `${styles.item} ${styles.selected}` : styles.item}
-      style={depth === 0 ? undefined : { paddingLeft: `${depth * 1.25}rem` }}
-    >
+      style={depth === 0 ? undefined : { paddingLeft: `${depth * 1.25}rem` }}>
       <div className={styles.left}>
         <input type="checkbox" checked={node.active} onChange={toggleActive} />
         <Icon name="video-file" />

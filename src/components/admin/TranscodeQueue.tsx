@@ -6,7 +6,7 @@ import { useSocketContext } from '@/contexts/SocketContext'
 import { JobState, Msg } from '@/lib/enums'
 import { SettingGroup, Header } from '@/components/admin/SettingsComponents'
 import Icon, { IconNames } from '@/components/ui/Icon'
-import ContextMenu from '@/components/ui/ContextMenu'
+import ClickContextMenu from '@/components/ui/ClickContextMenu'
 import ContextMenuButton from '@/components/ui/ContextMenuButton'
 import { twMerge } from 'tailwind-merge'
 import type { TranscodeClientVideo } from '@/typings/socket'
@@ -46,31 +46,28 @@ function Job({ job, index }: { job: TranscodeClientVideo; index: number }) {
 
   return (
     <div className="animate-itemFadeIn queueItem cursor-default border-b-[1px] border-border1 p-2">
-      <header className="flex items-start justify-between gap-1">
-        <div className="flex gap-1">
+      <header className="flex items-start justify-between gap-1 overflow-hidden">
+        <div className="flex w-full gap-1.5 overflow-hidden">
           <span className="text-base text-text3">{index + 1}.</span>
-          <p>{job.name}</p>
+          <p className="overflow-hidden text-ellipsis whitespace-nowrap">{job.name}</p>
         </div>
         <button
           className="rounded-full p-1 hover:bg-bg2 hover:bg-opacity-50"
-          onClick={() => setShowActions(!showActions)}
-        >
+          onClick={() => setShowActions(!showActions)}>
           <Icon name="settings" />
-          <ContextMenu show={showActions}>
+          <ClickContextMenu placement="right">
             <ContextMenuButton
               icon="admin-panel"
-              onClick={() => socket.emit(Msg.AdminDebugJob, job.id)}
-            >
+              onClick={() => socket.emit(Msg.AdminDebugJob, job.id)}>
               Print Job Debug
             </ContextMenuButton>
             <ContextMenuButton
               icon="delete"
               onClick={() => socket.emit(Msg.AdminTerminateJob, job.id)}
-              className="text-red-500 hover:bg-red-500"
-            >
+              className="text-red-500 hover:bg-red-500">
               Terminate Job
             </ContextMenuButton>
-          </ContextMenu>
+          </ClickContextMenu>
         </button>
       </header>
       <div className="flex items-center gap-1.5 pb-1 pt-2">
@@ -82,8 +79,7 @@ function Job({ job, index }: { job: TranscodeClientVideo; index: number }) {
         <div className="relative h-1 w-full overflow-hidden rounded-full bg-gray-700">
           <div
             className="absolute h-full bg-white duration-500"
-            style={{ width: `${percent}%`, background: states[job.state].color }}
-          ></div>
+            style={{ width: `${percent}%`, background: states[job.state].color }}></div>
         </div>
         <p className="text-text3">{percent}%</p>
       </div>
@@ -91,8 +87,7 @@ function Job({ job, index }: { job: TranscodeClientVideo; index: number }) {
         className={twMerge(
           'my-1 h-0 overflow-hidden rounded-lg bg-bg2 opacity-0 duration-300',
           showDetails && 'opacity-1 h-[150px]' // Pre-defined height
-        )}
-      >
+        )}>
         <StatItem icon="arrow-right">Average FPS: -/-</StatItem>
         <StatItem icon="history">Current FPS: {job.fpsRate}</StatItem>
         <StatItem icon="list">Processed Frames: {job.frames.toLocaleString()}</StatItem>
@@ -100,8 +95,7 @@ function Job({ job, index }: { job: TranscodeClientVideo; index: number }) {
       </div>
       <button
         className="w-full rounded-full p-1 text-blue-500 duration-300 hover:underline active:bg-blue-500 active:bg-opacity-50 active:duration-0"
-        onClick={() => setShowDetails(!showDetails)}
-      >
+        onClick={() => setShowDetails(!showDetails)}>
         {showDetails ? 'Hide Details' : 'Show Details'}
       </button>
     </div>

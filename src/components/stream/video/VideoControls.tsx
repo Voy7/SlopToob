@@ -6,9 +6,8 @@ import { useVideoContext } from '@/contexts/VideoContext'
 import { useStreamContext } from '@/contexts/StreamContext'
 import { StreamState, AuthRole } from '@/lib/enums'
 import useStreamTimestamp from '@/hooks/useStreamTimestamp'
-import useTooltip from '@/hooks/useTooltip'
 import Icon from '@/components/ui/Icon'
-import Tooltip from '@/components/ui/Tooltip'
+import HoverTooltip from '@/components/ui/HoverTooltip'
 import { twMerge } from 'tailwind-merge'
 import RangeSliderInput from '../../ui/RangeSliderInput'
 
@@ -36,10 +35,6 @@ export default function VideoControls({ scrubber }: { scrubber: JSX.Element }) {
     streamInfo,
     lastStreamUpdateTimestamp
   )
-
-  const volumeBtnTooltip = useTooltip('top', 25)
-  const volumeSliderTooltip = useTooltip('top', 25)
-  const fullscreenTooltip = useTooltip('top-end', 25)
 
   // Show overlay when mouse is moved on it, keep it visible for 3 seconds
   // when mouse is moved out or stops moving, hide it after 3 seconds
@@ -117,16 +112,18 @@ export default function VideoControls({ scrubber }: { scrubber: JSX.Element }) {
             {currentTimestamp} / {totalTimestamp}
           </p>
           <div className="group flex items-center pr-8">
-            <div {...volumeBtnTooltip.anchorProps}>
-              <Tooltip {...volumeBtnTooltip.tooltipProps}>Toggle Volume (m)</Tooltip>
+            <div>
               <ActionButton onClick={() => (videoElement.muted = !videoElement.muted)}>
+                <HoverTooltip placement="top" offset={22}>
+                  Toggle Volume (m)
+                </HoverTooltip>
                 <Icon name={volume === 0 ? 'no-volume' : 'volume'} />
               </ActionButton>
             </div>
-            <div {...volumeSliderTooltip.anchorProps}>
-              <Tooltip {...volumeSliderTooltip.tooltipProps}>
+            <div>
+              <HoverTooltip placement="top" offset={22}>
                 Volume - {Math.round(volume)}%
-              </Tooltip>
+              </HoverTooltip>
               <RangeSliderInput
                 value={volume}
                 onChange={(value) => {
@@ -145,9 +142,11 @@ export default function VideoControls({ scrubber }: { scrubber: JSX.Element }) {
             </button> */}
           </div>
         )}
-        <div {...fullscreenTooltip.anchorProps}>
-          <Tooltip {...fullscreenTooltip.tooltipProps}>Toggle Fullscreen (f)</Tooltip>
+        <div>
           <ActionButton onClick={toggleFullscreen}>
+            <HoverTooltip placement="top-end" offset={22}>
+              Toggle Fullscreen (f)
+            </HoverTooltip>
             <Icon name="fullscreen" />
           </ActionButton>
         </div>
@@ -169,14 +168,14 @@ function PausePlayButton() {
   const { isPaused, videoElement } = useVideoContext()
   const { streamInfo } = useStreamContext()
 
-  const tooltip = useTooltip('top-start', 25)
-
   if (streamInfo.state === StreamState.Playing) {
     if (isPaused) {
       return (
-        <div {...tooltip.anchorProps}>
-          <Tooltip {...tooltip.tooltipProps}>Unpause (k)</Tooltip>
+        <div>
           <ActionButton onClick={() => videoElement.play()}>
+            <HoverTooltip placement="top-start" offset={22}>
+              Unpause (k)
+            </HoverTooltip>
             <Icon name="play" />
           </ActionButton>
         </div>
@@ -184,9 +183,11 @@ function PausePlayButton() {
     }
 
     return (
-      <div {...tooltip.anchorProps}>
-        <Tooltip {...tooltip.tooltipProps}>Pause - Only for you (k)</Tooltip>
+      <div>
         <ActionButton onClick={() => videoElement.pause()}>
+          <HoverTooltip placement="top-start" offset={22}>
+            Pause - Only for you (k)
+          </HoverTooltip>
           <Icon name="pause" />
         </ActionButton>
       </div>
@@ -194,8 +195,10 @@ function PausePlayButton() {
   }
 
   return (
-    <div {...tooltip.anchorProps}>
-      <Tooltip {...tooltip.tooltipProps}>Stream Paused - Wait for Admin</Tooltip>
+    <div>
+      <HoverTooltip placement="top-start" offset={22}>
+        Stream Paused - Wait for Admin
+      </HoverTooltip>
       <ActionButton className="cursor-not-allowed text-error hover:text-error">
         <Icon name="pause" />
       </ActionButton>
