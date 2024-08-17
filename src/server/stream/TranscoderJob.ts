@@ -11,6 +11,7 @@ import Player from '@/server/stream/Player'
 import TranscoderCommand from '@/server/stream/TranscoderCommand'
 import TranscoderQueue from '@/server/stream/TranscoderQueue'
 import SocketUtils from '@/server/socket/SocketUtils'
+import EventLogger from '@/server/stream/VideoEventLogger'
 import { JobState, Msg } from '@/lib/enums'
 import type { ProgressInfo } from '@/typings/types'
 import type Video from '@/server/stream/Video'
@@ -50,6 +51,8 @@ export default class TranscoderJob {
     this.command = new TranscoderCommand(this)
 
     this.command.onEnd(async () => {
+      EventLogger.log(this, `Command callback - onEnd()`)
+
       if (this.error) return
 
       Logger.debug('[TranscoderJob] Transcoding finished:', this.m3u8Path)
@@ -64,11 +67,15 @@ export default class TranscoderJob {
     })
 
     this.command.onError(async (error) => {
+      EventLogger.log(this, `Command callback - onError(${error})`)
+
       Logger.error(`[TranscoderJob] Transcoding error ${this.video.name}:`, error)
       this.throwError('Transcoding error occurred. :(')
     })
 
     this.command.onProgress((progress) => {
+      EventLogger.log(this, `Command callback - onProgress(${progress})`)
+
       this.lastProgressInfo = progress
       SocketUtils.broadcastAdmin(Msg.AdminStreamInfo, Player.adminStreamInfo)
       SocketUtils.broadcastAdmin(Msg.AdminTranscodeQueueList, TranscoderQueue.clientTranscodeList)
@@ -76,6 +83,8 @@ export default class TranscoderJob {
 
     // When first segment is created
     this.command.onFirstChunk(async () => {
+      EventLogger.log(this, `Command callback - onFirstChunk()`)
+
       this.isStreamableReady = true
       this.resolveStreamableReadyCallbacks()
       // Player.broadcastStreamInfo()
@@ -87,6 +96,8 @@ export default class TranscoderJob {
   // Initialize the job, check if transcoded files exist and are complete
   // Can be called multiple times, typically when 2+ videos are on this job and previous one finishes
   async initialize() {
+    EventLogger.log(this, `initialize()`)
+
     this.state = JobState.Initializing
 
     this.isStreamableReady = false
@@ -133,6 +144,8 @@ export default class TranscoderJob {
 
   // Add this job to the queue
   activate() {
+    EventLogger.log(this, `activate()`)
+
     // console.log(`${this.video.name} activate()`.bgBlue, this)
     if (this.error) return
 
@@ -155,6 +168,8 @@ export default class TranscoderJob {
   // Resolves when transcoding is complete, or immediately if it's already done
   // This is seperate from the transcoding being restarted for seeking, etc. It's for TranscoderQueue to know when it's done
   async transcode(): Promise<void> {
+    EventLogger.log(this, `transcode()`)
+
     this.state = JobState.Transcoding
 
     return new Promise<void>((resolve: any) => {
@@ -166,6 +181,8 @@ export default class TranscoderJob {
 
   // Remove video from job, and clean up if no other videos are using this job
   async unlink(video: Video) {
+    EventLogger.log(this, `unlink(${video.name})`)
+
     const index = this.videos.findIndex((item) => item === video)
     if (index !== -1) this.videos.splice(index, 1)
     await this.cleanup()
@@ -174,6 +191,8 @@ export default class TranscoderJob {
   // Clean up job and stop transcoding if it's still running
   // This should be called when video has finished playing, or when it's removed from the queue
   async cleanup() {
+    EventLogger.log(this, `cleanup()`)
+
     if (this.videos.length > 0) {
       // Don't cleanup if there are still videos in the queue
       // But if the current transcoded video is partial, we need to delete it and seek to 0
@@ -214,6 +233,8 @@ export default class TranscoderJob {
   // Restart the transcoding process from specified time
   // This can also be used to update ffmpeg options on the fly
   async seekTranscodeTo(seconds: number) {
+    EventLogger.log(this, `seekTranscodeTo(${seconds})`)
+
     this.transcodedStartSeconds = seconds
     if (this.state !== JobState.Transcoding && this.state !== JobState.Finished) return
     this.state = JobState.Transcoding
@@ -232,42 +253,51 @@ export default class TranscoderJob {
 
   // Force kill job and transcoding process
   forceKill() {
+    EventLogger.log(this, `forceKill()`)
+
     this.command.forceKill()
   }
 
   // Called when the video has been transcoded enough to start playing while the rest is still transcoding
   onStreamableReady(callback: () => void) {
+    EventLogger.log(this, `onStreamableReady()`)
     if (this.isStreamableReady) return callback()
     this.onStreamableReadyCallbacks.push(callback)
   }
 
   // Called if an error occurs during transcoding, no other callbacks will be called
   onError(callback: (error: string) => void) {
+    EventLogger.log(this, `onError()`)
     if (this.error) return callback(this.error)
     this.onErrorCallbacks.push(callback)
   }
 
   private resolveInitializedCallback() {
+    EventLogger.log(this, `resolveInitializedCallback()`)
     this.onInitializedCallback?.()
     delete this.onInitializedCallback
   }
 
   private resolveStreamableReadyCallbacks() {
+    EventLogger.log(this, `resolveStreamableReadyCallbacks()`)
     for (const callback of this.onStreamableReadyCallbacks) callback()
   }
 
   private resolveTranscodeFinishedCallback() {
+    EventLogger.log(this, `resolveTranscodeFinishedCallback()`)
     this.onTranscodeFinishedCallback?.()
     delete this.onTranscodeFinishedCallback
   }
 
   private resolveErrorCallbacks() {
+    EventLogger.log(this, `resolveErrorCallbacks()`)
     for (const callback of this.onErrorCallbacks) callback(this.error || 'Unknown error occurred.')
     this.onErrorCallbacks = []
   }
 
   // Throw a fatal error to Video
   private throwError(error: string) {
+    EventLogger.log(this, `throwError(${error})`)
     this.error = error || 'No error message provided.'
     this.state = JobState.Errored
     this.resolveErrorCallbacks()
@@ -275,6 +305,8 @@ export default class TranscoderJob {
 
   // See if existing transcoded files are full or partial
   private async checkIfCacheComplete(): Promise<boolean> {
+    EventLogger.log(this, `checkIfCacheComplete()`)
+
     if (!fs.existsSync(this.m3u8Path)) return false
     const manifestText = await fsAsync.readFile(this.m3u8Path, 'utf8')
     const manifest = parseHlsManifest(manifestText)

@@ -11,7 +11,7 @@ import type { ProgressInfo } from '@/typings/types'
 import type TransCoderJob from '@/server/stream/TranscoderJob'
 
 export default class TranscoderCommand {
-  private readonly job: TransCoderJob
+  readonly job: TransCoderJob
   private ffmpegCommand?: FfmpegCommand
   private onEndCallback?: () => void
   private onErrorCallback?: (err: Error) => void

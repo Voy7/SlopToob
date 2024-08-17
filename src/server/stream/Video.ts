@@ -11,6 +11,7 @@ import Settings from '@/server/Settings'
 import SocketUtils from '@/server/socket/SocketUtils'
 import PlayHistory from '@/server/stream/PlayHistory'
 import VoteSkipHandler from '@/server/stream/VoteSkipHandler'
+import EventLogger from '@/server/stream/VideoEventLogger'
 import { socketClients } from '@/server/socket/socketClients'
 import { Msg, VideoState as State } from '@/lib/enums'
 import type { ClientVideo } from '@/typings/types'
@@ -61,6 +62,8 @@ export default class Video {
 
     // Fires when job has fatal error, fires immediately if already errored
     this.job.onError((error) => {
+      EventLogger.log(this, `Job callback - onError(${error})`)
+
       this.error = 'Internal transcoding error occurred.'
       this.state = State.Errored
       this.startErrorDisplayTimeout()
@@ -69,6 +72,8 @@ export default class Video {
     // This wwill fire immediately if job is already ready/streamable
     // Can fire multiple times during Video's lifetime, usually because of seeking
     this.job.onStreamableReady(() => {
+      EventLogger.log(this, `Job callback - onStreamableReady()`)
+
       if (this.error) return
 
       this.durationSeconds = this.job.duration
@@ -102,6 +107,8 @@ export default class Video {
   // Resolves once video is ready to play, or immediately if already ready
   // Can be called multiple times, typically by Player to try and prepare it ahead of when it's needed
   async prepare(): Promise<void> {
+    EventLogger.log(this, `prepare()`)
+
     if (this.error) return
     if (this.job.isStreamableReady) return
 
@@ -119,6 +126,8 @@ export default class Video {
   // Resolves once video is finished playing, including if it was skipped or errored
   // Should only be called once per video & only when in `Player.playing` state
   async play() {
+    EventLogger.log(this, `play()`)
+
     return new Promise<void>(async (resolve) => {
       this.finishedPlayingCallback = () => {
         VoteSkipHandler.disable()
@@ -132,6 +141,7 @@ export default class Video {
 
   // Start playing video for FIRST time (not part of seeking or resuming)
   private initPlaying() {
+    EventLogger.log(this, `initPlaying()`)
     Logger.debug(`[Video] Playing video: ${this.name}`)
 
     PlayHistory.add(this)
@@ -162,6 +172,7 @@ export default class Video {
   // Must be called before being removed from the queue or Player
   // This is primarily so the TranscoderHandler can clean up shared jobs properly
   end() {
+    EventLogger.log(this, `end()`)
     Logger.debug(`[Video] Finished playing: ${this.name}`)
 
     if (this.finishedTimeout) clearTimeout(this.finishedTimeout)
@@ -177,6 +188,8 @@ export default class Video {
 
   // Pause video, boolean return is if successful
   pause(persistPause: boolean = true): boolean {
+    EventLogger.log(this, `pause()`)
+
     if (this.state !== State.Playing || !this.playingDate) return false
     if (this.finishedTimeout) clearTimeout(this.finishedTimeout)
     this.passedDurationSeconds += (new Date().getTime() - this.playingDate.getTime()) / 1000
@@ -187,6 +200,8 @@ export default class Video {
 
   // Unpause video, boolean return is if successful
   unpause(): boolean {
+    EventLogger.log(this, `unpause()`)
+
     if (this.state !== State.Paused) return false
     this.startFinishTimeout()
     this.state = State.Playing
@@ -196,6 +211,8 @@ export default class Video {
 
   // Set video to a specific time in seconds
   seekTo(seconds: number) {
+    EventLogger.log(this, `seekTo(${seconds})`)
+
     if (this.state !== State.Playing && this.state !== State.Paused) return
     Logger.debug(`[Video] Seeking to ${parseTimestamp(seconds)}: ${this.name}`)
 
@@ -218,6 +235,7 @@ export default class Video {
 
   // Start video playing timer normally, starting from this.passedDurationSeconds
   private startFinishTimeout() {
+    EventLogger.log(this, `startFinishTimeout()`)
     this.playingDate = new Date()
     if (this.finishedTimeout) clearTimeout(this.finishedTimeout)
     this.finishedTimeout = setTimeout(
@@ -229,6 +247,7 @@ export default class Video {
   // Start video playing timer for error display
   // It's ok to call this even if video is not playing, it checks first
   private startErrorDisplayTimeout() {
+    EventLogger.log(this, `startErrorDisplayTimeout()`)
     if (Player.playing !== this) return
     if (this.finishedTimeout) clearTimeout(this.finishedTimeout)
     this.finishedTimeout = setTimeout(() => this.end(), Settings.errorDisplaySeconds * 1000)
@@ -236,11 +255,13 @@ export default class Video {
   }
 
   private resolveReadyCallbacks() {
+    EventLogger.log(this, `resolveReadyCallbacks()`)
     for (const callback of this.readyCallbacks) callback()
     this.readyCallbacks = []
   }
 
   private resolveFinishedCallback() {
+    EventLogger.log(this, `resolveFinishedCallback()`)
     this.finishedPlayingCallback?.()
     delete this.finishedPlayingCallback
   }

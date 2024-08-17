@@ -1,5 +1,6 @@
 import type { ListOption } from '@/typings/types'
 import type { SocketClient } from '@/typings/socket'
+import { enable } from 'colors'
 
 // List of all settings, with their default values and optional hooks
 // NOTE: Because of how Settings is initialized, most top-level imports are not allowed.
@@ -105,7 +106,11 @@ export const settingsList = {
   videoPaddingSeconds: { default: 1 },
 
   // Advanced name parsing for common torrent filename patterns
-  torrentNameParsing: { default: false }
+  torrentNameParsing: { default: false },
+
+  // Video event logging debug settings
+  enableVideoEventLogging: { default: true },
+  showVideoEventLogsInConsole: { default: false }
 } satisfies Record<string, Setting>
 
 async function voteSkipResync() {
