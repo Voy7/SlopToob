@@ -88,6 +88,35 @@ body {
   }
 }
 
+.chatMessageAnimation {
+  animation: chatMessage 150ms ease-in-out;
+  @keyframes chatMessage {
+    0% {
+      transform: translateY(0.5rem);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+}
+
+.chatViewersListAnimation {
+  animation: chatViewersListFadeIn 150ms ease-in-out;
+
+  @keyframes chatViewersListFadeIn {
+    0% {
+      bottom: 1rem;
+      opacity: 0;
+    }
+    100% {
+      bottom: 0;
+      opacity: 1;
+    }
+  }
+}
+
 // Admin panel section animation
 .sectionFadeInAnimation {
   animation: sectionFadeIn 300ms ease-in-out;

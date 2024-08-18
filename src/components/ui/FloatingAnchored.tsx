@@ -180,34 +180,4 @@ export default function FloatingAnchored({
       )}
     </div>
   )
-
-  // return (
-  //   <div ref={anchorRef} className="">
-  //     {createPortal(
-  //       <div
-  //         ref={tooltipRef}
-  //         className={twMerge(
-  //           'absolute rounded-lg bg-slate-500 p-2 text-lg',
-  //           (!tooltipPosition || !show) && 'invisible',
-  //           className
-  //         )}
-  //         style={{
-  //           top: tooltipPosition ? tooltipPosition[0] : 0,
-  //           left: tooltipPosition ? tooltipPosition[1] : 0
-  //         }}
-  //         {...props}>
-  //         <div
-  //           className="absolute -z-10 -translate-x-1/2 -translate-y-1/2 rotate-45 border-2 border-red-500 bg-blue-500"
-  //           style={{
-  //             ...arrowStyles,
-  //             width: arrowSize,
-  //             height: arrowSize
-  //           }}
-  //         />
-  //         {children}
-  //       </div>,
-  //       document.body
-  //     )}
-  //   </div>
-  // )
 }

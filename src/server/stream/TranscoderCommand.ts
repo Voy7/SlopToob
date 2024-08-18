@@ -5,7 +5,7 @@ import ffmpeg, { TRANSCODE_ARGS } from '@/lib/ffmpeg'
 import parseHlsManifest from '@/lib/parseHlsManifest'
 import parseTimestamp from '@/lib/parseTimestamp'
 import timestampToSeconds from '@/lib/timestampToSeconds'
-import Logger from '@/server/Logger'
+import EventLogger from '@/server/stream/VideoEventLogger'
 import type { FfmpegCommand } from 'fluent-ffmpeg'
 import type { ProgressInfo } from '@/typings/types'
 import type TransCoderJob from '@/server/stream/TranscoderJob'
@@ -13,6 +13,7 @@ import type TransCoderJob from '@/server/stream/TranscoderJob'
 export default class TranscoderCommand {
   readonly job: TransCoderJob
   private ffmpegCommand?: FfmpegCommand
+  private abortController: AbortController
   private onEndCallback?: () => void
   private onErrorCallback?: (err: Error) => void
   private onFirstChunkCallback?: () => void
@@ -20,11 +21,15 @@ export default class TranscoderCommand {
 
   constructor(job: TransCoderJob) {
     this.job = job
+    this.abortController = new AbortController()
   }
 
   // Construct and run ffmpeg command, with seek time
-  run() {
+  async run() {
+    EventLogger.log(this, `Initializing command`)
+
     fs.mkdirSync(this.job.video.outputPath, { recursive: true })
+    EventLogger.log(this, `Initializing command 2`)
 
     this.ffmpegCommand = ffmpeg(this.job.video.inputPath).addOptions(TRANSCODE_ARGS)
     this.ffmpegCommand.inputOptions([`-ss ${this.job.transcodedStartSeconds}`])
@@ -79,6 +84,7 @@ export default class TranscoderCommand {
     })
 
     // Actually run the command
+    EventLogger.log(this, `Running command`)
     this.ffmpegCommand.run()
   }
 

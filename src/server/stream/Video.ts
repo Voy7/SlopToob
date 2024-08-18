@@ -15,6 +15,7 @@ import EventLogger from '@/server/stream/VideoEventLogger'
 import { socketClients } from '@/server/socket/socketClients'
 import { Msg, VideoState as State } from '@/lib/enums'
 import type { ClientVideo } from '@/typings/types'
+import videoInputToOutputPath from '@/lib/videoInputToOutputPath'
 
 export default class Video {
   readonly id: string = generateSecret()
@@ -50,11 +51,7 @@ export default class Video {
     this.fromPlaylistID = fromPlaylistID
 
     this.inputPath = path.resolve(filePath).replace(/\\/g, '/')
-
-    const basePath = this.isBumper ? Env.BUMPERS_PATH : Env.VIDEOS_PATH
-    const outputBasePath = this.isBumper ? Env.BUMPERS_OUTPUT_PATH : Env.VIDEOS_OUTPUT_PATH
-    const newPath = filePath.replace(basePath, '')
-    this.outputPath = path.join(outputBasePath, newPath).replace(/\\/g, '/')
+    this.outputPath = videoInputToOutputPath(this.inputPath, isBumper)
 
     this.job = TranscoderQueue.newJob(this)
 
@@ -63,6 +60,7 @@ export default class Video {
     // Fires when job has fatal error, fires immediately if already errored
     this.job.onError((error) => {
       EventLogger.log(this, `Job callback - onError(${error})`)
+      Logger.error(`[Video] Threw an error: ${this.name} - ${error}`)
 
       this.error = 'Internal transcoding error occurred.'
       this.state = State.Errored

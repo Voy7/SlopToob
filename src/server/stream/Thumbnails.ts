@@ -20,7 +20,7 @@ export default new (class Thumbnails {
     }
 
     if (!fs.existsSync(videoPath)) {
-      Logger.error('[Thumbnails] Video file not found:', videoPath)
+      Logger.warn(`[Thumbnails] Video file does ot exist, ignoring. (${videoPath})`)
       return null
     }
 
@@ -106,7 +106,6 @@ export default new (class Thumbnails {
       res.setHeader('Content-Type', 'image/png')
       file.pipe(res)
     } catch (error: any) {
-      Logger.warn('[Thumbnails] Could not handle thumbnail request:', error.message)
       res.statusCode = 404
       res.end()
     }

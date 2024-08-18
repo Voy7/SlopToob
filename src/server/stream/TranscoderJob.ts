@@ -102,6 +102,11 @@ export default class TranscoderJob {
 
     this.isStreamableReady = false
 
+    if (!fs.existsSync(this.video.inputPath)) {
+      this.throwError(`Video file does not exist. (${this.video.inputPath})`)
+      return
+    }
+
     // Get the duration of the video if it hasn't been set yet
     if (!this.duration) {
       try {
@@ -170,6 +175,7 @@ export default class TranscoderJob {
   async transcode(): Promise<void> {
     EventLogger.log(this, `transcode()`)
 
+    if (this.error) return
     this.state = JobState.Transcoding
 
     return new Promise<void>((resolve: any) => {

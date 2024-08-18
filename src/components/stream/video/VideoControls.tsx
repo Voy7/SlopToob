@@ -77,6 +77,14 @@ export default function VideoControls({ scrubber }: { scrubber: JSX.Element }) {
       hoveredContainer = false
       check()
     }
+    containerElement.onmousedown = () => {
+      hoveredContainer = true
+      check()
+    }
+    containerElement.onmouseup = () => {
+      hoveredContainer = false
+      check()
+    }
 
     controlsElement.onmousemove = () => {
       hoveredControls = true
@@ -90,6 +98,8 @@ export default function VideoControls({ scrubber }: { scrubber: JSX.Element }) {
     return () => {
       containerElement.onmousemove = null
       containerElement.onmouseleave = null
+      containerElement.onmousedown = null
+      containerElement.onmouseup = null
       controlsElement.onmousemove = null
       controlsElement.onmouseleave = null
       clearTimeout(timeout)

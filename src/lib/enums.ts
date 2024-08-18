@@ -60,7 +60,7 @@ export const enum StreamState {
   Error
 }
 
-export const enum VideoState {
+export enum VideoState {
   NotReady,
   Preparing,
   Ready,
@@ -71,7 +71,7 @@ export const enum VideoState {
   Errored
 }
 
-export const enum JobState {
+export enum JobState {
   Initializing,
   Idle,
   AwaitingTranscode,

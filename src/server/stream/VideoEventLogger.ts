@@ -1,10 +1,22 @@
+import fs from 'fs'
 import Env from '@/server/EnvVariables'
 import Logger from '@/server/Logger'
 import Settings from '@/server/Settings'
 import Video from '@/server/stream/Video'
 import TranscoderJob from '@/server/stream/TranscoderJob'
 import TranscoderCommand from '@/server/stream/TranscoderCommand'
-import fs from 'fs'
+import { VideoState, JobState } from '@/lib/enums'
+
+let statesText = '(V) Video States:\n'
+for (const [index, state] of Object.entries(VideoState)) {
+  if (isNaN(Number(index))) continue
+  statesText += `  ${index}: ${state}\n`
+}
+statesText += '\n(J) Job States:\n'
+for (const [index, state] of Object.entries(JobState)) {
+  if (isNaN(Number(index))) continue
+  statesText += `  ${index}: ${state}\n`
+}
 
 const loggedVideos: Map<string, { count: number; path: string }> = new Map()
 
@@ -41,7 +53,8 @@ class VideoEventLogger {
         `Job ID: ${video.job.id}\n` +
         `Job Init StreamID: ${video.job.streamID}\n` +
         `Job Output Path: ${video.outputPath}\n` +
-        '----------------------------------------------------------------\n\n'
+        '----------------------------------------------------------------\n\n' +
+        `${statesText}\n`
       fs.writeFileSync(file, header)
     }
 
@@ -56,7 +69,7 @@ class VideoEventLogger {
     // time format: HH:MM:SS.mmm
     const timestamp = `${time}.${date.getMilliseconds().toString().padStart(3, '0')}`
 
-    const log = `${timestamp} | ${index} | V-${video.state} J-${video.job.state} | [${instanceName}] ${event}`
+    const log = `${timestamp} | ${index.toString().padStart(3, '0')} | V-${video.state} J-${video.job.state} | [${instanceName}] ${event}`
     fs.appendFileSync(file, log + '\n')
     if (Settings.showVideoEventLogsInConsole) Logger.debug(`[VideoEventLogger] - ${log}`)
   }

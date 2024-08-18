@@ -17,11 +17,16 @@ type Props = {
 export default function SelectDropdown({ text, icon, image, isFullHeight, children }: Props) {
   const [open, setOpen] = useState(false)
 
+  const containerRef = useRef<HTMLButtonElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!open) return
-    const close = () => setOpen(false)
+    function close(event: MouseEvent) {
+      if (containerRef.current?.contains(event.target as Node)) return
+      setOpen(false)
+    }
+
     window.addEventListener('click', close)
 
     // If content goes off screen to the right, move it left
@@ -41,14 +46,14 @@ export default function SelectDropdown({ text, icon, image, isFullHeight, childr
 
   return (
     <div className={styles.dropdown} onClick={() => setOpen(!open)}>
-      <button className={buttonStyles.join(' ')}>
+      <button ref={containerRef} className={buttonStyles.join(' ')}>
         {icon && <Icon name={icon} />}
         {image && <Image src={image} alt="" width={24} height={24} />}
         <span>{text}</span>
         <Icon name="down-chevron" className={styles.arrow} />
       </button>
       {open && (
-        <div className={styles.dropdownContent} ref={contentRef}>
+        <div ref={contentRef} className={styles.dropdownContent}>
           {children}
         </div>
       )}
