@@ -8,7 +8,7 @@ export default function ChatViewersList({ close }: { close: () => void }) {
   const { streamInfo, viewers } = useStreamContext()
 
   return (
-    <div className="chatViewersListAnimation absolute bottom-0 left-0 max-h-[12rem] w-full translate-y-[calc(100%+0.25rem)] overflow-y-auto rounded-lg border border-border2 bg-bg2 pb-2 shadow-lg md:max-h-[20rem]">
+    <div className="animate-chat-viewers-list absolute bottom-0 left-0 max-h-[12rem] w-full translate-y-[calc(100%+0.25rem)] overflow-y-auto rounded-lg border border-border2 bg-bg2 pb-2 shadow-lg md:max-h-[20rem]">
       <header className="mx-2 mb-2 flex items-center justify-between gap-4 border-b border-border2 py-2">
         <h3 className="cursor-default text-xl font-normal text-text1">{viewers.length} Viewers</h3>
         <button

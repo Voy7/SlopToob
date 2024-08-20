@@ -340,6 +340,21 @@ export const socketEvents: Record<string, EventOptions> = {
     }
   },
 
+  // Admin goes to the previous video (or seek to start if conditions met)
+  [Msg.AdminPreviousVideo]: {
+    adminOnly: true,
+    run: (socket) => {
+      const didPrevious = Player.previous()
+      if (!didPrevious) return
+      const client = socketClients.find((c) => c.socket === socket)
+      if (!client || !Settings.sendAdminPrevious) return
+      Chat.send({
+        type: Chat.Type.AdminPrevious,
+        message: `${client.username} went to the previous video.`
+      })
+    }
+  },
+
   // Admin seeks to a specific time (seconds) in the video
   [Msg.AdminSeekTo]: {
     adminOnly: true,

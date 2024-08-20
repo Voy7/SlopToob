@@ -4,6 +4,7 @@ import authOptions from '@/lib/authOptions'
 import Footer from '@/components/layout/Footer'
 import type { Metadata } from 'next'
 import '@/app/globals.scss'
+import '@/app/animations.scss'
 
 import { Roboto } from 'next/font/google'
 const mainFont = Roboto({

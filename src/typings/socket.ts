@@ -66,7 +66,8 @@ export type AdminStreamInfo = {
   transcodedSeconds?: number
   activePlaylistID: string
   activeThemeID: string
-  version: string
+  previousVideoExists: boolean
+  appVersion: string
 } & BaseStreamInfo
 
 export type SocketClient = {

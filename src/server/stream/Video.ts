@@ -173,6 +173,11 @@ export default class Video {
     EventLogger.log(this, `end()`)
     Logger.debug(`[Video] Finished playing: ${this.name}`)
 
+    if (Player.playing === this && !this.error) {
+      Player.addPreviousVideo(this)
+      Settings.setSetting('streamIsPaused', false)
+    }
+
     if (this.finishedTimeout) clearTimeout(this.finishedTimeout)
     delete this.playingDate
     this.durationSeconds = 0
@@ -180,7 +185,6 @@ export default class Video {
     this.state = State.Finished
 
     this.job.unlink(this)
-    Settings.setSetting('streamIsPaused', false)
     this.resolveFinishedCallback()
   }
 

@@ -44,6 +44,7 @@ export const enum Msg {
   AdminPauseStream = 'admin-pause-stream',
   AdminUnpauseStream = 'admin-unpause-stream',
   AdminSkipVideo = 'admin-skip-video',
+  AdminPreviousVideo = 'admin-previous-video',
   AdminSeekTo = 'admin-seek-to',
   AdminTerminateJob = 'admin-terminate-job',
   AdminRemoveQueueVideo = 'admin-remove-queue-item',
@@ -92,5 +93,6 @@ export enum ChatType {
   AdminPause,
   AdminUnpause,
   AdminSkip,
+  AdminPrevious,
   AdminChangePlaylist
 }

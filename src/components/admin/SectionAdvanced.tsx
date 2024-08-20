@@ -59,7 +59,7 @@ export default function SectionAdvanced() {
       </SettingGroup>
       <SettingGroup>
         <Header icon="admin-panel">App Information</Header>
-        <ButtonOption label={`Version: ${streamInfo.version}`}>
+        <ButtonOption label={`Version: ${streamInfo.appVersion}`}>
           <></>
         </ButtonOption>
       </SettingGroup>

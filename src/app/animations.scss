@@ -1,0 +1,108 @@
+.animate-fade-in {
+  animation: fadeIn 300ms ease-in-out;
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+}
+
+.animate-fade-out {
+  animation: fadeOut 300ms ease-in-out forwards;
+  @keyframes fadeOut {
+    0% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+}
+
+.animate-modal-container {
+  animation: modalContainerFadeIn 300ms ease-in-out;
+  @keyframes modalContainerFadeIn {
+    0% {
+      top: calc(50% - 20px);
+      opacity: 0;
+    }
+    100% {
+      top: 50%;
+      opacity: 1;
+    }
+  }
+}
+
+.animate-chat-message {
+  animation: chatMessage 150ms ease-in-out;
+  @keyframes chatMessage {
+    0% {
+      transform: translateY(0.5rem);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+}
+
+.animate-chat-viewers-list {
+  animation: chatViewersListFadeIn 150ms ease-in-out;
+
+  @keyframes chatViewersListFadeIn {
+    0% {
+      bottom: 1rem;
+      opacity: 0;
+    }
+    100% {
+      bottom: 0;
+      opacity: 1;
+    }
+  }
+}
+
+.animate-section {
+  animation: sectionFadeIn 300ms ease-in-out;
+  @keyframes sectionFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-1rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+.animate-video-error {
+  animation: videoErrorFadeIn 500ms ease-in-out;
+  @keyframes videoErrorFadeIn {
+    0% {
+      background: rgb(80, 80, 80);
+      opacity: 0;
+    }
+    100% {
+      background: rgb(0, 0, 0);
+      opacity: 1;
+    }
+  }
+}
+
+.animate-video-action-out {
+  animation: iconFadeOut 500ms ease-out forwards;
+  @keyframes iconFadeOut {
+    0% {
+      opacity: 1;
+      scale: 1;
+    }
+    100% {
+      opacity: 0;
+      scale: 1.5;
+    }
+  }
+}

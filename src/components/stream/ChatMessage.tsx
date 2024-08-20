@@ -24,6 +24,7 @@ const eventIcons: Record<ChatType, EventIcon | null> = {
   [ChatType.AdminPause]: { icon: 'pause', color: 'rgb(255, 95, 95)' },
   [ChatType.AdminUnpause]: { icon: 'play', color: 'rgb(255, 95, 95)' },
   [ChatType.AdminSkip]: { icon: 'skip', color: 'rgb(255, 95, 95)' },
+  [ChatType.AdminPrevious]: { icon: 'previous', color: 'rgb(255, 95, 95)' },
   [ChatType.AdminChangePlaylist]: { icon: 'playlist', color: 'rgb(255, 95, 95)' }
 }
 
@@ -42,7 +43,7 @@ export default function ChatMessage({ chat }: { chat: ChatMessageType & { time: 
   if (chat.type === ChatType.UserChat) {
     const nameColor = roleColors[chat.role]
     return (
-      <div className="chatMessageAnimation flex items-start justify-between gap-1 p-1 hover:bg-bg2">
+      <div className="animate-chat-message flex items-start justify-between gap-1 p-1 hover:bg-bg2">
         <div className="flex items-start gap-1.5 overflow-hidden">
           {streamInfo.chat.showIdenticons && (
             <img src={chat.image} alt="" className="h-[1.4rem] w-[1.4rem] rounded-full bg-white" />
@@ -61,7 +62,7 @@ export default function ChatMessage({ chat }: { chat: ChatMessageType & { time: 
   // Is error, use different styling
   if (chat.type === ChatType.Error) {
     return (
-      <div className="chatMessageAnimation flex items-start justify-between gap-1 border-l-2 border-red-500 bg-red-500 bg-opacity-25 p-1 pl-2 text-red-200">
+      <div className="animate-chat-message flex items-start justify-between gap-1 border-l-2 border-red-500 bg-red-500 bg-opacity-25 p-1 pl-2 text-red-200">
         <p>{chat.message}</p>
       </div>
     )
@@ -70,7 +71,7 @@ export default function ChatMessage({ chat }: { chat: ChatMessageType & { time: 
   // Chat event message
   const eventIcon = eventIcons[chat.type]
   return (
-    <div className="chatMessageAnimation flex items-start justify-between gap-1 p-1 hover:bg-bg2">
+    <div className="animate-chat-message flex items-start justify-between gap-1 p-1 hover:bg-bg2">
       {eventIcon && (
         <Icon
           name={eventIcon.icon}

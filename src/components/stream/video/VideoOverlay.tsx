@@ -5,7 +5,7 @@ import { useStreamContext } from '@/contexts/StreamContext'
 import useStreamTimestamp from '@/hooks/useStreamTimestamp'
 import Icon from '@/components/ui/Icon'
 import { StreamState } from '@/lib/enums'
-import styles from './VideoOverlay.module.scss'
+import { twMerge } from 'tailwind-merge'
 
 // Video center overlay items (not bottom controls)
 export default function VideoOverlay() {
@@ -28,7 +28,9 @@ function StateOverlay() {
 
   if (streamInfo.state === StreamState.Playing && isPaused) {
     return (
-      <button className={styles.playButton} onClick={() => videoElement.play()}>
+      <button
+        className="absolute left-1/2 top-1/2 m-auto flex -translate-x-1/2 -translate-y-1/2 transform cursor-pointer items-center justify-center rounded-lg border-none bg-bg2 p-2 text-[5rem] text-text2 hover:bg-bg3 hover:text-text1"
+        onClick={() => videoElement.play()}>
         <Icon name="play" />
       </button>
     )
@@ -36,7 +38,7 @@ function StateOverlay() {
 
   if (streamInfo.state === StreamState.Paused) {
     return (
-      <p className={styles.paused}>
+      <p className="animate-fade-in absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 transform cursor-default items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-black bg-opacity-50 p-4 text-xl tracking-wide text-text2">
         <Icon name="pause" />
         STREAM PAUSED
       </p>
@@ -45,7 +47,7 @@ function StateOverlay() {
 
   if (streamInfo.state === StreamState.Loading) {
     return (
-      <p className={styles.loading}>
+      <p className="animate-fade-in absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 transform cursor-default items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-black bg-opacity-50 p-4 text-xl tracking-wide text-text2">
         <Icon name="loading" />
         LOADING...
       </p>
@@ -54,8 +56,8 @@ function StateOverlay() {
 
   if (streamInfo.state === StreamState.Error) {
     return (
-      <div className={styles.error}>
-        <Icon name="warning" />
+      <div className="animate-video-error absolute left-0 top-0 flex h-full w-full cursor-default flex-col items-center justify-center gap-4 bg-black text-lg text-text2">
+        <Icon name="warning" className="text-[5rem] text-red-500" />
         <p>{streamInfo.error}.</p>
       </div>
     )
@@ -91,9 +93,18 @@ function BumperOverlay() {
   }
 
   return (
-    <div className={showControls ? `${styles.bumperTime} ${styles.offsetUp}` : styles.bumperTime}>
-      Ends in <span key={time}>{time}</span>
-      <span key={unit}>{unit}</span>
+    <div
+      className={twMerge(
+        'absolute bottom-4 right-4 cursor-default whitespace-nowrap rounded border border-white border-opacity-50 bg-black bg-opacity-75 p-4 text-lg text-white transition-all duration-150',
+        showControls && 'bottom-[5rem]'
+      )}>
+      Ends in{' '}
+      <span key={time} className="animate-fade-in">
+        {time}
+      </span>
+      <span key={unit} className="animate-fade-in">
+        {unit}
+      </span>
     </div>
   )
 }
@@ -104,15 +115,30 @@ function ActionPopupOverlay() {
   if (!actionPopup) return null
 
   return (
-    <div className={styles.actionPopup} key={actionPopup.id}>
-      <Icon name={actionPopup.icon} />
-      {actionPopup.text && <p>{actionPopup.text}</p>}
+    <div
+      className="pointer-events-none absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 transform cursor-default flex-col items-center justify-center gap-6"
+      key={actionPopup.id}>
+      <Icon
+        name={actionPopup.icon}
+        className="animate-video-action-out rounded-full bg-black bg-opacity-50 p-4 text-[5rem] text-[var(--text-color-2)]"
+      />
+      {actionPopup.text && (
+        <p className="animate-fade-out delay-750 text-2xl text-white shadow-md">
+          {actionPopup.text}
+        </p>
+      )}
     </div>
   )
 }
 
 function FoxNewsOverlay() {
-  return <img src="/theme-assets/fox-news-overlay.png" alt="" className={styles.fullImageOverlay} />
+  return (
+    <img
+      src="/theme-assets/fox-news-overlay.png"
+      alt=""
+      className="absolute left-0 top-0 h-full w-full"
+    />
+  )
 }
 
 function SaulGoodmanOverlay() {
@@ -120,7 +146,7 @@ function SaulGoodmanOverlay() {
     <img
       src="/theme-assets/saul-goodman-overlay.gif"
       alt=""
-      className={styles.saulGoodmanOverlay}
+      className="absolute left-0 top-0 h-full w-full opacity-50"
     />
   )
 }

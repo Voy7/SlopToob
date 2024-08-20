@@ -58,6 +58,15 @@ export const settingsList = {
     }
   },
 
+  // Maximum number of videos to keep in Player's history (Not to be confused with PlayHistory)
+  previousVideoLimit: {
+    default: 10,
+    onChange: async (value: number) => {
+      const { default: Player } = await import('@/server/stream/Player')
+      Player.updatedPreviousVideoLimit()
+    }
+  },
+
   // Delete transcoded files after they are played or not
   cacheVideos: { default: true },
   cacheBumpers: { default: true },
@@ -89,6 +98,7 @@ export const settingsList = {
   sendAdminPause: { default: true },
   sendAdminUnpause: { default: true },
   sendAdminSkip: { default: true },
+  sendAdminPrevious: { default: true },
   sendAdminChangePlaylist: { default: true },
 
   // Pause stream when no one is watching

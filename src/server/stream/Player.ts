@@ -28,6 +28,7 @@ export default new (class Player {
   playlists: RichPlaylist[] = []
   activePlaylist: RichPlaylist | null = null
   private lastBumperDate: Date = new Date()
+  previousVideos: { path: string; isBumper: boolean; fromPlaylistID?: string }[] = []
 
   // Get all playlists on startup
   async initialize() {
@@ -48,11 +49,44 @@ export default new (class Player {
   pause(): boolean {
     return this.playing?.pause() || false
   }
+
   unpause(): boolean {
     return this.playing?.unpause() || false
   }
+
   skip() {
     this.playing?.end()
+  }
+
+  // Go to previous video, or seek to start if conditions met, returns true if previous video was played
+  previous(): boolean {
+    let previousVideo = this.previousVideos[this.previousVideos.length - 1]
+    // In most cases, the previous video is the one that was just skipped and is in the array
+    if (this.playing?.inputPath === previousVideo?.path) {
+      previousVideo = this.previousVideos[this.previousVideos.length - 2]
+    }
+
+    // Seek to start if no previous videos
+    if (this.playing && !previousVideo) {
+      this.playing.seekTo(0)
+      return false
+    }
+    // Seek to start if video has been playing for more than 5 seconds & passed duration as % is < 50%
+    if (
+      this.playing &&
+      this.playing.currentSeconds > 5 &&
+      this.playing.currentSeconds / this.playing.durationSeconds < 0.5
+    ) {
+      this.playing.seekTo(0)
+      return false
+    }
+
+    this.addVideo(
+      new Video(previousVideo.path, previousVideo.isBumper, previousVideo.fromPlaylistID),
+      true
+    )
+    this.playing?.end()
+    return true
   }
 
   private async playNext() {
@@ -93,9 +127,9 @@ export default new (class Player {
   }
 
   // Add video to end of queue
-  addVideo(video: Video) {
+  addVideo(video: Video, addToStart: boolean = false) {
     Logger.debug('[Player] Adding video to queue:', video.name)
-    this.queue.push(video)
+    addToStart ? this.queue.unshift(video) : this.queue.push(video)
     if (!this.playing) this.playNext()
     SocketUtils.broadcastAdmin(Msg.AdminQueueList, this.clientVideoQueue)
   }
@@ -120,6 +154,19 @@ export default new (class Player {
 
     if (this.queue.length < Settings.targetQueueSize) {
       this.populateRandomToQueue()
+    }
+  }
+
+  addPreviousVideo(video: Video) {
+    if (this.previousVideos.length >= Settings.previousVideoLimit) {
+      this.previousVideos.shift()
+    }
+    this.previousVideos.push({ path: video.inputPath, isBumper: video.isBumper })
+  }
+
+  updatedPreviousVideoLimit() {
+    if (this.previousVideos.length > Settings.previousVideoLimit) {
+      this.previousVideos = this.previousVideos.slice(0, Settings.previousVideoLimit)
     }
   }
 
@@ -214,7 +261,8 @@ export default new (class Player {
       ...this.baseStreamInfo,
       activePlaylistID: this.activePlaylist?.id || 'None',
       activeThemeID: Settings.streamTheme,
-      version: packageJSON.version
+      previousVideoExists: this.previousVideos.length > 0,
+      appVersion: packageJSON.version
     }
     if (this.playing) {
       info.transcodedSeconds = this.playing.job.availableSeconds

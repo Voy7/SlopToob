@@ -67,14 +67,14 @@ export default function Modal({
   return createPortal(
     <div
       className={twMerge(
-        'modalBackgroundAnimation fixed inset-0 bg-black bg-opacity-50 opacity-0 backdrop-blur-sm transition-opacity duration-300 ease-in-out',
+        'animate-fade-in fixed inset-0 bg-black bg-opacity-50 opacity-0 backdrop-blur-sm transition-opacity duration-300 ease-in-out',
         isOpen && 'opacity-100'
       )}
       onClick={backgroundClick}>
       <div
         ref={containerRef}
         className={twMerge(
-          'modalContainerAnimation fixed left-1/2 top-1/2 w-auto max-w-full -translate-x-1/2 -translate-y-1/2 transform overflow-y-auto rounded-lg border border-border1 bg-bg1 opacity-0 shadow-md transition-all duration-300 ease-in-out',
+          'animate-modal-container fixed left-1/2 top-1/2 w-auto max-w-full -translate-x-1/2 -translate-y-1/2 transform overflow-y-auto rounded-lg border border-border1 bg-bg1 opacity-0 shadow-md transition-all duration-300 ease-in-out',
           isOpen && 'opacity-100',
           className
         )}>

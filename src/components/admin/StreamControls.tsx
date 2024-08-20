@@ -28,6 +28,9 @@ export default function StreamControls() {
 
   return (
     <div className="mb-4 flex items-center justify-start gap-2">
+      <button className={actionButtonStyles} onClick={() => socket.emit(Msg.AdminPreviousVideo)}>
+        <Icon name="previous" />
+      </button>
       <ActionButton />
       <button className={actionButtonStyles} onClick={() => socket.emit(Msg.AdminSkipVideo)}>
         <Icon name="skip" />

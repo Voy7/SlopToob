@@ -50,7 +50,7 @@ export default function Navbar() {
           </div>
         ))}
       </div>
-      <p className="py-2 text-center text-text3">{streamInfo.version}</p>
+      <p className="py-2 text-center text-text3">{streamInfo.appVersion}</p>
     </nav>
   )
 }
