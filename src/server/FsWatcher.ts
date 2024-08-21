@@ -21,7 +21,7 @@ export default class FsWatcher {
     fs.watch(this.dirPath, { recursive: true }, (event, filename) => {
       if (!filename) return
 
-      const fullPath = path.join(this.dirPath, filename)
+      const fullPath = `${this.dirPath}/${filename}`.replace(/\\/g, '/')
       if (event === 'change') return
       if (event === 'rename') {
         if (fs.existsSync(fullPath)) this.newFileCallback?.(fullPath)

@@ -82,6 +82,9 @@ console.log(
 function updateCheckLine(check: CheckKey, text: string) {
   const index = Object.keys(CHECKS).indexOf(check)
   process.stdout.write('\u001b[s')
+  // clear line
+  process.stdout.cursorTo(0, HEADER_LINES + index)
+  process.stdout.write(' '.repeat(100))
   process.stdout.cursorTo(0, HEADER_LINES + index)
   process.stdout.write(text)
   process.stdout.write('\u001b[u')
