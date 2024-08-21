@@ -1,13 +1,12 @@
 import fs from 'fs'
-import fsAsync from 'fs/promises'
 import path from 'path'
 import Env from '@/server/EnvVariables'
 import Logger from '@/server/Logger'
 import Checklist from '@/server/Checklist'
+import FsWatcher from '@/server/FsWatcher'
 import SocketUtils from '@/server/socket/SocketUtils'
 import { Msg } from '@/lib/enums'
 import type { FileTreeNode } from '@/typings/types'
-import FsWatcher from './FsWatcher'
 
 const VALID_EXTENSIONS = ['.mp4', '.mkv', '.avi', '.mov', '.flv', '.wmv', '.webm', '.m2ts']
 
@@ -51,7 +50,7 @@ export default new (class FileTreeHandler {
     watcher.onNewFile((filePath) => {
       const ext = path.extname(filePath).toLowerCase()
       if (!VALID_EXTENSIONS.includes(ext)) return
-      if (this.paths.includes(filePath)) return
+      // if (this.paths.includes(filePath)) return
 
       this.paths.push(filePath)
       if (this.refreshTimeout) clearTimeout(this.refreshTimeout)
@@ -99,21 +98,6 @@ export default new (class FileTreeHandler {
         else resolve(results)
       })
     })
-
-    // async function getChildren(pathname: string) {
-    //   const files = await fsAsync.readdir(pathname, { withFileTypes: true })
-    //   for (const file of files) {
-    //     if (file.isDirectory()) await getChildren(`${pathname}/${file.name}`)
-    //     else {
-    //       const ext = path.extname(file.name).toLowerCase()
-    //       if (!VALID_EXTENSIONS.includes(ext)) continue
-    //       paths.push(path.join(pathname, file.name).replace(/\\/g, '/'))
-    //     }
-    //   }
-    // }
-
-    // await getChildren(rootPath)
-    // return paths
   }
 
   // Transform paths array to a tree structure

@@ -54,7 +54,7 @@ function Job({ job, index }: { job: TranscodeClientVideo; index: number }) {
         <button
           className="rounded-full p-1 hover:bg-bg2 hover:bg-opacity-50"
           onClick={() => setShowActions(!showActions)}>
-          <Icon name="settings" />
+          <Icon name="more" />
           <ClickContextMenu placement="right">
             <ContextMenuButton
               icon="admin-panel"

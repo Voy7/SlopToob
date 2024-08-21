@@ -161,7 +161,11 @@ export default new (class Player {
     if (this.previousVideos.length >= Settings.previousVideoLimit) {
       this.previousVideos.shift()
     }
-    this.previousVideos.push({ path: video.inputPath, isBumper: video.isBumper })
+    this.previousVideos.push({
+      path: video.inputPath,
+      isBumper: video.isBumper,
+      fromPlaylistID: video.fromPlaylistID
+    })
   }
 
   updatedPreviousVideoLimit() {

@@ -363,6 +363,22 @@ export const socketEvents: Record<string, EventOptions> = {
     }
   },
 
+  [Msg.AdminSeekStepForward]: {
+    adminOnly: true,
+    run: (socket, seconds: unknown) => {
+      if (typeof seconds !== 'number') return
+      Player.playing?.seekTo(Player.playing.currentSeconds + seconds)
+    }
+  },
+
+  [Msg.AdminSeekStepBackward]: {
+    adminOnly: true,
+    run: (socket, seconds: unknown) => {
+      if (typeof seconds !== 'number') return
+      Player.playing?.seekTo(Player.playing.currentSeconds - seconds)
+    }
+  },
+
   [Msg.AdminTerminateJob]: {
     adminOnly: true,
     run: (socket, jobID: string) => {

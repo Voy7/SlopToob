@@ -21,6 +21,7 @@ export default class Video {
   readonly id: string = generateSecret()
   readonly name: string
   readonly isBumper: boolean
+  readonly fromPlaylistID?: string
   readonly inputPath: string
   readonly outputPath: string
   readonly job: TranscoderJob
@@ -33,7 +34,6 @@ export default class Video {
   private readyCallbacks: Array<() => void> = []
   private finishedPlayingCallback?: () => void
   private playAfterSeek: boolean = true
-  private readonly fromPlaylistID?: string
 
   private _state: State = State.NotReady
   get state() {
@@ -214,6 +214,10 @@ export default class Video {
   // Set video to a specific time in seconds
   seekTo(seconds: number) {
     EventLogger.log(this, `seekTo(${seconds})`)
+
+    // Ensure seconds is within video duration
+    if (seconds < 0) seconds = 0
+    if (seconds > this.durationSeconds) seconds = this.durationSeconds
 
     if (this.state !== State.Playing && this.state !== State.Paused) return
     Logger.debug(`[Video] Seeking to ${parseTimestamp(seconds)}: ${this.name}`)

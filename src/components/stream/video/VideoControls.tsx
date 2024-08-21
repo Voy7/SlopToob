@@ -1,23 +1,24 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { useSession } from 'next-auth/react'
 import { useVideoContext } from '@/contexts/VideoContext'
 import { useStreamContext } from '@/contexts/StreamContext'
-import { StreamState, AuthRole } from '@/lib/enums'
+import { StreamState } from '@/lib/enums'
 import useStreamTimestamp from '@/hooks/useStreamTimestamp'
 import Icon from '@/components/ui/Icon'
 import HoverTooltip from '@/components/ui/HoverTooltip'
+import RangeSliderInput from '@/components/ui/RangeSliderInput'
 import { twMerge } from 'tailwind-merge'
-import RangeSliderInput from '../../ui/RangeSliderInput'
 
 const OVERLAY_MOUSE_TIMEOUT = 3000
 
-// Video bottom controls
-export default function VideoControls({ scrubber }: { scrubber: JSX.Element }) {
-  const session = useSession()
-  const authUser = session.data?.user
+type Props = {
+  scrubber: JSX.Element
+  adminControls?: JSX.Element
+}
 
+// Video bottom controls
+export default function VideoControls({ scrubber, adminControls }: Props) {
   const {
     isPaused,
     volume,
@@ -145,13 +146,7 @@ export default function VideoControls({ scrubber }: { scrubber: JSX.Element }) {
             </div>
           </div>
         </div>
-        {authUser && authUser.role >= AuthRole.Admin && (
-          <div className="flex items-center gap-2">
-            {/* <button className={styles.actionButton} onClick={() => setShowKeybindsModal(true)}>
-              <Icon name="stream-settings" />
-            </button> */}
-          </div>
-        )}
+        {adminControls}
         <div>
           <ActionButton onClick={toggleFullscreen}>
             <HoverTooltip placement="top-end" offset={22}>
@@ -181,37 +176,31 @@ function PausePlayButton() {
   if (streamInfo.state === StreamState.Playing) {
     if (isPaused) {
       return (
-        <div>
-          <ActionButton onClick={() => videoElement.play()}>
-            <HoverTooltip placement="top-start" offset={22}>
-              Unpause (k)
-            </HoverTooltip>
-            <Icon name="play" />
-          </ActionButton>
-        </div>
+        <ActionButton onClick={() => videoElement.play()}>
+          <HoverTooltip placement="top-start" offset={22}>
+            Unpause (k)
+          </HoverTooltip>
+          <Icon name="play" />
+        </ActionButton>
       )
     }
 
     return (
-      <div>
-        <ActionButton onClick={() => videoElement.pause()}>
-          <HoverTooltip placement="top-start" offset={22}>
-            Pause - Only for you (k)
-          </HoverTooltip>
-          <Icon name="pause" />
-        </ActionButton>
-      </div>
+      <ActionButton onClick={() => videoElement.pause()}>
+        <HoverTooltip placement="top-start" offset={22}>
+          Pause - Only for you (k)
+        </HoverTooltip>
+        <Icon name="pause" />
+      </ActionButton>
     )
   }
 
   return (
-    <div>
+    <ActionButton className="cursor-not-allowed text-error hover:text-error">
       <HoverTooltip placement="top-start" offset={22}>
         Stream Paused - Wait for Admin
       </HoverTooltip>
-      <ActionButton className="cursor-not-allowed text-error hover:text-error">
-        <Icon name="pause" />
-      </ActionButton>
-    </div>
+      <Icon name="pause" />
+    </ActionButton>
   )
 }

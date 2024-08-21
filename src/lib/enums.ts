@@ -46,6 +46,8 @@ export const enum Msg {
   AdminSkipVideo = 'admin-skip-video',
   AdminPreviousVideo = 'admin-previous-video',
   AdminSeekTo = 'admin-seek-to',
+  AdminSeekStepForward = 'admin-seek-step-forward',
+  AdminSeekStepBackward = 'admin-seek-step-backward',
   AdminTerminateJob = 'admin-terminate-job',
   AdminRemoveQueueVideo = 'admin-remove-queue-item',
   AdminDebugJob = 'admin-debug-job',
