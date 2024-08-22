@@ -27,6 +27,11 @@ export default class Logger {
     this.send('DEBUG'.magenta, ...args)
   }
 
+  // Chat messages
+  static chatMessage(...args: any[]) {
+    this.send('CHAT'.blue, ...args)
+  }
+
   // Private method that sends the message with fancy styling
   private static send(label: string, ...args: any[]) {
     const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false })

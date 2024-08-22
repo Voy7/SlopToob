@@ -22,6 +22,7 @@ export default function SectionAdvanced() {
   const videoPaddingSeconds = useNumberOption('videoPaddingSeconds')
   const errorDisplaySeconds = useNumberOption('errorDisplaySeconds')
   const torrentNameParsing = useToggleOption('torrentNameParsing')
+  const showChatMessagesInConsole = useToggleOption('showChatMessagesInConsole')
 
   return (
     <>
@@ -56,12 +57,9 @@ export default function SectionAdvanced() {
         <Gap />
         <ToggleOption label="Torrent Name Parsing" {...torrentNameParsing} />
         <Description>Parse common torrent filename patterns into nice video titles.</Description>
-      </SettingGroup>
-      <SettingGroup>
-        <Header icon="admin-panel">App Information</Header>
-        <ButtonOption label={`Version: ${streamInfo.appVersion}`}>
-          <></>
-        </ButtonOption>
+        <Gap />
+        <ToggleOption label="Show Chat Messages in Console" {...showChatMessagesInConsole} />
+        <Description>Show all chat messages in the server console.</Description>
       </SettingGroup>
     </>
   )

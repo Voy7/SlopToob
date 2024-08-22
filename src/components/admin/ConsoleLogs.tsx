@@ -8,7 +8,8 @@ const prefixColors: Record<string, string> = {
   INFO: 'cyan',
   WARN: 'yellow',
   ERROR: 'red',
-  DEBUG: 'magenta'
+  DEBUG: 'magenta',
+  CHAT: 'blue'
 }
 
 export default function ConsoleLogs() {
@@ -56,7 +57,7 @@ export default function ConsoleLogs() {
   }, [])
 
   return (
-    <div className="overflow-hidden rounded-md border-[1px] border-border1">
+    <div className="h-[300px] rounded-md border-[1px] border-border1">
       <header className="flex w-full cursor-default items-center justify-between gap-2 bg-bg3 px-1 text-text3">
         <p className="flex items-center gap-1">
           <Icon name="admin-panel" />
@@ -67,7 +68,7 @@ export default function ConsoleLogs() {
           {logs.length} Logs
         </p>
       </header>
-      <div ref={messagesRef} className="h-[20em] w-full overflow-y-scroll bg-black pb-2">
+      <div ref={messagesRef} className="h-full w-full overflow-y-scroll bg-black pb-2">
         {parsedLogs.map((log, index) => (
           <div key={index} className="px-2 hover:bg-bg2">
             {log}
