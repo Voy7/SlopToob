@@ -96,7 +96,7 @@ function BumperOverlay() {
     <div
       className={twMerge(
         'absolute bottom-4 right-4 cursor-default whitespace-nowrap rounded border border-white border-opacity-50 bg-black bg-opacity-75 p-4 text-lg text-white transition-all duration-150',
-        showControls && 'bottom-[5rem]'
+        showControls && 'bottom-[6rem]'
       )}>
       Ends in{' '}
       <span key={time} className="animate-fade-in">

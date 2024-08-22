@@ -168,8 +168,7 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
           hideCursor && 'cursor-none',
           streamInfo.streamTheme === 'Zoomer' && 'grid grid-cols-[1fr_1fr] grid-rows-[1fr_1fr]'
         )}
-        onClick={backgroundClick}
-      >
+        onClick={backgroundClick}>
         <video ref={videoRef} autoPlay playsInline>
           Your browser does not support the video tag.
         </video>

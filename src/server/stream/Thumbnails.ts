@@ -20,7 +20,7 @@ export default new (class Thumbnails {
     }
 
     if (!fs.existsSync(videoPath)) {
-      Logger.warn(`[Thumbnails] Video file does ot exist, ignoring. (${videoPath})`)
+      Logger.warn(`[Thumbnails] Video file does not exist, ignoring. (${videoPath})`)
       return null
     }
 

@@ -27,7 +27,7 @@ export default function AdminScrubber() {
 
   return (
     <div
-      className="relative h-2 w-full cursor-pointer bg-[rgba(136,136,136,0.5)] transition-[height] duration-300 ease-in-out hover:h-4"
+      className="relative h-2 w-full cursor-pointer bg-slate-700 transition-[height] duration-300 ease-in-out hover:h-4"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onMouseMove={(event) => {
@@ -43,12 +43,10 @@ export default function AdminScrubber() {
         const seconds = percentage * totalSeconds
         socket.emit(Msg.AdminSeekTo, seconds)
       }}>
-      {isHovered && (
-        <div
-          className="pointer-events-none absolute h-full bg-slate-500 transition-[width] duration-150"
-          style={{ width: `${transcodedPercent}%` }}
-        />
-      )}
+      <div
+        className="pointer-events-none absolute h-full bg-slate-500 transition-[width] duration-150"
+        style={{ width: `${transcodedPercent}%` }}
+      />
       <div
         className="pointer-events-none absolute h-full border-r-2 border-[rgba(0,0,0,0.25)] bg-blue-500 transition-[width] duration-150"
         style={{ width: `${(currentSeconds / totalSeconds) * 100}%` }}

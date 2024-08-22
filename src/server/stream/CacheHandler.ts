@@ -1,16 +1,11 @@
-import path from 'path'
-import fs from 'fs'
-import fsAsync from 'fs/promises'
 import bytesToSize from '@/lib/bytesToSize'
+import CacheNode from '@/server/stream/CacheNode'
 import Env from '@/server/EnvVariables'
 import Logger from '@/server/Logger'
-import FsWatcher from '@/server/FsWatcher'
 import TranscoderQueue from '@/server/stream/TranscoderQueue'
-import SocketUtils from '@/server/socket/SocketUtils'
-import { Msg } from '@/lib/enums'
 import type { ClientCacheStatus } from '@/typings/socket'
 
-type CacheDefinition = {
+export type CacheDefinition = {
   [key: string]: {
     isVideos: boolean
     dirPath: string
@@ -25,6 +20,7 @@ const cacheDefinitions = {
     omitDirs: () => {
       let omitDirs: string[] = []
       for (const job of TranscoderQueue.jobs) {
+        if (job.video.isBumper) continue
         omitDirs.push(job.video.outputPath)
       }
       return omitDirs
@@ -36,6 +32,7 @@ const cacheDefinitions = {
     omitDirs: () => {
       let omitDirs: string[] = []
       for (const job of TranscoderQueue.jobs) {
+        if (!job.video.isBumper) continue
         omitDirs.push(job.video.outputPath)
       }
       return omitDirs
@@ -51,99 +48,7 @@ export type CacheID = keyof typeof cacheDefinitions
 
 const MIN_SECONDS_CLIENT_UPDATE = 5
 
-// Individual cache nodess
-class CacheNode {
-  id: CacheID
-  isVideos: boolean
-  dirPath: string
-  totalBytes: number = 0
-  totalItems: number = 0
-  isDeleting: boolean = false
-  private fileSizes: Map<string, number> = new Map()
-  private lastClientUpdateTime: number = 0
-  private isClientUpdatePending: boolean = false
-
-  constructor(id: CacheID, definiton: CacheDefinition[CacheID]) {
-    this.id = id
-    this.isVideos = definiton.isVideos
-    this.dirPath = definiton.dirPath
-
-    this.initialize()
-  }
-
-  async initialize() {
-    const startTime = Date.now()
-
-    if (!fs.existsSync(this.dirPath)) fs.mkdirSync(this.dirPath, { recursive: true })
-
-    const watcher = new FsWatcher(this.dirPath)
-
-    let firstEmit = true
-    watcher.onNewFile((filePath) => {
-      if (firstEmit) {
-        const stats = fs.statSync(filePath)
-        this.totalBytes += stats.size
-        this.totalItems++
-        this.fileSizes.set(filePath, stats.size)
-        this.broadcastClientUpdate()
-        return
-      }
-      this.totalItems++
-      this.fileSizes.set(filePath, 0)
-      setTimeout(() => {
-        if (!this.fileSizes.has(filePath)) return
-        const stats = fs.statSync(filePath)
-        this.totalBytes += stats.size
-        this.fileSizes.set(filePath, stats.size)
-        this.broadcastClientUpdate()
-      }, 1000) // Wait 1s before checking file size
-    })
-
-    watcher.onDeleteFile((filePath) => {
-      if (!this.fileSizes.has(filePath)) return
-      const size = this.fileSizes.get(filePath) as number
-      this.totalBytes -= size
-      this.totalItems--
-      this.fileSizes.delete(filePath)
-      this.broadcastClientUpdate()
-    })
-
-    await watcher.emitAllCurrentFiles()
-    firstEmit = false
-
-    watcher.activate()
-
-    const passedSeconds = ((Date.now() - startTime) / 1000).toFixed(3)
-    Logger.debug(
-      `[CacheNode] Initialized cache ${this.id} with ${this.totalItems} files and ${this.totalBytes} bytes in ${passedSeconds}s.`
-    )
-  }
-
-  broadcastClientUpdate() {
-    if (this.isClientUpdatePending) return
-    const lastUpdateSeconds = (Date.now() - this.lastClientUpdateTime) / 1000
-    if (lastUpdateSeconds < MIN_SECONDS_CLIENT_UPDATE) {
-      this.isClientUpdatePending = true
-      setTimeout(
-        () => {
-          this.isClientUpdatePending = false
-          this.broadcastClientUpdate()
-        },
-        (MIN_SECONDS_CLIENT_UPDATE - lastUpdateSeconds) * 1000
-      )
-    }
-
-    this.lastClientUpdateTime = Date.now()
-    SocketUtils.broadcastAdmin(Msg.AdminCacheStatus, CacheHandler.getClientCacheStatus(this.id))
-  }
-
-  deleteAll() {
-    // Delete all files in the cache directory
-    if (this.isDeleting) return
-    this.isDeleting = true
-    SocketUtils.broadcastAdmin(Msg.AdminCacheStatus, CacheHandler.getClientCacheStatus(this.id))
-  }
-}
+//
 
 const caches = {} as Record<CacheID, CacheNode>
 for (const cacheIDKey in cacheDefinitions) {

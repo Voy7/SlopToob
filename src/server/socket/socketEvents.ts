@@ -363,6 +363,7 @@ export const socketEvents: Record<string, EventOptions> = {
     }
   },
 
+  // Admin seeks forward by specific seconds
   [Msg.AdminSeekStepForward]: {
     adminOnly: true,
     run: (socket, seconds: unknown) => {
@@ -371,6 +372,7 @@ export const socketEvents: Record<string, EventOptions> = {
     }
   },
 
+  // Admin seeks backward by specific seconds
   [Msg.AdminSeekStepBackward]: {
     adminOnly: true,
     run: (socket, seconds: unknown) => {

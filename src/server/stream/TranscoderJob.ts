@@ -134,6 +134,7 @@ export default class TranscoderJob {
         this.isStreamableReady = true
         this.resolveStreamableReadyCallbacks()
         this.resolveTranscodeFinishedCallback()
+        return
       }
 
       Logger.warn('[TranscoderJob] Partial files found, deleting cache:', this.video.outputPath)
@@ -215,7 +216,7 @@ export default class TranscoderJob {
     this.state = JobState.CleaningUp
 
     const keepCache = this.video.isBumper ? Settings.cacheBumpers : Settings.cacheVideos
-    if (!keepCache) {
+    if (!keepCache || this.transcodedStartSeconds > 0) {
       try {
         await rmDirRetry(this.video.outputPath)
       } catch (error) {
@@ -233,7 +234,7 @@ export default class TranscoderJob {
     const index = TranscoderQueue.jobs.findIndex((item) => item === this)
     if (index !== -1) TranscoderQueue.jobs.splice(index, 1)
 
-    this.initialize()
+    // this.initialize()
   }
 
   // Restart the transcoding process from specified time

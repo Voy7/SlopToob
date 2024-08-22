@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import Icon from '@/components/ui/Icon'
 import { twMerge } from 'tailwind-merge'
@@ -25,8 +25,6 @@ export default function Modal({
 }: Props) {
   const [show, setShow] = useState<boolean>(isOpen)
 
-  const containerRef = useRef<HTMLDivElement>(null)
-
   // Sync 'show' state with isOpen and animation delay
   useEffect(() => {
     if (isOpen) {
@@ -50,15 +48,8 @@ export default function Modal({
     }
 
     document.addEventListener('keydown', handleKeyDown)
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown)
-    }
+    return () => document.removeEventListener('keydown', handleKeyDown)
   }, [])
-
-  function backgroundClick(event: React.MouseEvent<HTMLDivElement>) {
-    if (containerRef.current?.contains(event.target as Node)) return
-    setClose()
-  }
 
   if (!show) return null
 
@@ -70,9 +61,11 @@ export default function Modal({
         'animate-fade-in fixed inset-0 bg-black bg-opacity-50 opacity-0 backdrop-blur-sm transition-opacity duration-300 ease-in-out',
         isOpen && 'opacity-100'
       )}
-      onClick={backgroundClick}>
+      onClick={(event) => {
+        if (event.target !== event.currentTarget) return
+        setClose()
+      }}>
       <div
-        ref={containerRef}
         className={twMerge(
           'animate-modal-container fixed left-1/2 top-1/2 w-auto max-w-full -translate-x-1/2 -translate-y-1/2 transform overflow-y-auto rounded-lg border border-border1 bg-bg1 opacity-0 shadow-md transition-all duration-300 ease-in-out',
           isOpen && 'opacity-100',
