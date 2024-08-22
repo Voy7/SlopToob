@@ -19,32 +19,47 @@ export default class FsWatcher {
     this.isActive = true
 
     fs.watch(this.dirPath, { recursive: true }, (event, filename) => {
+      if (event !== 'rename') return
       if (!filename) return
 
       const fullPath = `${this.dirPath}/${filename}`.replace(/\\/g, '/')
-      if (event === 'change') return
-      if (event === 'rename') {
-        if (fs.existsSync(fullPath)) this.newFileCallback?.(fullPath)
-        else this.deleteFileCallback?.(fullPath)
+      if (fs.existsSync(fullPath)) {
+        if (fs.statSync(fullPath).isDirectory()) return
+        this.newFileCallback?.(fullPath)
+        return
       }
+      this.deleteFileCallback?.(fullPath)
     })
   }
 
   // Crawl entire tree and emit new file event for each file
   async emitAllCurrentFiles() {
-    const getFiles = async (dirPath: string) => {
-      const files = await fsAsync.readdir(dirPath, { withFileTypes: true })
-      for (const file of files) {
-        if (file.isDirectory()) {
-          await getFiles(path.join(dirPath, file.name))
-          continue
-        }
-        const fullPath = path.join(dirPath, file.name)
-        this.newFileCallback?.(fullPath)
+    return new Promise<void>((resolve, reject) => {
+      const walk = (dir: string, done: (error?: Error) => void) => {
+        // const results: string[] = []
+        fs.readdir(dir, { withFileTypes: true }, (err, list) => {
+          if (err) return done(err)
+          let pending = list.length
+          if (!pending) return done()
+          list.forEach((file) => {
+            const filePath = `${dir}/${file.name}`
+            if (file.isDirectory()) {
+              walk(filePath, (res) => {
+                if (!--pending) done()
+              })
+            } else {
+              this.newFileCallback?.(filePath)
+              if (!--pending) done()
+            }
+          })
+        })
       }
-    }
 
-    return await getFiles(this.dirPath)
+      walk(this.dirPath, (error) => {
+        if (error) reject(error)
+        else resolve()
+      })
+    })
   }
 
   onNewFile(callback: (filePath: string) => void) {

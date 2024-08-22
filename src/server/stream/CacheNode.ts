@@ -1,17 +1,18 @@
 import fs from 'fs'
 import bytesToSize from '@/lib/bytesToSize'
-import CacheHandler, { type CacheDefinition, type CacheID } from '@/server/stream/CacheHandler'
 import FsWatcher from '@/server/FsWatcher'
 import Logger from '@/server/Logger'
 import SocketUtils from '@/server/socket/SocketUtils'
 import { Msg } from '@/lib/enums'
+import type { CacheDefinition, CacheID } from '@/server/stream/CacheHandler'
+import type { ClientCacheStatus } from '@/typings/socket'
 
 const MIN_SECONDS_CLIENT_UPDATE = 5
 
 // Individual cache nodess
 export default class CacheNode {
   readonly id: CacheID
-  readonly definition: CacheDefinition[CacheID]
+  readonly definition: CacheDefinition
   totalBytes: number = 0
   totalItems: number = 0
   isDeleting: boolean = false
@@ -20,7 +21,7 @@ export default class CacheNode {
   private lastClientUpdateTime: number = 0
   private isClientUpdatePending: boolean = false
 
-  constructor(id: CacheID, definiton: CacheDefinition[CacheID]) {
+  constructor(id: CacheID, definiton: CacheDefinition) {
     this.id = id
     this.definition = definiton
 
@@ -57,6 +58,7 @@ export default class CacheNode {
     })
 
     watcher.onDeleteFile((filePath) => {
+      console.log('delete file', filePath)
       if (!this.fileSizes.has(filePath)) return
       const size = this.fileSizes.get(filePath) as number
       this.totalBytes -= size
@@ -76,7 +78,7 @@ export default class CacheNode {
     )
   }
 
-  broadcastClientUpdate() {
+  private broadcastClientUpdate() {
     if (this.isClientUpdatePending) return
     const lastUpdateSeconds = (Date.now() - this.lastClientUpdateTime) / 1000
     if (lastUpdateSeconds < MIN_SECONDS_CLIENT_UPDATE) {
@@ -91,30 +93,89 @@ export default class CacheNode {
     }
 
     this.lastClientUpdateTime = Date.now()
-    SocketUtils.broadcastAdmin(Msg.AdminCacheStatus, CacheHandler.getClientCacheStatus(this.id))
+    SocketUtils.broadcastAdmin(Msg.AdminCacheStatus, this.clientCacheStatus)
   }
 
   async deleteAll() {
     // Delete all files in the cache directory
     if (this.isDeleting) return
     this.isDeleting = true
+    SocketUtils.broadcastAdmin(Msg.AdminCacheStatus, this.clientCacheStatus)
 
     const startTime = Date.now()
 
-    const omitDirs = this.definition.omitDirs?.() || []
-
     if (this.definition.isVideos) {
+      const omitDirs = this.definition.omitDirs?.() || []
       const dirs: string[] = []
-      for (const file of Object.keys(this.fileSizes)) {
+      this.fileSizes.forEach((size, file) => {
         const dir = file.split('/').slice(0, -1).join('/')
-        if (dirs.includes(dir)) continue
-        if (omitDirs.includes(dir)) continue
+        console.log(dir, omitDirs)
+        if (dirs.includes(dir)) return
+        if (omitDirs.includes(dir)) return
         dirs.push(dir)
-      }
+      })
 
-      console.log(dirs)
+      let deleteCount = 0
+      for (const dir of dirs) {
+        fs.rm(dir, { recursive: true, force: true }, (error) => {
+          if (error) Logger.error(`[CacheNode] Error deleting cache dir: ${dir}`, error)
+          deleteCount++
+          if (deleteCount !== dirs.length) return
+          this.isDeleting = false
+          SocketUtils.broadcastAdmin(Msg.AdminCacheStatus, this.clientCacheStatus)
+          const passedSeconds = ((Date.now() - startTime) / 1000).toFixed(2)
+          Logger.debug(
+            `[CacheNode] Deleted ${dirs.length} directories in ${this.id} cache in ${passedSeconds}s.`
+          )
+        })
+      }
+      return
     }
 
-    SocketUtils.broadcastAdmin(Msg.AdminCacheStatus, CacheHandler.getClientCacheStatus(this.id))
+    let deleteCount = 0
+    this.fileSizes.forEach((size, file) => {
+      fs.rm(file, { force: true }, (error) => {
+        if (error) Logger.error(`[CacheNode] Error deleting cache file: ${file}`, error)
+        deleteCount++
+        if (deleteCount !== this.fileSizes.size) return
+        this.isDeleting = false
+        SocketUtils.broadcastAdmin(Msg.AdminCacheStatus, this.clientCacheStatus)
+        const passedSeconds = ((Date.now() - startTime) / 1000).toFixed(2)
+        Logger.debug(
+          `[CacheNode] Deleted ${deleteCount} files in ${this.id} cache in ${passedSeconds}s.`
+        )
+      })
+    })
+  }
+
+  get clientCacheStatus(): ClientCacheStatus {
+    if (this.definition.isVideos) {
+      const omitDirs = this.definition.omitDirs?.() || []
+      let totalBytes = this.totalBytes
+      let totalItems = this.totalItems
+      const dirs: string[] = []
+      this.fileSizes.forEach((size, file) => {
+        const dir = file.split('/').slice(0, -1).join('/')
+        if (!omitDirs.includes(dir)) return
+        if (!dirs.includes(dir)) dirs.push(dir)
+        totalBytes -= size
+        totalItems--
+      })
+
+      return {
+        cacheID: this.id,
+        fileCount: totalItems,
+        videosCount: dirs.length,
+        size: bytesToSize(totalBytes),
+        isDeleting: this.isDeleting
+      }
+    }
+
+    return {
+      cacheID: this.id,
+      fileCount: this.totalItems,
+      size: bytesToSize(this.totalBytes),
+      isDeleting: this.isDeleting
+    }
   }
 }

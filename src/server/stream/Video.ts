@@ -169,12 +169,12 @@ export default class Video {
 
   // Must be called before being removed from the queue or Player
   // This is primarily so the TranscoderHandler can clean up shared jobs properly
-  end() {
+  end(omitFromPreviousVideos: boolean = false) {
     EventLogger.log(this, `end()`)
     Logger.debug(`[Video] Finished playing: ${this.name}`)
 
     if (Player.playing === this && !this.error) {
-      Player.addPreviousVideo(this)
+      if (!omitFromPreviousVideos) Player.addPreviousVideo(this)
       Settings.setSetting('streamIsPaused', false)
     }
 

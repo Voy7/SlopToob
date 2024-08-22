@@ -28,7 +28,8 @@ export default new (class Player {
   playlists: RichPlaylist[] = []
   activePlaylist: RichPlaylist | null = null
   private lastBumperDate: Date = new Date()
-  previousVideos: { path: string; isBumper: boolean; fromPlaylistID?: string }[] = []
+  private previousVideos: { path: string; isBumper: boolean; fromPlaylistID?: string }[] = []
+  private omitBumpersNextPlay: boolean = false
 
   // Get all playlists on startup
   async initialize() {
@@ -60,11 +61,7 @@ export default new (class Player {
 
   // Go to previous video, or seek to start if conditions met, returns true if previous video was played
   previous(): boolean {
-    let previousVideo = this.previousVideos[this.previousVideos.length - 1]
-    // In most cases, the previous video is the one that was just skipped and is in the array
-    if (this.playing?.inputPath === previousVideo?.path) {
-      previousVideo = this.previousVideos[this.previousVideos.length - 2]
-    }
+    const previousVideo = this.previousVideos[this.previousVideos.length - 1]
 
     // Seek to start if no previous videos
     if (this.playing && !previousVideo) {
@@ -81,17 +78,20 @@ export default new (class Player {
       return false
     }
 
+    this.previousVideos.pop()
     this.addVideo(
       new Video(previousVideo.path, previousVideo.isBumper, previousVideo.fromPlaylistID),
       true
     )
-    this.playing?.end()
+    this.omitBumpersNextPlay = true
+    this.playing?.end(true)
     return true
   }
 
   private async playNext() {
     // Play bumper if enough time has passed
     if (
+      !this.omitBumpersNextPlay &&
       Settings.bumpersEnabled &&
       this.lastBumperDate.getTime() + Settings.bumperIntervalMinutes * 60 * 1000 < Date.now()
     ) {
@@ -101,6 +101,8 @@ export default new (class Player {
         this.lastBumperDate = new Date()
       }
     }
+
+    this.omitBumpersNextPlay = false
 
     if (this.queue.length === 0) {
       this.broadcastStreamInfo()

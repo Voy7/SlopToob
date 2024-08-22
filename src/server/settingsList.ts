@@ -120,7 +120,9 @@ export const settingsList = {
 
   // Video event logging debug settings
   enableVideoEventLogging: { default: true },
-  showVideoEventLogsInConsole: { default: false }
+  showVideoEventLogsInConsole: { default: false },
+
+  showChatMessagesInConsole: { default: true }
 } satisfies Record<string, Setting>
 
 async function voteSkipResync() {

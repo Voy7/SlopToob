@@ -140,7 +140,8 @@ export type ClientHistoryStatus = {
 
 export type ClientCacheStatus = {
   cacheID: CacheID
-  filesCount: number
+  fileCount: number
+  videosCount?: number
   size: string
   isDeleting: boolean
 }

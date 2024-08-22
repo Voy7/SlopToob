@@ -1,4 +1,3 @@
-import bytesToSize from '@/lib/bytesToSize'
 import CacheNode from '@/server/stream/CacheNode'
 import Env from '@/server/EnvVariables'
 import Logger from '@/server/Logger'
@@ -6,11 +5,9 @@ import TranscoderQueue from '@/server/stream/TranscoderQueue'
 import type { ClientCacheStatus } from '@/typings/socket'
 
 export type CacheDefinition = {
-  [key: string]: {
-    isVideos: boolean
-    dirPath: string
-    omitDirs?: () => string[]
-  }
+  isVideos: boolean
+  dirPath: string
+  omitDirs?: () => string[]
 }
 
 const cacheDefinitions = {
@@ -42,7 +39,7 @@ const cacheDefinitions = {
     isVideos: false,
     dirPath: Env.THUMBNAILS_OUTPUT_PATH
   }
-} satisfies CacheDefinition
+} satisfies Record<string, CacheDefinition>
 
 export type CacheID = keyof typeof cacheDefinitions
 
@@ -56,8 +53,8 @@ for (const cacheIDKey in cacheDefinitions) {
   caches[cacheID] = new CacheNode(cacheID, cacheDefinitions[cacheID])
 }
 
-// Main cache handler, manages all cache nodes
-class CacheHandlerClass {
+// Main cache handler, manages all cache nodes, singleton
+class CacheHandler {
   isCacheID(id: unknown): id is CacheID {
     if (typeof id !== 'string') return false
     return id in cacheDefinitions
@@ -68,16 +65,8 @@ class CacheHandlerClass {
   }
 
   getClientCacheStatus(id: CacheID): ClientCacheStatus {
-    const cache = caches[id]
-    return {
-      cacheID: id,
-      filesCount: cache.totalItems,
-      size: bytesToSize(cache.totalBytes),
-      isDeleting: cache.isDeleting
-    }
+    return caches[id].clientCacheStatus
   }
 }
 
-const CacheHandler = new CacheHandlerClass()
-
-export default CacheHandler
+export default new CacheHandler()

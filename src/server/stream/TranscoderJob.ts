@@ -63,7 +63,6 @@ export default class TranscoderJob {
         this.resolveStreamableReadyCallbacks()
       }
       this.resolveTranscodeFinishedCallback()
-      // Player.broadcastStreamInfo()
     })
 
     this.command.onError(async (error) => {
@@ -87,7 +86,6 @@ export default class TranscoderJob {
 
       this.isStreamableReady = true
       this.resolveStreamableReadyCallbacks()
-      // Player.broadcastStreamInfo()
     })
 
     this.initialize()
@@ -152,7 +150,6 @@ export default class TranscoderJob {
   activate() {
     EventLogger.log(this, `activate()`)
 
-    // console.log(`${this.video.name} activate()`.bgBlue, this)
     if (this.error) return
 
     if (this.state === JobState.Idle) {
@@ -166,7 +163,6 @@ export default class TranscoderJob {
     }
 
     if (this.state === JobState.CleaningUp) {
-      // this.cleanUpCallback = () => this.activate()
       this.onInitializedCallback = () => this.activate()
     }
   }
@@ -233,8 +229,6 @@ export default class TranscoderJob {
     // Remove job from queue
     const index = TranscoderQueue.jobs.findIndex((item) => item === this)
     if (index !== -1) TranscoderQueue.jobs.splice(index, 1)
-
-    // this.initialize()
   }
 
   // Restart the transcoding process from specified time
@@ -251,7 +245,6 @@ export default class TranscoderJob {
       await rmDirRetry(this.video.outputPath)
       this.streamID = generateSecret()
       this.command.run()
-      // Player.broadcastStreamInfo()
     } catch (error: any) {
       Logger.error('[TranscoderJob] Error seeking transcoded video:', error)
       this.throwError(error.message)

@@ -1,10 +1,9 @@
 import Logger from '@/server/Logger'
 import Settings from '@/server/Settings'
 import Player from '@/server/stream/Player'
-import SocketUtils from '@/server/socket/SocketUtils'
 import Chat from '@/server/stream/Chat'
 import { socketClients } from '@/server/socket/socketClients'
-import { Msg, VideoState } from '@/lib/enums'
+import { VideoState } from '@/lib/enums'
 
 export default new (class VoteSkipHandler {
   private _isAllowed: boolean = false
@@ -20,7 +19,6 @@ export default new (class VoteSkipHandler {
   }
 
   enable() {
-    Logger.debug('[VoteSkipHandler] enabled', this._isAllowed, this.allowedInTimeout)
     if (this._isAllowed || this.allowedInTimeout) return
     this.allowedInDate = new Date()
     this.allowedInTimeout = setTimeout(() => {
@@ -31,7 +29,6 @@ export default new (class VoteSkipHandler {
   }
 
   disable() {
-    Logger.debug('[VoteSkipHandler] disabled')
     if (this.allowedInTimeout) {
       clearTimeout(this.allowedInTimeout)
       this.allowedInTimeout = null

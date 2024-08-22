@@ -20,7 +20,6 @@ type Props = {
 // Video bottom controls
 export default function VideoControls({ scrubber, adminControls }: Props) {
   const {
-    isPaused,
     volume,
     showControls,
     setShowControls,
@@ -68,8 +67,6 @@ export default function VideoControls({ scrubber, adminControls }: Props) {
       timeout = setTimeout(() => setShowControls(false), OVERLAY_MOUSE_TIMEOUT)
     }
 
-    if (!isPaused) startTimer()
-
     containerElement.onmousemove = () => {
       hoveredContainer = true
       check()
@@ -96,6 +93,8 @@ export default function VideoControls({ scrubber, adminControls }: Props) {
       check()
     }
 
+    check()
+
     return () => {
       containerElement.onmousemove = null
       containerElement.onmouseleave = null
@@ -105,7 +104,7 @@ export default function VideoControls({ scrubber, adminControls }: Props) {
       controlsElement.onmouseleave = null
       clearTimeout(timeout)
     }
-  }, [isPaused, containerElement])
+  }, [containerElement])
 
   return (
     <div
