@@ -13,11 +13,10 @@ import {
   Gap
 } from '@/components/admin/SettingsComponents'
 
-export default function SectionAdvanced() {
+export default function SectionOther() {
   const { streamInfo } = useAdminContext()
 
   const pauseWhenInactive = useToggleOption('pauseWhenInactive')
-  const maxTranscodingJobs = useNumberOption('maxTranscodingJobs')
   const targetQueueSize = useNumberOption('targetQueueSize')
   const videoPaddingSeconds = useNumberOption('videoPaddingSeconds')
   const errorDisplaySeconds = useNumberOption('errorDisplaySeconds')
@@ -32,13 +31,6 @@ export default function SectionAdvanced() {
         <ToggleOption label="Pause When Inactive" {...pauseWhenInactive} />
         <Description>
           Pause the stream when no one is watching, will automatically resume when someone joins.
-        </Description>
-        <Gap />
-        <NumberOption label="Max Transcoding Jobs" type="integer" {...maxTranscodingJobs} />
-        <Description>
-          Maximum number of transcoding jobs that can run at once.
-          <br />
-          Recommended: 2 - 3, use 1 if server has performance issues.
         </Description>
         <Gap />
         <NumberOption label="Target Queue Size" type="integer" {...targetQueueSize} />

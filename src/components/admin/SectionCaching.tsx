@@ -64,7 +64,7 @@ function CacheStatus({ label, status }: CacheStatusProps) {
       <div className="grid grid-cols-[1fr,auto] items-center gap-2 rounded-lg bg-bg2 p-2">
         <div className="">
           <h3 className="pb-2 text-lg font-bold">{label} Cache</h3>
-          {status.videosCount ? (
+          {status.videosCount !== undefined ? (
             <>
               <p className="flex items-center gap-1 text-text3">
                 <Icon name="video-file" className="" />

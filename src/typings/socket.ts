@@ -1,7 +1,6 @@
-import type { AuthRole, JobState } from '@/lib/enums'
 import type { Socket } from 'socket.io'
 import type { CacheID } from '@/server/stream/CacheHandler'
-import { StreamState, ChatType } from '@/lib/enums'
+import type { AuthRole, StreamState, VideoState, JobState, ChatType } from '@/lib/enums'
 
 export type { CacheID }
 
@@ -114,14 +113,39 @@ export type EditPlaylistVideosPayload = {
   newVideoPaths: number[]
 }
 
+export type ClientPlaylist = {
+  id: string
+  name: string
+  videoPaths: number[]
+}
+
+export type ClientVideo = {
+  id: string
+  jobID: string
+  state: VideoState
+  name: string
+  path: string
+  thumbnailURL: string
+  isPlaying: boolean
+}
+
+export type ClientBumper = {
+  name: string
+  path: string
+}
+
 export type TranscodeClientVideo = {
   id: string
   state: JobState
   name: string
   inputPath: string
+  thumbnailURL: string
+  isUsingCache: boolean
+  targetSection: string
   totalSeconds: number
   availableSeconds: number
-  fpsRate: number
+  averageFpsRate: number
+  currentFpsRate?: number
   frames: number
 }
 

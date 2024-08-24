@@ -1,7 +1,9 @@
+import parseTimestamp from '@/lib/parseTimestamp'
 import Logger from '@/server/Logger'
 import Settings from '@/server/Settings'
 import TranscoderJob from '@/server/stream/TranscoderJob'
 import SocketUtils from '@/server/socket/SocketUtils'
+import Thumbnails from '@/server/stream/Thumbnails'
 import { JobState, Msg } from '@/lib/enums'
 import type { TranscodeClientVideo } from '@/typings/socket'
 import type Video from '@/server/stream/Video'
@@ -41,16 +43,23 @@ export default new (class TranscoderQueue {
   get clientTranscodeList(): TranscodeClientVideo[] {
     const list: TranscodeClientVideo[] = []
     for (const job of this.jobs) {
-      list.push({
+      const item: TranscodeClientVideo = {
         id: job.id,
         state: job.state,
         name: job.video.name,
         inputPath: job.video.inputPath,
+        thumbnailURL: Thumbnails.getURL(job.video.inputPath),
+        isUsingCache: job.isUsingCache,
+        targetSection: `${parseTimestamp(job.transcodedStartSeconds)} - ${parseTimestamp(job.duration)}`,
         totalSeconds: job.duration,
         availableSeconds: job.availableSeconds,
-        fpsRate: job.lastProgressInfo?.fpsRate || 0,
+        averageFpsRate: job.lastProgressInfo?.averageFpsRate || 0,
         frames: job.lastProgressInfo?.frames || 0
-      })
+      }
+      if (job.state === JobState.Transcoding) {
+        item.currentFpsRate = job.lastProgressInfo?.currentFpsRate || 0
+      }
+      list.push(item)
     }
     return list
   }

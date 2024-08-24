@@ -13,7 +13,6 @@ import type TransCoderJob from '@/server/stream/TranscoderJob'
 export default class TranscoderCommand {
   readonly job: TransCoderJob
   private ffmpegCommand?: FfmpegCommand
-  private abortController: AbortController
   private onEndCallback?: () => void
   private onErrorCallback?: (err: Error) => void
   private onFirstChunkCallback?: () => void
@@ -21,12 +20,13 @@ export default class TranscoderCommand {
 
   constructor(job: TransCoderJob) {
     this.job = job
-    this.abortController = new AbortController()
   }
 
   // Construct and run ffmpeg command, with seek time
   async run() {
     EventLogger.log(this, `Initializing command`)
+
+    const fpsRates: number[] = []
 
     fs.mkdirSync(this.job.video.outputPath, { recursive: true })
     EventLogger.log(this, `Initializing command 2`)
@@ -69,7 +69,10 @@ export default class TranscoderCommand {
 
     // Output progress info every second
     this.ffmpegCommand.on('progress', (progress) => {
-      progress.timemark = progress.timemark?.split('.')[0] || '00:00:00'
+      if (progress.currentFps) {
+        fpsRates.push(progress.currentFps)
+        if (fpsRates.length > 100) fpsRates.shift()
+      }
       this.onProgressCallback?.({
         percent:
           ((availableSeconds + this.job.transcodedStartSeconds) / this.job.video.durationSeconds) *
@@ -77,8 +80,8 @@ export default class TranscoderCommand {
         processedSeconds: timestampToSeconds(progress.timemark) || 0,
         processedTimestamp: progress.timemark,
         availableSeconds: availableSeconds,
-        availableTimestamp: parseTimestamp(availableSeconds),
-        fpsRate: progress.currentFps || 0,
+        averageFpsRate: Math.round(fpsRates.reduce((a, b) => a + b, 0) / fpsRates.length),
+        currentFpsRate: progress.currentFps || 0,
         frames: progress.frames || 0
       })
     })

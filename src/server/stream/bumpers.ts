@@ -6,7 +6,7 @@ import Video from '@/server/stream/Video'
 import PlayHistory from '@/server/stream/PlayHistory'
 import SocketUtils from '@/server/socket/SocketUtils'
 import { Msg } from '@/lib/enums'
-import type { ClientBumper } from '@/typings/types'
+import type { ClientBumper } from '@/typings/socket'
 
 const bumperPaths: string[] = []
 let nextBumper: Video | null = null

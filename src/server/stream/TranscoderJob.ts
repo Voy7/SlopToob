@@ -23,6 +23,7 @@ export default class TranscoderJob {
   videos: Video[] = []
   readonly m3u8Path: string
   isStreamableReady: boolean = false
+  isUsingCache: boolean = false
   duration: number = 0
   error?: string
   lastProgressInfo?: ProgressInfo
@@ -99,6 +100,7 @@ export default class TranscoderJob {
     this.state = JobState.Initializing
 
     this.isStreamableReady = false
+    this.isUsingCache = false
 
     if (!fs.existsSync(this.video.inputPath)) {
       this.throwError(`Video file does not exist. (${this.video.inputPath})`)
@@ -130,6 +132,7 @@ export default class TranscoderJob {
       if (isFullCache) {
         this.state = JobState.Finished
         this.isStreamableReady = true
+        this.isUsingCache = true
         this.resolveStreamableReadyCallbacks()
         this.resolveTranscodeFinishedCallback()
         return

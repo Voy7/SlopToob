@@ -10,7 +10,7 @@ import Icon from '@/components/ui/Icon'
 import Button from '@/components/ui/Button'
 import ActionModal from '@/components/ui/ActionModal'
 import styles from './BumpersList.module.scss'
-import type { ClientBumper } from '@/typings/types'
+import type { ClientBumper } from '@/typings/socket'
 
 export default function BumpersList() {
   const { socket } = useSocketContext()
@@ -84,8 +84,7 @@ export default function BumpersList() {
                 onClick={() => {
                   setShowDeleteModal(true)
                   setDeleteBumperSelected(bumper)
-                }}
-              >
+                }}>
                 <Icon name="delete" />
               </button>
             </div>
@@ -103,8 +102,7 @@ export default function BumpersList() {
           </Button>
         }
         error={addBumperError}
-        formOnSubmit={addBumperSubmit}
-      >
+        formOnSubmit={addBumperSubmit}>
         <p>Upload a new bumper video.</p>
         <label>
           Bumper Title
@@ -126,13 +124,11 @@ export default function BumpersList() {
               style="danger"
               icon="delete"
               loading={deleteBumperLoading}
-              onClick={deleteBumper}
-            >
+              onClick={deleteBumper}>
               Delete
             </Button>
           }
-          error={deleteBumperError}
-        >
+          error={deleteBumperError}>
           <p>Are you sure you want to delete "{deleteBumperSelected.name}"?</p>
         </ActionModal>
       )}

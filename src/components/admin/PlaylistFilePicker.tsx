@@ -7,8 +7,8 @@ import { Msg } from '@/lib/enums'
 import Icon from '@/components/ui/Icon'
 import HoverTooltip from '@/components/ui/HoverTooltip'
 import styles from './PlaylistFilePicker.module.scss'
-import type { ClientPlaylist, FileTreeNode } from '@/typings/types'
-import type { EditPlaylistVideosPayload } from '@/typings/socket'
+import type { FileTreeNode } from '@/typings/types'
+import type { ClientPlaylist, EditPlaylistVideosPayload } from '@/typings/socket'
 
 const SEARCH_TIMEOUT_MS = 150
 const SEARCH_ITEMS_PER_MS = 1000

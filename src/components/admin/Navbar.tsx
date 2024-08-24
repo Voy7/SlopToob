@@ -10,7 +10,7 @@ const categories = [
     sections: sections.filter((sec) => sec.category === 1)
   },
   {
-    label: 'Misc Elements',
+    label: 'Miscellaneous',
     sections: sections.filter((sec) => sec.category === 2)
   },
   {
@@ -28,7 +28,6 @@ export default function Navbar() {
       <div className="flex flex-col">
         {categories.map((category) => (
           <div key={category.label} className="flex flex-col">
-            <hr className="m-2 border-t border-border1" />
             <h3 className="mb-2 cursor-default px-2 font-bold text-white">{category.label}</h3>
             {category.sections.map((sec) => {
               const isActive = sec.name === section.name
@@ -36,17 +35,32 @@ export default function Navbar() {
                 <button
                   key={sec.name}
                   className={twMerge(
-                    'flex cursor-pointer items-center gap-2 whitespace-nowrap border-0 border-r-[0.25rem] border-transparent bg-transparent p-2 pl-4 pr-3 text-lg text-text3',
+                    'flex h-10 cursor-pointer items-center gap-2 whitespace-nowrap bg-transparent pl-4 text-lg text-text2',
+                    isActive && sec.accentColor,
                     isActive
-                      ? 'border-blue-500 bg-bg2 font-bold text-white duration-500'
+                      ? 'bg-bg2 font-bold text-white duration-500'
                       : 'transition-[background-color] duration-500 hover:text-white hover:underline active:bg-bg3 active:duration-0'
                   )}
                   onClick={() => setSection(sec.name)}>
-                  <Icon name={sec.icon} className="text-xl" />
-                  <span>{sec.name}</span>
+                  <Icon
+                    name={sec.icon}
+                    className={twMerge(
+                      'rounded-md bg-blue-500 p-1 text-2xl transition-colors',
+                      sec.accentColor,
+                      isActive ? 'bg-opacity-100 text-white' : 'bg-opacity-50'
+                    )}
+                  />
+                  <span className="w-full text-left">{sec.name}</span>
+                  <div
+                    className={twMerge(
+                      `${sec.accentColor} w-1 duration-300`,
+                      isActive ? 'h-10 opacity-100' : 'h-0 opacity-50 duration-0'
+                    )}
+                  />
                 </button>
               )
             })}
+            <hr className="m-2 border-t border-border1" />
           </div>
         ))}
       </div>

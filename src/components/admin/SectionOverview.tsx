@@ -10,7 +10,7 @@ import {
 import StreamControls from '@/components/admin/StreamControls'
 import QueueList from '@/components/admin/QueueList'
 
-export default function SectionStream() {
+export default function SectionOverview() {
   const activePlaylist = useListOption('activePlaylistID')
   const activeTheme = useListOption('streamTheme')
 

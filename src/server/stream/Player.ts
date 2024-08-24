@@ -11,13 +11,15 @@ import Chat from '@/server/stream/Chat'
 import { getNextBumper } from '@/server/stream/bumpers'
 import { themes } from '@/server/stream/themes'
 import { StreamState, Msg, VideoState } from '@/lib/enums'
-import type { RichPlaylist, ClientPlaylist, ClientVideo, ListOption } from '@/typings/types'
+import type { RichPlaylist, ListOption } from '@/typings/types'
 import type {
   SocketClient,
   BaseStreamInfo,
   ViewerStreamInfo,
   AdminStreamInfo,
-  StreamOptions
+  StreamOptions,
+  ClientPlaylist,
+  ClientVideo
 } from '@/typings/socket'
 import packageJSON from '@package' assert { type: 'json' }
 
@@ -303,7 +305,10 @@ export default new (class Player {
   }
 
   get clientVideoQueue(): ClientVideo[] {
-    return this.queue.map((video) => video.clientVideo)
+    const list: ClientVideo[] = []
+    if (this.playing) list.push(this.playing.clientVideo)
+    for (const video of this.queue) list.push(video.clientVideo)
+    return list
   }
 
   get listOptionPlaylists(): ListOption {

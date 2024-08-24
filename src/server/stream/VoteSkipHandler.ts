@@ -95,7 +95,7 @@ export default new (class VoteSkipHandler {
     if (!Settings.sendVoteSkipPassed) return
     Chat.send({
       type: Chat.Type.VoteSkipPassed,
-      message: `Vote skip passed! Skipping video... (${this.currentCount}/${socketClients.length})`
+      message: `Vote skip passed! Skipping video...`
     })
 
     this.voterIDs = []

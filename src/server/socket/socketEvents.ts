@@ -96,10 +96,13 @@ export const socketEvents: Record<string, EventOptions> = {
       if (Settings.pauseWhenInactive && !Settings.streamIsPaused) Player.unpause()
 
       if (!Settings.sendJoinedStream) return
-      Chat.send({
-        type: Chat.Type.Joined,
-        message: `${client.username} joined the stream.`
-      })
+      Chat.send(
+        {
+          type: Chat.Type.Joined,
+          message: `${client.username} joined the stream.`
+        },
+        client
+      )
     }
   },
 

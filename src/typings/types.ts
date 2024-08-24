@@ -11,8 +11,8 @@ export type ProgressInfo = {
   processedSeconds: number
   processedTimestamp: string
   availableSeconds: number
-  availableTimestamp: string
-  fpsRate: number
+  averageFpsRate: number
+  currentFpsRate: number
   frames: number
 }
 
@@ -38,6 +38,7 @@ export type ClientVideo = {
   state: VideoState
   name: string
   path: string
+  thumbnailURL: string
 }
 
 export type ClientBumper = {

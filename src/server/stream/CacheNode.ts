@@ -58,7 +58,6 @@ export default class CacheNode {
     })
 
     watcher.onDeleteFile((filePath) => {
-      console.log('delete file', filePath)
       if (!this.fileSizes.has(filePath)) return
       const size = this.fileSizes.get(filePath) as number
       this.totalBytes -= size
@@ -156,10 +155,12 @@ export default class CacheNode {
       const dirs: string[] = []
       this.fileSizes.forEach((size, file) => {
         const dir = file.split('/').slice(0, -1).join('/')
-        if (!omitDirs.includes(dir)) return
+        if (omitDirs.includes(dir)) {
+          totalBytes -= size
+          totalItems--
+          return
+        }
         if (!dirs.includes(dir)) dirs.push(dir)
-        totalBytes -= size
-        totalItems--
       })
 
       return {

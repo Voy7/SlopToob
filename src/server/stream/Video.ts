@@ -1,8 +1,8 @@
 import path from 'path'
 import generateSecret from '@/lib/generateSecret'
+import videoInputToOutputPath from '@/lib/videoInputToOutputPath'
 import parseVideoName from '@/lib/parseVideoName'
 import parseTimestamp from '@/lib/parseTimestamp'
-import Env from '@/server/EnvVariables'
 import Logger from '@/server/Logger'
 import Player from '@/server/stream/Player'
 import TranscoderJob from '@/server/stream/TranscoderJob'
@@ -11,12 +11,13 @@ import Settings from '@/server/Settings'
 import SocketUtils from '@/server/socket/SocketUtils'
 import PlayHistory from '@/server/stream/PlayHistory'
 import VoteSkipHandler from '@/server/stream/VoteSkipHandler'
+import Thumbnails from '@/server/stream/Thumbnails'
 import EventLogger from '@/server/stream/VideoEventLogger'
 import { socketClients } from '@/server/socket/socketClients'
 import { Msg, VideoState as State } from '@/lib/enums'
-import type { ClientVideo } from '@/typings/types'
-import videoInputToOutputPath from '@/lib/videoInputToOutputPath'
+import type { ClientVideo } from '@/typings/socket'
 
+// Main video class (for both normal and bumpers)
 export default class Video {
   readonly id: string = generateSecret()
   readonly name: string
@@ -42,7 +43,7 @@ export default class Video {
   private set state(newState: State) {
     this._state = newState
     if (Player.playing === this) Player.broadcastStreamInfo()
-    else SocketUtils.broadcastAdmin(Msg.AdminQueueList, Player.clientVideoQueue)
+    SocketUtils.broadcastAdmin(Msg.AdminQueueList, Player.clientVideoQueue)
   }
 
   constructor(filePath: string, isBumper: boolean = false, fromPlaylistID?: string) {
@@ -280,7 +281,15 @@ export default class Video {
   }
 
   get clientVideo(): ClientVideo {
-    return { id: this.id, state: this.state, name: this.name, path: this.inputPath }
+    return {
+      id: this.id,
+      jobID: this.job.id,
+      state: this.state,
+      name: this.name,
+      path: this.inputPath,
+      thumbnailURL: Thumbnails.getURL(this.inputPath),
+      isPlaying: Player.playing === this
+    }
   }
 
   get fromPlaylistName(): string | null {

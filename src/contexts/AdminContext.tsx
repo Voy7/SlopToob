@@ -4,27 +4,32 @@ import { useState, useContext, createContext, useEffect } from 'react'
 import { useSocketContext } from '@/contexts/SocketContext'
 import useSocketOn from '@/hooks/useSocketOn'
 import { Msg } from '@/lib/enums'
-import type { ClientBumper, ClientPlaylist, ClientVideo, FileTreeNode } from '@/typings/types'
+import type { FileTreeNode } from '@/typings/types'
 import type {
   AdminStreamInfo,
+  ClientBumper,
+  ClientPlaylist,
+  ClientVideo,
   ClientCacheStatus,
   ClientHistoryStatus,
   TranscodeClientVideo
 } from '@/typings/socket'
 import type { IconNames } from '@/components/ui/Icon'
-import SectionStream from '@/components/admin/SectionStream'
+import SectionOverview from '@/components/admin/SectionOverview'
 import SectionPlaylists from '@/components/admin/SectionPlaylists'
 import SectionBumpers from '@/components/admin/SectionBumpers'
-import SectionCaching from '@/components/admin/SectionCaching'
+import SectionTranscoding from '@/components/admin/SectionTranscoding'
 import SectionChat from '@/components/admin/SectionChat'
 import SectionHistory from '@/components/admin/SectionHistory'
 import SectionVoteSkip from '@/components/admin/SectionVoteSkip'
 import SectionDebug from '@/components/admin/SectionDebug'
-import SectionAdvanced from '@/components/admin/SectionAdvanced'
+import SectionCaching from '@/components/admin/SectionCaching'
+import SectionOther from '@/components/admin/SectionOther'
 
 type Section = {
   name: string
   icon: IconNames
+  accentColor: string
   category: number
   component: React.ReactNode
 }
@@ -34,51 +39,72 @@ export const sections = [
   {
     name: 'Overview',
     icon: 'stream-settings',
+    accentColor: 'bg-gray-500',
     category: 1,
-    component: <SectionStream />
+    component: <SectionOverview />
   },
   {
     name: 'Playlists',
     icon: 'playlist',
+    accentColor: 'bg-blue-600',
     category: 1,
     component: <SectionPlaylists />
   },
   {
     name: 'Bumpers',
     icon: 'bumper',
+    accentColor: 'bg-blue-700',
     category: 1,
     component: <SectionBumpers />
   },
   {
-    name: 'Caching',
-    icon: 'cache',
+    name: 'Transcoding',
+    icon: 'files',
+    accentColor: 'bg-yellow-500',
     category: 1,
-    component: <SectionCaching />
+    component: <SectionTranscoding />
   },
-  { name: 'Chat', icon: 'chat', category: 2, component: <SectionChat /> },
+  {
+    name: 'Chat',
+    icon: 'chat',
+    accentColor: 'bg-green-400',
+    category: 2,
+    component: <SectionChat />
+  },
   {
     name: 'History',
     icon: 'history',
+    accentColor: 'bg-orange-500',
     category: 2,
     component: <SectionHistory />
   },
   {
     name: 'Vote Skip',
     icon: 'skip',
+    accentColor: 'bg-purple-500',
     category: 2,
     component: <SectionVoteSkip />
   },
   {
+    name: 'Caching',
+    icon: 'cache',
+    accentColor: 'bg-purple-700',
+    category: 3,
+    component: <SectionCaching />
+  },
+  {
     name: 'Debug',
+    accentColor: 'bg-red-500',
     icon: 'admin-panel',
     category: 3,
     component: <SectionDebug />
   },
   {
-    name: 'Advanced',
+    name: 'Other',
     icon: 'settings',
+    accentColor: 'bg-red-600',
     category: 3,
-    component: <SectionAdvanced />
+    component: <SectionOther />
   }
 ] as const satisfies Section[]
 

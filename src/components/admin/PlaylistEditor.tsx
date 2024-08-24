@@ -15,8 +15,7 @@ import Button from '@/components/ui/Button'
 import PlaylistFilePicker from '@/components/admin/PlaylistFilePicker'
 import ActionModal from '@/components/ui/ActionModal'
 import styles from './PlaylistEditor.module.scss'
-import type { ClientPlaylist } from '@/typings/types'
-import type { EditPlaylistNamePayload } from '@/typings/socket'
+import type { ClientPlaylist, EditPlaylistNamePayload } from '@/typings/socket'
 
 export default function PlaylistEditor({ playlist }: { playlist: ClientPlaylist }) {
   const { socket } = useSocketContext()
@@ -92,8 +91,7 @@ export default function PlaylistEditor({ playlist }: { playlist: ClientPlaylist 
             onClick={() => {
               setShowDeleteModal(true)
               setDeletePlaylistError(null)
-            }}
-          >
+            }}>
             Delete Playlist
           </Button>
         </ButtonOption>
@@ -108,13 +106,11 @@ export default function PlaylistEditor({ playlist }: { playlist: ClientPlaylist 
             style="danger"
             icon="delete"
             loading={deletePlaylistLoading}
-            onClick={deletePlaylist}
-          >
+            onClick={deletePlaylist}>
             Delete
           </Button>
         }
-        error={deletePlaylistError}
-      >
+        error={deletePlaylistError}>
         <p>Are you sure you want to delete the playlist "{playlist.name}"?</p>
       </ActionModal>
     </div>

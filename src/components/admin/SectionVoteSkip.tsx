@@ -20,7 +20,6 @@ export default function SectionVoteSkip() {
 
   return (
     <>
-      <h2>Vote Skip</h2>
       <SettingGroup>
         <Header icon="skip">Vote Skipping</Header>
         <ToggleOption label="Enable Vote Skipping" {...voteSkipEnabled} />
