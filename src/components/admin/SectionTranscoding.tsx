@@ -3,6 +3,7 @@
 import useToggleOption from '@/hooks/useToggleOption'
 import useNumberOption from '@/hooks/useNumberOption'
 import {
+  MainHeader,
   SettingGroup,
   Description,
   Header,
@@ -16,7 +17,7 @@ export default function SectionTranscoding() {
 
   return (
     <>
-      <h2>Transcoding</h2>
+      <MainHeader>Transcoding</MainHeader>
       <SettingGroup>
         <Header icon="settings">Transcoder Settings</Header>
         <NumberOption label="Max Transcoding Jobs" type="integer" {...maxTranscodingJobs} />

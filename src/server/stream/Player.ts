@@ -24,7 +24,7 @@ import type {
 import packageJSON from '@package' assert { type: 'json' }
 
 // Main video player handler, singleton
-export default new (class Player {
+class Player {
   playing: Video | null = null
   queue: Video[] = []
   playlists: RichPlaylist[] = []
@@ -81,6 +81,12 @@ export default new (class Player {
     }
 
     this.previousVideos.pop()
+    if (this.playing) {
+      this.addVideo(
+        new Video(this.playing.inputPath, this.playing.isBumper, this.playing.fromPlaylistID),
+        true
+      )
+    }
     this.addVideo(
       new Video(previousVideo.path, previousVideo.isBumper, previousVideo.fromPlaylistID),
       true
@@ -141,15 +147,15 @@ export default new (class Player {
   // Fill queue with random videos from active playlist
   populateRandomToQueue() {
     if (!this.activePlaylist) return
-    if (this.queue.length == Settings.targetQueueSize) return
+    if (this.queue.length >= Settings.targetQueueSize) return
 
-    if (this.queue.length > Settings.targetQueueSize) {
-      while (this.queue.length > Settings.targetQueueSize) {
-        this.queue.pop()?.end()
-      }
-      SocketUtils.broadcastAdmin(Msg.AdminQueueList, this.clientVideoQueue)
-      return
-    }
+    // if (this.queue.length > Settings.targetQueueSize) {
+    //   while (this.queue.length > Settings.targetQueueSize) {
+    //     this.queue.pop()?.end()
+    //   }
+    //   SocketUtils.broadcastAdmin(Msg.AdminQueueList, this.clientVideoQueue)
+    //   return
+    // }
 
     const randomVideo = PlayHistory.getRandom(this.activePlaylist.videos)
     if (!randomVideo) return
@@ -159,6 +165,15 @@ export default new (class Player {
     if (this.queue.length < Settings.targetQueueSize) {
       this.populateRandomToQueue()
     }
+  }
+
+  // Remove video from queue
+  removeVideoFromQueue(videoID: string) {
+    const videoIndex = this.queue.findIndex((video) => video.id === videoID)
+    if (videoIndex === -1) return
+    this.queue[videoIndex].end()
+    this.queue.splice(videoIndex, 1)
+    this.populateRandomToQueue()
   }
 
   addPreviousVideo(video: Video) {
@@ -324,4 +339,6 @@ export default new (class Player {
       selectedID: Settings.streamTheme
     }
   }
-})()
+}
+
+export default new Player()

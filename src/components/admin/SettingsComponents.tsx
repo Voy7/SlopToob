@@ -6,8 +6,12 @@ import type { ListOption } from '@/typings/types'
 
 // Admin panel settings components
 
+export function MainHeader({ children }: { children: React.ReactNode }) {
+  return <h2 className="text-xl font-bold uppercase">{children}</h2>
+}
+
 export function SettingGroup({ children }: { children: React.ReactNode }) {
-  return <div className={styles.settingGroup}>{children}</div>
+  return <div className="mb-1 rounded-lg border border-border1 p-2">{children}</div>
 }
 
 export function Header({ icon, children }: { icon: IconNames; children: React.ReactNode }) {
@@ -174,8 +178,7 @@ export function NumberOption({ label, type, value, setValue }: NumberOptionProps
             <div className={styles.valueLabel}>
               <p
                 key={`${isValid}`}
-                className={typeof isValid === 'string' ? styles.show : undefined}
-              >
+                className={typeof isValid === 'string' ? styles.show : undefined}>
                 <Icon name="warning" />
                 {isValid}
               </p>
@@ -224,8 +227,7 @@ export function ListOption({ value, setValue }: ListOptionProps) {
               ? `${styles.listOption} ${styles.active}`
               : styles.listOption
           }
-          onClick={() => setValue(option.id)}
-        >
+          onClick={() => setValue(option.id)}>
           {option.name}
           <div className={styles.right}>
             {option.id === value.selectedID ? (

@@ -124,9 +124,11 @@ export type ClientVideo = {
   jobID: string
   state: VideoState
   name: string
+  isBumper: boolean
   path: string
   thumbnailURL: string
   isPlaying: boolean
+  error?: string
 }
 
 export type ClientBumper = {
@@ -147,6 +149,7 @@ export type TranscodeClientVideo = {
   averageFpsRate: number
   currentFpsRate?: number
   frames: number
+  error?: string
 }
 
 export type ClientHistoryItem = {

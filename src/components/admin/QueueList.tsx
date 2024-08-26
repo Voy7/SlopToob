@@ -14,7 +14,7 @@ import type { ClientVideo } from '@/typings/socket'
 
 const states: Record<VideoState, { name: string; color: string }> = {
   [VideoState.NotReady]: { name: 'Not Ready', color: 'gray' },
-  [VideoState.Ready]: { name: 'Ready', color: 'lime' },
+  [VideoState.Ready]: { name: 'Ready', color: 'magenta' },
   [VideoState.Preparing]: { name: 'Preparing', color: 'aqua' },
   [VideoState.Playing]: { name: 'Playing', color: 'lime' },
   [VideoState.Paused]: { name: 'Paused', color: 'white' },
@@ -45,38 +45,60 @@ function Video({ video, index }: { video: ClientVideo; index: number }) {
   const [showActions, setShowActions] = useState<boolean>(false)
 
   return (
-    <div className="border-b-[1px] border-border1 p-2">
-      <div className="animate-itemFadeIn flex w-full cursor-default items-center gap-2">
+    <div className="animate-fade-in border-b-[1px] border-border1 p-2">
+      <div className="flex w-full cursor-default items-center gap-2">
         {video.isPlaying ? (
-          <span className="w-[1em] text-center text-text3" title="Currently Playing">
+          <span
+            className="w-[1em] shrink-0 grow-0 text-center text-text3"
+            title="Currently Playing">
             <Icon name="play" />
           </span>
         ) : (
-          <span className="w-[1em] text-center text-text3">{index}</span>
+          <span className="w-[1em] shrink-0 text-center text-text3">{index}</span>
         )}
-        <Thumbnail src={video.thumbnailURL} height={40} />
+        <div className="mr-0.5 shrink-0">
+          <Thumbnail src={video.thumbnailURL} height={40} />
+        </div>
         <div className="flex w-full flex-col items-start justify-center overflow-hidden">
           <p className="w-full overflow-hidden text-ellipsis whitespace-nowrap" title={video.name}>
+            {video.isBumper && (
+              <span className="mr-1 rounded-md bg-bg2 px-1 text-xs text-blue-500">Bumper</span>
+            )}
             {video.name}
           </p>
-          <div className="flex w-full items-center gap-1.5">
+          <div key={video.state} className="animate-fade-in flex w-full items-center gap-1.5">
             <div
-              className="h-1.5 w-1.5 rounded-full bg-white"
+              className="h-1.5 w-1.5 shrink-0 rounded-full bg-white"
               style={{ background: states[video.state].color }}
             />
-            <p className="text-text2">{states[video.state].name}</p>
+            <p className="whitespace-nowrap text-text2">{states[video.state].name}</p>
+            {video.error && (
+              <p
+                className="overflow-hidden text-ellipsis whitespace-nowrap text-text3"
+                title={video.error}>
+                &bull; {video.error}
+              </p>
+            )}
           </div>
         </div>
         <button
-          className="whitespace-nowrap rounded-lg px-2 py-1 text-blue-500 duration-300 hover:underline active:bg-blue-500 active:bg-opacity-50 active:duration-0"
+          className="shrink-0 whitespace-nowrap rounded-lg px-2 py-1 text-blue-500 duration-300 hover:underline active:bg-blue-500 active:bg-opacity-50 active:duration-0"
           onClick={() => setShowDetails(!showDetails)}>
           {showDetails ? 'Hide Details' : 'Show Details'}
         </button>
         <button
-          className="rounded-full p-1.5 text-lg hover:bg-bg2 hover:bg-opacity-50"
+          className="shrink-0 rounded-full p-1.5 text-lg hover:bg-bg2 hover:bg-opacity-50"
           onClick={() => setShowActions(!showActions)}>
           <Icon name="more" />
           <ClickContextMenu placement="right">
+            {!video.isPlaying && (
+              <ContextMenuButton
+                icon="delete"
+                onClick={() => socket.emit(Msg.AdminRemoveQueueVideo, video.id)}
+                className="text-red-500 hover:bg-red-500">
+                Remove from Queue
+              </ContextMenuButton>
+            )}
             <ContextMenuButton
               icon="admin-panel"
               onClick={() => socket.emit(Msg.AdminDebugVideo, video.id)}>

@@ -6,7 +6,7 @@ import Icon from '@/components/ui/Icon'
 import { twMerge } from 'tailwind-merge'
 
 type Props = {
-  title: string
+  title: JSX.Element | string
   isOpen: boolean
   setClose: Function
   canEscapeKeyClose?: boolean

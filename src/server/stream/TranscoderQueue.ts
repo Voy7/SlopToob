@@ -54,7 +54,8 @@ export default new (class TranscoderQueue {
         totalSeconds: job.duration,
         availableSeconds: job.availableSeconds,
         averageFpsRate: job.lastProgressInfo?.averageFpsRate || 0,
-        frames: job.lastProgressInfo?.frames || 0
+        frames: job.lastProgressInfo?.frames || 0,
+        error: job.error
       }
       if (job.state === JobState.Transcoding) {
         item.currentFpsRate = job.lastProgressInfo?.currentFpsRate || 0

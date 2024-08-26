@@ -35,7 +35,7 @@ export default function StreamControls() {
       <button className={actionButtonStyles} onClick={() => socket.emit(Msg.AdminSkipVideo)}>
         <Icon name="skip" />
       </button>
-      <div className="ml-2 flex flex-col gap-1 overflow-hidden">
+      <div className="ml-2 flex flex-col overflow-hidden">
         <h6
           className={twMerge(
             'cursor-default overflow-hidden text-ellipsis whitespace-nowrap text-base font-normal text-text2',

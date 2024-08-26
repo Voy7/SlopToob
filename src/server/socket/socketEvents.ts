@@ -395,10 +395,7 @@ export const socketEvents: Record<string, EventOptions> = {
   [Msg.AdminRemoveQueueVideo]: {
     adminOnly: true,
     run: (socket, videoID: string) => {
-      const video = Player.queue.find((v) => v.id === videoID)
-      if (!video) return
-      video.end()
-      Player.queue.splice(Player.queue.indexOf(video), 1)
+      Player.removeVideoFromQueue(videoID)
     }
   },
 

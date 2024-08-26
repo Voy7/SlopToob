@@ -40,7 +40,7 @@ export default new (class Playlists {
     Player.playlists = Player.playlists.sort((a, b) => a.name.localeCompare(b.name))
 
     SocketUtils.broadcastAdmin(Msg.AdminPlaylists, Player.clientPlaylists)
-    Logger.debug('Playlist added:', name)
+    Logger.debug('[Playlists] Playlist added:', name)
     return playlist.id
   }
 
@@ -54,7 +54,7 @@ export default new (class Playlists {
       Player.playlists = Player.playlists.filter((playlist) => playlist.id !== playlistID)
 
       SocketUtils.broadcastAdmin(Msg.AdminPlaylists, Player.clientPlaylists)
-      Logger.debug('Playlist deleted:', playlistID)
+      Logger.debug('[Playlists] Playlist deleted:', playlistID)
     } catch (error: any) {
       return error.message
     }
@@ -71,7 +71,7 @@ export default new (class Playlists {
     const playlist = Player.playlists.find((playlist) => playlist.id === playlistID)
     if (playlist) playlist.name = newName
 
-    Logger.debug(`Playlist (${playlistID}) name updated:`, newName)
+    Logger.debug(`[Playlists] Playlist (${playlistID}) name updated:`, newName)
     SocketUtils.broadcastAdmin(Msg.AdminPlaylists, Player.clientPlaylists)
     if (playlist === Player.activePlaylist) {
       Player.broadcastStreamInfo() // Update 'fromPlaylistName' streamInfo
@@ -108,7 +108,7 @@ export default new (class Playlists {
 
     const playlist = Player.playlists.find((playlist) => playlist.id === playlistID)
     if (!playlist)
-      return Logger.warn(`Tried to set videos for non-existent playlist: ${playlistID}`)
+      return Logger.warn(`[Playlists] Tried to set videos for non-existent playlist: ${playlistID}`)
 
     playlist.videos = newVideoPaths
     playlist.videoIndexes = newVideoPathsIndex
@@ -118,6 +118,6 @@ export default new (class Playlists {
       data: { videoPaths: newVideoPaths.join('|') }
     })
 
-    Logger.debug(`Playlist (${playlistID}) videos updated: ${newVideoPaths.length}`)
+    Logger.debug(`[Playlists] Playlist (${playlistID}) videos updated: ${newVideoPaths.length}`)
   }
 })()

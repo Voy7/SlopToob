@@ -3,6 +3,7 @@
 import useToggleOption from '@/hooks/useToggleOption'
 import useNumberOption from '@/hooks/useNumberOption'
 import {
+  MainHeader,
   SettingGroup,
   Description,
   Header,
@@ -17,7 +18,7 @@ export default function SectionBumpers() {
 
   return (
     <>
-      <h2>Bumpers</h2>
+      <MainHeader>Bumpers</MainHeader>
       <SettingGroup>
         <Header icon="bumper">Bumper Settings</Header>
         <ToggleOption label="Bumpers Enabled" {...bumpersEnabled} />

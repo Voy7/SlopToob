@@ -10,7 +10,18 @@ export default function AdminModal() {
 
   return (
     <Modal
-      title="Admin Panel"
+      title={
+        <div className="flex items-center gap-2">
+          Admin Panel <span className="text-text3">&bull;</span>
+          <a
+            href="/admin"
+            target="_blank"
+            className="text-base text-blue-500 hover:underline"
+            onClick={() => setShowAdminModal(false)}>
+            Open in New Tab
+          </a>
+        </div>
+      }
       isOpen={showAdminModal}
       setClose={() => setShowAdminModal(false)}
       canEscapeKeyClose={false}

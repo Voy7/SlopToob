@@ -6,7 +6,7 @@ import { twMerge } from 'tailwind-merge'
 
 const categories = [
   {
-    label: 'Stream Settings',
+    label: 'Stream Player',
     sections: sections.filter((sec) => sec.category === 1)
   },
   {

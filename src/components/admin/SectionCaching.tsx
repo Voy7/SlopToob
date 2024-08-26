@@ -5,6 +5,7 @@ import { useSocketContext } from '@/contexts/SocketContext'
 import { useAdminContext } from '@/contexts/AdminContext'
 import useToggleOption from '@/hooks/useToggleOption'
 import {
+  MainHeader,
   SettingGroup,
   Header,
   Description,
@@ -26,7 +27,7 @@ export default function SectionStream() {
 
   return (
     <>
-      <h2>Caching</h2>
+      <MainHeader>Caching</MainHeader>
       <SettingGroup>
         <Header icon="cache">Cache Settings</Header>
         <ToggleOption label="Cache Videos" {...cacheVideos} />

@@ -106,3 +106,17 @@
     }
   }
 }
+
+.animate-dropdown {
+  animation: dropdown 150ms ease-in-out;
+  @keyframes dropdown {
+    0% {
+      transform: translateY(-0.5rem);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+}

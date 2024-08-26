@@ -9,6 +9,7 @@ import useNumberOption from '@/hooks/useNumberOption'
 import Button from '@/components/ui/Button'
 import ActionModal from '@/components/ui/ActionModal'
 import {
+  MainHeader,
   SettingGroup,
   Description,
   Header,
@@ -36,7 +37,7 @@ export default function SectionHistory() {
 
   return (
     <>
-      <h2>History</h2>
+      <MainHeader>Play History</MainHeader>
       <SettingGroup>
         <Header icon="video-file">Shuffle History Settings</Header>
         <NumberOption label="Shuffle History Max Items" type="integer" {...historyMaxItems} />
@@ -45,7 +46,7 @@ export default function SectionHistory() {
         </Description>
         <Gap />
         <ButtonOption
-          label={`Internal history usage: ${historyStatus.currentCount} / ${historyStatus.totalCount}`}
+          label={`Internal history usage: ${historyStatus.currentCount.toLocaleString()} / ${historyStatus.totalCount.toLocaleString()}`}
           swapped>
           <Button
             style="danger"

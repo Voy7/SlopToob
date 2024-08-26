@@ -286,9 +286,11 @@ export default class Video {
       jobID: this.job.id,
       state: this.state,
       name: this.name,
+      isBumper: this.isBumper,
       path: this.inputPath,
       thumbnailURL: Thumbnails.getURL(this.inputPath),
-      isPlaying: Player.playing === this
+      isPlaying: Player.playing === this,
+      error: this.error
     }
   }
 

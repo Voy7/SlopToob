@@ -1,11 +1,12 @@
 'use client'
 
 import { useStreamContext } from '@/contexts/StreamContext'
-import Button from '@/components/ui/Button'
-import HeaderAdminDropdown from '@/components/stream/HeaderAdminDropdown'
 import { useAdminContext } from '@/contexts/AdminContext'
 import { useSocketContext } from '@/contexts/SocketContext'
+import Button from '@/components/ui/Button'
+import HeaderAdminDropdown from '@/components/stream/HeaderAdminDropdown'
 import Icon from '@/components/ui/Icon'
+import HoverTooltip from '@/components/ui/HoverTooltip'
 import { themes } from '@/server/stream/themes'
 import { twMerge } from 'tailwind-merge'
 
@@ -18,6 +19,15 @@ export default function HeaderAdminOptions() {
     themes.find((theme) => theme.id === streamInfo.activeThemeID)?.name || 'None'
   const activePlaylistName =
     playlists.find((playlist) => playlist.id === streamInfo.activePlaylistID)?.name || 'None'
+
+  // If pressing CTRL, open /admin in a new tab
+  function openAdminPanel(event: React.MouseEvent) {
+    if (event.ctrlKey) {
+      window.open('/admin')
+      return
+    }
+    setShowAdminModal(true)
+  }
 
   return (
     <>
@@ -36,7 +46,7 @@ export default function HeaderAdminOptions() {
                 <div className="flex items-center gap-2 overflow-hidden">
                   <Icon
                     name={isActive ? 'radio-checked' : 'radio-unchecked'}
-                    className="shrink-0 text-sm"
+                    className={twMerge('shrink-0 text-sm text-text3', isActive && 'text-white')}
                   />
                   <p className="overflow-hidden text-ellipsis whitespace-nowrap">{theme.name}</p>
                 </div>
@@ -58,7 +68,7 @@ export default function HeaderAdminOptions() {
                 <div className="flex items-center gap-2 overflow-hidden">
                   <Icon
                     name={isActive ? 'radio-checked' : 'radio-unchecked'}
-                    className="shrink-0 text-sm"
+                    className={twMerge('shrink-0 text-sm text-text3', isActive && 'text-white')}
                   />
                   <p className="overflow-hidden text-ellipsis whitespace-nowrap">{playlist.name}</p>
                 </div>
@@ -70,9 +80,14 @@ export default function HeaderAdminOptions() {
           })}
         </HeaderAdminDropdown>
       </div>
-      <Button style="main" icon="admin-panel" onClick={() => setShowAdminModal(true)}>
-        Admin Panel
-      </Button>
+      <div />
+      <div>
+        <HoverTooltip placement="bottom">CTRL + Click to open in new tab</HoverTooltip>
+        <Button style="main" icon="admin-panel" onClick={openAdminPanel}>
+          Admin Panel
+        </Button>
+      </div>
+      <div />
     </>
   )
 }

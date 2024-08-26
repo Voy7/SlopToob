@@ -15,7 +15,7 @@ type Props = {
 } & React.ComponentProps<'button'>
 
 // Fancy button component
-export default function Buttons({
+export default function Button({
   style,
   onClick,
   active,
@@ -29,17 +29,16 @@ export default function Buttons({
   const classNames = [
     styles.button,
     styles[style],
-    className && className,
     active === false && styles.disabled,
-    loading && styles.loading
+    loading && styles.loading,
+    className && className
   ].join(' ')
   return (
     <button
       type={isSubmit ? 'submit' : 'button'}
       className={classNames}
       onClick={onClick && onClick}
-      {...props}
-    >
+      {...props}>
       <>
         <div className={styles.text}>
           {icon && <Icon name={icon} />}

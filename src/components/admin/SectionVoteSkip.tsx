@@ -3,6 +3,7 @@
 import useToggleOption from '@/hooks/useToggleOption'
 import useNumberOption from '@/hooks/useNumberOption'
 import {
+  MainHeader,
   SettingGroup,
   Header,
   Description,
@@ -20,6 +21,7 @@ export default function SectionVoteSkip() {
 
   return (
     <>
+      <MainHeader>Vote Skipping</MainHeader>
       <SettingGroup>
         <Header icon="skip">Vote Skipping</Header>
         <ToggleOption label="Enable Vote Skipping" {...voteSkipEnabled} />

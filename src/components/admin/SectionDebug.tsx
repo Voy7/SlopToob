@@ -2,6 +2,7 @@
 
 import useToggleOption from '@/hooks/useToggleOption'
 import {
+  MainHeader,
   SettingGroup,
   Header,
   Description,
@@ -18,7 +19,7 @@ export default function SectionDebug() {
 
   return (
     <>
-      <h2>Dev Monitor Panel</h2>
+      <MainHeader>Developer Debug</MainHeader>
       <StreamControls />
       <SettingGroup>
         <Header icon="admin-panel">Video Event Logger</Header>
@@ -28,10 +29,8 @@ export default function SectionDebug() {
           Generate event timeline logs of video instances, used for developer debugging.
         </Description>
       </SettingGroup>
-      {/* <div className="grid grid-cols-2 gap-4"> */}
       <QueueList />
       <TranscodeQueue />
-      {/* </div> */}
       <ConsoleLogs />
     </>
   )

@@ -4,6 +4,7 @@ import { useAdminContext } from '@/contexts/AdminContext'
 import useToggleOption from '@/hooks/useToggleOption'
 import useNumberOption from '@/hooks/useNumberOption'
 import {
+  MainHeader,
   SettingGroup,
   Description,
   Header,
@@ -25,7 +26,7 @@ export default function SectionOther() {
 
   return (
     <>
-      <h2>Advanced</h2>
+      <MainHeader>Other Settings</MainHeader>
       <SettingGroup>
         <Header icon="settings">Advanced Settings</Header>
         <ToggleOption label="Pause When Inactive" {...pauseWhenInactive} />

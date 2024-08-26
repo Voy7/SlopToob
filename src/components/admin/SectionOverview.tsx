@@ -2,6 +2,7 @@
 
 import useListOption from '@/hooks/useListOption'
 import {
+  MainHeader,
   SettingGroup,
   Header,
   Description,
@@ -16,14 +17,14 @@ export default function SectionOverview() {
 
   return (
     <>
-      <h2>Stream Settings</h2>
+      <MainHeader>Stream Overview</MainHeader>
       <StreamControls />
+      <QueueList />
       <SettingGroup>
         <Header icon="playlist">Active Playlist</Header>
         <ListOption {...activePlaylist} />
         <Description>Playlist that will be used for the stream.</Description>
       </SettingGroup>
-      <QueueList />
       <SettingGroup>
         <Header icon="menu">Joke Themes</Header>
         <ListOption {...activeTheme} />

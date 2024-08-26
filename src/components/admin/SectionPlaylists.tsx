@@ -4,13 +4,14 @@ import { useState } from 'react'
 import { useSocketContext } from '@/contexts/SocketContext'
 import { useAdminContext } from '@/contexts/AdminContext'
 import { Msg } from '@/lib/enums'
+import useSocketOn from '@/hooks/useSocketOn'
+import { MainHeader } from '@/components/admin/SettingsComponents'
 import Icon from '@/components/ui/Icon'
 import Button from '@/components/ui/Button'
 import ActionModal from '@/components/ui/ActionModal'
 import SelectDropdown from '@/components/ui/SelectDropdown'
 import PlaylistEditor from '@/components/admin/PlaylistEditor'
 import styles from './SectionPlaylists.module.scss'
-import useSocketOn from '@/hooks/useSocketOn'
 
 export default function SectionPlaylists() {
   const { playlists, selectedPlaylist, setSelectedPlaylist } = useAdminContext()
@@ -52,14 +53,13 @@ export default function SectionPlaylists() {
             style="main"
             icon="playlist-add"
             loading={addLoading}
-            onClick={() => setShowAddModal(true)}
-          >
+            onClick={() => setShowAddModal(true)}>
             Add Playlist
           </Button>
         </div>
       ) : (
         <>
-          <h2>Playlists ({playlists.length})</h2>
+          <MainHeader>Playlists ({playlists.length})</MainHeader>
           <div className={styles.playlistNavbar}>
             <SelectDropdown text={activePlaylist?.name || 'None Selected'} icon="playlist">
               {playlists.map((playlist) => (
@@ -70,8 +70,7 @@ export default function SectionPlaylists() {
                       ? `${styles.playlistItem} ${styles.selected}`
                       : styles.playlistItem
                   }
-                  onClick={() => setSelectedPlaylist(playlist.id)}
-                >
+                  onClick={() => setSelectedPlaylist(playlist.id)}>
                   {playlist.name}
                   <span>{playlist.videoPaths.length.toLocaleString()} Videos</span>
                 </button>
@@ -81,8 +80,7 @@ export default function SectionPlaylists() {
               style="main"
               icon="playlist-add"
               loading={addLoading}
-              onClick={() => setShowAddModal(true)}
-            >
+              onClick={() => setShowAddModal(true)}>
               Add Playlist
             </Button>
           </div>
@@ -101,8 +99,7 @@ export default function SectionPlaylists() {
           </Button>
         }
         error={addError}
-        formOnSubmit={submitAddPlaylist}
-      >
+        formOnSubmit={submitAddPlaylist}>
         <p>Enter a name for the new playlist.</p>
         <label>
           <input type="text" name="playlistName" placeholder="New Playlist..." autoFocus />

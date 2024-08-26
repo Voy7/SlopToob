@@ -31,14 +31,23 @@ export default function HeaderAdminDropdown({ title, subtitle, icon, children }:
       setLeft(window.innerWidth - contentRect.width - RIGHT_PADDING)
     else setLeft(containerRect.left)
 
-    function close(event: MouseEvent) {
+    function handleClick(event: MouseEvent) {
       if (containerRef.current?.contains(event.target as Node)) return
       setOpen(false)
     }
 
-    window.addEventListener('click', close)
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key !== 'Escape') return
+      setOpen(false)
+    }
 
-    return () => window.removeEventListener('click', close)
+    window.addEventListener('click', handleClick)
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      window.removeEventListener('click', handleClick)
+      window.removeEventListener('keydown', handleKeyDown)
+    }
   }, [open])
 
   return (
@@ -48,30 +57,43 @@ export default function HeaderAdminDropdown({ title, subtitle, icon, children }:
       onClick={() => setOpen(!open)}>
       <button
         className={twMerge(
-          'flex h-full w-full items-center justify-between gap-1 border border-border1 p-2 text-lg',
+          'flex h-full w-full items-center justify-between gap-1 p-2 text-lg',
           open ? 'bg-bg3' : 'hover:bg-bg3'
         )}>
         <div className="flex items-center gap-1 overflow-hidden">
-          {icon && <Icon name={icon} className="shrink-0" />}
+          {icon && <Icon name={icon} className="shrink-0 text-sm text-text3" />}
           <div className="flex h-full flex-col overflow-hidden">
             <span className="overflow-hidden text-ellipsis whitespace-nowrap text-left">
               {title}
             </span>
-            <span className="mt-[-0.5rem] w-full overflow-hidden text-ellipsis whitespace-nowrap text-left text-sm text-text3">
+            <span
+              key={subtitle}
+              className="animate-fade-in mt-[-0.5rem] w-full overflow-hidden text-ellipsis whitespace-nowrap text-left text-sm text-text3">
               {subtitle}
             </span>
           </div>
         </div>
-        <Icon name="down-chevron" className="shrink-0" />
+        <Icon
+          name="down-chevron"
+          className={twMerge(
+            'shrink-0 transform text-text3 transition-transform duration-150',
+            open && 'rotate-180'
+          )}
+        />
       </button>
       {createPortal(
         <div
           ref={contentRef}
           className={twMerge(
-            'absolute top-[var(--header-height)] z-10 overflow-hidden rounded-md border border-border1 bg-red-500 shadow-xl',
+            'animate-dropdown absolute top-[var(--header-height)] z-10 overflow-hidden rounded-md border border-border1 bg-red-500 shadow-xl',
             !open && 'hidden'
           )}
-          style={{ left }}>
+          style={{
+            left,
+            minWidth: containerRef.current
+              ? `${containerRef.current?.getBoundingClientRect().width}px`
+              : `fit-content`
+          }}>
           {children}
         </div>,
         document.body

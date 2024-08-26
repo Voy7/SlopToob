@@ -3,6 +3,7 @@
 import useToggleOption from '@/hooks/useToggleOption'
 import useNumberOption from '@/hooks/useNumberOption'
 import {
+  MainHeader,
   SettingGroup,
   Header,
   Description,
@@ -34,7 +35,7 @@ export default function SectionChat() {
 
   return (
     <>
-      <h2>Chat</h2>
+      <MainHeader>Chat</MainHeader>
       <SettingGroup>
         <Header icon="chat">User Chat Messages</Header>
         <NumberOption label="Maximum Message Length" type="integer" {...chatMaxLength} />

@@ -1,11 +1,9 @@
 'use client'
 
 import { useSession, signOut } from 'next-auth/react'
-import { useStreamContext } from '@/contexts/StreamContext'
 import { AuthRole } from '@/lib/enums'
 import Link from 'next/link'
 import Image from 'next/image'
-import Icon from '@/components/ui/Icon'
 import Button from '@/components/ui/Button'
 import HeaderAdminOptions from '@/components/stream/HeaderAdminOptions'
 import styles from './Header.module.scss'
@@ -14,8 +12,6 @@ import styles from './Header.module.scss'
 export default function Header() {
   const session = useSession()
   const authUser = session.data?.user
-
-  const { setShowAdminModal } = useStreamContext()
 
   return (
     <header className={styles.header}>
@@ -31,7 +27,7 @@ export default function Header() {
           style="normal"
           icon="logout"
           onClick={() => signOut()}
-          className={styles.signOutButton}>
+          className="hover:text-red-500">
           Sign Out
         </Button>
       </div>
