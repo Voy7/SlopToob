@@ -18,7 +18,7 @@ model Settings {
 model Playlist {
   id         String   @id @default(cuid())
   name       String
-  videoPaths String  @default("")
+  videoPaths String   @default("")
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }
@@ -30,4 +30,20 @@ model PlayHistory {
   totalDuration Int      @default(0)
   isDeleted     Boolean  @default(false)
   createdAt     DateTime @default(now())
+}
+
+model WeeklySchedule {
+  id         Int      @id @default(autoincrement())
+  dayOfWeek  Int
+  secondsIn  Int
+  playlistID String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model ConnectionLog {
+  id        Int      @id @default(autoincrement())
+  type      String
+  ip        String
+  createdAt DateTime @default(now())
 }
