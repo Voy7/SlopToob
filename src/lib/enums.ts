@@ -16,6 +16,7 @@ export const enum Msg {
   SendChatMessage = 'send-chat-message',
   NewChatMessage = 'new-chat-message',
   StreamInfo = 'stream-info',
+  ScheduleDisplay = 'schedule-display',
   VoteSkipAdd = 'vote-skip-add',
   VoteSkipRemove = 'vote-skip-remove',
   VoteSkipStatus = 'vote-skip-status',
@@ -37,8 +38,6 @@ export const enum Msg {
   AdminTranscodeQueueList = 'admin-transcode-queue-list',
   AdminHistoryStatus = 'admin-history-status',
   AdminDeleteHistory = 'admin-delete-history',
-  // AdminVideosCacheStatus = 'admin-videos-cache-status',
-  // AdminBumpersCacheStatus = 'admin-bumpers-cache-status',
   AdminCacheStatus = 'admin-cache-status',
   AdminDeleteCache = 'admin-delete-cache',
   AdminPauseStream = 'admin-pause-stream',
@@ -53,7 +52,12 @@ export const enum Msg {
   AdminDebugJob = 'admin-debug-job',
   AdminDebugVideo = 'admin-debug-video',
   AdminSendAllLogs = 'admin-send-all-logs',
-  AdminNewLog = 'admin-new-log'
+  AdminNewLog = 'admin-new-log',
+  AdminSchedule = 'admin-schedule',
+  AdminScheduleSync = 'admin-schedule-sync',
+  AdminScheduleAddEntry = 'admin-schedule-add-entry',
+  AdminScheduleDeleteEntry = 'admin-schedule-delete-entry',
+  AdminScheduleUpdateEntry = 'admin-schedule-update-entry'
 }
 
 export const enum StreamState {
@@ -96,5 +100,6 @@ export enum ChatType {
   AdminUnpause,
   AdminSkip,
   AdminPrevious,
-  AdminChangePlaylist
+  AdminChangePlaylist,
+  AdminSyncedSchedule
 }

@@ -11,8 +11,8 @@ import Header from '@/components/stream/Header'
 import Video from '@/components/stream/video/Video'
 import Chat from '@/components/stream/Chat'
 import InfoBody from '@/components/stream/InfoBody'
+import ScheduleDisplay from '@/components/stream/ScheduleDisplay'
 import History from '@/components/stream/History'
-import styles from './Stream.module.scss'
 
 const AdminModal = dynamic(() => import('@/components/admin/AdminModal'), { ssr: true })
 
@@ -35,6 +35,7 @@ export default async function StreamPage() {
             <Chat />
           </div>
           <InfoBody />
+          <ScheduleDisplay />
           <History />
         </AdminProviderConditional>
       </StreamProvider>

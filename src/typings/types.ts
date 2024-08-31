@@ -27,29 +27,18 @@ export type RichPlaylist = {
   videoIndexes: number[]
 } & Omit<Playlist, 'videoPaths'>
 
-export type ClientPlaylist = {
-  id: string
-  name: string
-  videoPaths: number[]
-}
-
-export type ClientVideo = {
-  id: string
-  state: VideoState
-  name: string
-  path: string
-  thumbnailURL: string
-}
-
-export type ClientBumper = {
-  name: string
-  path: string
-}
-
 export type ListOption = {
   list: {
     name: string
     id: string
   }[]
   selectedID: string
+}
+
+export type ScheduleEntryOptions = {
+  isEnabled: boolean
+  day: number
+  hours: number
+  minutes: number
+  playlistID: string
 }

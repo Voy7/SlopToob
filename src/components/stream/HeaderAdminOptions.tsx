@@ -7,12 +7,13 @@ import Button from '@/components/ui/Button'
 import HeaderAdminDropdown from '@/components/stream/HeaderAdminDropdown'
 import Icon from '@/components/ui/Icon'
 import HoverTooltip from '@/components/ui/HoverTooltip'
+import ScheduleSyncer from '@/components/admin/ScheduleSyncer'
 import { themes } from '@/server/stream/themes'
 import { twMerge } from 'tailwind-merge'
 
 export default function HeaderAdminOptions() {
   const { setShowAdminModal } = useStreamContext()
-  const { playlists, streamInfo } = useAdminContext()
+  const { playlists, streamInfo, schedule } = useAdminContext()
   const { socket } = useSocketContext()
 
   const activeThemeName =
@@ -55,6 +56,12 @@ export default function HeaderAdminOptions() {
           })}
         </HeaderAdminDropdown>
         <HeaderAdminDropdown title="Active Playlist" subtitle={activePlaylistName} icon="playlist">
+          {schedule.canBeSynced && (
+            <div className="w-full bg-bg1 p-2">
+              <ScheduleSyncer />
+              <hr className="my-2 mb-0 border-border1" />
+            </div>
+          )}
           {playlists.map((playlist) => {
             const isActive = playlist.id === streamInfo.activePlaylistID
             return (

@@ -8,6 +8,7 @@ import FileTreeHandler from '@/server/FileTreeHandler'
 import Settings from '@/server/Settings'
 import SocketUtils from '@/server/socket/SocketUtils'
 import Chat from '@/server/stream/Chat'
+import Schedule from '@/server/stream/Schedule'
 import { getNextBumper } from '@/server/stream/bumpers'
 import { themes } from '@/server/stream/themes'
 import { StreamState, Msg, VideoState } from '@/lib/enums'
@@ -194,7 +195,11 @@ class Player {
   }
 
   // Set playlist as active, and start playing it
-  async setActivePlaylistID(playlistID: string, executedBy?: SocketClient) {
+  async setActivePlaylistID(
+    playlistID: string,
+    executedBy?: SocketClient,
+    noScheduleCheck?: boolean
+  ) {
     const playlist = this.playlists.find((playlist) => playlist.id === playlistID) || null
     Logger.debug('[Player] Setting active playlist:', playlist?.name || 'None')
 
@@ -209,6 +214,10 @@ class Player {
       })
     }
     sendChangedMessage()
+
+    if (!noScheduleCheck && this.activePlaylist?.id !== playlistID) {
+      Schedule.unsync()
+    }
 
     this.activePlaylist = playlist
 

@@ -169,13 +169,14 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
           streamInfo.streamTheme === 'Zoomer' && 'grid grid-cols-[1fr_1fr] grid-rows-[1fr_1fr]'
         )}
         onClick={backgroundClick}>
-        <video ref={videoRef} autoPlay playsInline>
+        <video ref={videoRef} className="h-full w-full" autoPlay playsInline>
           Your browser does not support the video tag.
         </video>
         {streamInfo.streamTheme === 'Zoomer' && (
           <>
             <video
               src="/theme-assets/zoomer-1.mp4"
+              className="h-full w-full"
               autoPlay
               loop
               muted
@@ -184,6 +185,7 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
             />
             <video
               src="/theme-assets/zoomer-2.mp4"
+              className="h-full w-full"
               autoPlay
               loop
               muted
@@ -192,6 +194,7 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
             />
             <video
               src="/theme-assets/zoomer-3.mp4"
+              className="h-full w-full"
               autoPlay
               loop
               muted

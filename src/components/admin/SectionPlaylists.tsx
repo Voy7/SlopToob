@@ -61,7 +61,7 @@ export default function SectionPlaylists() {
         <>
           <MainHeader>Playlists ({playlists.length})</MainHeader>
           <div className={styles.playlistNavbar}>
-            <SelectDropdown text={activePlaylist?.name || 'None Selected'} icon="playlist">
+            <SelectDropdown label={activePlaylist?.name || 'None Selected'} icon="playlist">
               {playlists.map((playlist) => (
                 <button
                   key={playlist.id}

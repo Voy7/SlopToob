@@ -1,6 +1,5 @@
 import type { ListOption } from '@/typings/types'
 import type { SocketClient } from '@/typings/socket'
-import { enable } from 'colors'
 
 // List of all settings, with their default values and optional hooks
 // NOTE: Because of how Settings is initialized, most top-level imports are not allowed.
@@ -100,6 +99,7 @@ export const settingsList = {
   sendAdminSkip: { default: true },
   sendAdminPrevious: { default: true },
   sendAdminChangePlaylist: { default: true },
+  sendAdminSyncedSchedule: { default: true },
 
   // Pause stream when no one is watching
   pauseWhenInactive: { default: true },
@@ -122,7 +122,17 @@ export const settingsList = {
   enableVideoEventLogging: { default: true },
   showVideoEventLogsInConsole: { default: false },
 
-  showChatMessagesInConsole: { default: true }
+  showChatMessagesInConsole: { default: true },
+
+  // Weeky schedule settings
+  enableWeeklySchedule: { default: false, onChange: scheduleResync },
+  weekyScheduleInSync: { default: false },
+  weeklyScheduleUTCOffset: { default: 0, onChange: scheduleResync },
+
+  // Weekly schedule user display settings
+  showWeeklySchedule: { default: true, onChange: scheduleDisplayResync },
+  showWeeklyScheduleIfUnsynced: { default: true, onChange: scheduleDisplayResync },
+  showWeeklyScheduleTimemarks: { default: true, onChange: scheduleDisplayResync }
 } satisfies Record<string, Setting>
 
 async function voteSkipResync() {
@@ -138,4 +148,14 @@ async function chatResync() {
 async function historyResync() {
   const { default: PlayHistory } = await import('@/server/stream/PlayHistory')
   PlayHistory.resyncChanges()
+}
+
+async function scheduleResync() {
+  const { default: Schedule } = await import('@/server/stream/Schedule')
+  Schedule.updateCheck()
+}
+
+async function scheduleDisplayResync() {
+  const { default: Schedule } = await import('@/server/stream/Schedule')
+  Schedule.updateCheck()
 }

@@ -34,6 +34,7 @@ model PlayHistory {
 
 model WeeklySchedule {
   id         Int      @id @default(autoincrement())
+  isEnabled  Boolean  @default(true)
   dayOfWeek  Int
   secondsIn  Int
   playlistID String

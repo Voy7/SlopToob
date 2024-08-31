@@ -10,6 +10,7 @@ const CHECKS = {
   // pathsValid: 'File Paths',
   settingsReady: 'Settings',
   fileTreeReady: 'File Tree',
+  scheduleReady: 'Playlist Scheduler',
   httpServerReady: 'HTTP Server',
   socketServerReady: 'Web Socket Server',
   nextAppReady: 'Next.js App',

@@ -172,3 +172,29 @@ export type ClientCacheStatus = {
   size: string
   isDeleting: boolean
 }
+
+export type ClientSchedule = {
+  isEnabled: boolean
+  isSynced: boolean
+  canBeSynced: boolean
+  activeEntryID: number | null
+  entries: ClientScheduleEntry[]
+}
+
+export type ClientScheduleEntry = {
+  id: number
+  isEnabled: boolean
+  dayOfWeek: number
+  hours: number
+  minutes: number
+  playlistID: string
+}
+
+export type ClientScheduleDisplay = {
+  inSync: boolean
+  activeEntryIndex: number | null
+  entries: {
+    name: string
+    date: string
+  }[]
+}

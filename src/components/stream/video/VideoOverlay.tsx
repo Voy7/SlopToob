@@ -3,6 +3,7 @@
 import { useVideoContext } from '@/contexts/VideoContext'
 import { useStreamContext } from '@/contexts/StreamContext'
 import useStreamTimestamp from '@/hooks/useStreamTimestamp'
+import Image from 'next/image'
 import Icon from '@/components/ui/Icon'
 import { StreamState } from '@/lib/enums'
 import { twMerge } from 'tailwind-merge'
@@ -56,9 +57,17 @@ function StateOverlay() {
 
   if (streamInfo.state === StreamState.Error) {
     return (
-      <div className="animate-video-error absolute left-0 top-0 flex h-full w-full cursor-default flex-col items-center justify-center gap-4 bg-black text-lg text-text2">
-        <Icon name="warning" className="text-[5rem] text-red-500" />
-        <p>{streamInfo.error}.</p>
+      <div className="animate-video-error absolute left-0 top-0 flex h-full w-full cursor-default flex-col items-center justify-center gap-4 bg-black">
+        <Image
+          src="/logo-alt.png"
+          alt=""
+          width={100 * 1.98}
+          height={100}
+          className="pointer-events-none grayscale filter"
+        />
+        <p className="rounded-lg border border-red-500 border-opacity-25 bg-bg2 p-2 text-lg text-text2">
+          {streamInfo.error}.
+        </p>
       </div>
     )
   }

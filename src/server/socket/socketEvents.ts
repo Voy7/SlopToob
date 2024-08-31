@@ -16,14 +16,16 @@ import Settings from '@/server/Settings'
 import FileTreeHandler from '@/server/FileTreeHandler'
 import VoteSkipHandler from '@/server/stream/VoteSkipHandler'
 import Chat from '@/server/stream/Chat'
+import Playlists from '@/server/stream/Playlists'
+import CacheHandler from '@/server/stream/CacheHandler'
+import Schedule from '@/server/stream/Schedule'
 import type { Socket } from 'socket.io'
 import type {
   AuthenticatePayload,
   EditPlaylistNamePayload,
   EditPlaylistVideosPayload
 } from '@/typings/socket'
-import Playlists from '@/server/stream/Playlists'
-import CacheHandler from '../stream/CacheHandler'
+import type { ScheduleEntryOptions } from '@/typings/types'
 
 type EventOptions = {
   allowUnauthenticated?: boolean // Allow unauthenticated users to run this event (default: false)
@@ -90,6 +92,7 @@ export const socketEvents: Record<string, EventOptions> = {
       SocketUtils.broadcastViewersList()
 
       socket.emit(Msg.StreamInfo, Player.clientStreamInfo)
+      socket.emit(Msg.ScheduleDisplay, Schedule.clientScheduleDisplay)
       socket.emit(Msg.JoinStream, true)
 
       // Unpause stream if 'pause when inactive' was active
@@ -199,6 +202,7 @@ export const socketEvents: Record<string, EventOptions> = {
       socket.emit(Msg.AdminCacheStatus, CacheHandler.getClientCacheStatus('bumpers'))
       socket.emit(Msg.AdminCacheStatus, CacheHandler.getClientCacheStatus('thumbnails'))
       socket.emit(Msg.AdminSendAllLogs, Logger.logs)
+      socket.emit(Msg.AdminSchedule, Schedule.clientSchedule)
     }
   },
 
@@ -420,6 +424,35 @@ export const socketEvents: Record<string, EventOptions> = {
     run: async (socket, cacheID: unknown) => {
       if (!CacheHandler.isCacheID(cacheID)) return
       CacheHandler.deleteAll(cacheID)
+    }
+  },
+
+  [Msg.AdminScheduleSync]: {
+    adminOnly: true,
+    run: (socket, skipCurrentVideo?: true) => {
+      const client = socketClients.find((c) => c.socket === socket)
+      Schedule.sync(client, skipCurrentVideo)
+    }
+  },
+
+  [Msg.AdminScheduleAddEntry]: {
+    adminOnly: true,
+    run: async (socket, options: ScheduleEntryOptions) => {
+      await Schedule.addEntry(options)
+    }
+  },
+
+  [Msg.AdminScheduleDeleteEntry]: {
+    adminOnly: true,
+    run: async (socket, entryID: number) => {
+      await Schedule.removeEntry(entryID)
+    }
+  },
+
+  [Msg.AdminScheduleUpdateEntry]: {
+    adminOnly: true,
+    run: async (socket, payload: { entryID: number; options: ScheduleEntryOptions }) => {
+      await Schedule.updateEntry(payload.entryID, payload.options)
     }
   }
 }

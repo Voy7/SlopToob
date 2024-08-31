@@ -5,7 +5,7 @@ import { useSocketContext } from '@/contexts/SocketContext'
 import useSocketOn from '@/hooks/useSocketOn'
 import LoadingPage from '@/components/stream/LoadingPage'
 import { Msg } from '@/lib/enums'
-import type { Viewer, ChatMessage, ViewerStreamInfo } from '@/typings/socket'
+import type { Viewer, ChatMessage, ViewerStreamInfo, ClientScheduleDisplay } from '@/typings/socket'
 
 const MAX_CHAT_MESSAGES = 250 // Max to display in chat / remove from array
 
@@ -23,6 +23,7 @@ type ContextProps = {
   clearChatMessages: () => void
   streamInfo: ViewerStreamInfo
   lastStreamUpdateTimestamp: number | null
+  scheduleDisplay: ClientScheduleDisplay | null
 }
 
 // Context provider wrapper component
@@ -36,6 +37,7 @@ export function StreamProvider({ children }: { children: React.ReactNode }) {
   const [chatMessages, setChatMessages] = useState<(ChatMessage & { time: number })[]>([])
   const [streamInfo, setStreamInfo] = useState<ViewerStreamInfo | null>(null)
   const [lastStreamUpdateTimestamp, setLastStreamUpdateTimestamp] = useState<number | null>(null)
+  const [scheduleDisplay, setScheduleDisplay] = useState<ClientScheduleDisplay | null | undefined>()
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
 
   useEffect(() => {
@@ -48,6 +50,10 @@ export function StreamProvider({ children }: { children: React.ReactNode }) {
     setStreamInfo(info)
     setLastStreamUpdateTimestamp(Date.now())
   })
+
+  useSocketOn(Msg.ScheduleDisplay, (payload: ClientScheduleDisplay | null) =>
+    setScheduleDisplay(payload)
+  )
 
   useSocketOn(Msg.NewChatMessage, (message: ChatMessage) => addChatMessage(message))
 
@@ -70,6 +76,8 @@ export function StreamProvider({ children }: { children: React.ReactNode }) {
   if (!isAuthenticated) return <LoadingPage text="Authenticating..." />
   if (!streamInfo) return <LoadingPage text="Fetching stream info..." />
 
+  if (scheduleDisplay === undefined) return <LoadingPage text="Fetching schedule..." />
+
   const context: ContextProps = {
     viewers,
     showAdminModal,
@@ -82,7 +90,8 @@ export function StreamProvider({ children }: { children: React.ReactNode }) {
     addChatMessage,
     clearChatMessages,
     streamInfo,
-    lastStreamUpdateTimestamp
+    lastStreamUpdateTimestamp,
+    scheduleDisplay
   }
 
   return <StreamContext.Provider value={context}>{children}</StreamContext.Provider>

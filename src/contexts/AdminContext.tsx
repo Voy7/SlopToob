@@ -4,6 +4,17 @@ import { useState, useContext, createContext, useEffect } from 'react'
 import { useSocketContext } from '@/contexts/SocketContext'
 import useSocketOn from '@/hooks/useSocketOn'
 import { Msg } from '@/lib/enums'
+import SectionOverview from '@/components/admin/SectionOverview'
+import SectionPlaylists from '@/components/admin/SectionPlaylists'
+import SectionBumpers from '@/components/admin/SectionBumpers'
+import SectionTranscoding from '@/components/admin/SectionTranscoding'
+import SectionChat from '@/components/admin/SectionChat'
+import SectionSchedule from '@/components/admin/SectionSchedule'
+import SectionHistory from '@/components/admin/SectionHistory'
+import SectionVoteSkip from '@/components/admin/SectionVoteSkip'
+import SectionDebug from '@/components/admin/SectionDebug'
+import SectionCaching from '@/components/admin/SectionCaching'
+import SectionOther from '@/components/admin/SectionOther'
 import type { FileTreeNode } from '@/typings/types'
 import type {
   AdminStreamInfo,
@@ -12,19 +23,11 @@ import type {
   ClientVideo,
   ClientCacheStatus,
   ClientHistoryStatus,
-  TranscodeClientVideo
+  TranscodeClientVideo,
+  ClientScheduleEntry,
+  ClientSchedule
 } from '@/typings/socket'
 import type { IconNames } from '@/components/ui/Icon'
-import SectionOverview from '@/components/admin/SectionOverview'
-import SectionPlaylists from '@/components/admin/SectionPlaylists'
-import SectionBumpers from '@/components/admin/SectionBumpers'
-import SectionTranscoding from '@/components/admin/SectionTranscoding'
-import SectionChat from '@/components/admin/SectionChat'
-import SectionHistory from '@/components/admin/SectionHistory'
-import SectionVoteSkip from '@/components/admin/SectionVoteSkip'
-import SectionDebug from '@/components/admin/SectionDebug'
-import SectionCaching from '@/components/admin/SectionCaching'
-import SectionOther from '@/components/admin/SectionOther'
 
 type Section = {
   name: string
@@ -46,7 +49,7 @@ export const sections = [
   {
     name: 'Playlists',
     icon: 'playlist',
-    accentColor: 'bg-blue-600',
+    accentColor: 'bg-blue-500',
     category: 1,
     component: <SectionPlaylists />
   },
@@ -60,7 +63,7 @@ export const sections = [
   {
     name: 'Transcoding',
     icon: 'files',
-    accentColor: 'bg-yellow-500',
+    accentColor: 'bg-red-500',
     category: 1,
     component: <SectionTranscoding />
   },
@@ -70,6 +73,13 @@ export const sections = [
     accentColor: 'bg-green-400',
     category: 2,
     component: <SectionChat />
+  },
+  {
+    name: 'Schedule',
+    icon: 'calendar',
+    accentColor: 'bg-yellow-500',
+    category: 2,
+    component: <SectionSchedule />
   },
   {
     name: 'History',
@@ -129,6 +139,7 @@ type ContextProps = {
   videosCacheStatus: ClientCacheStatus
   bumpersCacheStatus: ClientCacheStatus
   thumbnailsCacheStatus: ClientCacheStatus
+  schedule: ClientSchedule
   logs: string[]
 }
 
@@ -150,6 +161,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [videosCacheStatus, setVideosCacheStatus] = useState<ClientCacheStatus | null>(null)
   const [bumpersCacheStatus, setBumpersCacheStatus] = useState<ClientCacheStatus | null>(null)
   const [thumbnailsCacheStatus, setThumbnailsCacheStatus] = useState<ClientCacheStatus | null>(null)
+  const [schedule, setSchedule] = useState<ClientSchedule | null>(null)
   const [logs, setLogs] = useState<string[]>([])
 
   function setSection(sectionName: SectionName) {
@@ -182,7 +194,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     if (status.cacheID === 'bumpers') setBumpersCacheStatus(status)
     if (status.cacheID === 'thumbnails') setThumbnailsCacheStatus(status)
   })
-
+  useSocketOn(Msg.AdminSchedule, (schedule: ClientSchedule) => setSchedule(schedule))
   useSocketOn(Msg.AdminSendAllLogs, (logs: string[]) => setLogs(logs))
 
   useSocketOn(Msg.AdminNewLog, (log: string) => {
@@ -203,6 +215,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   if (!videosCacheStatus) return null
   if (!bumpersCacheStatus) return null
   if (!thumbnailsCacheStatus) return null
+  if (!schedule) return null
 
   const context: ContextProps = {
     section,
@@ -222,6 +235,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     videosCacheStatus,
     bumpersCacheStatus,
     thumbnailsCacheStatus,
+    schedule,
     logs
   }
 

@@ -25,7 +25,8 @@ const eventIcons: Record<ChatType, EventIcon | null> = {
   [ChatType.AdminUnpause]: { icon: 'play', color: 'rgb(255, 95, 95)' },
   [ChatType.AdminSkip]: { icon: 'skip', color: 'rgb(255, 95, 95)' },
   [ChatType.AdminPrevious]: { icon: 'previous', color: 'rgb(255, 95, 95)' },
-  [ChatType.AdminChangePlaylist]: { icon: 'playlist', color: 'rgb(255, 95, 95)' }
+  [ChatType.AdminChangePlaylist]: { icon: 'playlist', color: 'rgb(255, 95, 95)' },
+  [ChatType.AdminSyncedSchedule]: { icon: 'calendar', color: 'rgb(255, 95, 95)' }
 }
 
 export default function ChatMessage({ chat }: { chat: ChatMessageType & { time: number } }) {

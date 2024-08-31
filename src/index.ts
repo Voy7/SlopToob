@@ -13,6 +13,9 @@ async function main() {
   const { default: FileTreeHandler } = await import('@/server/FileTreeHandler')
   await FileTreeHandler.onReady()
 
+  const { default: Schedule } = await import('@/server/stream/Schedule')
+  await Schedule.initialize()
+
   import('@/server/nextServer')
 }
 
