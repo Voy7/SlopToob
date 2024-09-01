@@ -176,7 +176,7 @@ export default class Video {
 
     if (Player.playing === this && !this.error) {
       if (!omitFromPreviousVideos) Player.addPreviousVideo(this)
-      Settings.setSetting('streamIsPaused', false)
+      Settings.set('streamIsPaused', false)
     }
 
     if (this.finishedTimeout) clearTimeout(this.finishedTimeout)
@@ -197,7 +197,7 @@ export default class Video {
     if (this.finishedTimeout) clearTimeout(this.finishedTimeout)
     this.passedDurationSeconds += (new Date().getTime() - this.playingDate.getTime()) / 1000
     this.state = State.Paused
-    if (persistPause) Settings.setSetting('streamIsPaused', true)
+    if (persistPause) Settings.set('streamIsPaused', true)
     return true
   }
 
@@ -208,7 +208,7 @@ export default class Video {
     if (this.state !== State.Paused) return false
     this.startFinishTimeout()
     this.state = State.Playing
-    Settings.setSetting('streamIsPaused', false)
+    Settings.set('streamIsPaused', false)
     return true
   }
 

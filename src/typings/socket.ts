@@ -78,7 +78,6 @@ export type SocketClient = {
 }
 
 export type Viewer = {
-  socketID: string
   username: string
   image: string
   role: AuthRole
@@ -197,4 +196,12 @@ export type ClientScheduleDisplay = {
     name: string
     date: string
   }[]
+}
+
+export type ClientRichUser = {
+  socketID: string
+  username: string
+  role: AuthRole
+  image: string
+  isWatching: boolean
 }

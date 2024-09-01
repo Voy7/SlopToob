@@ -41,7 +41,7 @@ export default function FloatingAnchored({
   children,
   ...props
 }: FloatingAnchoredProps) {
-  if (typeof window === 'undefined') return null
+  if (!show || typeof window === 'undefined') return null
 
   const anchorRef = useRef<HTMLDivElement>(null)
   const tooltipRef = useRef<HTMLDivElement>(null)
@@ -112,9 +112,9 @@ export default function FloatingAnchored({
     if (tooltipLeft < 0) {
       tooltipLeft = 0
     }
-    // if (tooltipLeft + tooltipWidth > window.innerWidth) {
-    //   tooltipLeft = window.innerWidth - tooltipWidth
-    // }
+    if (tooltipLeft + tooltipWidth > window.innerWidth) {
+      tooltipLeft = window.innerWidth - tooltipWidth
+    }
 
     // Align arrow with center of parent element
     if (isVertical) arrowLeft = parentLeft + parentRect.width / 2 - tooltipLeft
@@ -122,15 +122,13 @@ export default function FloatingAnchored({
 
     setTooltipPosition([tooltipTop, tooltipLeft])
     setArrowPosition([arrowTop, arrowLeft])
-  }, [placement, offset, arrowSize, borderWidth, show])
+  }, [show, placement, offset, arrowSize, borderWidth])
 
-  const arrowStyles = useMemo(() => {
-    const styles: React.CSSProperties = {}
-    if (!arrowPosition) return styles
-    styles.top = `${arrowPosition[0]}px`
-    styles.left = `${arrowPosition[1]}px`
-    return styles
-  }, [arrowPosition])
+  let arrowStyles: React.CSSProperties = {}
+  if (arrowPosition) {
+    arrowStyles.top = `${arrowPosition[0]}px`
+    arrowStyles.left = `${arrowPosition[1]}px`
+  }
 
   return (
     <div ref={anchorRef} className="hidden">
@@ -169,7 +167,7 @@ export default function FloatingAnchored({
           <div
             ref={tooltipRef}
             className={twMerge(
-              'relative rounded-lg bg-slate-600 p-2 text-lg',
+              'relative overflow-hidden rounded-lg bg-slate-600 p-2 text-lg',
               sharedClassName,
               className
             )}>

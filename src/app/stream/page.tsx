@@ -13,6 +13,7 @@ import Chat from '@/components/stream/Chat'
 import InfoBody from '@/components/stream/InfoBody'
 import ScheduleDisplay from '@/components/stream/ScheduleDisplay'
 import History from '@/components/stream/History'
+import Footer from '@/components/layout/Footer'
 
 const AdminModal = dynamic(() => import('@/components/admin/AdminModal'), { ssr: true })
 
@@ -26,20 +27,23 @@ export default async function StreamPage() {
   const cookieUsername = username || 'Anonymous'
 
   return (
-    <SocketProvider authUser={authUser} cookieUsername={cookieUsername}>
-      <StreamProvider>
-        <AdminProviderConditional authRole={authUser.role}>
-          <Header />
-          <div className="flex flex-col md:h-[calc((100vw-var(--chat-width))*9/16)] md:max-h-[calc(100vh-var(--info-body-height)-2px)] md:flex-row">
-            <Video />
-            <Chat />
-          </div>
-          <InfoBody />
-          <ScheduleDisplay />
-          <History />
-        </AdminProviderConditional>
-      </StreamProvider>
-    </SocketProvider>
+    <>
+      <SocketProvider authUser={authUser} cookieUsername={cookieUsername}>
+        <StreamProvider>
+          <AdminProviderConditional authRole={authUser.role}>
+            <Header />
+            <div className="flex flex-col md:h-[calc((100vw-var(--chat-width))*9/16)] md:max-h-[calc(100vh-var(--info-body-height)-2px)] md:flex-row">
+              <Video />
+              <Chat />
+            </div>
+            <InfoBody />
+            <ScheduleDisplay />
+            <History />
+          </AdminProviderConditional>
+        </StreamProvider>
+      </SocketProvider>
+      <Footer />
+    </>
   )
 }
 

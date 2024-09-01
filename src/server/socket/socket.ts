@@ -80,5 +80,5 @@ async function handleSettingEvent(
     return
   }
 
-  await Settings.setSetting(settingKey, payload, client)
+  await Settings.set(settingKey, payload, client)
 }

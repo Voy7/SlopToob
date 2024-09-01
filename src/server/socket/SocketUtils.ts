@@ -1,7 +1,6 @@
 import { socketClients } from '@/server/socket/socketClients'
 import { Msg, AuthRole } from '@/lib/enums'
-import Player from '@/server/stream/Player'
-import type { Viewer } from '@/typings/socket'
+import type { Viewer, ClientRichUser } from '@/typings/socket'
 
 // Server-side socket utilities
 export default class SocketUtils {
@@ -23,15 +22,39 @@ export default class SocketUtils {
   // Broadcast list of viewers, derived from socketClients
   static broadcastViewersList() {
     const viewers: Viewer[] = []
+    const richUsers: ClientRichUser[] = []
     for (const client of socketClients) {
+      richUsers.push({
+        socketID: client.socket.id,
+        username: client.username,
+        image: client.image,
+        role: client.role,
+        isWatching: client.isWatching
+      })
       if (!client.isWatching) continue
       viewers.push({
-        socketID: client.socket.id,
         username: client.username,
         image: client.image,
         role: client.role
       })
     }
+    richUsers.sort((a, b) => (a.isWatching === b.isWatching ? 0 : a.isWatching ? 1 : -1))
     this.broadcast(Msg.ViewersList, viewers)
+    this.broadcastAdmin(Msg.AdminRichUsers, richUsers)
+  }
+
+  static get clientRichUsers(): ClientRichUser[] {
+    const richUsers: ClientRichUser[] = []
+    for (const client of socketClients) {
+      richUsers.push({
+        socketID: client.socket.id,
+        username: client.username,
+        image: client.image,
+        role: client.role,
+        isWatching: client.isWatching
+      })
+    }
+    richUsers.sort((a, b) => (a.isWatching === b.isWatching ? 0 : a.isWatching ? 1 : -1))
+    return richUsers
   }
 }

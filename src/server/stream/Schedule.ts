@@ -81,7 +81,7 @@ class Schedule {
   }
 
   sync(executedBy?: SocketClient, skipCurrentVideo?: boolean) {
-    Settings.setSetting('weekyScheduleInSync', true)
+    Settings.set('weekyScheduleInSync', true)
     this.updateCheck()
 
     if (!executedBy || !Settings.sendAdminSyncedSchedule) return
@@ -94,7 +94,7 @@ class Schedule {
   }
 
   unsync() {
-    Settings.setSetting('weekyScheduleInSync', false)
+    Settings.set('weekyScheduleInSync', false)
     SocketUtils.broadcastAdmin(Msg.AdminSchedule, this.clientSchedule)
     SocketUtils.broadcast(Msg.ScheduleDisplay, this.clientScheduleDisplay)
   }
@@ -186,27 +186,14 @@ class Schedule {
       if (day < 0) day = 6
     }
 
-    let currentSecondsIn =
+    const currentSecondsIn =
       day * 86400 + hours * 3600 + date.getUTCMinutes() * 60 + date.getUTCSeconds()
 
-    // Calculate how many seconds into the week th entry is
     const entrySecondsIn = entry.dayOfWeek * 86400 + entry.secondsIn
 
-    // const SECONDS_IN_A_WEEK = 604800
     return entrySecondsIn > currentSecondsIn
       ? entrySecondsIn - currentSecondsIn
       : 604800 - currentSecondsIn + entrySecondsIn
-
-    // const day = date.getUTCDay()
-    // const seconds = date.getUTCHours() * 3600 + date.getUTCMinutes() * 60 + date.getUTCSeconds()
-
-    // let dayOffsetSeconds = 0
-    // if (entry.dayOfWeek > day) dayOffsetSeconds = (entry.dayOfWeek - day) * 86400
-    // else if (entry.dayOfWeek < day) dayOffsetSeconds = (7 - day + entry.dayOfWeek) * 86400
-
-    // let secondsUntil = entry.secondsIn - seconds + dayOffsetSeconds
-    // if (secondsUntil < 1) secondsUntil = 1
-    // return secondsUntil
   }
 
   // Sort entries by day and time to be in order

@@ -17,12 +17,15 @@ let settings: SettingsList | null = null
 let onReadyCallback: Function | null = null
 
 const Settings = {
-  async setSetting(
+  async set(
     key: keyof SettingsList,
     value: string | number | boolean,
     executedBy?: SocketClient
   ): Promise<boolean> {
     if (!settings || value === undefined) return false
+
+    // Skip if value is the same, TODO: Investigate possible unknown side effects
+    if (settings[key] === value) return true
 
     const valueIsValid = typeof value === typeof settings[key]
     if (!valueIsValid) {

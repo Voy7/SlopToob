@@ -41,7 +41,10 @@ export const socketEvents: Record<string, EventOptions> = {
       if (!existingClient) return
       socketClients.splice(socketClients.indexOf(existingClient), 1)
 
-      if (!existingClient.isWatching) return
+      if (!existingClient.isWatching) {
+        SocketUtils.broadcastAdmin(Msg.AdminRichUsers, SocketUtils.clientRichUsers)
+        return
+      }
 
       VoteSkipHandler.removeVote(socket.id)
       VoteSkipHandler.resyncChanges()
@@ -203,6 +206,7 @@ export const socketEvents: Record<string, EventOptions> = {
       socket.emit(Msg.AdminCacheStatus, CacheHandler.getClientCacheStatus('thumbnails'))
       socket.emit(Msg.AdminSendAllLogs, Logger.logs)
       socket.emit(Msg.AdminSchedule, Schedule.clientSchedule)
+      socket.emit(Msg.AdminRichUsers, SocketUtils.clientRichUsers)
     }
   },
 
@@ -453,6 +457,14 @@ export const socketEvents: Record<string, EventOptions> = {
     adminOnly: true,
     run: async (socket, payload: { entryID: number; options: ScheduleEntryOptions }) => {
       await Schedule.updateEntry(payload.entryID, payload.options)
+    }
+  },
+
+  [Msg.AdminKickUser]: {
+    adminOnly: true,
+    run: async (socket, socketID: unknown) => {
+      const client = socketClients.find((c) => c.socket.id === socketID)
+      if (client) client.socket.disconnect()
     }
   }
 }

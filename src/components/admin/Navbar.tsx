@@ -24,7 +24,7 @@ export default function Navbar() {
   const { section, setSection, streamInfo } = useAdminContext()
 
   return (
-    <nav className="flex w-[200px] flex-shrink-0 flex-row justify-between overflow-x-auto overflow-y-hidden border-b border-r-0 border-border1 md:flex-col md:overflow-y-auto md:overflow-x-hidden md:border-b md:border-r">
+    <nav className="flex w-[200px] shrink-0 flex-row justify-between overflow-x-auto overflow-y-hidden border-b border-r-0 border-border1 md:flex-col md:overflow-y-auto md:overflow-x-hidden md:border-b md:border-r">
       <div className="flex flex-col">
         {categories.map((category) => (
           <div key={category.label} className="flex flex-col">

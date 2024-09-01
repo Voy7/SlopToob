@@ -25,7 +25,8 @@ import type {
   ClientHistoryStatus,
   TranscodeClientVideo,
   ClientScheduleEntry,
-  ClientSchedule
+  ClientSchedule,
+  ClientRichUser
 } from '@/typings/socket'
 import type { IconNames } from '@/components/ui/Icon'
 
@@ -140,6 +141,7 @@ type ContextProps = {
   bumpersCacheStatus: ClientCacheStatus
   thumbnailsCacheStatus: ClientCacheStatus
   schedule: ClientSchedule
+  richUsers: ClientRichUser[]
   logs: string[]
 }
 
@@ -162,6 +164,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [bumpersCacheStatus, setBumpersCacheStatus] = useState<ClientCacheStatus | null>(null)
   const [thumbnailsCacheStatus, setThumbnailsCacheStatus] = useState<ClientCacheStatus | null>(null)
   const [schedule, setSchedule] = useState<ClientSchedule | null>(null)
+  const [richUsers, setRichUsers] = useState<ClientRichUser[] | null>(null)
   const [logs, setLogs] = useState<string[]>([])
 
   function setSection(sectionName: SectionName) {
@@ -195,8 +198,8 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     if (status.cacheID === 'thumbnails') setThumbnailsCacheStatus(status)
   })
   useSocketOn(Msg.AdminSchedule, (schedule: ClientSchedule) => setSchedule(schedule))
+  useSocketOn(Msg.AdminRichUsers, (users: ClientRichUser[]) => setRichUsers(users))
   useSocketOn(Msg.AdminSendAllLogs, (logs: string[]) => setLogs(logs))
-
   useSocketOn(Msg.AdminNewLog, (log: string) => {
     setLogs((prev) => {
       if (prev.length >= 500) prev.shift()
@@ -216,6 +219,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   if (!bumpersCacheStatus) return null
   if (!thumbnailsCacheStatus) return null
   if (!schedule) return null
+  if (!richUsers) return null
 
   const context: ContextProps = {
     section,
@@ -236,6 +240,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     bumpersCacheStatus,
     thumbnailsCacheStatus,
     schedule,
+    richUsers,
     logs
   }
 

@@ -35,7 +35,7 @@ export default function HoverTooltip({ placement, offset = 5, children }: Props)
     <>
       <div ref={anchorRef} className="hidden" />
       <FloatingAnchored
-        className="whitespace-nowrap"
+        // className="whitespace-nowrap"
         show={show}
         setShow={setShow}
         placement={placement}

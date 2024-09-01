@@ -33,7 +33,7 @@ export default function AdminControls() {
       </ActionButton>
       <ActionButton onClick={() => socket.emit(Msg.AdminSeekStepForward, 10)}>
         <HoverTooltip placement="top" offset={22}>
-          Fast Forward 10s (Admin only)
+          Fast Forward 10s (Admin only) Fast Forward 10s (Admin only)
         </HoverTooltip>
         <Icon name="forward-10" />
       </ActionButton>

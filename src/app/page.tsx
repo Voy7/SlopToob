@@ -6,6 +6,7 @@ import Image from 'next/image'
 import Canvas3D from '@/components/home/3DCanvas'
 import Button from '@/components/ui/Button'
 import Icon from '@/components/ui/Icon'
+import Footer from '@/components/layout/Footer'
 import styles from './Home.module.scss'
 
 export default function Home() {
@@ -46,36 +47,39 @@ export default function Home() {
   }
 
   return (
-    <div className={success ? `${styles.home} ${styles.fadeOutAnimation}` : styles.home}>
-      <Canvas3D />
-      <form onSubmit={submit}>
-        <Image src="/logo.png" alt="Logo" width={110} height={110} />
-        <h1>
-          <span>Slop</span>Toob
-        </h1>
-        <p className={styles.blurb}>Enter the password to access infinite slop!</p>
-        <div className={styles.password}>
-          <input
-            type="password"
-            placeholder="Enter password..."
-            value={password}
-            onChange={(event) => {
-              setPassword(event.target.value)
-              setError(null)
-            }}
-            autoFocus
-          />
-          <Button style="main" loading={loading} active={password.length > 0} isSubmit>
-            Go {'>'}
-          </Button>
-        </div>
-        {error && (
-          <p className={styles.error}>
-            <Icon name="warning" />
-            {error}
-          </p>
-        )}
-      </form>
-    </div>
+    <>
+      <div className={success ? `${styles.home} ${styles.fadeOutAnimation}` : styles.home}>
+        <Canvas3D />
+        <form onSubmit={submit}>
+          <Image src="/logo.png" alt="Logo" width={110} height={110} />
+          <h1>
+            <span>Slop</span>Toob
+          </h1>
+          <p className={styles.blurb}>Enter the password to access infinite slop!</p>
+          <div className={styles.password}>
+            <input
+              type="password"
+              placeholder="Enter password..."
+              value={password}
+              onChange={(event) => {
+                setPassword(event.target.value)
+                setError(null)
+              }}
+              autoFocus
+            />
+            <Button style="main" loading={loading} active={password.length > 0} isSubmit>
+              Go {'>'}
+            </Button>
+          </div>
+          {error && (
+            <p className={styles.error}>
+              <Icon name="warning" />
+              {error}
+            </p>
+          )}
+        </form>
+      </div>
+      <Footer />
+    </>
   )
 }

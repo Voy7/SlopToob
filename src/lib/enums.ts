@@ -57,7 +57,9 @@ export const enum Msg {
   AdminScheduleSync = 'admin-schedule-sync',
   AdminScheduleAddEntry = 'admin-schedule-add-entry',
   AdminScheduleDeleteEntry = 'admin-schedule-delete-entry',
-  AdminScheduleUpdateEntry = 'admin-schedule-update-entry'
+  AdminScheduleUpdateEntry = 'admin-schedule-update-entry',
+  AdminRichUsers = 'admin-rich-users',
+  AdminKickUser = 'admin-kick-user'
 }
 
 export const enum StreamState {

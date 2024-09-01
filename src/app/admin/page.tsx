@@ -6,6 +6,7 @@ import { AuthRole } from '@/lib/enums'
 import { AdminProvider } from '@/contexts/AdminContext'
 import AuthExpired from '@/components/stream/AuthExpired'
 import AdminPanel from '@/components/admin/AdminPanel'
+import RichUsersList from '@/components/admin/RichUsersList'
 
 export default async function AdminPage() {
   const session = await getServerSession(authOptions)
@@ -20,13 +21,11 @@ export default async function AdminPage() {
   return (
     <SocketProvider authUser={authUser} cookieUsername={cookieUsername}>
       <AdminProvider>
-        <div className="grid min-h-screen grid-cols-[1fr] gap-6 p-6">
-          <div className="border-[1px] border-border1">
-            <div className="flex flex-col lg:flex-row">
-              <AdminPanel />
-            </div>
+        <div className="grid h-screen w-screen grid-cols-[1fr,320px] gap-6 overflow-hidden">
+          <div className="flex h-screen flex-col overflow-hidden p-16 lg:flex-row">
+            <AdminPanel />
           </div>
-          {/* <div className="w-full bg-slate-500">SIDEBAR</div> */}
+          <RichUsersList />
         </div>
       </AdminProvider>
     </SocketProvider>
