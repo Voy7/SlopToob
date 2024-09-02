@@ -49,33 +49,32 @@ export default function ScheduleEditor() {
                 <ScheduleSyncer />
               </div>
             )}
-            <ScheduleHeader />
-            {schedule.entries.map((entry, index) => (
-              <div
-                key={`${index}-${entry.id}`}
-                className={twMerge(
-                  'animate-fade-in flex items-center justify-between gap-4 bg-bg2 pr-1',
-                  index !== 0 && 'border-t-[1px] border-border1'
-                )}>
-                <ScheduleEntry
-                  entry={entry}
-                  onChange={(options) => {
-                    socket.emit(Msg.AdminScheduleUpdateEntry, { entryID: entry.id, options })
-                  }}
-                />
-                <button className="shrink-0 rounded-full p-1.5 text-lg hover:bg-bg3">
-                  <Icon name="more" />
-                  <ClickContextMenu placement="right">
-                    <ContextMenuButton
-                      icon="delete"
-                      onClick={() => socket.emit(Msg.AdminScheduleDeleteEntry, entry.id)}
-                      className="text-red-500 hover:bg-red-500">
-                      Delete Entry
-                    </ContextMenuButton>
-                  </ClickContextMenu>
-                </button>
-              </div>
-            ))}
+            <div className="w-full overflow-x-auto bg-bg2">
+              <ScheduleHeader />
+              {schedule.entries.map((entry, index) => (
+                <div
+                  key={`${index}-${entry.id}`}
+                  className="animate-fade-in flex w-full min-w-max items-center justify-between gap-4 border-t-[1px] border-border1 bg-bg2 pr-1">
+                  <ScheduleEntry
+                    entry={entry}
+                    onChange={(options) => {
+                      socket.emit(Msg.AdminScheduleUpdateEntry, { entryID: entry.id, options })
+                    }}
+                  />
+                  <button className="shrink-0 rounded-full p-1.5 text-lg hover:bg-bg3">
+                    <Icon name="more" />
+                    <ClickContextMenu placement="right">
+                      <ContextMenuButton
+                        icon="delete"
+                        onClick={() => socket.emit(Msg.AdminScheduleDeleteEntry, entry.id)}
+                        className="text-red-500 hover:bg-red-500">
+                        Delete Entry
+                      </ContextMenuButton>
+                    </ClickContextMenu>
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         ) : (
           <div className="flex w-full cursor-default flex-col items-center justify-center gap-4 py-8 text-lg text-text2">
@@ -103,9 +102,11 @@ export default function ScheduleEditor() {
           <p className="mb-8 text-center text-text2">
             Enter the details for the new schedule entry below.
           </p>
-          <ScheduleHeader />
-          <div className="bg-bg2 py-2">
-            <ScheduleEntry onChange={(options) => setAddOptions(options)} />
+          <div className="w-full overflow-x-auto bg-bg2">
+            <ScheduleHeader />
+            <div className="bg-bg2 py-2">
+              <ScheduleEntry onChange={(options) => setAddOptions(options)} />
+            </div>
           </div>
           <div className="mt-8 flex items-center justify-end gap-2">
             <Button style="normal" onClick={() => setShowAddModal(false)}>

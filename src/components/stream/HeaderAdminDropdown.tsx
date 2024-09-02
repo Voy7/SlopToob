@@ -23,13 +23,13 @@ export default function HeaderAdminDropdown({ title, subtitle, icon, children }:
   useEffect(() => {
     if (!containerRef.current || !contentRef.current) return
 
-    const RIGHT_PADDING = 24
+    const x_PADDING = 12
     const containerRect = containerRef.current.getBoundingClientRect()
     const contentRect = contentRef.current.getBoundingClientRect()
     const totalWidth = contentRect.left + contentRect.width
-    if (totalWidth > window.innerWidth - RIGHT_PADDING)
-      setLeft(window.innerWidth - contentRect.width - RIGHT_PADDING)
-    else setLeft(containerRect.left)
+    if (totalWidth > window.innerWidth - x_PADDING * 2)
+      setLeft(window.innerWidth - contentRect.width - x_PADDING)
+    else setLeft(containerRect.left + x_PADDING)
 
     function handleClick(event: MouseEvent) {
       if (containerRef.current?.contains(event.target as Node)) return
@@ -85,7 +85,7 @@ export default function HeaderAdminDropdown({ title, subtitle, icon, children }:
         <div
           ref={contentRef}
           className={twMerge(
-            'animate-dropdown absolute top-[var(--header-height)] z-10 overflow-hidden rounded-md border border-border1 bg-red-500 shadow-xl',
+            'animate-dropdown fixed top-[var(--header-height)] z-10 max-w-[calc(100vw-1rem)] overflow-hidden rounded-md border border-border1 bg-red-500 shadow-xl',
             !open && 'hidden'
           )}
           style={{

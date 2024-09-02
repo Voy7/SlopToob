@@ -32,7 +32,7 @@ export default function QueueList({ omitDetails = false }: { omitDetails?: boole
   return (
     <>
       <SettingGroup>
-        <div className="flex items-center justify-between gap-4">
+        <div className="mb-1 flex items-center justify-between gap-4">
           <Header icon="list">Queue ({queue.length})</Header>
           <button
             className="flex shrink-0 items-center gap-0.5 whitespace-nowrap rounded-lg px-2 py-1 text-blue-500 duration-300 hover:underline active:bg-blue-500 active:bg-opacity-50 active:duration-0"

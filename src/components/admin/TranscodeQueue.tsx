@@ -27,7 +27,9 @@ export default function QueueList() {
 
   return (
     <SettingGroup>
-      <Header icon="list">Transcoding Jobs ({transcodeQueue.length})</Header>
+      <div className="mb-1">
+        <Header icon="list">Transcoding Jobs ({transcodeQueue.length})</Header>
+      </div>
       <div className="flex flex-col border-l-[1px] border-r-[1px] border-t-[1px] border-border1">
         {transcodeQueue.map((job, index) => (
           <Job key={job.id} job={job} index={index} />
