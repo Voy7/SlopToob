@@ -23,8 +23,6 @@ export default function Modal({
   className,
   children
 }: Props) {
-  const modalRef = useRef<HTMLDialogElement>(null)
-
   const [show, setShow] = useState<boolean>(isOpen)
 
   // Sync 'show' state with isOpen and animation delay
@@ -47,12 +45,6 @@ export default function Modal({
     return () => clearTimeout(timeout)
   }, [isOpen])
 
-  useEffect(() => {
-    if (!modalRef.current) return
-    if (show) modalRef.current.showModal()
-    else modalRef.current.close()
-  }, [show])
-
   // Escape key press logic
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -70,10 +62,10 @@ export default function Modal({
   if (typeof window === 'undefined') return null
 
   return createPortal(
-    <dialog
-      ref={modalRef}
+    <div
+      data-modal
       className={twMerge(
-        'animate-fade-in h-screen w-screen bg-black bg-opacity-50 text-text1 opacity-0 backdrop-blur-sm transition-opacity duration-300 ease-in-out [&:modal]:max-h-[100vh] [&:modal]:max-w-[100vw]',
+        'animate-fade-in fixed left-0 top-0 h-screen w-screen bg-black bg-opacity-50 opacity-0 backdrop-blur-sm transition-opacity duration-300 ease-in-out',
         isOpen && 'opacity-100'
       )}
       onClick={(event) => {
@@ -96,7 +88,7 @@ export default function Modal({
         </div>
         {children}
       </div>
-    </dialog>,
+    </div>,
     document.querySelector('#modals-root')!
   )
 }

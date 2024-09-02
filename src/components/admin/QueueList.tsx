@@ -9,6 +9,7 @@ import Icon, { IconNames } from '@/components/ui/Icon'
 import Thumbnail from '@/components/stream/Thumbnail'
 import ClickContextMenu from '@/components/ui/ClickContextMenu'
 import ContextMenuButton from '@/components/ui/ContextMenuButton'
+import Modal from '@/components/ui/Modal'
 import { twMerge } from 'tailwind-merge'
 import type { ClientVideo } from '@/typings/socket'
 
@@ -26,15 +27,34 @@ const states: Record<VideoState, { name: string; color: string }> = {
 export default function QueueList({ omitDetails = false }: { omitDetails?: boolean }) {
   const { queue } = useAdminContext()
 
+  const [showAddModal, setShowAddModal] = useState<boolean>(false)
+
   return (
-    <SettingGroup>
-      <Header icon="list">Queue ({queue.length})</Header>
-      <div className="flex flex-col border-l-[1px] border-r-[1px] border-t-[1px] border-border1">
-        {queue.map((video, index) => (
-          <Video key={video.id} video={video} index={index} omitDetails={omitDetails} />
-        ))}
-      </div>
-    </SettingGroup>
+    <>
+      <SettingGroup>
+        <div className="flex items-center justify-between gap-4">
+          <Header icon="list">Queue ({queue.length})</Header>
+          <button
+            className="flex shrink-0 items-center gap-0.5 whitespace-nowrap rounded-lg px-2 py-1 text-blue-500 duration-300 hover:underline active:bg-blue-500 active:bg-opacity-50 active:duration-0"
+            onClick={() => setShowAddModal(true)}>
+            <Icon name="playlist-add" />
+            Add Video Manually
+          </button>
+        </div>
+        <div className="flex flex-col border-l-[1px] border-r-[1px] border-t-[1px] border-border1">
+          {queue.map((video, index) => (
+            <Video key={video.id} video={video} index={index} omitDetails={omitDetails} />
+          ))}
+        </div>
+      </SettingGroup>
+
+      <Modal
+        title="Add Video Manually"
+        isOpen={showAddModal}
+        setClose={() => setShowAddModal(false)}>
+        <div className="flex flex-col gap-4"></div>
+      </Modal>
+    </>
   )
 }
 

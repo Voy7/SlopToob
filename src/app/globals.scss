@@ -34,9 +34,9 @@ body {
   overflow-x: hidden;
 }
 
-body:has(dialog[open]) {
+body:has([data-modal]) {
   overflow: hidden;
-  padding-right: 8px; // Scrollbar width
+  padding-right: 12px; // Scrollbar width
 }
 
 *,
