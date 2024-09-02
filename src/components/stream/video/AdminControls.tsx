@@ -11,7 +11,7 @@ export default function AdminControls() {
   const { socket } = useSocketContext()
 
   return (
-    <div className="flex items-center rounded-xl border border-blue-500 border-opacity-50 bg-slate-500 bg-opacity-25 p-1">
+    <div className="hidden items-center rounded-xl border border-blue-500 border-opacity-50 bg-slate-500 bg-opacity-25 p-1 md:flex">
       <ActionButton onClick={() => socket.emit(Msg.AdminSeekStepBackward, 10)}>
         <HoverTooltip placement="top" offset={22}>
           Rewind 10s (Admin only)

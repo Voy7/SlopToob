@@ -13,6 +13,7 @@ export default function ClickContextMenu({ placement, offset = 5, children }: Pr
   const [show, setShow] = useState<boolean>(false)
 
   const anchorRef = useRef<HTMLDivElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!anchorRef.current) return
@@ -27,15 +28,15 @@ export default function ClickContextMenu({ placement, offset = 5, children }: Pr
     }
   }, [])
 
-  // Close if clicked outside of menu
+  // Close if clicked outside of menu or on a menu button
   useEffect(() => {
     if (!show) return
 
     function handleClick(event: MouseEvent) {
       const parent = anchorRef.current?.parentElement
       if (!parent) return
-      if (parent.contains(event.target as Node)) return
-      setShow(false)
+      if (event.target instanceof HTMLElement && event.target.dataset.noClose) return
+      if (!parent.contains(event.target as Node)) setShow(false)
     }
 
     function handleKeyDown(event: KeyboardEvent) {
@@ -56,7 +57,6 @@ export default function ClickContextMenu({ placement, offset = 5, children }: Pr
     <>
       <div ref={anchorRef} className="hidden" />
       <FloatingAnchored
-        onClick={(event) => event.stopPropagation()}
         className="whitespace-nowrap"
         sharedClassName="bg-bg1"
         borderColor="bg-border1"

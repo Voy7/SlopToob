@@ -92,6 +92,14 @@ export default function VideoControls({ scrubber, adminControls }: Props) {
       hoveredControls = false
       check()
     }
+    controlsElement.ontouchstart = () => {
+      hoveredControls = true
+      check()
+    }
+    controlsElement.ontouchend = () => {
+      hoveredControls = false
+      check()
+    }
 
     check()
 
@@ -102,6 +110,8 @@ export default function VideoControls({ scrubber, adminControls }: Props) {
       containerElement.onmouseup = null
       controlsElement.onmousemove = null
       controlsElement.onmouseleave = null
+      controlsElement.ontouchstart = null
+      controlsElement.ontouchend = null
       clearTimeout(timeout)
     }
   }, [containerElement])
@@ -110,7 +120,7 @@ export default function VideoControls({ scrubber, adminControls }: Props) {
     <div
       ref={controlsContainerRef}
       className={twMerge(
-        'absolute bottom-0 left-0 flex w-full flex-col bg-[rgba(0,0,0,0.5)] shadow-[0_0.5rem_1rem_rgba(0,0,0,0.5)] transition-[150ms]',
+        'absolute bottom-0 left-0 flex w-full flex-col overflow-x-auto overflow-y-hidden bg-[rgba(0,0,0,0.5)] shadow-[0_0.5rem_1rem_rgba(0,0,0,0.5)] transition-[150ms]',
         !showControls && 'translate-y-full opacity-0'
       )}
       onClick={(event) => event.stopPropagation()}>
@@ -118,7 +128,7 @@ export default function VideoControls({ scrubber, adminControls }: Props) {
       <div className="flex items-center justify-between p-2">
         <div className="flex items-center gap-2">
           <PausePlayButton />
-          <p className="cursor-default text-lg text-slate-200">
+          <p className="cursor-default whitespace-nowrap text-lg text-slate-200">
             {currentTimestamp} / {totalTimestamp}
           </p>
           <div className="group flex items-center pr-8">

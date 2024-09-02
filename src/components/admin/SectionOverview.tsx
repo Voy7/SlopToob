@@ -19,7 +19,7 @@ export default function SectionOverview() {
     <>
       <MainHeader>Stream Overview</MainHeader>
       <StreamControls />
-      <QueueList />
+      <QueueList omitDetails={true} />
       <SettingGroup>
         <Header icon="playlist">Active Playlist</Header>
         <ListOption {...activePlaylist} />

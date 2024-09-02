@@ -80,6 +80,8 @@ export const socketEvents: Record<string, EventOptions> = {
       })
 
       socket.emit(Msg.Authenticate, true)
+
+      SocketUtils.broadcastAdmin(Msg.AdminRichUsers, SocketUtils.clientRichUsers)
     }
   },
 

@@ -126,8 +126,8 @@ export const settingsList = {
 
   // Weeky schedule settings
   enableWeeklySchedule: { default: false, onChange: scheduleResync },
-  weekyScheduleInSync: { default: false },
   weeklyScheduleUTCOffset: { default: 0, onChange: scheduleResync },
+  weekyScheduleInSync: { default: false }, // Not a real setting, just a persistant state
 
   // Weekly schedule user display settings
   showWeeklySchedule: { default: true, onChange: scheduleDisplayResync },

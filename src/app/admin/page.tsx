@@ -21,11 +21,13 @@ export default async function AdminPage() {
   return (
     <SocketProvider authUser={authUser} cookieUsername={cookieUsername}>
       <AdminProvider>
-        <div className="grid h-screen w-screen grid-cols-[1fr,320px] gap-6 overflow-hidden">
-          <div className="flex h-screen flex-col overflow-hidden p-16 lg:flex-row">
+        <div className="grid h-screen w-screen grid-cols-[1fr] gap-6 overflow-hidden lg:grid-cols-[1fr,320px]">
+          <div className="flex h-screen flex-row overflow-hidden">
             <AdminPanel />
           </div>
-          <RichUsersList />
+          <div className="hidden lg:block">
+            <RichUsersList />
+          </div>
         </div>
       </AdminProvider>
     </SocketProvider>

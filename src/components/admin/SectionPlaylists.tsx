@@ -10,6 +10,7 @@ import Icon from '@/components/ui/Icon'
 import Button from '@/components/ui/Button'
 import ActionModal from '@/components/ui/ActionModal'
 import SelectDropdown from '@/components/ui/SelectDropdown'
+import SelectItem from '@/components/ui/SelectItem'
 import PlaylistEditor from '@/components/admin/PlaylistEditor'
 import styles from './SectionPlaylists.module.scss'
 
@@ -63,17 +64,13 @@ export default function SectionPlaylists() {
           <div className={styles.playlistNavbar}>
             <SelectDropdown label={activePlaylist?.name || 'None Selected'} icon="playlist">
               {playlists.map((playlist) => (
-                <button
+                <SelectItem
                   key={playlist.id}
-                  className={
-                    selectedPlaylist === playlist.id
-                      ? `${styles.playlistItem} ${styles.selected}`
-                      : styles.playlistItem
-                  }
-                  onClick={() => setSelectedPlaylist(playlist.id)}>
-                  {playlist.name}
-                  <span>{playlist.videoPaths.length.toLocaleString()} Videos</span>
-                </button>
+                  active={selectedPlaylist === playlist.id}
+                  label={playlist.name}
+                  subLabel={`${playlist.videoPaths.length.toLocaleString()} Videos`}
+                  onClick={() => setSelectedPlaylist(playlist.id)}
+                />
               ))}
             </SelectDropdown>
             <Button

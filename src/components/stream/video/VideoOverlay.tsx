@@ -30,8 +30,8 @@ function StateOverlay() {
   if (streamInfo.state === StreamState.Playing && isPaused) {
     return (
       <button
-        className="absolute left-1/2 top-1/2 m-auto flex -translate-x-1/2 -translate-y-1/2 transform cursor-pointer items-center justify-center rounded-lg border-none bg-bg2 p-2 text-[5rem] text-text2 hover:bg-bg3 hover:text-text1"
-        onClick={() => videoElement.play()}>
+        className="absolute left-1/2 top-1/2 m-auto flex -translate-x-1/2 -translate-y-1/2 transform cursor-pointer items-center justify-center rounded-xl border-none bg-bg2 px-4 py-1 text-[5rem] text-pink-300 shadow-xl transition-colors duration-150 hover:bg-bg3 hover:text-text1 active:bg-bg4 active:duration-0"
+        onClick={() => videoElement.play().catch(() => {})}>
         <Icon name="play" />
       </button>
     )

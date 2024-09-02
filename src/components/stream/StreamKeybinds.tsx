@@ -38,7 +38,8 @@ export default function StreamKeybinds() {
         key: [' '],
         keyLabel: 'Space',
         description: 'Play/Pause video',
-        action: () => (videoElement.paused ? videoElement.play() : videoElement.pause())
+        action: () =>
+          videoElement.paused ? videoElement.play().catch(() => {}) : videoElement.pause()
       },
       {
         key: ['arrowup'],
@@ -117,7 +118,7 @@ export default function StreamKeybinds() {
             }
             return
           }
-          videoElement.paused ? videoElement.play() : videoElement.pause()
+          videoElement.paused ? videoElement.play().catch(() => {}) : videoElement.pause()
         }
       },
       {

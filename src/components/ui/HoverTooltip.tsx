@@ -24,10 +24,14 @@ export default function HoverTooltip({ placement, offset = 5, children }: Props)
 
     parent.addEventListener('mouseenter', mouseEnter)
     parent.addEventListener('mouseleave', mouseLeave)
+    parent.addEventListener('focus', mouseEnter)
+    parent.addEventListener('blur', mouseLeave)
 
     return () => {
       parent.removeEventListener('mouseenter', mouseEnter)
       parent.removeEventListener('mouseleave', mouseLeave)
+      parent.removeEventListener('focus', mouseEnter)
+      parent.removeEventListener('blur', mouseLeave)
     }
   }, [])
 
@@ -35,7 +39,6 @@ export default function HoverTooltip({ placement, offset = 5, children }: Props)
     <>
       <div ref={anchorRef} className="hidden" />
       <FloatingAnchored
-        // className="whitespace-nowrap"
         show={show}
         setShow={setShow}
         placement={placement}

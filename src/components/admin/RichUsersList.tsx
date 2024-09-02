@@ -28,7 +28,7 @@ export default function RichUsersList() {
         <Icon name="users" />
       </h2>
       <Group title="Admins" color={roleColors[AuthRole.Admin]} users={adminUsers} />
-      <Group title="Users" color={roleColors[AuthRole.Normal]} users={normalUsers} />
+      <Group title="Normal Users" color={roleColors[AuthRole.Normal]} users={normalUsers} />
     </div>
   )
 }
@@ -67,28 +67,30 @@ function Group({ title, color, users }: GroupProps) {
                   style={{ color }}>
                   {user.username}
                 </p>
-                {user.isWatching ? (
-                  <div className="shrink-0 p-1 text-blue-300">
-                    <Icon name="visibility-on" />
-                    <HoverTooltip placement="top">Watching Stream</HoverTooltip>
-                  </div>
-                ) : (
-                  <div className="shrink-0 p-1 text-gray-500">
-                    <Icon name="visibility-off" />
-                    <HoverTooltip placement="top">Not Watching Stream</HoverTooltip>
-                  </div>
-                )}
-                <button className="shrink-0 rounded-full p-1 hover:bg-bg2">
-                  <Icon name="more" />
-                  <ClickContextMenu placement="top-end">
-                    <ContextMenuButton
-                      icon="logout"
-                      className="text-red-500 hover:bg-red-500"
-                      onClick={() => socket.emit(Msg.AdminKickUser, user.socketID)}>
-                      Kick / Disconnect
-                    </ContextMenuButton>
-                  </ClickContextMenu>
-                </button>
+                <div className="flex shrink-0 items-center">
+                  {user.isWatching ? (
+                    <div className="shrink-0 p-1 text-blue-300">
+                      <Icon name="visibility-on" />
+                      <HoverTooltip placement="top">Watching Stream</HoverTooltip>
+                    </div>
+                  ) : (
+                    <div className="shrink-0 p-1 text-gray-500">
+                      <Icon name="visibility-off" />
+                      <HoverTooltip placement="top">Not Watching Stream</HoverTooltip>
+                    </div>
+                  )}
+                  <button className="shrink-0 rounded-full p-1 hover:bg-bg2">
+                    <Icon name="more" />
+                    <ClickContextMenu placement="top-end">
+                      <ContextMenuButton
+                        icon="logout"
+                        className="text-red-500 hover:bg-red-500"
+                        onClick={() => socket.emit(Msg.AdminKickUser, user.socketID)}>
+                        Kick / Disconnect
+                      </ContextMenuButton>
+                    </ClickContextMenu>
+                  </button>
+                </div>
               </div>
             </div>
           ))}

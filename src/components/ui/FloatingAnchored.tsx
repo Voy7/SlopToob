@@ -134,6 +134,7 @@ export default function FloatingAnchored({
     <div ref={anchorRef} className="hidden">
       {createPortal(
         <div
+          data-floating-anchored
           className={twMerge(
             'absolute z-50 max-w-[100vw] rounded-lg',
             borderColor,
@@ -165,6 +166,7 @@ export default function FloatingAnchored({
             }}
           />
           <div
+            data-no-close
             ref={tooltipRef}
             className={twMerge(
               'relative overflow-hidden rounded-lg bg-slate-600 p-2 text-lg',

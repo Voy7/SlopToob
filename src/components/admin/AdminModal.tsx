@@ -26,7 +26,7 @@ export default function AdminModal() {
       setClose={() => setShowAdminModal(false)}
       canEscapeKeyClose={false}
       className="overflow-y-hidden">
-      <div className="flex h-[calc(100vh-4rem)] w-[min(calc(100vw-2rem-2px),1100px)] flex-col md:h-[calc(100vh-9rem)] lg:flex-row">
+      <div className="flex h-[calc(100vh-4rem)] w-[min(calc(100vw-2rem-2px),1100px)] flex-row md:h-[calc(100vh-9rem)]">
         <AdminPanel />
       </div>
     </Modal>

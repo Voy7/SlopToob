@@ -13,8 +13,7 @@ export default function ContextMenuButton({ icon, children, className, ...props 
         'flex items-center justify-between gap-2 rounded-sm px-2 py-1 text-text2 hover:bg-blue-500 hover:text-white',
         className
       )}
-      {...props}
-    >
+      {...props}>
       {children}
       {icon && <Icon name={icon} />}
     </button>

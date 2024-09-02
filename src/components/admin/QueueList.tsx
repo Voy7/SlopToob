@@ -23,7 +23,7 @@ const states: Record<VideoState, { name: string; color: string }> = {
   [VideoState.Errored]: { name: 'Errored', color: 'red' }
 }
 
-export default function QueueList() {
+export default function QueueList({ omitDetails = false }: { omitDetails?: boolean }) {
   const { queue } = useAdminContext()
 
   return (
@@ -31,14 +31,20 @@ export default function QueueList() {
       <Header icon="list">Queue ({queue.length})</Header>
       <div className="flex flex-col border-l-[1px] border-r-[1px] border-t-[1px] border-border1">
         {queue.map((video, index) => (
-          <Video key={video.id} video={video} index={index} />
+          <Video key={video.id} video={video} index={index} omitDetails={omitDetails} />
         ))}
       </div>
     </SettingGroup>
   )
 }
 
-function Video({ video, index }: { video: ClientVideo; index: number }) {
+type VideoProps = {
+  video: ClientVideo
+  index: number
+  omitDetails: boolean
+}
+
+function Video({ video, index, omitDetails }: VideoProps) {
   const { socket } = useSocketContext()
 
   const [showDetails, setShowDetails] = useState<boolean>(false)
@@ -81,11 +87,13 @@ function Video({ video, index }: { video: ClientVideo; index: number }) {
             )}
           </div>
         </div>
-        <button
-          className="shrink-0 whitespace-nowrap rounded-lg px-2 py-1 text-blue-500 duration-300 hover:underline active:bg-blue-500 active:bg-opacity-50 active:duration-0"
-          onClick={() => setShowDetails(!showDetails)}>
-          {showDetails ? 'Hide Details' : 'Show Details'}
-        </button>
+        {!omitDetails && (
+          <button
+            className="shrink-0 whitespace-nowrap rounded-lg px-2 py-1 text-blue-500 duration-300 hover:underline active:bg-blue-500 active:bg-opacity-50 active:duration-0"
+            onClick={() => setShowDetails(!showDetails)}>
+            {showDetails ? 'Hide Details' : 'Show Details'}
+          </button>
+        )}
         <button
           className="shrink-0 rounded-full p-1.5 text-lg hover:bg-bg2 hover:bg-opacity-50"
           onClick={() => setShowActions(!showActions)}>

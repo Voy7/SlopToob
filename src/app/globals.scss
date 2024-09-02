@@ -34,6 +34,11 @@ body {
   overflow-x: hidden;
 }
 
+body:has(dialog[open]) {
+  overflow: hidden;
+  padding-right: 8px; // Scrollbar width
+}
+
 *,
 *::before,
 *::after {

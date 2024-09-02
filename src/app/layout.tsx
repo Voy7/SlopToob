@@ -26,7 +26,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <meta name="theme-color" content="#5496ff" />
       </head>
       <body className={mainFont.className}>
-        <SessionProvider session={session}>{children}</SessionProvider>
+        <SessionProvider session={session}>
+          {children}
+          <div id="modals-root" />
+        </SessionProvider>
       </body>
     </html>
   )

@@ -72,14 +72,11 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
       if (streamInfo.state !== StreamState.Playing) {
         event.preventDefault()
         video.pause()
+        syncVideoTime()
         return
       }
       setIsPaused(false)
-
-      // Seek to current time
-      if (!lastStreamUpdateTimestamp) return
-      const diff = (Date.now() - lastStreamUpdateTimestamp) / 1000 + streamInfo.trueCurrentSeconds
-      video.currentTime = diff
+      syncVideoTime()
     }
 
     video.onpause = () => {
@@ -93,6 +90,17 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
         setVolume(0)
         if (video.volume === 0) video.volume = 1
       } else setVolume(video.volume * 100)
+    }
+
+    video.onseeking = (event) => {
+      // console.log('seeking', event)
+    }
+
+    // There are a bunch of ways to force the player to seek, including the safari video player
+    // So enforce the time to be the same as the stream time
+    // This might have some weird jumping effects if seeking process takes more than 1 second
+    video.onseeked = (event) => {
+      syncVideoTime()
     }
   }, [streamInfo, lastStreamUpdateTimestamp])
 
@@ -111,11 +119,25 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
       video.pause()
     }
 
-    // Time sync logic, only sync if the difference is greater than 1 second
-    if (!('trueCurrentSeconds' in streamInfo)) return
-    const diff = Math.abs(video.currentTime - streamInfo.trueCurrentSeconds)
-    if (diff > 1) video.currentTime = streamInfo.trueCurrentSeconds
+    syncVideoTime()
   }, [streamInfo, prevState, lastStreamUpdateTimestamp])
+
+  // Sync video time with stream time if possible
+  function syncVideoTime() {
+    if (!videoRef.current) return
+    if (videoRef.current.seeking) return
+    if (!('trueCurrentSeconds' in streamInfo) || !lastStreamUpdateTimestamp) {
+      videoRef.current.currentTime = 0
+      return
+    }
+    if (streamInfo.state !== StreamState.Playing) {
+      videoRef.current.currentTime = streamInfo.trueCurrentSeconds
+      return
+    }
+    const time = (Date.now() - lastStreamUpdateTimestamp) / 1000 + streamInfo.trueCurrentSeconds
+    const diff = Math.abs(videoRef.current.currentTime - time)
+    if (diff > 1) videoRef.current.currentTime = time
+  }
 
   // Sync video title with document title
   useEffect(() => {
@@ -128,7 +150,7 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
 
   // Pause/unpause video when background is clicked
   function backgroundClick() {
-    if (isPaused) videoRef.current?.play()
+    if (isPaused) videoRef.current?.play().catch(() => {})
     else videoRef.current?.pause()
   }
 
@@ -141,8 +163,18 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
   }
 
   function toggleFullscreen() {
-    if (document.fullscreenElement) document.exitFullscreen()
-    else containerRef.current?.requestFullscreen()
+    if (!videoRef.current || !containerRef.current) return
+    if ('webkitEnterFullscreen' in videoRef.current) {
+      // @ts-ignore - webkitEnterFullscreen is a non-standard method
+      if (videoRef.current.webkitDisplayingFullscreen) videoRef.current.webkitExitFullscreen()
+      // @ts-ignore - webkitEnterFullscreen is a non-standard method
+      else videoRef.current.webkitEnterFullscreen()
+    }
+    if ('requestFullscreen' in containerRef.current) {
+      if (document.fullscreenElement) document.exitFullscreen()
+      else containerRef.current.requestFullscreen()
+      return
+    }
   }
 
   const context: ContextProps = {
@@ -169,7 +201,7 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
           streamInfo.streamTheme === 'Zoomer' && 'grid grid-cols-[1fr_1fr] grid-rows-[1fr_1fr]'
         )}
         onClick={backgroundClick}>
-        <video ref={videoRef} className="h-full w-full" autoPlay playsInline>
+        <video ref={videoRef} className="h-full w-full" autoPlay playsInline controls={false}>
           Your browser does not support the video tag.
         </video>
         {streamInfo.streamTheme === 'Zoomer' && (

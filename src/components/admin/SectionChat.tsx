@@ -28,6 +28,7 @@ export default function SectionChat() {
   const sendAdminSkip = useToggleOption('sendAdminSkip')
   const sendAdminPrevious = useToggleOption('sendAdminPrevious')
   const sendAdminChangePlaylist = useToggleOption('sendAdminChangePlaylist')
+  const snedAdminSyncedSchedule = useToggleOption('sendAdminSyncedSchedule')
 
   const nicknameOnlyAlphanumeric = useToggleOption('nicknameOnlyAlphanumeric')
   const nicknameMinLength = useNumberOption('nicknameMinLength')
@@ -59,6 +60,7 @@ export default function SectionChat() {
         <ToggleOption label="Admin Skipped Video" {...sendAdminSkip} />
         <ToggleOption label="Admin Played Previous Video" {...sendAdminPrevious} />
         <ToggleOption label="Admin Changed Active Playlist" {...sendAdminChangePlaylist} />
+        <ToggleOption label="Admin Synced Playlist Scheduler" {...snedAdminSyncedSchedule} />
         <Description>Send a message when an event occurs.</Description>
       </SettingGroup>
       <SettingGroup>

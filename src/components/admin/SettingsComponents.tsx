@@ -11,7 +11,7 @@ export function MainHeader({ children }: { children: React.ReactNode }) {
 }
 
 export function SettingGroup({ children }: { children: React.ReactNode }) {
-  return <div className="mb-1 rounded-lg border border-border1 p-2">{children}</div>
+  return <div className="mb-1 w-full rounded-lg border border-border1 p-2">{children}</div>
 }
 
 export function Header({ icon, children }: { icon: IconNames; children: React.ReactNode }) {
