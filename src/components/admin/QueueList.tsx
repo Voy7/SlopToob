@@ -34,12 +34,12 @@ export default function QueueList({ omitDetails = false }: { omitDetails?: boole
       <SettingGroup>
         <div className="mb-1 flex items-center justify-between gap-4">
           <Header icon="list">Queue ({queue.length})</Header>
-          <button
+          {/* <button
             className="flex shrink-0 items-center gap-0.5 whitespace-nowrap rounded-lg px-2 py-1 text-blue-500 duration-300 hover:underline active:bg-blue-500 active:bg-opacity-50 active:duration-0"
             onClick={() => setShowAddModal(true)}>
             <Icon name="playlist-add" />
             Add Video Manually
-          </button>
+          </button> */}
         </div>
         <div className="flex flex-col border-l-[1px] border-r-[1px] border-t-[1px] border-border1">
           {queue.map((video, index) => (
@@ -127,11 +127,13 @@ function Video({ video, index, omitDetails }: VideoProps) {
                 Remove from Queue
               </ContextMenuButton>
             )}
-            <ContextMenuButton
-              icon="admin-panel"
-              onClick={() => socket.emit(Msg.AdminDebugVideo, video.id)}>
-              Print Video Debug
-            </ContextMenuButton>
+            {!omitDetails && (
+              <ContextMenuButton
+                icon="admin-panel"
+                onClick={() => socket.emit(Msg.AdminDebugVideo, video.id)}>
+                Print Video Debug
+              </ContextMenuButton>
+            )}
           </ClickContextMenu>
         </button>
       </div>

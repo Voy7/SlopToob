@@ -12,10 +12,10 @@ export default function ScheduleDisplay() {
 
   return (
     <div className="m-4 rounded-xl bg-bg2 p-4">
-      <h2 className="flex items-center gap-1 text-xl font-medium">
-        <Icon name="calendar" />
-        Weekly Playlist Schedule
-        <span className="text-base text-text3">
+      <h2 className="flex w-full items-center gap-1 overflow-hidden whitespace-nowrap text-xl font-medium">
+        <Icon name="calendar" className="shrink-0" />
+        <span className="overflow-hidden text-ellipsis">Weekly Playlist Schedule</span>
+        <span className="overflow-hidden text-ellipsis text-base text-text3">
           &bull; {scheduleDisplay.inSync ? 'Is Active' : 'Currently Not Active'}
         </span>
       </h2>
@@ -25,19 +25,21 @@ export default function ScheduleDisplay() {
             key={index}
             className={twMerge(
               'flex cursor-default flex-col items-start',
-              index !== scheduleDisplay.entries.length - 1 && 'w-full'
+              index !== scheduleDisplay.entries.length - 1 && 'w-full min-w-[240px]'
             )}>
-            <h3 className="flex items-center gap-1 whitespace-nowrap text-xl uppercase text-text3">
+            <h3 className="flex items-center gap-1 whitespace-nowrap text-xl uppercase text-text2">
               {entry.day}
-              {entry.timemark && <span className="text-base">&bull; {entry.timemark}</span>}
+              {entry.timemark && (
+                <span className="text-base text-text3">&bull; {entry.timemark}</span>
+              )}
             </h3>
-            <div className="flex w-full min-w-[200px] shrink-0 items-center">
+            <div className="flex w-full shrink-0 items-center">
               <div
                 className={twMerge(
-                  'relative h-[100px] w-[178px] shrink-0 overflow-hidden rounded-lg border border-border1 bg-bg3 shadow-lg',
+                  'relative h-[115px] w-[204px] shrink-0 overflow-hidden rounded-xl border-2 border-border1 bg-bg3 shadow-lg',
                   index === scheduleDisplay.activeEntryIndex && 'border-blue-500'
                 )}>
-                <Thumbnail src={entry.thumbnailURL} height={178} />
+                <Thumbnail src={entry.thumbnailURL} height={115} />
                 <div className="schedule-vertical-dark-gradient absolute bottom-0 left-0 flex h-[3.5rem] w-full items-center overflow-hidden px-1.5 pt-2 text-base text-white">
                   <p
                     title={entry.playlist}

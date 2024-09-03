@@ -195,11 +195,8 @@ class Player {
   }
 
   // Set playlist as active, and start playing it
-  async setActivePlaylistID(
-    playlistID: string,
-    executedBy?: SocketClient,
-    noScheduleCheck?: boolean
-  ) {
+  // NOTE: Do NOT call this function directly, use Settings.set('activePlaylistID', id) instead
+  async setActivePlaylistID(playlistID: string, executedBy?: SocketClient) {
     const playlist = this.playlists.find((playlist) => playlist.id === playlistID) || null
     Logger.debug('[Player] Setting active playlist:', playlist?.name || 'None')
 
@@ -215,9 +212,7 @@ class Player {
     }
     sendChangedMessage()
 
-    if (!noScheduleCheck && this.activePlaylist?.id !== playlistID) {
-      Schedule.unsync()
-    }
+    Schedule.unsyncCheck(playlistID)
 
     this.activePlaylist = playlist
 

@@ -95,7 +95,14 @@ class Schedule {
     })
   }
 
-  unsync() {
+  unsyncCheck(newPlaylistID?: string) {
+    if (!Settings.enableWeeklySchedule || !Settings.weekyScheduleInSync) return
+    const activeEntry = this.getActiveEntry()
+    if (!activeEntry || newPlaylistID === activeEntry.playlistID) return
+    this.unsync()
+  }
+
+  private unsync() {
     if (this.syncTimeout) clearTimeout(this.syncTimeout)
     Settings.set('weekyScheduleInSync', false)
     SocketUtils.broadcastAdmin(Msg.AdminSchedule, this.clientSchedule)
@@ -139,8 +146,9 @@ class Schedule {
     }
 
     const playlist = Player.playlists.find((p) => p.id === activeEntry.playlistID)
-    if (!playlist) return
-    Player.setActivePlaylistID(activeEntry.playlistID, undefined, true)
+    if (!playlist) return this.unsync()
+    // Player.setActivePlaylistID(activeEntry.playlistID, undefined, true)
+    Settings.set('activePlaylistID', activeEntry.playlistID)
     SocketUtils.broadcastAdmin(Msg.AdminSchedule, this.clientSchedule)
     SocketUtils.broadcast(Msg.ScheduleDisplay, this.clientScheduleDisplay)
   }
@@ -164,7 +172,6 @@ class Schedule {
     for (let i = 0; i < entries.length; i++) {
       const entry = entries[i]
       const secondsUntil = this.getSecondsUntil(now, entry)
-      console.log(entry.id, secondsUntil)
       if (prevSecondsUntil === null) {
         prevSecondsUntil = secondsUntil
         continue
@@ -248,7 +255,9 @@ class Schedule {
         const obj: ClientScheduleDisplay['entries'][0] = {
           day: daysOfWeek.find((d) => d.index === entry.dayOfWeek)?.name || 'Invalid Day',
           playlist: playlist ? playlist.name : '(Deleted Playlist)',
-          thumbnailURL: Thumbnails.getURL(playlist?.videos[0] || 'unknown')
+          thumbnailURL: Thumbnails.getURL(
+            playlist?.videos[Math.round(playlist.videos.length / 2)] || 'unknown'
+          )
         }
         if (Settings.showWeeklyScheduleTimemarks) {
           const minute = Math.floor((entry.secondsIn % 3600) / 60)

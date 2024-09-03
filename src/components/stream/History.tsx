@@ -13,12 +13,13 @@ export default function History() {
 
   return (
     <div className={styles.history}>
-      <h3 className={styles.header}>
-        <Icon name="history" />
-        Stream History
-        <span>&bull;</span>
-        <span>Last {streamInfo.history.length} videos</span>
-      </h3>
+      <h2 className="flex w-full items-center gap-1 overflow-hidden whitespace-nowrap text-xl font-medium">
+        <Icon name="history" className="shrink-0" />
+        <span className="overflow-hidden text-ellipsis">Stream History</span>
+        <span className="overflow-hidden text-ellipsis text-base text-text3">
+          &bull; Last {streamInfo.history.length} videos
+        </span>
+      </h2>
       {streamInfo.history.length > 0 ? (
         <ol className={styles.items}>
           {streamInfo.history.map((video, index) => (
