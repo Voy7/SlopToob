@@ -20,6 +20,10 @@ export default function SectionSchedule() {
   const enableWeeklySchedule = useToggleOption('enableWeeklySchedule')
   const weeklyScheduleUTCOffset = useNumberOption('weeklyScheduleUTCOffset')
 
+  const showWeeklySchedule = useToggleOption('showWeeklySchedule')
+  const showWeeklyScheduleIfUnsynced = useToggleOption('showWeeklyScheduleIfUnsynced')
+  const showWeeklyScheduleTimemarks = useToggleOption('showWeeklyScheduleTimemarks')
+
   return (
     <>
       <MainHeader>Weekly Schedule</MainHeader>
@@ -49,6 +53,19 @@ export default function SectionSchedule() {
         </Description>
       </SettingGroup>
       <ScheduleEditor />
+      <SettingGroup>
+        <Header icon="display">Scheduler Display Settings</Header>
+        <ToggleOption label="Show Weekly Schedule" {...showWeeklySchedule} />
+        <Description>Display the playlist schedule below the video.</Description>
+        <Gap />
+        <ToggleOption label="Show Weekly Schedule If Unsynced" {...showWeeklyScheduleIfUnsynced} />
+        <Description>Display the playlist schedule even if it is not synced.</Description>
+        <Gap />
+        <ToggleOption label="Show Weekly Schedule Timemarks" {...showWeeklyScheduleTimemarks} />
+        <Description>
+          Show timestamps on playlist schedule display. Will only show the day if disabled.
+        </Description>
+      </SettingGroup>
     </>
   )
 }

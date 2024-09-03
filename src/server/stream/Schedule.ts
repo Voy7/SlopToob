@@ -245,6 +245,8 @@ class Schedule {
 
   get clientScheduleDisplay(): ClientScheduleDisplay | null {
     if (!Settings.enableWeeklySchedule) return null
+    if (!Settings.showWeeklySchedule) return null
+    if (!Settings.showWeeklyScheduleIfUnsynced && !Settings.weekyScheduleInSync) return null
     return {
       inSync: Settings.weekyScheduleInSync,
       activeEntryIndex:
