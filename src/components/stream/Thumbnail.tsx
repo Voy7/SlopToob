@@ -15,8 +15,7 @@ export default function Thumbnail({ src, height }: Props) {
   return (
     <div
       className={loaded ? `${styles.thumbnail} ${styles.loaded}` : styles.thumbnail}
-      style={{ height: `${height}px` }}
-    >
+      style={{ height: `${height}px` }}>
       <img
         src={src}
         onError={(event) => {

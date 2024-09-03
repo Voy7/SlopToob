@@ -8,7 +8,7 @@ import '@/app/animations.scss'
 import { Roboto } from 'next/font/google'
 const mainFont = Roboto({
   subsets: ['latin'],
-  weight: ['400', '700']
+  weight: ['400', '500', '700']
 })
 
 export const metadata: Metadata = {

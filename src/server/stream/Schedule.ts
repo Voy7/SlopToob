@@ -3,8 +3,10 @@ import Checklist from '@/server/Checklist'
 import Settings from '@/server/Settings'
 import Player from '@/server/stream/Player'
 import Chat from '@/server/stream/Chat'
+import Thumbnails from '@/server/stream/Thumbnails'
 import SocketUtils from '../socket/SocketUtils'
 import { Msg } from '@/lib/enums'
+import { daysOfWeek } from '@/lib/daysOfWeek'
 import type { WeeklySchedule as DBScheduleEntry } from '@prisma/client'
 import type { ClientSchedule, ClientScheduleDisplay, SocketClient } from '@/typings/socket'
 import type { ScheduleEntryOptions } from '@/typings/types'
@@ -94,6 +96,7 @@ class Schedule {
   }
 
   unsync() {
+    if (this.syncTimeout) clearTimeout(this.syncTimeout)
     Settings.set('weekyScheduleInSync', false)
     SocketUtils.broadcastAdmin(Msg.AdminSchedule, this.clientSchedule)
     SocketUtils.broadcast(Msg.ScheduleDisplay, this.clientScheduleDisplay)
@@ -241,10 +244,21 @@ class Schedule {
         this.entries.findIndex((e) => e.playlistID === Player.activePlaylist?.id) || null,
       entries: this.entries.map((entry) => {
         const playlist = Player.playlists.find((p) => p.id === entry.playlistID)
-        return {
-          name: playlist ? playlist.name : '(Deleted Playlist)',
-          date: `${entry.dayOfWeek} ${entry.secondsIn}`
+        const realHour = Math.floor(entry.secondsIn / 3600)
+        const obj: ClientScheduleDisplay['entries'][0] = {
+          day: daysOfWeek.find((d) => d.index === entry.dayOfWeek)?.name || 'Invalid Day',
+          playlist: playlist ? playlist.name : '(Deleted Playlist)',
+          thumbnailURL: Thumbnails.getURL(playlist?.videos[0] || 'unknown')
         }
+        if (Settings.showWeeklyScheduleTimemarks) {
+          const minute = Math.floor((entry.secondsIn % 3600) / 60)
+            .toString()
+            .padStart(2, '0')
+          const ampm = realHour >= 12 ? 'PM' : 'AM'
+          const hour = realHour > 12 ? realHour - 12 : realHour
+          obj.timemark = `${hour}:${minute}${ampm}`
+        }
+        return obj
       })
     }
   }

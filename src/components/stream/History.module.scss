@@ -10,12 +10,13 @@
     display: flex;
     align-items: center;
     gap: 0.25em;
-    font-weight: 400;
+    font-weight: 500;
     font-size: 1.25rem;
 
     span {
       font-size: 1rem;
       color: var(--text-color-3);
+      font-weight: 400;
     }
   }
 

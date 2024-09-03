@@ -193,8 +193,10 @@ export type ClientScheduleDisplay = {
   inSync: boolean
   activeEntryIndex: number | null
   entries: {
-    name: string
-    date: string
+    day: string
+    timemark?: string
+    playlist: string
+    thumbnailURL: string
   }[]
 }
 

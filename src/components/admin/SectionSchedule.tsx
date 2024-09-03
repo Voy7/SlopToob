@@ -43,8 +43,19 @@ export default function SectionSchedule() {
             />
           ))}
         </SelectDropdown>
+        <Description>
+          Set the timezone for the playlist scheduler. &bull; (Aprroximate time:{' '}
+          {currentTimeDisplay(weeklyScheduleUTCOffset.value || 0)})
+        </Description>
       </SettingGroup>
       <ScheduleEditor />
     </>
   )
+}
+
+function currentTimeDisplay(offset: number): string {
+  const now = new Date()
+  const utc = now.getTime() + now.getTimezoneOffset() * 60000
+  const local = new Date(utc + 3600000 * offset)
+  return local.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 }
