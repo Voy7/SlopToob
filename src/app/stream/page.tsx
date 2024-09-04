@@ -32,7 +32,7 @@ export default async function StreamPage() {
         <StreamProvider>
           <AdminProviderConditional authRole={authUser.role}>
             <Header />
-            <div className="flex flex-col md:h-[calc((100vw-var(--chat-width))*9/16)] md:max-h-[calc(100vh-var(--info-body-height)-2px)] md:flex-row">
+            <div className="flex flex-col md:h-[calc((100vw-var(--chat-width))*9/16)] md:max-h-[calc(100vh-var(--header-height)-var(--info-body-height)-0.5rem)] md:flex-row">
               <Video />
               <Chat />
             </div>

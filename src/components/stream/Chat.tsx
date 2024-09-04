@@ -63,8 +63,8 @@ export default function Chat() {
         <div className="relative flex w-full items-center justify-between gap-4 border-b border-[var(--border-color-1)]">
           <button
             className={twMerge(
-              'flex cursor-pointer items-center gap-1 border-none bg-transparent p-2 text-text2 hover:bg-bg2 hover:text-text1 active:bg-bg3 active:text-text1',
-              showViewersList && 'bg-bg3 text-text1'
+              'flex cursor-pointer items-center gap-1 border-none bg-transparent p-2 text-text2',
+              showViewersList ? 'bg-bg3 text-text1' : 'hover:bg-bg2 hover:text-text1'
             )}
             onClick={() => setShowViewersList(!showViewersList)}>
             {!showViewersList && (

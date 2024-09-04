@@ -79,7 +79,7 @@ export default function ScheduleEntry({ entry, onChange }: Props) {
           ))}
         </SelectDropdown>
       </div>
-      <div className="w-[140px]">
+      <div className="w-[150px]">
         <SelectDropdown
           label={daysOfWeek.find((d) => d.index === day)?.name || 'Unknown'}
           icon="calendar">

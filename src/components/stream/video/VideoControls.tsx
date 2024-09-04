@@ -79,10 +79,10 @@ export default function VideoControls({ scrubber, adminControls }: Props) {
       hoveredContainer = true
       check()
     }
-    containerElement.onmouseup = () => {
-      hoveredContainer = false
-      check()
-    }
+    // containerElement.onmouseup = () => {
+    //   hoveredContainer = false
+    //   check()
+    // }
 
     controlsElement.onmousemove = () => {
       hoveredControls = true
@@ -96,10 +96,10 @@ export default function VideoControls({ scrubber, adminControls }: Props) {
       hoveredControls = true
       check()
     }
-    controlsElement.ontouchend = () => {
-      hoveredControls = false
-      check()
-    }
+    // controlsElement.ontouchend = () => {
+    //   hoveredControls = false
+    //   check()
+    // }
 
     check()
 
@@ -107,11 +107,11 @@ export default function VideoControls({ scrubber, adminControls }: Props) {
       containerElement.onmousemove = null
       containerElement.onmouseleave = null
       containerElement.onmousedown = null
-      containerElement.onmouseup = null
+      // containerElement.onmouseup = null
       controlsElement.onmousemove = null
       controlsElement.onmouseleave = null
       controlsElement.ontouchstart = null
-      controlsElement.ontouchend = null
+      // controlsElement.ontouchend = null
       clearTimeout(timeout)
     }
   }, [containerElement])

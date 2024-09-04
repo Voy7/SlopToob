@@ -11,31 +11,30 @@ const ANSI_REMOVE_REGEX =
 export default class Logger {
   // Informational messages
   static info(...args: any[]) {
-    this.send('INFO'.cyan, ...args)
+    this.send('INFO'.cyan, true, ...args)
   }
   // Warning messages
   static warn(...args: any[]) {
-    this.send('WARN'.yellow, ...args)
+    this.send('WARN'.yellow, true, ...args)
   }
   // Error messages
   static error(...args: any[]) {
-    this.send('ERROR'.red, ...args)
+    this.send('ERROR'.red, true, ...args)
   }
   // Debug messages (only seen in development mode)
   static debug(...args: any[]) {
-    if (Env.PROJECT_MODE != 'development') return
-    this.send('DEBUG'.magenta, ...args)
+    this.send('DEBUG'.magenta, Env.PROJECT_MODE === 'development', ...args)
   }
 
   // Chat messages
   static chatMessage(...args: any[]) {
-    this.send('CHAT'.blue, ...args)
+    this.send('CHAT'.blue, true, ...args)
   }
 
   // Private method that sends the message with fancy styling
-  private static send(label: string, ...args: any[]) {
+  private static send(label: string, sendInConsole: boolean, ...args: any[]) {
     const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false })
-    console.log(`${timestamp} `.gray + label, ...args)
+    if (sendInConsole) console.log(`${timestamp} `.gray + label, ...args)
     const log = `${timestamp} ${label.reset} ${args.join(' ')}`.replace(ANSI_REMOVE_REGEX, '')
     logs.push(log)
     if (logs.length > 500) logs.shift()

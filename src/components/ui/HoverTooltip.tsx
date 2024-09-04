@@ -19,19 +19,25 @@ export default function HoverTooltip({ placement, offset = 5, children }: Props)
     const parent = anchorRef.current.parentElement
     if (!parent) return
 
-    const mouseEnter = () => setShow(true)
-    const mouseLeave = () => setShow(false)
+    const showTooltip = () => setShow(true)
+    const hideTooltip = () => setShow(false)
 
-    parent.addEventListener('mouseenter', mouseEnter)
-    parent.addEventListener('mouseleave', mouseLeave)
-    parent.addEventListener('focus', mouseEnter)
-    parent.addEventListener('blur', mouseLeave)
+    parent.addEventListener('mouseenter', showTooltip)
+    parent.addEventListener('mouseleave', hideTooltip)
+    parent.addEventListener('touchstart', showTooltip)
+    parent.addEventListener('touchend', hideTooltip)
+    parent.addEventListener('click', hideTooltip)
+    parent.addEventListener('focus', showTooltip)
+    parent.addEventListener('blur', hideTooltip)
 
     return () => {
-      parent.removeEventListener('mouseenter', mouseEnter)
-      parent.removeEventListener('mouseleave', mouseLeave)
-      parent.removeEventListener('focus', mouseEnter)
-      parent.removeEventListener('blur', mouseLeave)
+      parent.removeEventListener('mouseenter', showTooltip)
+      parent.removeEventListener('mouseleave', hideTooltip)
+      parent.removeEventListener('touchstart', showTooltip)
+      parent.removeEventListener('touchend', hideTooltip)
+      parent.removeEventListener('click', hideTooltip)
+      parent.removeEventListener('focus', showTooltip)
+      parent.removeEventListener('blur', hideTooltip)
     }
   }, [])
 

@@ -15,7 +15,7 @@ export default function ScheduleSyncer() {
 
   if (schedule.isSynced) {
     return (
-      <div className="flex w-full cursor-default items-center gap-4 overflow-hidden">
+      <div className="flex w-max cursor-default items-center gap-2 overflow-hidden">
         <div className="shrink-0 rounded-full bg-bg2 p-1 text-xl text-lime-700">
           <Icon name="calendar" />
           <HoverTooltip placement="bottom">Playlist Scheduler Status: Synced</HoverTooltip>
@@ -31,7 +31,7 @@ export default function ScheduleSyncer() {
   }
 
   return (
-    <div className="flex w-full cursor-default items-center gap-4 overflow-hidden">
+    <div className="flex w-max cursor-default items-center gap-2 overflow-hidden">
       <div className="shrink-0 rounded-full bg-bg2 p-1 text-xl text-red-400">
         <Icon name="calendar" />
         <HoverTooltip placement="bottom">Playlist Scheduler Status: Not Synced</HoverTooltip>

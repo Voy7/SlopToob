@@ -13,7 +13,7 @@ export default function InfoBody() {
   const id = 'path' in streamInfo ? streamInfo.path : 'None'
 
   return (
-    <div className="mx-4 mt-4 grid grid-cols-1 items-center gap-4 border-b border-border1 md:mt-0 md:h-[4.5rem] md:grid-cols-[1fr_calc(var(--chat-width)-2rem)]">
+    <div className="mx-4 mt-4 grid grid-cols-1 items-center gap-4 border-b border-border1 md:mt-0 md:h-[var(--info-body-height)] md:grid-cols-[1fr_calc(var(--chat-width)-2rem)]">
       <div className="flex flex-col">
         <div className="flex items-center gap-3 overflow-hidden">
           {isBumper && (
