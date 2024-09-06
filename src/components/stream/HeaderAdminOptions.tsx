@@ -68,7 +68,7 @@ export default function HeaderAdminOptions() {
               <div
                 key={playlist.id}
                 className={twMerge(
-                  'flex cursor-pointer items-center justify-between gap-4 bg-bg1 p-2 text-lg',
+                  'flex w-full cursor-pointer items-center justify-between gap-4 bg-bg1 p-2 text-lg',
                   isActive ? 'bg-blue-500 text-white' : 'hover:bg-bg3'
                 )}
                 onClick={() => socket.emit('setting.activePlaylistID', playlist.id)}>

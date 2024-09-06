@@ -84,7 +84,7 @@ export default function HeaderAdminDropdown({ title, subtitle, icon, children }:
         <div
           ref={contentRef}
           className={twMerge(
-            'animate-dropdown absolute top-[var(--header-height)] z-10 max-h-[calc(100vh-var(--header-height)-1rem)] w-max max-w-[calc(100vw-1rem)] overflow-hidden overflow-y-auto rounded-md border border-border1 bg-red-500 shadow-xl',
+            'animate-dropdown absolute top-[var(--header-height)] z-10 max-h-[calc(100vh-var(--header-height)-1rem)] w-fit max-w-[calc(100vw-1rem)] overflow-hidden overflow-y-auto rounded-md border border-border1 bg-red-500 shadow-xl',
             !open && 'hidden'
           )}
           style={{

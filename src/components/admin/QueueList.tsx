@@ -10,6 +10,7 @@ import Thumbnail from '@/components/stream/Thumbnail'
 import ClickContextMenu from '@/components/ui/ClickContextMenu'
 import ContextMenuButton from '@/components/ui/ContextMenuButton'
 import Modal from '@/components/ui/Modal'
+import ManualVideoPicker from '@/components/admin/ManualVideoPicker'
 import { twMerge } from 'tailwind-merge'
 import type { ClientVideo } from '@/typings/socket'
 
@@ -52,7 +53,7 @@ export default function QueueList({ omitDetails = false }: { omitDetails?: boole
         title="Add Video Manually"
         isOpen={showAddModal}
         setClose={() => setShowAddModal(false)}>
-        <div className="flex flex-col gap-4"></div>
+        <ManualVideoPicker />
       </Modal>
     </>
   )

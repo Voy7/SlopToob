@@ -31,13 +31,13 @@ export default function ScheduleSyncer() {
   }
 
   return (
-    <div className="flex w-max cursor-default items-center gap-2 overflow-hidden">
+    <div className="flex w-full min-w-fit cursor-default items-center gap-2 overflow-hidden">
       <div className="shrink-0 rounded-full bg-bg2 p-1 text-xl text-red-400">
         <Icon name="calendar" />
         <HoverTooltip placement="bottom">Playlist Scheduler Status: Not Synced</HoverTooltip>
       </div>
       <p className="w-full overflow-hidden text-ellipsis whitespace-nowrap">
-        Playlist Scheduler is not synced.
+        Playlist Scheduler not synced.
       </p>
       <Button style="main" icon="sync" onClick={() => socket.emit(Msg.AdminScheduleSync)}>
         Sync Now

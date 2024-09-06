@@ -8,7 +8,7 @@ import SocketUtils from '@/server/socket/SocketUtils'
 import { Msg } from '@/lib/enums'
 import type { FileTreeNode } from '@/typings/types'
 
-const VALID_EXTENSIONS = ['.mp4', '.mkv', '.avi', '.mov', '.flv', '.wmv', '.webm', '.m2ts']
+const VALID_EXTENSIONS = ['.mp4', '.mkv', '.avi', '.mov', '.flv', '.wmv', '.webm', '.m2ts', '.m4v']
 
 export default new (class FileTreeHandler {
   private _tree: FileTreeNode | null = null
