@@ -43,6 +43,10 @@ export function SocketProvider({ authUser, cookieUsername, children }: Props) {
 
     socket.on('disconnect', () => setSocket(null))
 
+    socket.on('close', (reason, details) => {
+      console.log('Socket close:', reason, details)
+    })
+
     socket.on(Msg.Authenticate, (isAuthenticated: boolean) => {
       if (isAuthenticated) setSocket(socket)
       else setSocket(false)
