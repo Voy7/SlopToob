@@ -6,7 +6,7 @@ import { useSocketContext } from '@/contexts/SocketContext'
 import { Msg } from '@/lib/enums'
 import Icon from '@/components/ui/Icon'
 import HoverTooltip from '@/components/ui/HoverTooltip'
-import styles from './PlaylistFilePicker.module.scss'
+import { twMerge } from 'tailwind-merge'
 import type { FileTreeNode } from '@/typings/types'
 import type { ClientPlaylist, EditPlaylistVideosPayload } from '@/typings/socket'
 
@@ -59,10 +59,11 @@ function PlaylistFilePickerProvider({ playlist }: { playlist: ClientPlaylist }) 
         indexesMap.set(item.path, index)
         pathsArray.push(item.path)
         index++
-      } else
-        for (const child of item.children) {
-          getPaths(child)
-        }
+        return
+      }
+      for (const child of item.children) {
+        getPaths(child)
+      }
     }
     getPaths(tree)
     return [indexesMap, pathsArray]
@@ -271,8 +272,8 @@ function PlaylistFilePickerProvider({ playlist }: { playlist: ClientPlaylist }) 
   let rootElement: JSX.Element
   if (isSearching)
     rootElement = (
-      <div className={styles.searchLoading}>
-        <Icon name="loading" />
+      <div className="flex cursor-default flex-col items-center justify-center gap-3 py-6 text-xs tracking-wide text-text3">
+        <Icon name="loading" className="text-2xl" />
         <p>Searching Files...</p>
       </div>
     )
@@ -281,26 +282,35 @@ function PlaylistFilePickerProvider({ playlist }: { playlist: ClientPlaylist }) 
 
   return (
     <PlaylistFilePickerContext.Provider value={context}>
-      <div className={styles.filePicker}>
-        <div className={styles.searchBox}>
+      <div className="border border-border1">
+        <div className="relative">
           <input
+            className="w-full resize-none border border-transparent bg-bg2 px-3 py-2 pl-8 text-base text-text3 focus:border-border1 focus:text-text1 focus:outline-none"
             type="text"
             value={searchInput}
             onChange={(event) => searchFiles(event.target.value)}
             placeholder="Search files..."
           />
-          <Icon className={styles.searchIcon} name="search" />
+          <Icon
+            className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 transform text-xl text-gray-500"
+            name="search"
+          />
           {searchResults !== null && (
-            <div className={styles.resultsCount}>
+            <div className="absolute right-0 top-0 flex h-[calc(100%-2px)] cursor-default items-center bg-bg2 pr-2 text-sm text-text3">
               <p>
                 {searchResults.size}
                 {searchResults.size === SEARCH_MAX_ITEMS ? '+' : null} Results
               </p>
-              <ClearResultsButton onClick={() => searchFiles('')} />
+              <button
+                onClick={() => searchFiles('')}
+                className="flex h-full cursor-pointer items-center border-0 bg-transparent px-2 text-2xl text-text3 hover:text-text1">
+                <HoverTooltip placement="top">Clear search results</HoverTooltip>
+                <Icon name="close" />
+              </button>
             </div>
           )}
         </div>
-        <div className={styles.items}>{rootElement}</div>
+        <div className="overflow-hidden border border-border1 px-0 py-1">{rootElement}</div>
       </div>
     </PlaylistFilePickerContext.Provider>
   )
@@ -310,21 +320,12 @@ function PlaylistFilePickerProvider({ playlist }: { playlist: ClientPlaylist }) 
 const PlaylistFilePickerContext = createContext<ContextProps>(null as any)
 const usePlaylistFilePickerContext = () => useContext(PlaylistFilePickerContext)
 
-function ClearResultsButton({ onClick }: { onClick: Function }) {
-  return (
-    <button onClick={() => onClick()} className={styles.clearResultsButton}>
-      <HoverTooltip placement="top">Clear search results</HoverTooltip>
-      <Icon name="close" />
-    </button>
-  )
-}
-
 function SearchResultItems() {
   const { searchResults, activeMap } = usePlaylistFilePickerContext()
   if (searchResults === null || searchResults.size === 0) {
     return (
-      <div className={styles.searchLoading}>
-        <Icon name="search" />
+      <div className="flex cursor-default flex-col items-center justify-center gap-3 py-6 text-xs tracking-wide text-text3">
+        <Icon name="search" className="text-2xl" />
         <p>No Results Found.</p>
       </div>
     )
@@ -359,11 +360,15 @@ function TreeFolder({ node, depth, highlightPos, defaultOpen = false }: TreeFold
   return (
     <>
       <div
-        className={node.active ? `${styles.item} ${styles.selected}` : styles.item}
+        className={twMerge(
+          'flex cursor-grab items-center justify-between gap-2 overflow-hidden py-[2px] pl-[5px] pr-[10px]',
+          node.active ? 'bg-bg3 text-text1' : 'text-text2 hover:bg-bg2'
+        )}
         onClick={() => setIsOpen(!isOpen)}
         style={depth === 0 ? undefined : { paddingLeft: `${depth * 1.25}rem` }}>
-        <div className={styles.left}>
+        <div className="flex items-center gap-1 overflow-hidden">
           <input
+            className="relative h-4 w-4 cursor-pointer appearance-none rounded border border-border1 checked:border-blue-500 checked:bg-blue-500 checked:after:absolute checked:after:left-1/2 checked:after:top-1/2 checked:after:block checked:after:h-4 checked:after:w-4 checked:after:-translate-x-1/2 checked:after:-translate-y-1/2 checked:after:transform checked:after:text-center checked:after:leading-4 checked:after:text-text1 checked:after:content-['✔'] hover:border-blue-500 hover:border-opacity-50"
             type="checkbox"
             checked={node.active}
             onChange={toggleActive}
@@ -371,17 +376,27 @@ function TreeFolder({ node, depth, highlightPos, defaultOpen = false }: TreeFold
           />
           <Icon name={isOpen ? 'folder-open' : 'folder'} />
           {!highlightPos ? (
-            <p title={node.name}>{node.name}</p>
+            <p className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap" title={node.name}>
+              {node.name}
+            </p>
           ) : (
-            <p title={node.name}>
+            <p className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap" title={node.name}>
               <>{node.name.slice(0, highlightPos[0])}</>
-              <span>{node.name.slice(highlightPos[0], highlightPos[1])}</span>
+              <span className="bg-yellow-500 bg-opacity-25">
+                {node.name.slice(highlightPos[0], highlightPos[1])}
+              </span>
               <>{node.name.slice(highlightPos[1])}</>
             </p>
           )}
         </div>
-        <div className={styles.right}>
-          <Icon name="down-chevron" className={isOpen ? styles.open : undefined} />
+        <div className="max-w-[33%] shrink-0 overflow-hidden text-ellipsis whitespace-nowrap text-sm text-text3">
+          <Icon
+            name="down-chevron"
+            className={twMerge(
+              'transform transition-transform duration-150 ease-in-out',
+              isOpen ? 'rotate-0' : '-rotate-90'
+            )}
+          />
         </div>
       </div>
       {isOpen &&
@@ -410,23 +425,37 @@ function TreeFile({ node, depth, highlightPos }: TreeFileProps) {
 
   return (
     <label
-      className={node.active ? `${styles.item} ${styles.selected}` : styles.item}
+      className={twMerge(
+        'flex cursor-pointer items-center justify-between gap-2 overflow-hidden py-[2px] pl-[5px] pr-[10px]',
+        node.active ? 'bg-bg3 text-text1' : 'text-text2 hover:bg-bg2'
+      )}
       style={depth === 0 ? undefined : { paddingLeft: `${depth * 1.25}rem` }}>
-      <div className={styles.left}>
-        <input type="checkbox" checked={node.active} onChange={toggleActive} />
+      <div className="flex items-center gap-1 overflow-hidden">
+        <input
+          className="relative h-4 w-4 cursor-pointer appearance-none rounded border border-border1 checked:border-blue-500 checked:bg-blue-500 checked:after:absolute checked:after:left-1/2 checked:after:top-1/2 checked:after:block checked:after:h-4 checked:after:w-4 checked:after:-translate-x-1/2 checked:after:-translate-y-1/2 checked:after:transform checked:after:text-center checked:after:leading-4 checked:after:text-text1 checked:after:content-['✔'] hover:border-blue-500 hover:border-opacity-50"
+          type="checkbox"
+          checked={node.active}
+          onChange={toggleActive}
+        />
         <Icon name="video-file" />
         {!highlightPos ? (
-          <p title={node.name}>{node.name}</p>
+          <p className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap" title={node.name}>
+            {node.name}
+          </p>
         ) : (
-          <p title={node.name}>
+          <p className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap" title={node.name}>
             <>{node.name.slice(0, highlightPos[0])}</>
-            <span>{node.name.slice(highlightPos[0], highlightPos[1])}</span>
+            <span className="bg-yellow-500 bg-opacity-25">
+              {node.name.slice(highlightPos[0], highlightPos[1])}
+            </span>
             <>{node.name.slice(highlightPos[1])}</>
           </p>
         )}
       </div>
       {highlightPos && (
-        <p className={styles.right} title={`${node.parent?.path}/`}>
+        <p
+          className="max-w-[33%] shrink-0 overflow-hidden text-ellipsis whitespace-nowrap text-sm text-text3"
+          title={`${node.parent?.path}/`}>
           {node.parent?.path}/
         </p>
       )}

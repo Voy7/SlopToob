@@ -28,11 +28,10 @@ export default function ActionModal({
         className={styles.actionModal}
         style={{ width: `min(100%, ${width}px)` }}
         // @ts-expect-error - onSubmit is only defined if it exists, so this would be a form
-        onSubmit={formOnSubmit}
-      >
+        onSubmit={formOnSubmit}>
         {modalProps.children}
         <div className={styles.buttons}>
-          <Button style="normal" onClick={() => modalProps.setClose()}>
+          <Button variant="normal" onClick={() => modalProps.setClose()}>
             Cancel
           </Button>
           {button}

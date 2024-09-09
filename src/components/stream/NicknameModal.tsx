@@ -52,14 +52,13 @@ export default function NicknameModal() {
       isOpen={showNicknameModal}
       setClose={() => setShowNicknameModal(false)}
       button={
-        <Button style="main" icon="edit" loading={loading} active={name.length > 0} isSubmit>
+        <Button variant="main" icon="edit" loading={loading} disabled={name.length > 0} isSubmit>
           Save Nickname
         </Button>
       }
       error={error}
       formOnSubmit={submit}
-      width={380}
-    >
+      width={380}>
       <p>Enter a nickname to be displayed in chat.</p>
       <label>
         <input

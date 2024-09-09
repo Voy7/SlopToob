@@ -90,7 +90,7 @@ export default function HeaderAdminOptions() {
       <div />
       <div>
         <HoverTooltip placement="bottom">CTRL + Click to open in new tab</HoverTooltip>
-        <Button style="main" icon="admin-panel" onClick={openAdminPanel}>
+        <Button variant="main" icon="admin-panel" onClick={openAdminPanel}>
           Admin Panel
         </Button>
       </div>

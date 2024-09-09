@@ -120,7 +120,7 @@ export default function Chat() {
         isOpen={showClearChatModal}
         setClose={() => setShowClearChatModal(false)}
         button={
-          <Button style="main" icon="delete" onClick={clearChatMessages} isSubmit autoFocus>
+          <Button variant="main" icon="delete" onClick={clearChatMessages} isSubmit autoFocus>
             Clear Chat
           </Button>
         }

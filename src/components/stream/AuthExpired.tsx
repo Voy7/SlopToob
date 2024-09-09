@@ -11,7 +11,7 @@ export default function AuthExpired() {
     <div className={styles.authExpired}>
       <Icon name="warning" className={styles.icon} />
       <p>Your authentication is invalid or has expired.</p>
-      <Button style="main" icon="logout" onClick={() => signOut()}>
+      <Button variant="main" icon="logout" onClick={() => signOut()}>
         Sign in Again
       </Button>
     </div>

@@ -15,7 +15,7 @@ export default function ScheduleSyncer() {
 
   if (schedule.isSynced) {
     return (
-      <div className="flex w-max cursor-default items-center gap-2 overflow-hidden">
+      <div className="flex w-full min-w-fit cursor-default items-center gap-2 overflow-hidden">
         <div className="shrink-0 rounded-full bg-bg2 p-1 text-xl text-lime-700">
           <Icon name="calendar" />
           <HoverTooltip placement="bottom">Playlist Scheduler Status: Synced</HoverTooltip>
@@ -23,7 +23,7 @@ export default function ScheduleSyncer() {
         <p className="w-full overflow-hidden text-ellipsis whitespace-nowrap">
           Playlist Scheduler is synced.
         </p>
-        <Button style="normal" icon="check" className="text-lime-500" active={false}>
+        <Button variant="normal" icon="check" disabled>
           Synced
         </Button>
       </div>
@@ -39,7 +39,11 @@ export default function ScheduleSyncer() {
       <p className="w-full overflow-hidden text-ellipsis whitespace-nowrap">
         Playlist Scheduler not synced.
       </p>
-      <Button style="main" icon="sync" onClick={() => socket.emit(Msg.AdminScheduleSync)}>
+      <Button
+        variant="main"
+        icon="sync"
+        className="border-green-500 bg-green-600 hover:bg-green-500"
+        onClick={() => socket.emit(Msg.AdminScheduleSync)}>
         Sync Now
       </Button>
     </div>

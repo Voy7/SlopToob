@@ -14,7 +14,6 @@ import {
 import Button from '@/components/ui/Button'
 import PlaylistFilePicker from '@/components/admin/PlaylistFilePicker'
 import ActionModal from '@/components/ui/ActionModal'
-import styles from './PlaylistEditor.module.scss'
 import type { ClientPlaylist, EditPlaylistNamePayload } from '@/typings/socket'
 
 export default function PlaylistEditor({ playlist }: { playlist: ClientPlaylist }) {
@@ -67,7 +66,7 @@ export default function PlaylistEditor({ playlist }: { playlist: ClientPlaylist 
   }
 
   return (
-    <div className={styles.playlistEditor}>
+    <div className="animate-fade-in flex flex-col gap-4">
       <SettingGroup>
         <Header icon="playlist">Playlist Details</Header>
         <StringOption
@@ -86,7 +85,7 @@ export default function PlaylistEditor({ playlist }: { playlist: ClientPlaylist 
       <SettingGroup>
         <ButtonOption label="Permanently delete this playlist." swapped={true}>
           <Button
-            style="danger"
+            variant="danger"
             icon="delete"
             onClick={() => {
               setShowDeleteModal(true)
@@ -103,7 +102,7 @@ export default function PlaylistEditor({ playlist }: { playlist: ClientPlaylist 
         setClose={() => setShowDeleteModal(false)}
         button={
           <Button
-            style="danger"
+            variant="danger"
             icon="delete"
             loading={deletePlaylistLoading}
             onClick={deletePlaylist}>

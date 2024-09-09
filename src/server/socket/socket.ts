@@ -13,7 +13,7 @@ let io: Server | null = null
 export function initializeSocketServer() {
   io = new Server(httpServer, {
     cors: { origin: '*', methods: ['GET', 'POST'] },
-    maxHttpBufferSize: 100e8 // Max size of HTTP buffer (100MB)
+    maxHttpBufferSize: 100e6 // Max size of HTTP buffer (100MB)
   })
 
   Checklist.pass('socketServerReady', 'Web Socket Server Ready.')

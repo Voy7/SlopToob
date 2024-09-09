@@ -12,7 +12,6 @@ import ActionModal from '@/components/ui/ActionModal'
 import SelectDropdown from '@/components/ui/SelectDropdown'
 import SelectItem from '@/components/ui/SelectItem'
 import PlaylistEditor from '@/components/admin/PlaylistEditor'
-import styles from './SectionPlaylists.module.scss'
 
 export default function SectionPlaylists() {
   const { playlists, selectedPlaylist, setSelectedPlaylist } = useAdminContext()
@@ -47,11 +46,11 @@ export default function SectionPlaylists() {
   return (
     <>
       {!playlists || !selectedPlaylist ? (
-        <div className={styles.addFirstPlaylist}>
-          <Icon name="playlist-add" className={styles.icon} />
+        <div className="mb-2 flex h-full w-full cursor-default flex-col items-center justify-center gap-4 p-4 text-xl text-text3">
+          <Icon name="playlist-add" className="text-4xl" />
           <p>No playlists yet, add one.</p>
           <Button
-            style="main"
+            variant="main"
             icon="playlist-add"
             loading={addLoading}
             onClick={() => setShowAddModal(true)}>
@@ -61,7 +60,7 @@ export default function SectionPlaylists() {
       ) : (
         <>
           <MainHeader>Playlists ({playlists.length})</MainHeader>
-          <div className={styles.playlistNavbar}>
+          <div className="flex items-center justify-between gap-2 border-b border-border1 pb-2">
             <SelectDropdown label={activePlaylist?.name || 'None Selected'} icon="playlist">
               {playlists.map((playlist) => (
                 <SelectItem
@@ -74,7 +73,7 @@ export default function SectionPlaylists() {
               ))}
             </SelectDropdown>
             <Button
-              style="main"
+              variant="main"
               icon="playlist-add"
               loading={addLoading}
               onClick={() => setShowAddModal(true)}>
@@ -91,7 +90,7 @@ export default function SectionPlaylists() {
         setClose={() => setShowAddModal(false)}
         width={360}
         button={
-          <Button style="main" icon="playlist-add" loading={addLoading} isSubmit>
+          <Button variant="main" icon="playlist-add" loading={addLoading} isSubmit>
             Add Playlist
           </Button>
         }

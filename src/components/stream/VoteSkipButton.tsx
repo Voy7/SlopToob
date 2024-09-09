@@ -1,11 +1,11 @@
 'use client'
 
-import Button from '@/components/ui/Button'
+import { useEffect, useState } from 'react'
 import { useSocketContext } from '@/contexts/SocketContext'
 import { useStreamContext } from '@/contexts/StreamContext'
-import { useEffect, useState } from 'react'
-import { Msg } from '@/lib/enums'
 import useSocketOn from '@/hooks/useSocketOn'
+import Button from '@/components/ui/Button'
+import { Msg } from '@/lib/enums'
 
 // Vote skip button
 export default function VoteSkipButton() {
@@ -44,7 +44,7 @@ export default function VoteSkipButton() {
   // Vote skipping entirely disabled
   if (!streamInfo.voteSkip.isEnabled) {
     return (
-      <Button data-vote-button style="normal" icon="skip" active={false}>
+      <Button data-vote-button variant="normal" icon="skip" disabled={false}>
         Vote Skipping Disabled
       </Button>
     )
@@ -53,7 +53,7 @@ export default function VoteSkipButton() {
   // Vote skip not ready yet
   if (!streamInfo.voteSkip.isAllowed && streamInfo.voteSkip.allowedInSeconds <= -1) {
     return (
-      <Button data-vote-button style="normal" icon="skip" active={false}>
+      <Button data-vote-button variant="normal" icon="skip" disabled={false}>
         Vote Skip &bull; Wait
       </Button>
     )
@@ -62,8 +62,12 @@ export default function VoteSkipButton() {
   // Vote skip countdown to be allowed
   if (!streamInfo.voteSkip.isAllowed) {
     return (
-      <Button data-vote-button style="normal" icon="skip">
-        Vote Skip &bull; <span key={`s${allowedInSeconds}`}>{allowedInSeconds}</span>s
+      <Button data-vote-button variant="normal" icon="skip">
+        Vote Skip &bull;{' '}
+        <span key={`s${allowedInSeconds}`} className="animate-fade-in">
+          {allowedInSeconds}
+        </span>
+        s
       </Button>
     )
   }
@@ -71,20 +75,39 @@ export default function VoteSkipButton() {
   // Submit vote (not voted yet)
   if (!hasVoted) {
     return (
-      <Button data-vote-button key="vote" style="normal" icon="skip" onClick={submitVote}>
+      <Button data-vote-button key="vote" variant="normal" icon="skip" onClick={submitVote}>
         <span key="v1">Vote Skip</span> &bull;{' '}
-        <span key={streamInfo.voteSkip.currentCount}>{streamInfo.voteSkip.currentCount}</span>/
-        <span key={streamInfo.voteSkip.requiredCount}>{streamInfo.voteSkip.requiredCount}</span>
+        <span key={streamInfo.voteSkip.currentCount} className="animate-fade-in">
+          {streamInfo.voteSkip.currentCount}
+        </span>
+        /
+        <span key={streamInfo.voteSkip.requiredCount} className="animate-fade-in">
+          {streamInfo.voteSkip.requiredCount}
+        </span>
       </Button>
     )
   }
 
   // Remove vote (already voted)
   return (
-    <Button data-vote-button key="vote" style="normal-highlight" icon="skip" onClick={submitVote}>
-      <span key="v2">Voted</span> &bull;{' '}
-      <span key={`c${streamInfo.voteSkip.currentCount}`}>{streamInfo.voteSkip.currentCount}</span>/
-      <span key={streamInfo.voteSkip.requiredCount}>{streamInfo.voteSkip.requiredCount}</span>
+    <Button
+      data-vote-button
+      key="vote"
+      variant="normal"
+      className="border-purple-500 hover:border-purple-500"
+      icon="skip"
+      onClick={submitVote}>
+      <span key="v2" className="animate-fade-in">
+        Voted
+      </span>{' '}
+      &bull;{' '}
+      <span key={`c${streamInfo.voteSkip.currentCount}`} className="animate-fade-in">
+        {streamInfo.voteSkip.currentCount}
+      </span>
+      /
+      <span key={streamInfo.voteSkip.requiredCount} className="animate-fade-in">
+        {streamInfo.voteSkip.requiredCount}
+      </span>
     </Button>
   )
 }

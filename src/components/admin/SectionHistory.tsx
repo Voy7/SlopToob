@@ -49,7 +49,7 @@ export default function SectionHistory() {
           label={`Internal history usage: ${historyStatus.currentCount.toLocaleString()} / ${historyStatus.totalCount.toLocaleString()}`}
           swapped>
           <Button
-            style="danger"
+            variant="danger"
             icon="delete"
             loading={historyStatus.isDeleting}
             onClick={() => setShowHistoryModal(true)}>
@@ -61,7 +61,7 @@ export default function SectionHistory() {
             setClose={() => setShowHistoryModal(false)}
             button={
               <Button
-                style="danger"
+                variant="danger"
                 icon="delete"
                 loading={historyStatus.isDeleting}
                 onClick={clearHistory}>

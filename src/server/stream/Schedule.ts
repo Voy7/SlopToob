@@ -19,6 +19,7 @@ class Schedule {
   async initialize() {
     Checklist.running('scheduleReady')
     this.entries = await prisma.weeklySchedule.findMany()
+    this.sort()
     this.updateCheck()
     Checklist.pass('scheduleReady', `Loaded ${this.entries.length} entries`)
   }

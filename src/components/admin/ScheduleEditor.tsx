@@ -81,7 +81,7 @@ export default function ScheduleEditor() {
             <Icon name="calendar" className="text-4xl" />
             No schedule entries yet, Click "Add Entry" below.
             <Button
-              style="main"
+              variant="main"
               icon="calendar-add"
               className=""
               onClick={() => {
@@ -109,10 +109,10 @@ export default function ScheduleEditor() {
             </div>
           </div>
           <div className="mt-8 flex items-center justify-end gap-2">
-            <Button style="normal" onClick={() => setShowAddModal(false)}>
+            <Button variant="normal" onClick={() => setShowAddModal(false)}>
               Cancel
             </Button>
-            <Button style="main" icon="calendar-add" onClick={addEntry}>
+            <Button variant="main" icon="calendar-add" onClick={addEntry}>
               Save Entry
             </Button>
           </div>

@@ -67,7 +67,7 @@ export default function BumpersList() {
     <>
       <SettingGroup>
         <ButtonOption label="Upload a bumper video file">
-          <Button style="main" icon="add" onClick={() => setShowAddModal(true)}>
+          <Button variant="main" icon="add" onClick={() => setShowAddModal(true)}>
             Upload Bumper
           </Button>
         </ButtonOption>
@@ -97,7 +97,7 @@ export default function BumpersList() {
         isOpen={showAddModal}
         setClose={() => setShowAddModal(false)}
         button={
-          <Button style="main" icon="add" loading={addBumperLoading} isSubmit>
+          <Button variant="main" icon="add" loading={addBumperLoading} isSubmit>
             Upload
           </Button>
         }
@@ -121,7 +121,7 @@ export default function BumpersList() {
           setClose={() => setShowDeleteModal(false)}
           button={
             <Button
-              style="danger"
+              variant="danger"
               icon="delete"
               loading={deleteBumperLoading}
               onClick={deleteBumper}>
