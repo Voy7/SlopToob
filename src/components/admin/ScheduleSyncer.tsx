@@ -15,14 +15,17 @@ export default function ScheduleSyncer() {
 
   if (schedule.isSynced) {
     return (
-      <div className="flex w-full min-w-fit cursor-default items-center gap-2 overflow-hidden">
-        <div className="shrink-0 rounded-full bg-bg2 p-1 text-xl text-lime-700">
-          <Icon name="calendar" />
-          <HoverTooltip placement="bottom">Playlist Scheduler Status: Synced</HoverTooltip>
+      <div className="flex cursor-default items-center gap-4 overflow-hidden">
+        <div className="flex w-full items-center gap-2">
+          <div className="shrink-0 rounded-full bg-bg2 p-1 text-xl text-lime-700">
+            <Icon name="calendar" />
+            <HoverTooltip placement="bottom">Playlist Scheduler Status: Synced</HoverTooltip>
+          </div>
+          <p className="overflow-hidden text-ellipsis whitespace-nowrap text-text2">
+            <span className="block sm:hidden">Is synced.</span>
+            <span className="hidden sm:block">Playlist Scheduler is synced.</span>
+          </p>
         </div>
-        <p className="w-full overflow-hidden text-ellipsis whitespace-nowrap">
-          Playlist Scheduler is synced.
-        </p>
         <Button variant="normal" icon="check" disabled>
           Synced
         </Button>
@@ -31,14 +34,17 @@ export default function ScheduleSyncer() {
   }
 
   return (
-    <div className="flex w-full min-w-fit cursor-default items-center gap-2 overflow-hidden">
-      <div className="shrink-0 rounded-full bg-bg2 p-1 text-xl text-red-400">
-        <Icon name="calendar" />
-        <HoverTooltip placement="bottom">Playlist Scheduler Status: Not Synced</HoverTooltip>
+    <div className="flex cursor-default items-center gap-4 overflow-hidden">
+      <div className="flex w-full items-center gap-2">
+        <div className="shrink-0 rounded-full bg-bg2 p-1 text-xl text-red-400">
+          <Icon name="calendar" />
+          <HoverTooltip placement="bottom">Playlist Scheduler Status: Not Synced</HoverTooltip>
+        </div>
+        <p className="overflow-hidden text-ellipsis whitespace-nowrap text-text2">
+          <span className="block sm:hidden">Not synced.</span>
+          <span className="hidden sm:block">Playlist Scheduler not synced.</span>
+        </p>
       </div>
-      <p className="w-full overflow-hidden text-ellipsis whitespace-nowrap">
-        Playlist Scheduler not synced.
-      </p>
       <Button
         variant="main"
         icon="sync"

@@ -57,34 +57,38 @@ export default function HeaderAdminOptions() {
         </HeaderAdminDropdown>
         <HeaderAdminDropdown title="Active Playlist" subtitle={activePlaylistName} icon="playlist">
           {schedule.canBeSynced && (
-            <div className="w-full bg-bg1 p-2">
+            <div className="sticky top-0 w-full bg-bg1 p-2">
               <ScheduleSyncer />
               <hr className="my-2 mb-0 border-border1" />
             </div>
           )}
-          {playlists.map((playlist) => {
-            const isActive = playlist.id === streamInfo.activePlaylistID
-            return (
-              <div
-                key={playlist.id}
-                className={twMerge(
-                  'flex w-full cursor-pointer items-center justify-between gap-4 bg-bg1 p-2 text-lg',
-                  isActive ? 'bg-blue-500 text-white' : 'hover:bg-bg3'
-                )}
-                onClick={() => socket.emit('setting.activePlaylistID', playlist.id)}>
-                <div className="flex items-center gap-2 overflow-hidden">
-                  <Icon
-                    name={isActive ? 'radio-checked' : 'radio-unchecked'}
-                    className={twMerge('shrink-0 text-sm text-text3', isActive && 'text-white')}
-                  />
-                  <p className="overflow-hidden text-ellipsis whitespace-nowrap">{playlist.name}</p>
+          <div className="h-full w-full overflow-y-auto overflow-x-hidden">
+            {playlists.map((playlist) => {
+              const isActive = playlist.id === streamInfo.activePlaylistID
+              return (
+                <div
+                  key={playlist.id}
+                  className={twMerge(
+                    'flex w-full cursor-pointer items-center justify-between gap-4 bg-bg1 p-2 text-lg',
+                    isActive ? 'bg-blue-500 text-white' : 'hover:bg-bg3'
+                  )}
+                  onClick={() => socket.emit('setting.activePlaylistID', playlist.id)}>
+                  <div className="flex items-center gap-2 overflow-hidden">
+                    <Icon
+                      name={isActive ? 'radio-checked' : 'radio-unchecked'}
+                      className={twMerge('shrink-0 text-sm text-text3', isActive && 'text-white')}
+                    />
+                    <p className="overflow-hidden text-ellipsis whitespace-nowrap">
+                      {playlist.name}
+                    </p>
+                  </div>
+                  <p className={twMerge('shrink-0 text-sm text-text3', isActive && 'text-white')}>
+                    {playlist.videoPaths.length.toLocaleString()} Videos
+                  </p>
                 </div>
-                <p className={twMerge('shrink-0 text-sm text-text3', isActive && 'text-white')}>
-                  {playlist.videoPaths.length.toLocaleString()} Videos
-                </p>
-              </div>
-            )
-          })}
+              )
+            })}
+          </div>
         </HeaderAdminDropdown>
       </div>
       <div />

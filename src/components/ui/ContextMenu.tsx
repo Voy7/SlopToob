@@ -4,11 +4,12 @@ import { useEffect, useRef, useState } from 'react'
 import FloatingContextMenu from '@/components/headless/FloatingContextMenu'
 
 type Props = {
+  show: boolean
+  setShow: (show: boolean) => void
   children: React.ReactNode
 }
 
-export default function ContextMenu({ children }: Props) {
-  const [show, setShow] = useState<boolean>(false)
+export default function ContextMenu({ show, setShow, children }: Props) {
   const [position, setPosition] = useState<[number, number]>([0, 0])
 
   const anchorRef = useRef<HTMLDivElement>(null)
@@ -24,10 +25,25 @@ export default function ContextMenu({ children }: Props) {
       setShow(true)
     }
 
+    let touchStartTime: number
+    function handleTouchStart(event: TouchEvent) {
+      touchStartTime = Date.now()
+    }
+    function handleTouchEnd(event: TouchEvent) {
+      if (Date.now() - touchStartTime < 500) return
+      event.preventDefault()
+      setPosition([event.changedTouches[0].clientY, event.changedTouches[0].clientX])
+      setShow(true)
+    }
+
     parent.addEventListener('contextmenu', handleContextMenu)
+    parent.addEventListener('touchstart', handleTouchStart)
+    parent.addEventListener('touchend', handleTouchEnd)
 
     return () => {
       parent.removeEventListener('contextmenu', handleContextMenu)
+      parent.removeEventListener('touchstart', handleTouchStart)
+      parent.removeEventListener('touchend', handleTouchEnd)
     }
   }, [])
 

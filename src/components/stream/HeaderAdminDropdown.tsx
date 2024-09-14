@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import SelectDropdwon from '@/components/ui/SelectDropdown'
 import Icon, { IconNames } from '@/components/ui/Icon'
 import { twMerge } from 'tailwind-merge'
 import { createPortal } from 'react-dom'
@@ -23,11 +24,13 @@ export default function HeaderAdminDropdown({ title, subtitle, icon, children }:
   useEffect(() => {
     if (!containerRef.current || !contentRef.current) return
 
-    const x_PADDING = 12
+    const x_MARGIN = 8
     const containerRect = containerRef.current.getBoundingClientRect()
     const contentRect = contentRef.current.getBoundingClientRect()
-    // const totalWidth = contentRect.left + contentRect.width
-    if (contentRect.width > window.innerWidth - x_PADDING * 2) setLeft(x_PADDING)
+
+    if (containerRect.left + contentRect.width > window.innerWidth - x_MARGIN)
+      setLeft(window.innerWidth - contentRect.width - x_MARGIN)
+    else if (contentRect.width > window.innerWidth - x_MARGIN * 2) setLeft(x_MARGIN)
     else setLeft(containerRect.left)
 
     function handleClick(event: MouseEvent) {
@@ -84,7 +87,7 @@ export default function HeaderAdminDropdown({ title, subtitle, icon, children }:
         <div
           ref={contentRef}
           className={twMerge(
-            'animate-dropdown absolute top-[var(--header-height)] z-10 max-h-[calc(100vh-var(--header-height)-1rem)] w-fit max-w-[calc(100vw-1rem)] overflow-hidden overflow-y-auto rounded-md border border-border1 bg-red-500 shadow-xl',
+            'animate-dropdown absolute top-[var(--header-height)] z-10 max-h-[calc(100vh-var(--header-height)-1rem)] w-auto max-w-[calc(100vw-1rem)] flex-col overflow-x-hidden overflow-y-hidden rounded-md border border-border1 bg-bg1 shadow-xl',
             !open && 'hidden'
           )}
           style={{

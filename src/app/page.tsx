@@ -67,7 +67,7 @@ export default function Home() {
               }}
               autoFocus
             />
-            <Button variant="main" loading={loading} disabled={password.length > 0} isSubmit>
+            <Button variant="main" loading={loading} disabled={password.length <= 0} isSubmit>
               Go {'>'}
             </Button>
           </div>

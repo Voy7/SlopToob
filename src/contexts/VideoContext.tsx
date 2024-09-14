@@ -164,17 +164,19 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
 
   function toggleFullscreen() {
     if (!videoRef.current || !containerRef.current) return
-    if ('webkitEnterFullscreen' in videoRef.current) {
+    // Standard browser fullscreen API
+    if ('requestFullscreen' in containerRef.current) {
+      if (document.fullscreenElement) document.exitFullscreen()
+      else containerRef.current.requestFullscreen()
+    }
+    // Webkit (Safari) fullscreen API
+    else if ('webkitEnterFullscreen' in videoRef.current) {
       // @ts-ignore - webkitEnterFullscreen is a non-standard method
       if (videoRef.current.webkitDisplayingFullscreen) videoRef.current.webkitExitFullscreen()
       // @ts-ignore - webkitEnterFullscreen is a non-standard method
       else videoRef.current.webkitEnterFullscreen()
     }
-    if ('requestFullscreen' in containerRef.current) {
-      if (document.fullscreenElement) document.exitFullscreen()
-      else containerRef.current.requestFullscreen()
-      return
-    }
+    videoRef.current.focus()
   }
 
   const context: ContextProps = {
@@ -196,12 +198,18 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
       <div
         ref={containerRef}
         className={twMerge(
-          'relative flex h-mobile-video-height w-full items-center justify-center overflow-hidden bg-black md:h-full md:w-desktop-video-width',
+          'relative z-[1] flex h-mobile-video-height w-full items-center justify-center overflow-hidden bg-black md:h-full md:w-desktop-video-width',
           hideCursor && 'cursor-none',
           streamInfo.streamTheme === 'Zoomer' && 'grid grid-cols-[1fr_1fr] grid-rows-[1fr_1fr]'
         )}
         onClick={backgroundClick}>
-        <video ref={videoRef} className="h-full w-full" autoPlay playsInline controls={false}>
+        <video
+          ref={videoRef}
+          className="h-full w-full"
+          autoPlay
+          playsInline
+          controls={false}
+          controlsList="nodownload">
           Your browser does not support the video tag.
         </video>
         {streamInfo.streamTheme === 'Zoomer' && (
@@ -235,7 +243,7 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
             />
           </>
         )}
-        {children}
+        <div className="absolute z-[2] h-full w-full">{children}</div>
       </div>
     </VideoContext.Provider>
   )

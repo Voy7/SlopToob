@@ -28,7 +28,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className={mainFont.className}>
         <SessionProvider session={session}>
           {children}
-          <div id="modals-root" />
+          <div id="modals-root" className="relative z-10" />
         </SessionProvider>
       </body>
     </html>
