@@ -29,12 +29,6 @@ export default function Modal({
   useEffect(() => {
     if (isOpen) {
       setShow(true)
-
-      // document.body.style.position = 'fixed'
-
-      // return () => {
-      //   document.body.style.position = ''
-      // }
       return
     }
 
@@ -74,18 +68,18 @@ export default function Modal({
       }}>
       <div
         className={twMerge(
-          'animate-modal-container fixed left-1/2 top-1/2 w-auto max-w-full -translate-x-1/2 -translate-y-1/2 transform overflow-y-auto rounded-lg border border-border1 bg-bg1 opacity-0 shadow-md transition-all duration-300 ease-in-out',
+          'animate-modal-container fixed left-1/2 top-1/2 max-h-full w-auto max-w-full -translate-x-1/2 -translate-y-1/2 transform overflow-y-auto rounded-lg border border-border1 bg-bg1 opacity-0 shadow-md transition-all duration-300 ease-in-out',
           isOpen && 'opacity-100',
           className
         )}>
-        <div className="mx-2 flex items-center justify-between gap-4 border-b border-border1 py-2 pb-2">
+        <header className="mx-2 flex h-[3rem] items-center justify-between gap-4 border-b border-border1">
           <h2 className="cursor-default text-lg font-normal text-text1">{title}</h2>
           <button
             className="flex cursor-pointer items-center justify-center rounded border border-border1 bg-bg2 p-1 text-xl text-text1 transition-all duration-200 ease-in-out hover:border-border2 hover:bg-bg3"
             onClick={() => setClose()}>
             <Icon name="close" />
           </button>
-        </div>
+        </header>
         {children}
       </div>
     </div>,

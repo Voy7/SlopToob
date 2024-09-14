@@ -1,10 +1,9 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import Icon, { IconNames } from '@/components/ui/Icon'
 import { createPortal } from 'react-dom'
+import { useState, useEffect, useRef } from 'react'
+import Icon, { type IconNames } from '@/components/ui/Icon'
 import { twMerge } from 'tailwind-merge'
-// import styles from './SelectDropdown.module.scss'
 
 const MARGIN_PX = 20
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import FloatingAnchored, { type Placement } from '@/components/ui/FloatingAnchored'
+import FloatingAnchored, { type Placement } from '@/components/headless/FloatingAnchored'
 
 type Props = {
   placement: Placement

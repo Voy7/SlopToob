@@ -1,4 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+'use client'
+
+import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { twMerge } from 'tailwind-merge'
 

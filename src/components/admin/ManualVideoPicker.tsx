@@ -1,3 +1,330 @@
+'use client'
+
+import { useState, useContext, createContext, useEffect, useMemo } from 'react'
+import { useAdminContext } from '@/contexts/AdminContext'
+import { useSocketContext } from '@/contexts/SocketContext'
+import { Msg } from '@/lib/enums'
+import Icon from '@/components/ui/Icon'
+import HoverTooltip from '@/components/ui/HoverTooltip'
+import { twMerge } from 'tailwind-merge'
+import type { FileTreeNode } from '@/typings/types'
+import type { ClientPlaylist, EditPlaylistVideosPayload } from '@/typings/socket'
+
+const SEARCH_TIMEOUT_MS = 150
+const SEARCH_ITEMS_PER_MS = 1000
+const SEARCH_MAX_ITEMS = 100
+
 export default function ManualVideoPicker() {
-  return <div className="flex flex-col gap-4">VIDEO PICKER</div>
+  return <PlaylistFilePickerProvider />
+}
+
+type ActiveTreeNode = {
+  path: string
+  name: string
+  active: boolean
+  parent?: ActiveTreeNode
+  children?: ActiveTreeNode[]
+}
+
+// Stream page context
+type ContextProps = {
+  activeMap: Map<string, ActiveTreeNode>
+  searchResults: Map<string, [number, number]> | null
+}
+
+// Context provider wrapper component
+function PlaylistFilePickerProvider() {
+  const { fileTree: tree } = useAdminContext()
+  if (!tree) return null
+
+  const { socket } = useSocketContext()
+
+  // const [activeMap, setActiveMap] = useState<Map<string, ActiveTreeNode>>(new Map())
+  const [isSearching, setIsSearching] = useState<boolean>(false)
+  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null)
+  const [searchResults, setSearchResults] = useState<Map<string, [number, number]> | null>(null)
+  const [searchInput, setSearchInput] = useState<string>('')
+
+  const activeMap = useMemo(() => {
+    const map = new Map<string, ActiveTreeNode>()
+    function getPaths(item: FileTreeNode, parentNode?: ActiveTreeNode): ActiveTreeNode {
+      if (item.children) {
+        const parent: ActiveTreeNode = {
+          path: item.path,
+          name: item.name,
+          active: false,
+          children: []
+        }
+        if (parentNode) parent.parent = parentNode
+        for (const child of item.children) {
+          const childNode = getPaths(child, parent)
+          if (!childNode) continue
+          parent.children?.push(childNode)
+        }
+        map.set(item.path, parent)
+        return parent
+      }
+      const childNode: ActiveTreeNode = { path: item.path, name: item.name, active: false }
+      if (parentNode) childNode.parent = parentNode
+      map.set(item.path, childNode)
+      return childNode
+    }
+    map.set(tree.path, getPaths(tree))
+
+    // Sync active state of children with parent if all children are active
+    for (const [_, node] of map) {
+      if (!node.children) continue
+      const active = node.children.every((child) => child.active)
+      node.active = active
+    }
+
+    return map
+  }, [tree])
+
+  function searchFiles(input: string) {
+    setSearchInput(input)
+    if (searchTimeout) clearTimeout(searchTimeout)
+
+    input = input.replace(/\s+/g, '') // Remove all spaces
+    if (!input) {
+      setSearchResults(null)
+      setIsSearching(false)
+      return
+    }
+
+    const timeout = setTimeout(async () => {
+      setIsSearching(true)
+
+      const results = new Map<string, [number, number]>()
+      // Regex - match all characters in input in order, with any whitespace in between
+      const regex = new RegExp(input.split('').join('\\s*'), 'i')
+      let items = 0
+      for (const [_, node] of activeMap) {
+        // First folders
+        if (results.size >= SEARCH_MAX_ITEMS) break
+        if (!node.children) continue
+        items += 1
+        if (items % SEARCH_ITEMS_PER_MS === 0)
+          await new Promise((resolve) => setTimeout(resolve, 1))
+        const matches = node.name.match(regex)
+        if (matches?.index !== undefined)
+          results.set(node.path, [matches.index, matches.index + matches[0].length])
+      }
+      for (const [_, node] of activeMap) {
+        // Then files
+        if (results.size >= SEARCH_MAX_ITEMS) break
+        if (node.children) continue
+        items += 1
+        if (items % SEARCH_ITEMS_PER_MS === 0)
+          await new Promise((resolve) => setTimeout(resolve, 1))
+        const matches = node.name.match(regex)
+        if (matches?.index !== undefined)
+          results.set(node.path, [matches.index, matches.index + matches[0].length])
+      }
+
+      // Sort results by folders first, and names naturally (case-insensitive)
+      const sortedResults = new Map(
+        [...results.entries()].sort((a, b) => {
+          const aNode = activeMap.get(a[0])!
+          const bNode = activeMap.get(b[0])!
+          if (aNode.children && !bNode.children) return -1
+          if (!aNode.children && bNode.children) return 1
+          return aNode.name.localeCompare(bNode.name, undefined, { sensitivity: 'base' })
+        })
+      )
+
+      setSearchResults(sortedResults)
+      setIsSearching(false)
+    }, SEARCH_TIMEOUT_MS)
+    setSearchTimeout(timeout)
+  }
+
+  const context: ContextProps = {
+    activeMap,
+    searchResults
+  }
+
+  const rootNode = activeMap.get(tree.path)
+  if (!rootNode) return null
+
+  let rootElement: JSX.Element
+  if (isSearching)
+    rootElement = (
+      <div className="flex cursor-default flex-col items-center justify-center gap-3 py-6 text-xs tracking-wide text-text3">
+        <Icon name="loading" className="text-2xl" />
+        <p>Searching Files...</p>
+      </div>
+    )
+  else if (!searchResults) rootElement = <TreeFolder node={rootNode} depth={0} defaultOpen={true} />
+  else rootElement = <SearchResultItems />
+
+  return (
+    <PlaylistFilePickerContext.Provider value={context}>
+      <div className="border border-border1">
+        <div className="relative">
+          <input
+            className="w-full resize-none border border-transparent bg-bg2 px-3 py-2 pl-8 text-base text-text3 focus:border-border1 focus:text-text1 focus:outline-none"
+            type="text"
+            value={searchInput}
+            onChange={(event) => searchFiles(event.target.value)}
+            placeholder="Search files..."
+          />
+          <Icon
+            className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 transform text-xl text-gray-500"
+            name="search"
+          />
+          {searchResults !== null && (
+            <div className="absolute right-0 top-0 flex h-[calc(100%-2px)] cursor-default items-center bg-bg2 pr-2 text-sm text-text3">
+              <p>
+                {searchResults.size}
+                {searchResults.size === SEARCH_MAX_ITEMS ? '+' : null} Results
+              </p>
+              <button
+                onClick={() => searchFiles('')}
+                className="flex h-full cursor-pointer items-center border-0 bg-transparent px-2 text-2xl text-text3 hover:text-text1">
+                <HoverTooltip placement="top">Clear search results</HoverTooltip>
+                <Icon name="close" />
+              </button>
+            </div>
+          )}
+        </div>
+        <div className="overflow-hidden px-0 py-1">{rootElement}</div>
+      </div>
+    </PlaylistFilePickerContext.Provider>
+  )
+}
+
+// Create the context and custom hook for it
+const PlaylistFilePickerContext = createContext<ContextProps>(null as any)
+const usePlaylistFilePickerContext = () => useContext(PlaylistFilePickerContext)
+
+function SearchResultItems() {
+  const { searchResults, activeMap } = usePlaylistFilePickerContext()
+  if (searchResults === null || searchResults.size === 0) {
+    return (
+      <div className="flex cursor-default flex-col items-center justify-center gap-3 py-6 text-xs tracking-wide text-text3">
+        <Icon name="search" className="text-2xl" />
+        <p>No Results Found.</p>
+      </div>
+    )
+  }
+
+  return Array.from(searchResults).map(([path, highlightPos]) => {
+    const node = activeMap.get(path)
+    if (!node) return null
+    if (node.children)
+      return <TreeFolder key={path} node={node} depth={0} highlightPos={highlightPos} />
+    return <TreeFile key={path} node={node} depth={0} highlightPos={highlightPos} />
+  })
+}
+
+type TreeFolderProps = {
+  node: ActiveTreeNode
+  depth: number
+  highlightPos?: [number, number]
+  defaultOpen?: boolean
+}
+
+function TreeFolder({ node, depth, highlightPos, defaultOpen = false }: TreeFolderProps) {
+  const [isOpen, setIsOpen] = useState<boolean>(defaultOpen)
+
+  return (
+    <>
+      <div
+        className={twMerge(
+          'flex cursor-grab items-center justify-between gap-2 overflow-hidden py-[2px] pl-[5px] pr-[10px]',
+          node.active ? 'bg-bg3 text-text1' : 'text-text2 hover:bg-bg2'
+        )}
+        onClick={() => setIsOpen(!isOpen)}
+        style={depth === 0 ? undefined : { paddingLeft: `${depth * 1.25}rem` }}>
+        <div className="flex items-center gap-1 overflow-hidden">
+          {/* <input
+            className="relative h-4 w-4 cursor-pointer appearance-none rounded border border-border1 checked:border-blue-500 checked:bg-blue-500 checked:after:absolute checked:after:left-1/2 checked:after:top-1/2 checked:after:block checked:after:h-4 checked:after:w-4 checked:after:-translate-x-1/2 checked:after:-translate-y-1/2 checked:after:transform checked:after:text-center checked:after:leading-4 checked:after:text-text1 checked:after:content-['✔'] hover:border-blue-500 hover:border-opacity-50"
+            type="checkbox"
+            checked={node.active}
+            onChange={toggleActive}
+            onClick={(event) => event.stopPropagation()}
+          /> */}
+          <Icon name={isOpen ? 'folder-open' : 'folder'} />
+          {!highlightPos ? (
+            <p className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap" title={node.name}>
+              {node.name}
+            </p>
+          ) : (
+            <p className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap" title={node.name}>
+              <>{node.name.slice(0, highlightPos[0])}</>
+              <span className="bg-yellow-500 bg-opacity-25">
+                {node.name.slice(highlightPos[0], highlightPos[1])}
+              </span>
+              <>{node.name.slice(highlightPos[1])}</>
+            </p>
+          )}
+        </div>
+        <div className="max-w-[33%] shrink-0 overflow-hidden text-ellipsis whitespace-nowrap text-sm text-text3">
+          <Icon
+            name="down-chevron"
+            className={twMerge(
+              'transform transition-transform duration-150 ease-in-out',
+              isOpen ? 'rotate-0' : '-rotate-90'
+            )}
+          />
+        </div>
+      </div>
+      {isOpen &&
+        node.children &&
+        node.children.map((child) => {
+          if (child.children) return <TreeFolder key={child.path} node={child} depth={depth + 1} />
+          return <TreeFile key={child.path} node={child} depth={depth + 1} />
+        })}
+    </>
+  )
+}
+
+type TreeFileProps = {
+  node: ActiveTreeNode
+  depth: number
+  highlightPos?: [number, number]
+}
+
+function TreeFile({ node, depth, highlightPos }: TreeFileProps) {
+  // const { selectFile, deselectFile } = usePlaylistFilePickerContext()
+
+  return (
+    <label
+      className={twMerge(
+        'flex cursor-pointer items-center justify-between gap-2 overflow-hidden py-[2px] pl-[5px] pr-[10px]',
+        node.active ? 'bg-bg3 text-text1' : 'text-text2 hover:bg-bg2'
+      )}
+      style={depth === 0 ? undefined : { paddingLeft: `${depth * 1.25}rem` }}>
+      <div className="flex items-center gap-1 overflow-hidden">
+        {/* <input
+          className="relative h-4 w-4 cursor-pointer appearance-none rounded border border-border1 checked:border-blue-500 checked:bg-blue-500 checked:after:absolute checked:after:left-1/2 checked:after:top-1/2 checked:after:block checked:after:h-4 checked:after:w-4 checked:after:-translate-x-1/2 checked:after:-translate-y-1/2 checked:after:transform checked:after:text-center checked:after:leading-4 checked:after:text-text1 checked:after:content-['✔'] hover:border-blue-500 hover:border-opacity-50"
+          type="checkbox"
+          checked={node.active}
+          onChange={toggleActive}
+        /> */}
+        <Icon name="video-file" />
+        {!highlightPos ? (
+          <p className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap" title={node.name}>
+            {node.name}
+          </p>
+        ) : (
+          <p className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap" title={node.name}>
+            <>{node.name.slice(0, highlightPos[0])}</>
+            <span className="bg-yellow-500 bg-opacity-25">
+              {node.name.slice(highlightPos[0], highlightPos[1])}
+            </span>
+            <>{node.name.slice(highlightPos[1])}</>
+          </p>
+        )}
+      </div>
+      {highlightPos && (
+        <p
+          className="max-w-[33%] shrink-0 overflow-hidden text-ellipsis whitespace-nowrap text-sm text-text3"
+          title={`${node.parent?.path}/`}>
+          {node.parent?.path}/
+        </p>
+      )}
+    </label>
+  )
 }

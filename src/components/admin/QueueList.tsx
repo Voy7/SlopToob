@@ -7,8 +7,8 @@ import { VideoState, Msg } from '@/lib/enums'
 import { SettingGroup, Header } from '@/components/admin/SettingsComponents'
 import Icon, { IconNames } from '@/components/ui/Icon'
 import Thumbnail from '@/components/stream/Thumbnail'
-import ClickContextMenu from '@/components/ui/ClickContextMenu'
-import ContextMenuButton from '@/components/ui/ContextMenuButton'
+import ClickActionsMenu from '@/components/ui/ClickActionsMenu'
+import MenuActionButton from '@/components/ui/MenuActionButton'
 import Modal from '@/components/ui/Modal'
 import ManualVideoPicker from '@/components/admin/ManualVideoPicker'
 import { twMerge } from 'tailwind-merge'
@@ -35,12 +35,12 @@ export default function QueueList({ omitDetails = false }: { omitDetails?: boole
       <SettingGroup>
         <div className="mb-1 flex items-center justify-between gap-4">
           <Header icon="list">Queue ({queue.length})</Header>
-          {/* <button
+          <button
             className="flex shrink-0 items-center gap-0.5 whitespace-nowrap rounded-lg px-2 py-1 text-blue-500 duration-300 hover:underline active:bg-blue-500 active:bg-opacity-50 active:duration-0"
             onClick={() => setShowAddModal(true)}>
             <Icon name="playlist-add" />
             Add Video Manually
-          </button> */}
+          </button>
         </div>
         <div className="flex flex-col border-l-[1px] border-r-[1px] border-t-[1px] border-border1">
           {queue.map((video, index) => (
@@ -53,7 +53,9 @@ export default function QueueList({ omitDetails = false }: { omitDetails?: boole
         title="Add Video Manually"
         isOpen={showAddModal}
         setClose={() => setShowAddModal(false)}>
-        <ManualVideoPicker />
+        <div className="h-[calc(90vh-4rem-2px)] w-[min(90vw,700px)] overflow-y-auto p-2 pb-0">
+          <ManualVideoPicker />
+        </div>
       </Modal>
     </>
   )
@@ -119,23 +121,23 @@ function Video({ video, index, omitDetails }: VideoProps) {
           className="shrink-0 rounded-full p-1.5 text-lg hover:bg-bg2 hover:bg-opacity-50"
           onClick={() => setShowActions(!showActions)}>
           <Icon name="more" />
-          <ClickContextMenu placement="right">
+          <ClickActionsMenu placement="right">
             {!video.isPlaying && (
-              <ContextMenuButton
+              <MenuActionButton
                 icon="delete"
                 onClick={() => socket.emit(Msg.AdminRemoveQueueVideo, video.id)}
                 className="text-red-500 hover:bg-red-500">
                 Remove from Queue
-              </ContextMenuButton>
+              </MenuActionButton>
             )}
             {!omitDetails && (
-              <ContextMenuButton
+              <MenuActionButton
                 icon="admin-panel"
                 onClick={() => socket.emit(Msg.AdminDebugVideo, video.id)}>
                 Print Video Debug
-              </ContextMenuButton>
+              </MenuActionButton>
             )}
-          </ClickContextMenu>
+          </ClickActionsMenu>
         </button>
       </div>
       <div

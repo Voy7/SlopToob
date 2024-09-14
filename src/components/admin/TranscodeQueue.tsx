@@ -7,8 +7,8 @@ import { JobState, Msg } from '@/lib/enums'
 import { SettingGroup, Header } from '@/components/admin/SettingsComponents'
 import Icon, { IconNames } from '@/components/ui/Icon'
 import Thumbnail from '@/components/stream/Thumbnail'
-import ClickContextMenu from '@/components/ui/ClickContextMenu'
-import ContextMenuButton from '@/components/ui/ContextMenuButton'
+import ClickActionsMenu from '@/components/ui/ClickActionsMenu'
+import MenuActionButton from '@/components/ui/MenuActionButton'
 import { twMerge } from 'tailwind-merge'
 import type { TranscodeClientVideo } from '@/typings/socket'
 
@@ -99,19 +99,19 @@ function Job({ job, index }: { job: TranscodeClientVideo; index: number }) {
           className="shrink-0 rounded-full p-1.5 text-lg hover:bg-bg2 hover:bg-opacity-50"
           onClick={() => setShowActions(!showActions)}>
           <Icon name="more" />
-          <ClickContextMenu placement="right">
-            <ContextMenuButton
+          <ClickActionsMenu placement="right">
+            <MenuActionButton
               icon="admin-panel"
               onClick={() => socket.emit(Msg.AdminDebugJob, job.id)}>
               Print Job Debug
-            </ContextMenuButton>
-            <ContextMenuButton
+            </MenuActionButton>
+            <MenuActionButton
               icon="delete"
               onClick={() => socket.emit(Msg.AdminTerminateJob, job.id)}
               className="text-red-500 hover:bg-red-500">
               Terminate Job
-            </ContextMenuButton>
-          </ClickContextMenu>
+            </MenuActionButton>
+          </ClickActionsMenu>
         </button>
       </div>
       <div

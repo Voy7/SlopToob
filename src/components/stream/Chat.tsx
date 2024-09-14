@@ -10,13 +10,13 @@ import Button from '@/components/ui/Button'
 import ChatMessage from '@/components/stream/ChatMessage'
 import ChatViewersList from '@/components/stream/ChatViewersList'
 import HoverTooltip from '@/components/ui/HoverTooltip'
+import ChatContextMenu from '@/components/stream/ChatContextMenu'
 import ActionModal from '@/components/ui/ActionModal'
 import { twMerge } from 'tailwind-merge'
 
 export default function Chat() {
   const { socket, nickname, showNicknameModal, setShowNicknameModal } = useSocketContext()
   const {
-    streamInfo,
     showClearChatModal,
     setShowClearChatModal,
     chatMessages,
@@ -74,7 +74,7 @@ export default function Chat() {
             {viewers.length}
           </button>
           <button
-            className="usernameButton flex cursor-pointer items-center gap-0.5 border-none bg-transparent p-2 text-text2 hover:bg-bg2 hover:text-text1"
+            className="flex cursor-pointer items-center gap-0.5 border-none bg-transparent p-2 text-text2 hover:bg-bg2 hover:text-text1"
             onClick={() => setShowNicknameModal(true)}>
             {!showNicknameModal && (
               <HoverTooltip placement="bottom-end">Change Nickname</HoverTooltip>
@@ -88,6 +88,7 @@ export default function Chat() {
         <div
           className="flex flex-grow flex-col-reverse overflow-y-auto overflow-x-hidden overscroll-contain p-2"
           ref={messagesRef}>
+          <ChatContextMenu />
           {chatMessages.length > 0 ? (
             chatMessages.map((chat, index) => (
               <ChatMessage key={chatMessages.length - index} chat={chat} />

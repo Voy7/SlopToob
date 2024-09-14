@@ -1,17 +1,17 @@
 'use client'
 
-import Icon from '@/components/ui/Icon'
 import { useSocketContext } from '@/contexts/SocketContext'
-import { StreamState, Msg } from '@/lib/enums'
-import HoverTooltip from '../../ui/HoverTooltip'
-import { twMerge } from 'tailwind-merge'
 import { useAdminContext } from '@/contexts/AdminContext'
+import { StreamState, Msg } from '@/lib/enums'
+import Icon from '@/components/ui/Icon'
+import HoverTooltip from '@/components/ui/HoverTooltip'
+import { twMerge } from 'tailwind-merge'
 
 export default function AdminControls() {
   const { socket } = useSocketContext()
 
   return (
-    <div className="hidden items-center rounded-xl border border-blue-500 border-opacity-50 bg-slate-500 bg-opacity-25 p-1 md:flex">
+    <div className="items-center rounded-xl border border-blue-500 border-opacity-50 bg-[rgba(0,0,30,0.5)] p-1">
       <ActionButton onClick={() => socket.emit(Msg.AdminSeekStepBackward, 10)}>
         <HoverTooltip placement="top" offset={22}>
           Rewind 10s (Admin only)

@@ -5,8 +5,8 @@ import { AuthRole, Msg } from '@/lib/enums'
 import { roleColors } from '@/lib/roleColors'
 import Icon from '@/components/ui/Icon'
 import HoverTooltip from '@/components/ui/HoverTooltip'
-import ClickContextMenu from '@/components/ui/ClickContextMenu'
-import ContextMenuButton from '@/components/ui/ContextMenuButton'
+import ClickActionsMenu from '@/components/ui/ClickActionsMenu'
+import MenuActionButton from '@/components/ui/MenuActionButton'
 import type { ClientRichUser } from '@/typings/socket'
 import { useSocketContext } from '@/contexts/SocketContext'
 
@@ -81,14 +81,14 @@ function Group({ title, color, users }: GroupProps) {
                   )}
                   <button className="shrink-0 rounded-full p-1 hover:bg-bg2">
                     <Icon name="more" />
-                    <ClickContextMenu placement="top-end">
-                      <ContextMenuButton
+                    <ClickActionsMenu placement="top-end">
+                      <MenuActionButton
                         icon="logout"
                         className="text-red-500 hover:bg-red-500"
                         onClick={() => socket.emit(Msg.AdminKickUser, user.socketID)}>
                         Kick / Disconnect
-                      </ContextMenuButton>
-                    </ClickContextMenu>
+                      </MenuActionButton>
+                    </ClickActionsMenu>
                   </button>
                 </div>
               </div>

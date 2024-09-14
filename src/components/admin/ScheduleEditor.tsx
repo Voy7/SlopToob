@@ -11,8 +11,8 @@ import Modal from '@/components/ui/Modal'
 import ScheduleSyncer from '@/components/admin/ScheduleSyncer'
 import ScheduleHeader from '@/components/admin/ScheduleHeader'
 import ScheduleEntry from '@/components/admin/ScheduleEntry'
-import ClickContextMenu from '@/components/ui/ClickContextMenu'
-import ContextMenuButton from '@/components/ui/ContextMenuButton'
+import ClickActionsMenu from '@/components/ui/ClickActionsMenu'
+import MenuActionButton from '@/components/ui/MenuActionButton'
 import type { ScheduleEntryOptions } from '@/typings/types'
 import { twMerge } from 'tailwind-merge'
 
@@ -63,14 +63,14 @@ export default function ScheduleEditor() {
                   />
                   <button className="shrink-0 rounded-full p-1.5 text-lg hover:bg-bg3">
                     <Icon name="more" />
-                    <ClickContextMenu placement="right">
-                      <ContextMenuButton
+                    <ClickActionsMenu placement="right">
+                      <MenuActionButton
                         icon="delete"
                         onClick={() => socket.emit(Msg.AdminScheduleDeleteEntry, entry.id)}
                         className="text-red-500 hover:bg-red-500">
                         Delete Entry
-                      </ContextMenuButton>
-                    </ClickContextMenu>
+                      </MenuActionButton>
+                    </ClickActionsMenu>
                   </button>
                 </div>
               ))}

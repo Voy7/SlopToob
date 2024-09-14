@@ -30,6 +30,7 @@ export default function VideoControls({ scrubber, adminControls }: Props) {
   const { streamInfo, lastStreamUpdateTimestamp } = useStreamContext()
 
   const controlsContainerRef = useRef<HTMLDivElement>(null)
+  const altControlsContainerRef = useRef<HTMLDivElement>(null)
 
   const { currentTimestamp, totalTimestamp } = useStreamTimestamp(
     streamInfo,
@@ -40,8 +41,9 @@ export default function VideoControls({ scrubber, adminControls }: Props) {
   // when mouse is moved out or stops moving, hide it after 3 seconds
   useEffect(() => {
     const controlsElement = controlsContainerRef.current
+    const altControlsElement = altControlsContainerRef.current
 
-    if (!controlsElement || !containerElement) return
+    if (!controlsElement || !altControlsElement || !containerElement) return
 
     let timeout: NodeJS.Timeout
     let hoveredControls = false
@@ -79,10 +81,6 @@ export default function VideoControls({ scrubber, adminControls }: Props) {
       hoveredContainer = true
       check()
     }
-    // containerElement.onmouseup = () => {
-    //   hoveredContainer = false
-    //   check()
-    // }
 
     controlsElement.onmousemove = () => {
       hoveredControls = true
@@ -96,10 +94,19 @@ export default function VideoControls({ scrubber, adminControls }: Props) {
       hoveredControls = true
       check()
     }
-    // controlsElement.ontouchend = () => {
-    //   hoveredControls = false
-    //   check()
-    // }
+
+    altControlsElement.onmousemove = () => {
+      hoveredControls = true
+      check()
+    }
+    altControlsElement.onmouseleave = () => {
+      hoveredControls = false
+      check()
+    }
+    altControlsElement.ontouchstart = () => {
+      hoveredControls = true
+      check()
+    }
 
     check()
 
@@ -107,65 +114,80 @@ export default function VideoControls({ scrubber, adminControls }: Props) {
       containerElement.onmousemove = null
       containerElement.onmouseleave = null
       containerElement.onmousedown = null
-      // containerElement.onmouseup = null
+
       controlsElement.onmousemove = null
       controlsElement.onmouseleave = null
       controlsElement.ontouchstart = null
-      // controlsElement.ontouchend = null
+
+      altControlsElement.onmousemove = null
+      altControlsElement.onmouseleave = null
+      altControlsElement.ontouchstart = null
+
       clearTimeout(timeout)
     }
   }, [containerElement])
 
   return (
-    <div
-      ref={controlsContainerRef}
-      className={twMerge(
-        'absolute bottom-0 left-0 flex w-full flex-col overflow-x-auto overflow-y-hidden bg-[rgba(0,0,0,0.5)] shadow-[0_0.5rem_1rem_rgba(0,0,0,0.5)] transition-[150ms]',
-        !showControls && 'translate-y-full opacity-0'
-      )}
-      onClick={(event) => event.stopPropagation()}>
-      {scrubber}
-      <div className="flex items-center justify-between p-2">
-        <div className="flex items-center gap-2">
-          <PausePlayButton />
-          <p className="cursor-default whitespace-nowrap text-lg text-slate-200">
-            {currentTimestamp} / {totalTimestamp}
-          </p>
-          <div className="group flex items-center pr-8">
-            <div>
-              <ActionButton onClick={() => (videoElement.muted = !videoElement.muted)}>
+    <>
+      <div
+        ref={altControlsContainerRef}
+        className={twMerge(
+          'absolute left-0 top-0 flex w-full items-center justify-center overflow-x-auto overflow-y-hidden p-2 duration-150 md:hidden',
+          !showControls && '-translate-y-full opacity-0'
+        )}
+        onClick={(event) => event.stopPropagation()}>
+        {adminControls}
+      </div>
+      <div
+        ref={controlsContainerRef}
+        className={twMerge(
+          'absolute bottom-0 left-0 flex w-full flex-col overflow-x-auto overflow-y-hidden bg-[rgba(0,0,0,0.5)] shadow-[0_0.5rem_1rem_rgba(0,0,0,0.5)] duration-150',
+          !showControls && 'translate-y-full opacity-0'
+        )}
+        onClick={(event) => event.stopPropagation()}>
+        {scrubber}
+        <div className="flex items-center justify-between p-2">
+          <div className="flex items-center gap-2">
+            <PausePlayButton />
+            <p className="cursor-default whitespace-nowrap text-lg text-slate-200">
+              {currentTimestamp} / {totalTimestamp}
+            </p>
+            <div className="group flex items-center pr-8">
+              <div>
+                <ActionButton onClick={() => (videoElement.muted = !videoElement.muted)}>
+                  <HoverTooltip placement="top" offset={22}>
+                    Toggle Volume (m)
+                  </HoverTooltip>
+                  <Icon name={volume === 0 ? 'no-volume' : 'volume'} />
+                </ActionButton>
+              </div>
+              <div>
                 <HoverTooltip placement="top" offset={22}>
-                  Toggle Volume (m)
+                  Volume - {Math.round(volume)}%
                 </HoverTooltip>
-                <Icon name={volume === 0 ? 'no-volume' : 'volume'} />
-              </ActionButton>
-            </div>
-            <div>
-              <HoverTooltip placement="top" offset={22}>
-                Volume - {Math.round(volume)}%
-              </HoverTooltip>
-              <RangeSliderInput
-                value={volume}
-                onChange={(value) => {
-                  videoElement.volume = value / 100
-                  videoElement.muted = false
-                }}
-                className="h-[3.5rem] w-0 opacity-0 transition-[150ms] ease-in-out group-hover:w-20 group-hover:opacity-100"
-              />
+                <RangeSliderInput
+                  value={volume}
+                  onChange={(value) => {
+                    videoElement.volume = value / 100
+                    videoElement.muted = false
+                  }}
+                  className="h-[3.5rem] w-0 opacity-0 transition-[150ms] ease-in-out group-hover:w-20 group-hover:opacity-100"
+                />
+              </div>
             </div>
           </div>
-        </div>
-        {adminControls}
-        <div>
-          <ActionButton onClick={toggleFullscreen}>
-            <HoverTooltip placement="top-end" offset={22}>
-              Toggle Fullscreen (f)
-            </HoverTooltip>
-            <Icon name="fullscreen" />
-          </ActionButton>
+          <div className="hidden md:block">{adminControls}</div>
+          <div>
+            <ActionButton onClick={toggleFullscreen}>
+              <HoverTooltip placement="top-end" offset={22}>
+                Toggle Fullscreen (f)
+              </HoverTooltip>
+              <Icon name="fullscreen" />
+            </ActionButton>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
 

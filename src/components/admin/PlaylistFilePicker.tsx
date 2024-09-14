@@ -310,7 +310,7 @@ function PlaylistFilePickerProvider({ playlist }: { playlist: ClientPlaylist }) 
             </div>
           )}
         </div>
-        <div className="overflow-hidden border border-border1 px-0 py-1">{rootElement}</div>
+        <div className="overflow-hidden px-0 py-1">{rootElement}</div>
       </div>
     </PlaylistFilePickerContext.Provider>
   )
