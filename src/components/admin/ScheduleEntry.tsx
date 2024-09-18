@@ -80,15 +80,13 @@ export default function ScheduleEntry({ entry, onChange }: Props) {
         </SelectDropdown>
       </div>
       <div className="w-[150px]">
-        <SelectDropdown
-          label={daysOfWeek.find((d) => d.index === day)?.name || 'Unknown'}
-          icon="calendar">
-          {daysOfWeek.map((weekDay) => (
+        <SelectDropdown label={daysOfWeek[day] || 'Unknown'} icon="calendar">
+          {daysOfWeek.map((weekDay, index) => (
             <SelectItem
-              key={weekDay.index}
-              active={weekDay.index === day}
-              label={weekDay.name}
-              onClick={() => setDay(weekDay.index)}
+              key={index}
+              active={index === day}
+              label={weekDay}
+              onClick={() => setDay(index)}
               className="py-1.5"
             />
           ))}

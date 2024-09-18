@@ -1,6 +1,6 @@
 import { socketClients } from '@/server/socket/socketClients'
 import { Msg, AuthRole } from '@/lib/enums'
-import type { Viewer, ClientRichUser } from '@/typings/socket'
+import type { Viewer, ClientRichUser, SocketClient } from '@/typings/socket'
 
 // Server-side socket utilities
 export default class SocketUtils {
@@ -56,5 +56,9 @@ export default class SocketUtils {
     }
     richUsers.sort((a, b) => (a.isWatching === b.isWatching ? 0 : a.isWatching ? 1 : -1))
     return richUsers
+  }
+
+  static get watchingClients(): SocketClient[] {
+    return socketClients.filter((client) => client.isWatching)
   }
 }

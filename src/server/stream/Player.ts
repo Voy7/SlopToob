@@ -220,6 +220,10 @@ class Player {
     this.queue = [] // Clear queue when playlist changes
     this.populateRandomToQueue()
 
+    if (Settings.skipVideoOnInactivePlaylistChange && SocketUtils.watchingClients.length <= 0) {
+      this.playing?.end()
+    }
+
     SocketUtils.broadcastAdmin(Msg.AdminPlaylists, this.clientPlaylists)
     SocketUtils.broadcastAdmin(Msg.AdminQueueList, this.clientVideoQueue)
     SocketUtils.broadcastAdmin(Msg.AdminStreamInfo, this.adminStreamInfo)

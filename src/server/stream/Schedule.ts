@@ -126,18 +126,11 @@ class Schedule {
       indexOfCurrent === entries.length - 1 ? entries[0] : entries[indexOfCurrent + 1]
 
     if (nextEntry) {
-      const now = new Date()
-      const day = now.getUTCDay()
-      const seconds = now.getUTCHours() * 3600 + now.getUTCMinutes() * 60 + now.getUTCSeconds()
-
-      let dayOffsetSeconds = 0
-      if (nextEntry.dayOfWeek > day) dayOffsetSeconds = (nextEntry.dayOfWeek - day) * 86400
-      else if (nextEntry.dayOfWeek < day) dayOffsetSeconds = (7 - day + nextEntry.dayOfWeek) * 86400
-
-      let secondsUntil = nextEntry.secondsIn - seconds + dayOffsetSeconds
-      if (secondsUntil < 1) secondsUntil = 1
-
-      this.syncTimeout = setTimeout(() => this.updateCheck, secondsUntil * 1000)
+      const secondsUntil = this.getSecondsUntil(new Date(), nextEntry) || 1
+      console.log(
+        `Timeout (${Player.playlists.find((p) => p.id === nextEntry.playlistID)?.name}): ${secondsUntil}s`
+      )
+      this.syncTimeout = setTimeout(() => this.updateCheck(), secondsUntil * 1000)
     }
 
     if (Player.activePlaylist?.id === activeEntry.playlistID) {
@@ -256,7 +249,7 @@ class Schedule {
         const playlist = Player.playlists.find((p) => p.id === entry.playlistID)
         const realHour = Math.floor(entry.secondsIn / 3600)
         const obj: ClientScheduleDisplay['entries'][0] = {
-          day: daysOfWeek.find((d) => d.index === entry.dayOfWeek)?.name || 'Invalid Day',
+          day: daysOfWeek[entry.dayOfWeek] || 'Invalid Day',
           playlist: playlist ? playlist.name : '(Deleted Playlist)',
           thumbnailURL: Thumbnails.getURL(
             playlist?.videos[Math.round(playlist.videos.length / 2)] || 'unknown'
