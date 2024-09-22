@@ -35,6 +35,14 @@ export type ListOption = {
   selectedID: string
 }
 
+export type MultiListOption = {
+  list: {
+    name: string
+    id: string
+  }[]
+  selectedIDs: string[]
+}
+
 export type ScheduleEntryOptions = {
   isEnabled: boolean
   day: number

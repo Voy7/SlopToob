@@ -1,15 +1,22 @@
-import type { ListOption } from '@/typings/types'
+import type { ListOption, MultiListOption } from '@/typings/types'
 import type { SocketClient } from '@/typings/socket'
 
 // List of all settings, with their default values and optional hooks
 // NOTE: Because of how Settings is initialized, most top-level imports are not allowed.
 // Instead, use dynamic imports (except importing types is fine)
 
-type Setting = {
-  default: string | number | boolean
-  onChange?: (value: any) => void
+type Setting<T = string | number | boolean> = {
+  default: T
   clientValue?: () => any
+  onChange?: (value: any) => void
+  setter?: (value: any) => T | Promise<T>
 }
+
+// type Setting = {
+//   default: string | number | boolean
+//   clientValue?: () => any
+//   onChange?: (value: any) => void
+// }
 
 export const settingsList = {
   // Current active playlist, client uses the setting as a ListOption
@@ -25,13 +32,30 @@ export const settingsList = {
     }
   },
 
-  streamTheme: {
-    default: 'None',
-    clientValue: async (): Promise<ListOption> => {
-      const { default: Player } = await import('@/server/stream/Player')
-      return Player.listOptionThemes
+  activeThemes: {
+    default: '',
+    setter: async (value: string[]) => {
+      const { default: Themes } = await import('@/server/stream/Themes')
+      return Themes.setActiveThemes(value)
     },
-    onChange: chatResync
+    clientValue: async (): Promise<MultiListOption> => {
+      const { default: Themes } = await import('@/server/stream/Themes')
+      return Themes.multiListOptionThemes
+    },
+    onChange: async (value: string[]) => {
+      const { default: Themes } = await import('@/server/stream/Themes')
+      // Themes.setActiveThemes(value)
+    }
+  },
+
+  // DELETE AFTER THEME UPDATE:
+  streamTheme: {
+    default: 'None'
+    // clientValue: async (): Promise<ListOption> => {
+    //   const { default: Player } = await import('@/server/stream/Player')
+    //   return Player.listOptionThemes
+    // },
+    // onChange: chatResync
   },
 
   // Is not a normal setting, just a persistant state for if the server restarts

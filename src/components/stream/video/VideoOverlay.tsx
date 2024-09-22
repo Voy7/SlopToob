@@ -14,8 +14,8 @@ export default function VideoOverlay() {
 
   return (
     <>
-      {streamInfo.streamTheme === 'FoxNews' && <FoxNewsOverlay />}
-      {streamInfo.streamTheme === 'SaulGoodman' && <SaulGoodmanOverlay />}
+      {streamInfo.streamThemes.includes('FoxNews') && <FoxNewsOverlay />}
+      {streamInfo.streamThemes.includes('SaulGoodman') && <SaulGoodmanOverlay />}
       <StateOverlay />
       <BumperOverlay />
       <ActionPopupOverlay />

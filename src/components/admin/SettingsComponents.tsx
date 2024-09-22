@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import Icon, { IconNames } from '@/components/ui/Icon'
 import Slider from '@/components/ui/Slider'
 import styles from './SettingsComponents.module.scss'
-import type { ListOption } from '@/typings/types'
+import type { ListOption, MultiListOption } from '@/typings/types'
 
 // Admin panel settings components
 
@@ -231,6 +231,57 @@ export function ListOption({ value, setValue }: ListOptionProps) {
           {option.name}
           <div className={styles.right}>
             {option.id === value.selectedID ? (
+              <div className={styles.valueLabel}>
+                <p>Selected</p>
+                <Icon name="radio-checked" />
+              </div>
+            ) : (
+              <Icon name="radio-unchecked" />
+            )}
+          </div>
+        </label>
+      ))}
+    </>
+  )
+}
+
+type MultiListOptionProps = {
+  value: MultiListOption | null
+  setValue: (value: string[]) => void
+}
+
+export function MultiListOption({ value, setValue }: MultiListOptionProps) {
+  if (!value)
+    return (
+      <label className={styles.listOption}>
+        Loading options...
+        <Icon name="loading" className={styles.loadingIcon} />
+      </label>
+    )
+
+  function toggleOption(option: string) {
+    if (!value) return
+    setValue(
+      value.selectedIDs.includes(option)
+        ? value.selectedIDs.filter((id) => id !== option)
+        : [...value.selectedIDs, option]
+    )
+  }
+
+  return (
+    <>
+      {value.list.map((option) => (
+        <label
+          key={option.id}
+          className={
+            value.selectedIDs.includes(option.id)
+              ? `${styles.listOption} ${styles.active}`
+              : styles.listOption
+          }
+          onClick={() => toggleOption(option.id)}>
+          {option.name}
+          <div className={styles.right}>
+            {value.selectedIDs.includes(option.id) ? (
               <div className={styles.valueLabel}>
                 <p>Selected</p>
                 <Icon name="radio-checked" />

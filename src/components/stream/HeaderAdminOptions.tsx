@@ -6,9 +6,10 @@ import { useSocketContext } from '@/contexts/SocketContext'
 import Button from '@/components/ui/Button'
 import HeaderAdminDropdown from '@/components/stream/HeaderAdminDropdown'
 import Icon from '@/components/ui/Icon'
+import Checkbox from '@/components/ui/Checkbox'
 import HoverTooltip from '@/components/ui/HoverTooltip'
 import ScheduleSyncer from '@/components/admin/ScheduleSyncer'
-import { themes } from '@/server/stream/themes'
+import { themes } from '@/lib/themes'
 import { twMerge } from 'tailwind-merge'
 
 export default function HeaderAdminOptions() {
@@ -41,14 +42,11 @@ export default function HeaderAdminOptions() {
                 key={theme.id}
                 className={twMerge(
                   'flex cursor-pointer items-center justify-between gap-4 bg-bg1 p-2 text-lg',
-                  isActive ? 'bg-blue-500 text-white' : 'hover:bg-bg3'
+                  isActive ? 'bg-bg2 text-white' : 'hover:bg-bg2'
                 )}
                 onClick={() => socket.emit('setting.streamTheme', theme.id)}>
                 <div className="flex items-center gap-2 overflow-hidden">
-                  <Icon
-                    name={isActive ? 'radio-checked' : 'radio-unchecked'}
-                    className={twMerge('shrink-0 text-sm text-text3', isActive && 'text-white')}
-                  />
+                  <Checkbox checked={isActive} />
                   <p className="overflow-hidden text-ellipsis whitespace-nowrap">{theme.name}</p>
                 </div>
               </div>
@@ -70,7 +68,7 @@ export default function HeaderAdminOptions() {
                   key={playlist.id}
                   className={twMerge(
                     'flex w-full cursor-pointer items-center justify-between gap-4 bg-bg1 p-2 text-lg',
-                    isActive ? 'bg-blue-500 text-white' : 'hover:bg-bg3'
+                    isActive ? 'bg-blue-500 text-white' : 'hover:bg-bg2'
                   )}
                   onClick={() => socket.emit('setting.activePlaylistID', playlist.id)}>
                   <div className="flex items-center gap-2 overflow-hidden">

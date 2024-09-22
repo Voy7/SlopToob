@@ -40,7 +40,7 @@ export type StreamError = {
 }
 
 export type StreamOptions = {
-  streamTheme: string
+  streamThemes: string[]
   history: ClientHistoryItem[] | null
   chat: {
     showTimestamps: boolean

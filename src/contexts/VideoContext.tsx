@@ -200,7 +200,8 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
         className={twMerge(
           'relative z-[1] flex h-mobile-video-height w-full items-center justify-center overflow-hidden bg-black md:h-full md:w-desktop-video-width',
           hideCursor && 'cursor-none',
-          streamInfo.streamTheme === 'Zoomer' && 'grid grid-cols-[1fr_1fr] grid-rows-[1fr_1fr]'
+          streamInfo.streamThemes.includes('Zoomer') &&
+            'grid grid-cols-[1fr_1fr] grid-rows-[1fr_1fr]'
         )}
         onClick={backgroundClick}>
         <video
@@ -212,7 +213,7 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
           controlsList="nodownload">
           Your browser does not support the video tag.
         </video>
-        {streamInfo.streamTheme === 'Zoomer' && (
+        {streamInfo.streamThemes.includes('Zoomer') && (
           <>
             <video
               src="/theme-assets/zoomer-1.mp4"

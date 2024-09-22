@@ -5,6 +5,7 @@ import { useAdminContext } from '@/contexts/AdminContext'
 import { useSocketContext } from '@/contexts/SocketContext'
 import { Msg } from '@/lib/enums'
 import Icon from '@/components/ui/Icon'
+import Checkbox from '@/components/ui/Checkbox'
 import HoverTooltip from '@/components/ui/HoverTooltip'
 import { twMerge } from 'tailwind-merge'
 import type { FileTreeNode } from '@/typings/types'
@@ -367,9 +368,7 @@ function TreeFolder({ node, depth, highlightPos, defaultOpen = false }: TreeFold
         onClick={() => setIsOpen(!isOpen)}
         style={depth === 0 ? undefined : { paddingLeft: `${depth * 1.25}rem` }}>
         <div className="flex items-center gap-1 overflow-hidden">
-          <input
-            className="relative h-4 w-4 cursor-pointer appearance-none rounded border border-border1 checked:border-blue-500 checked:bg-blue-500 checked:after:absolute checked:after:left-1/2 checked:after:top-1/2 checked:after:block checked:after:h-4 checked:after:w-4 checked:after:-translate-x-1/2 checked:after:-translate-y-1/2 checked:after:transform checked:after:text-center checked:after:leading-4 checked:after:text-text1 checked:after:content-['✔'] hover:border-blue-500 hover:border-opacity-50"
-            type="checkbox"
+          <Checkbox
             checked={node.active}
             onChange={toggleActive}
             onClick={(event) => event.stopPropagation()}
@@ -431,12 +430,7 @@ function TreeFile({ node, depth, highlightPos }: TreeFileProps) {
       )}
       style={depth === 0 ? undefined : { paddingLeft: `${depth * 1.25}rem` }}>
       <div className="flex items-center gap-1 overflow-hidden">
-        <input
-          className="relative h-4 w-4 cursor-pointer appearance-none rounded border border-border1 checked:border-blue-500 checked:bg-blue-500 checked:after:absolute checked:after:left-1/2 checked:after:top-1/2 checked:after:block checked:after:h-4 checked:after:w-4 checked:after:-translate-x-1/2 checked:after:-translate-y-1/2 checked:after:transform checked:after:text-center checked:after:leading-4 checked:after:text-text1 checked:after:content-['✔'] hover:border-blue-500 hover:border-opacity-50"
-          type="checkbox"
-          checked={node.active}
-          onChange={toggleActive}
-        />
+        <Checkbox checked={node.active} onChange={toggleActive} />
         <Icon name="video-file" />
         {!highlightPos ? (
           <p className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap" title={node.name}>

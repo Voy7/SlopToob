@@ -19,13 +19,19 @@ let onReadyCallback: Function | null = null
 const Settings = {
   async set(
     key: keyof SettingsList,
-    value: string | number | boolean,
+    value: string | number | boolean, // Note: Can really be anything, this just for nice autocompletion
     executedBy?: SocketClient
   ): Promise<boolean> {
     if (!settings || value === undefined) return false
 
     // Skip if value is the same, TODO: Investigate possible unknown side effects
     // if (settings[key] === value) return true
+
+    const setting = settingsList[key]
+
+    if ('setter' in setting) {
+      value = await setting.setter(value as never)
+    }
 
     const valueIsValid = typeof value === typeof settings[key]
     if (!valueIsValid) {
@@ -36,9 +42,7 @@ const Settings = {
     }
 
     Logger.debug(`[Settings] Updating setting.${key} to: ${value}`)
-    settings[key] = value as never // This is a hack to make TS happy, because it doesn't understand that value is valid
-
-    const setting = settingsList[key]
+    settings[key] = value as never // Using 'as never' hack to make TS happy, because it doesn't understand that value is valid
 
     const clientValue = 'clientValue' in setting ? await setting.clientValue() : value
     SocketUtils.broadcastAdmin(`setting.${key}` as any, clientValue)

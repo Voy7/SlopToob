@@ -6,7 +6,8 @@
     "dev": "tsx src/index.ts",
     "build": "next build",
     "lint": "next lint",
-    "prettier": "prettier --write ."
+    "prettier": "prettier --write .",
+    "test-name-parser": "tsx src/lib/testTorrentNameParser.ts"
   },
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.1.0",

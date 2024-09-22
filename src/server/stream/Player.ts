@@ -9,8 +9,8 @@ import Settings from '@/server/Settings'
 import SocketUtils from '@/server/socket/SocketUtils'
 import Chat from '@/server/stream/Chat'
 import Schedule from '@/server/stream/Schedule'
+import Themes from '@/server/stream/Themes'
 import { getNextBumper } from '@/server/stream/bumpers'
-import { themes } from '@/server/stream/themes'
 import { StreamState, Msg, VideoState } from '@/lib/enums'
 import type { RichPlaylist, ListOption } from '@/typings/types'
 import type {
@@ -303,7 +303,7 @@ class Player {
 
   get clientStreamOptions(): StreamOptions {
     return {
-      streamTheme: Settings.streamTheme,
+      streamThemes: Themes.activeThemes,
       history: PlayHistory.clientHistory,
       chat: {
         showTimestamps: Settings.showChatTimestamps,
@@ -338,13 +338,6 @@ class Player {
     return {
       list: this.playlists.map((playlist) => ({ name: playlist.name, id: playlist.id })),
       selectedID: Settings.activePlaylistID
-    }
-  }
-
-  get listOptionThemes(): ListOption {
-    return {
-      list: themes,
-      selectedID: Settings.streamTheme
     }
   }
 }

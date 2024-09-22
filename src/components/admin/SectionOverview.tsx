@@ -2,12 +2,14 @@
 
 import { useAdminContext } from '@/contexts/AdminContext'
 import useListOption from '@/hooks/useListOption'
+import useMultiListOption from '@/hooks/useMultiListOption'
 import {
   MainHeader,
   SettingGroup,
   Header,
   Description,
-  ListOption
+  ListOption,
+  MultiListOption
 } from '@/components/admin/SettingsComponents'
 import StreamControls from '@/components/admin/StreamControls'
 import QueueList from '@/components/admin/QueueList'
@@ -17,7 +19,7 @@ export default function SectionOverview() {
   const { schedule } = useAdminContext()
 
   const activePlaylist = useListOption('activePlaylistID')
-  const activeTheme = useListOption('streamTheme')
+  const activeThemes = useMultiListOption('activeThemes')
 
   return (
     <>
@@ -36,7 +38,7 @@ export default function SectionOverview() {
       </SettingGroup>
       <SettingGroup>
         <Header icon="menu">Joke Themes</Header>
-        <ListOption {...activeTheme} />
+        <MultiListOption {...activeThemes} />
         <Description>Enable a funny theme for the stream.</Description>
       </SettingGroup>
     </>
