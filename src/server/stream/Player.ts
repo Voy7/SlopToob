@@ -137,7 +137,7 @@ class Player {
     this.playNext()
   }
 
-  // Add video to end of queue
+  // Add video to queue
   addVideo(video: Video, addToStart: boolean = false) {
     Logger.debug('[Player] Adding video to queue:', video.name)
     addToStart ? this.queue.unshift(video) : this.queue.push(video)

@@ -52,9 +52,10 @@ export default function QueueList({ omitDetails = false }: { omitDetails?: boole
       <Modal
         title="Add Video Manually"
         isOpen={showAddModal}
-        setClose={() => setShowAddModal(false)}>
+        setClose={() => setShowAddModal(false)}
+        canEscapeKeyClose={false}>
         <div className="h-[calc(90vh-4rem-2px)] w-[min(90vw,700px)] overflow-y-auto p-2 pb-0">
-          <ManualVideoPicker />
+          <ManualVideoPicker setClose={() => setShowAddModal(false)} />
         </div>
       </Modal>
     </>

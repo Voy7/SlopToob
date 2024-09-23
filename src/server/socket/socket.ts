@@ -4,7 +4,8 @@ import Logger from '@/server/Logger'
 import Checklist from '@/server/Checklist'
 import Settings, { settingsList } from '@/server/Settings'
 import { socketClients } from '@/server/socket/socketClients'
-import { socketEvents } from '@/server/socket/socketEvents'
+// import { socketEvents } from '@/server/socket/socketEvents_'
+import Events from '@/server/socket/Events'
 import { AuthRole } from '@/lib/enums'
 
 let io: Server | null = null
@@ -38,7 +39,7 @@ export function initializeSocketServer() {
 
 // Handle socket events (from socketEvents)
 function handleSocketEvent(socket: Socket, eventID: string, payload?: any) {
-  const event = socketEvents[eventID]
+  const event = Events.get(eventID)
   if (!event) return
 
   const client = socketClients.find((c) => c.socket === socket)

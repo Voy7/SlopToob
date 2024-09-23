@@ -3,7 +3,7 @@ export const enum AuthRole {
   Admin
 }
 
-export const enum Msg {
+export enum Msg {
   // Socket.io predefined events
   Connect = 'connect',
   Disconnect = 'disconnect',
@@ -48,9 +48,11 @@ export const enum Msg {
   AdminSeekStepForward = 'admin-seek-step-forward',
   AdminSeekStepBackward = 'admin-seek-step-backward',
   AdminTerminateJob = 'admin-terminate-job',
+  AdminAddQueueVideo = 'admin-add-queue-video',
   AdminRemoveQueueVideo = 'admin-remove-queue-item',
   AdminDebugJob = 'admin-debug-job',
   AdminDebugVideo = 'admin-debug-video',
+  AdminPlayRightNow = 'admin-play-right-now',
   AdminSendAllLogs = 'admin-send-all-logs',
   AdminNewLog = 'admin-new-log',
   AdminSchedule = 'admin-schedule',

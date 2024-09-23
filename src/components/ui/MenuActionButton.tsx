@@ -10,12 +10,16 @@ export default function MenuActionButton({ icon, children, className, ...props }
   return (
     <button
       className={twMerge(
-        'flex w-full items-center justify-between gap-2 rounded-sm px-2 py-1 text-text2 hover:bg-blue-500 hover:text-white',
+        'group flex w-full items-center justify-between gap-2 rounded-md px-2 py-1.5 text-text2 hover:bg-blue-500 hover:text-white',
         className
       )}
       {...props}>
       {children}
-      {icon && <Icon name={icon} />}
+      {icon && (
+        <div className="rounded-full bg-bg2 p-1 group-hover:bg-[unset]">
+          <Icon name={icon} />
+        </div>
+      )}
     </button>
   )
 }

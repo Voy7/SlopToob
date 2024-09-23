@@ -108,8 +108,15 @@ export type EditPlaylistNamePayload = {
 
 export type EditPlaylistVideosPayload = {
   playlistID: string
-  // newVideoPaths: string[]
   newVideoPaths: number[]
+}
+
+export type AddQueueVideoPayload = {
+  videoPath: string
+  toStart: boolean
+  skipCurrent?: boolean
+  isBumper?: boolean
+  fromPlaylistID?: string
 }
 
 export type ClientPlaylist = {

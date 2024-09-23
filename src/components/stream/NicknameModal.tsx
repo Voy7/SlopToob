@@ -52,7 +52,7 @@ export default function NicknameModal() {
       isOpen={showNicknameModal}
       setClose={() => setShowNicknameModal(false)}
       button={
-        <Button variant="main" icon="edit" loading={loading} disabled={name.length > 0} isSubmit>
+        <Button variant="main" icon="edit" loading={loading} disabled={name.length <= 0} isSubmit>
           Save Nickname
         </Button>
       }

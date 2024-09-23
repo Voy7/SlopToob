@@ -1,88 +1,109 @@
 'use client'
 
-import { useState, useContext, createContext, useEffect, useMemo } from 'react'
+import { useState, useContext, createContext, useMemo, useEffect } from 'react'
 import { useAdminContext } from '@/contexts/AdminContext'
-import { useSocketContext } from '@/contexts/SocketContext'
-import { Msg } from '@/lib/enums'
 import Icon from '@/components/ui/Icon'
 import HoverTooltip from '@/components/ui/HoverTooltip'
+import FloatingContextMenu from '@/components/headless/FloatingContextMenu'
+import VideoPickerContextMenu from '@/components/admin/VideoPickerContextMenu'
+import SubSectionSelector from '@/components/ui/SubSectionSelector'
 import { twMerge } from 'tailwind-merge'
 import type { FileTreeNode } from '@/typings/types'
-import type { ClientPlaylist, EditPlaylistVideosPayload } from '@/typings/socket'
 
 const SEARCH_TIMEOUT_MS = 150
 const SEARCH_ITEMS_PER_MS = 1000
 const SEARCH_MAX_ITEMS = 100
 
-export default function ManualVideoPicker() {
-  return <PlaylistFilePickerProvider />
+export default function ManualVideoPicker({ setClose }: { setClose: Function }) {
+  return <ManualVideoPickerProvider setClose={setClose} />
 }
 
-type ActiveTreeNode = {
+type TreeNode = {
   path: string
   name: string
-  active: boolean
-  parent?: ActiveTreeNode
-  children?: ActiveTreeNode[]
+  parent?: TreeNode
+  children?: TreeNode[]
 }
 
-// Stream page context
+type ShowMenuData = {
+  selected: TreeNode
+  position: [number, number]
+}
+
+// Manual video picker context
 type ContextProps = {
-  activeMap: Map<string, ActiveTreeNode>
+  showMenuData: ShowMenuData | null
+  selectFile: (node: TreeNode, event: React.MouseEvent) => void
+  treeMap: Map<string, TreeNode>
   searchResults: Map<string, [number, number]> | null
 }
 
 // Context provider wrapper component
-function PlaylistFilePickerProvider() {
-  const { fileTree: tree } = useAdminContext()
+function ManualVideoPickerProvider({ setClose }: { setClose: Function }) {
+  const { fileTree: tree, bumpers } = useAdminContext()
   if (!tree) return null
 
-  const { socket } = useSocketContext()
-
-  // const [activeMap, setActiveMap] = useState<Map<string, ActiveTreeNode>>(new Map())
+  const [showMenuData, setShowMenuData] = useState<ShowMenuData | null>(null)
   const [isSearching, setIsSearching] = useState<boolean>(false)
   const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null)
   const [searchResults, setSearchResults] = useState<Map<string, [number, number]> | null>(null)
   const [searchInput, setSearchInput] = useState<string>('')
+  const [filesSource, setFilesSource] = useState<string>('videos')
 
-  const activeMap = useMemo(() => {
-    const map = new Map<string, ActiveTreeNode>()
-    function getPaths(item: FileTreeNode, parentNode?: ActiveTreeNode): ActiveTreeNode {
-      if (item.children) {
-        const parent: ActiveTreeNode = {
-          path: item.path,
-          name: item.name,
-          active: false,
-          children: []
+  const treeMap = useMemo(() => {
+    const map = new Map<string, TreeNode>()
+
+    // Videos file tree
+    if (filesSource === 'videos') {
+      function getPaths(item: FileTreeNode, parentNode?: TreeNode): TreeNode {
+        if (item.children) {
+          const parent: TreeNode = {
+            path: item.path,
+            name: item.name,
+            children: []
+          }
+          if (parentNode) parent.parent = parentNode
+          for (const child of item.children) {
+            const childNode = getPaths(child, parent)
+            if (!childNode) continue
+            parent.children?.push(childNode)
+          }
+          map.set(item.path, parent)
+          return parent
         }
-        if (parentNode) parent.parent = parentNode
-        for (const child of item.children) {
-          const childNode = getPaths(child, parent)
-          if (!childNode) continue
-          parent.children?.push(childNode)
-        }
-        map.set(item.path, parent)
-        return parent
+        const childNode: TreeNode = { path: item.path, name: item.name }
+        if (parentNode) childNode.parent = parentNode
+        map.set(item.path, childNode)
+        return childNode
       }
-      const childNode: ActiveTreeNode = { path: item.path, name: item.name, active: false }
-      if (parentNode) childNode.parent = parentNode
-      map.set(item.path, childNode)
-      return childNode
-    }
-    map.set(tree.path, getPaths(tree))
-
-    // Sync active state of children with parent if all children are active
-    for (const [_, node] of map) {
-      if (!node.children) continue
-      const active = node.children.every((child) => child.active)
-      node.active = active
+      map.set(tree.path, getPaths(tree))
+      return map
     }
 
+    // Bumpers files
+    const root: TreeNode = { path: 'bumpers', name: 'Bumpers', children: [] }
+    map.set('bumpers', root)
+    for (const bumper of bumpers) {
+      const bumperNode: TreeNode = { path: bumper.path, name: bumper.name }
+      root.children?.push(bumperNode)
+      map.set(bumper.path, bumperNode)
+    }
     return map
-  }, [tree])
+  }, [tree, bumpers, filesSource])
+
+  function selectFile(node: TreeNode, event: React.MouseEvent) {
+    event.preventDefault()
+    if (showMenuData?.selected === node) {
+      setShowMenuData(null)
+      return
+    }
+    const elementTop = (event.target as HTMLElement).getBoundingClientRect().bottom
+    setShowMenuData({ selected: node, position: [elementTop, event.clientX] })
+  }
 
   function searchFiles(input: string) {
     setSearchInput(input)
+    setShowMenuData(null)
     if (searchTimeout) clearTimeout(searchTimeout)
 
     input = input.replace(/\s+/g, '') // Remove all spaces
@@ -99,7 +120,7 @@ function PlaylistFilePickerProvider() {
       // Regex - match all characters in input in order, with any whitespace in between
       const regex = new RegExp(input.split('').join('\\s*'), 'i')
       let items = 0
-      for (const [_, node] of activeMap) {
+      for (const [_, node] of treeMap) {
         // First folders
         if (results.size >= SEARCH_MAX_ITEMS) break
         if (!node.children) continue
@@ -110,7 +131,7 @@ function PlaylistFilePickerProvider() {
         if (matches?.index !== undefined)
           results.set(node.path, [matches.index, matches.index + matches[0].length])
       }
-      for (const [_, node] of activeMap) {
+      for (const [_, node] of treeMap) {
         // Then files
         if (results.size >= SEARCH_MAX_ITEMS) break
         if (node.children) continue
@@ -125,8 +146,8 @@ function PlaylistFilePickerProvider() {
       // Sort results by folders first, and names naturally (case-insensitive)
       const sortedResults = new Map(
         [...results.entries()].sort((a, b) => {
-          const aNode = activeMap.get(a[0])!
-          const bNode = activeMap.get(b[0])!
+          const aNode = treeMap.get(a[0])!
+          const bNode = treeMap.get(b[0])!
           if (aNode.children && !bNode.children) return -1
           if (!aNode.children && bNode.children) return 1
           return aNode.name.localeCompare(bNode.name, undefined, { sensitivity: 'base' })
@@ -139,12 +160,21 @@ function PlaylistFilePickerProvider() {
     setSearchTimeout(timeout)
   }
 
-  const context: ContextProps = {
-    activeMap,
-    searchResults
-  }
+  useEffect(() => {
+    if (!showMenuData) return
 
-  const rootNode = activeMap.get(tree.path)
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key !== 'Escape') return
+      setShowMenuData(null)
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [showMenuData])
+
+  const context: ContextProps = { showMenuData, selectFile, treeMap, searchResults }
+
+  const rootNode = treeMap.get(filesSource === 'videos' ? tree.path : 'bumpers')
   if (!rootNode) return null
 
   let rootElement: JSX.Element
@@ -159,8 +189,34 @@ function PlaylistFilePickerProvider() {
   else rootElement = <SearchResultItems />
 
   return (
-    <PlaylistFilePickerContext.Provider value={context}>
-      <div className="border border-border1">
+    <manualVideoPickerContext.Provider value={context}>
+      <FloatingContextMenu
+        show={showMenuData !== null}
+        setShow={(show) => setShowMenuData(show ? showMenuData : null)}
+        position={showMenuData?.position ?? [0, 0]}
+        offset={0}>
+        <div className="animate-fade-in rounded-lg border border-border1 bg-bg1 p-2 shadow-xl [animation-duration:50ms_!important]">
+          {showMenuData && (
+            <VideoPickerContextMenu
+              onClick={() => {
+                setShowMenuData(null)
+                setClose()
+              }}
+              path={showMenuData.selected.path}
+              isBumper={filesSource === 'bumpers'}
+            />
+          )}
+        </div>
+      </FloatingContextMenu>
+      <div onContextMenu={(event) => event.preventDefault()}>
+        <SubSectionSelector
+          value={filesSource}
+          setValue={setFilesSource}
+          sections={[
+            { id: 'videos', label: 'Videos', icon: 'video-file' },
+            { id: 'bumpers', label: 'Bumpers', icon: 'bumper' }
+          ]}
+        />
         <div className="relative">
           <input
             className="w-full resize-none border border-transparent bg-bg2 px-3 py-2 pl-8 text-base text-text3 focus:border-border1 focus:text-text1 focus:outline-none"
@@ -190,16 +246,16 @@ function PlaylistFilePickerProvider() {
         </div>
         <div className="overflow-hidden px-0 py-1">{rootElement}</div>
       </div>
-    </PlaylistFilePickerContext.Provider>
+    </manualVideoPickerContext.Provider>
   )
 }
 
 // Create the context and custom hook for it
-const PlaylistFilePickerContext = createContext<ContextProps>(null as any)
-const usePlaylistFilePickerContext = () => useContext(PlaylistFilePickerContext)
+const manualVideoPickerContext = createContext<ContextProps>(null as any)
+const useManualVideoPickerContext = () => useContext(manualVideoPickerContext)
 
 function SearchResultItems() {
-  const { searchResults, activeMap } = usePlaylistFilePickerContext()
+  const { searchResults, treeMap } = useManualVideoPickerContext()
   if (searchResults === null || searchResults.size === 0) {
     return (
       <div className="flex cursor-default flex-col items-center justify-center gap-3 py-6 text-xs tracking-wide text-text3">
@@ -210,7 +266,7 @@ function SearchResultItems() {
   }
 
   return Array.from(searchResults).map(([path, highlightPos]) => {
-    const node = activeMap.get(path)
+    const node = treeMap.get(path)
     if (!node) return null
     if (node.children)
       return <TreeFolder key={path} node={node} depth={0} highlightPos={highlightPos} />
@@ -219,7 +275,7 @@ function SearchResultItems() {
 }
 
 type TreeFolderProps = {
-  node: ActiveTreeNode
+  node: TreeNode
   depth: number
   highlightPos?: [number, number]
   defaultOpen?: boolean
@@ -231,20 +287,10 @@ function TreeFolder({ node, depth, highlightPos, defaultOpen = false }: TreeFold
   return (
     <>
       <div
-        className={twMerge(
-          'flex cursor-grab items-center justify-between gap-2 overflow-hidden py-[2px] pl-[5px] pr-[10px]',
-          node.active ? 'bg-bg3 text-text1' : 'text-text2 hover:bg-bg2'
-        )}
+        className="flex cursor-grab items-center justify-between gap-2 overflow-hidden py-[2px] pl-[5px] pr-[10px]"
         onClick={() => setIsOpen(!isOpen)}
         style={depth === 0 ? undefined : { paddingLeft: `${depth * 1.25}rem` }}>
         <div className="flex items-center gap-1 overflow-hidden">
-          {/* <input
-            className="relative h-4 w-4 cursor-pointer appearance-none rounded border border-border1 checked:border-blue-500 checked:bg-blue-500 checked:after:absolute checked:after:left-1/2 checked:after:top-1/2 checked:after:block checked:after:h-4 checked:after:w-4 checked:after:-translate-x-1/2 checked:after:-translate-y-1/2 checked:after:transform checked:after:text-center checked:after:leading-4 checked:after:text-text1 checked:after:content-['✔'] hover:border-blue-500 hover:border-opacity-50"
-            type="checkbox"
-            checked={node.active}
-            onChange={toggleActive}
-            onClick={(event) => event.stopPropagation()}
-          /> */}
           <Icon name={isOpen ? 'folder-open' : 'folder'} />
           {!highlightPos ? (
             <p className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap" title={node.name}>
@@ -281,28 +327,23 @@ function TreeFolder({ node, depth, highlightPos, defaultOpen = false }: TreeFold
 }
 
 type TreeFileProps = {
-  node: ActiveTreeNode
+  node: TreeNode
   depth: number
   highlightPos?: [number, number]
 }
 
 function TreeFile({ node, depth, highlightPos }: TreeFileProps) {
-  // const { selectFile, deselectFile } = usePlaylistFilePickerContext()
+  const { selectFile, showMenuData } = useManualVideoPickerContext()
 
   return (
     <label
       className={twMerge(
         'flex cursor-pointer items-center justify-between gap-2 overflow-hidden py-[2px] pl-[5px] pr-[10px]',
-        node.active ? 'bg-bg3 text-text1' : 'text-text2 hover:bg-bg2'
+        showMenuData?.selected === node ? 'bg-bg3 text-text1' : 'text-text2 hover:bg-bg2'
       )}
-      style={depth === 0 ? undefined : { paddingLeft: `${depth * 1.25}rem` }}>
+      style={depth === 0 ? undefined : { paddingLeft: `${depth * 1.25}rem` }}
+      onMouseDown={(event) => selectFile(node, event)}>
       <div className="flex items-center gap-1 overflow-hidden">
-        {/* <input
-          className="relative h-4 w-4 cursor-pointer appearance-none rounded border border-border1 checked:border-blue-500 checked:bg-blue-500 checked:after:absolute checked:after:left-1/2 checked:after:top-1/2 checked:after:block checked:after:h-4 checked:after:w-4 checked:after:-translate-x-1/2 checked:after:-translate-y-1/2 checked:after:transform checked:after:text-center checked:after:leading-4 checked:after:text-text1 checked:after:content-['✔'] hover:border-blue-500 hover:border-opacity-50"
-          type="checkbox"
-          checked={node.active}
-          onChange={toggleActive}
-        /> */}
         <Icon name="video-file" />
         {!highlightPos ? (
           <p className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap" title={node.name}>

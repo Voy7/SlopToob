@@ -7,6 +7,8 @@ import { Msg } from '@/lib/enums'
 import Icon from '@/components/ui/Icon'
 import Checkbox from '@/components/ui/Checkbox'
 import HoverTooltip from '@/components/ui/HoverTooltip'
+import FloatingContextMenu from '@/components/headless/FloatingContextMenu'
+import VideoPickerContextMenu from '@/components/admin/VideoPickerContextMenu'
 import { twMerge } from 'tailwind-merge'
 import type { FileTreeNode } from '@/typings/types'
 import type { ClientPlaylist, EditPlaylistVideosPayload } from '@/typings/socket'
@@ -27,6 +29,11 @@ type ActiveTreeNode = {
   children?: ActiveTreeNode[]
 }
 
+type ShowMenuData = {
+  selected: ActiveTreeNode
+  position: [number, number]
+}
+
 // Stream page context
 type ContextProps = {
   activeMap: Map<string, ActiveTreeNode>
@@ -35,6 +42,7 @@ type ContextProps = {
   deselectFolder: (folderPath: string) => void
   selectFile: (filePath: string) => void
   deselectFile: (filePath: string) => void
+  selectContextMenu: (node: ActiveTreeNode, event: React.MouseEvent) => void
 }
 
 // Context provider wrapper component
@@ -44,6 +52,7 @@ function PlaylistFilePickerProvider({ playlist }: { playlist: ClientPlaylist }) 
 
   const { socket } = useSocketContext()
 
+  const [showMenuData, setShowMenuData] = useState<ShowMenuData | null>(null)
   const [activeMap, setActiveMap] = useState<Map<string, ActiveTreeNode>>(new Map())
   const [isSearching, setIsSearching] = useState<boolean>(false)
   const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null)
@@ -202,6 +211,7 @@ function PlaylistFilePickerProvider({ playlist }: { playlist: ClientPlaylist }) 
 
   function searchFiles(input: string) {
     setSearchInput(input)
+    setShowMenuData(null)
     if (searchTimeout) clearTimeout(searchTimeout)
 
     input = input.replace(/\s+/g, '') // Remove all spaces
@@ -258,13 +268,32 @@ function PlaylistFilePickerProvider({ playlist }: { playlist: ClientPlaylist }) 
     setSearchTimeout(timeout)
   }
 
+  function selectContextMenu(node: ActiveTreeNode, event: React.MouseEvent) {
+    event.preventDefault()
+    const elementTop = (event.target as HTMLElement).getBoundingClientRect().bottom
+    setShowMenuData({ selected: node, position: [elementTop, event.clientX] })
+  }
+
+  useEffect(() => {
+    if (!showMenuData) return
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key !== 'Escape') return
+      setShowMenuData(null)
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [showMenuData])
+
   const context: ContextProps = {
     activeMap,
     searchResults,
     selectFolder,
     deselectFolder,
     selectFile,
-    deselectFile
+    deselectFile,
+    selectContextMenu
   }
 
   const rootNode = activeMap.get(tree.path)
@@ -283,7 +312,23 @@ function PlaylistFilePickerProvider({ playlist }: { playlist: ClientPlaylist }) 
 
   return (
     <PlaylistFilePickerContext.Provider value={context}>
-      <div className="border border-border1">
+      <FloatingContextMenu
+        show={showMenuData !== null}
+        setShow={(show) => setShowMenuData(show ? showMenuData : null)}
+        position={showMenuData?.position ?? [0, 0]}
+        offset={0}>
+        <div className="animate-fade-in rounded-lg border border-border1 bg-bg1 p-2 shadow-xl [animation-duration:50ms_!important]">
+          {showMenuData && (
+            <VideoPickerContextMenu
+              onClick={() => {
+                setShowMenuData(null)
+              }}
+              path={showMenuData.selected.path}
+            />
+          )}
+        </div>
+      </FloatingContextMenu>
+      <div className="border border-border1" onContextMenu={(event) => event.preventDefault()}>
         <div className="relative">
           <input
             className="w-full resize-none border border-transparent bg-bg2 px-3 py-2 pl-8 text-base text-text3 focus:border-border1 focus:text-text1 focus:outline-none"
@@ -415,7 +460,7 @@ type TreeFileProps = {
 }
 
 function TreeFile({ node, depth, highlightPos }: TreeFileProps) {
-  const { selectFile, deselectFile } = usePlaylistFilePickerContext()
+  const { selectFile, deselectFile, selectContextMenu } = usePlaylistFilePickerContext()
 
   function toggleActive() {
     if (node.active) deselectFile(node.path)
@@ -428,7 +473,8 @@ function TreeFile({ node, depth, highlightPos }: TreeFileProps) {
         'flex cursor-pointer items-center justify-between gap-2 overflow-hidden py-[2px] pl-[5px] pr-[10px]',
         node.active ? 'bg-bg3 text-text1' : 'text-text2 hover:bg-bg2'
       )}
-      style={depth === 0 ? undefined : { paddingLeft: `${depth * 1.25}rem` }}>
+      style={depth === 0 ? undefined : { paddingLeft: `${depth * 1.25}rem` }}
+      onContextMenu={(event) => selectContextMenu(node, event)}>
       <div className="flex items-center gap-1 overflow-hidden">
         <Checkbox checked={node.active} onChange={toggleActive} />
         <Icon name="video-file" />

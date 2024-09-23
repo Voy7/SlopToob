@@ -28,7 +28,12 @@ export default class TranscoderCommand {
 
     const fpsRates: number[] = []
 
-    fs.mkdirSync(this.job.video.outputPath, { recursive: true })
+    try {
+      fs.mkdirSync(this.job.video.outputPath, { recursive: true })
+    } catch (error: any) {
+      this.onErrorCallback?.(error)
+      return
+    }
     EventLogger.log(this, `Initializing command 2`)
 
     this.ffmpegCommand = ffmpeg(this.job.video.inputPath).addOptions(TRANSCODE_ARGS)
