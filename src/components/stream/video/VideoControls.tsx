@@ -141,7 +141,7 @@ export default function VideoControls({ scrubber, adminControls }: Props) {
       <div
         ref={controlsContainerRef}
         className={twMerge(
-          'absolute bottom-0 left-0 flex w-full flex-col overflow-x-auto overflow-y-hidden bg-[rgba(0,0,0,0.5)] shadow-[0_0.5rem_1rem_rgba(0,0,0,0.5)] duration-150',
+          'absolute bottom-0 left-0 flex w-full flex-col bg-[rgba(0,0,0,0.5)] shadow-[0_0.5rem_1rem_rgba(0,0,0,0.5)] duration-150',
           !showControls && 'translate-y-full opacity-0'
         )}
         onClick={(event) => event.stopPropagation()}>

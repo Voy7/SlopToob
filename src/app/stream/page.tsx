@@ -6,7 +6,7 @@ import { SocketProvider } from '@/contexts/SocketContext'
 import { StreamProvider } from '@/contexts/StreamContext'
 import { AdminProvider } from '@/contexts/AdminContext'
 import { AuthRole } from '@/lib/enums'
-import AuthExpired from '@/components/stream/AuthExpired'
+import AuthExpired from '@/components/layout/AuthExpired'
 import Header from '@/components/stream/Header'
 import Video from '@/components/stream/video/Video'
 import Chat from '@/components/stream/Chat'
@@ -30,16 +30,18 @@ export default async function StreamPage() {
     <>
       <SocketProvider authUser={authUser} cookieUsername={cookieUsername}>
         <StreamProvider>
-          <AdminProviderConditional authRole={authUser.role}>
-            <Header />
-            <div className="flex flex-col md:h-[calc((100vw-var(--chat-width))*9/16)] md:max-h-[calc(100vh-var(--header-height)-var(--info-body-height)-0.5rem)] md:flex-row">
-              <Video />
-              <Chat />
-            </div>
-            <InfoBody />
-            <ScheduleDisplay />
-            <History />
-          </AdminProviderConditional>
+          <div className="animate-fade-in">
+            <AdminProviderConditional authRole={authUser.role}>
+              <Header />
+              <div className="flex flex-col md:h-[calc((100vw-var(--chat-width))*9/16)] md:max-h-[calc(100vh-var(--header-height)-var(--info-body-height)-0.5rem)] md:flex-row">
+                <Video />
+                <Chat />
+              </div>
+              <InfoBody />
+              <ScheduleDisplay />
+              <History />
+            </AdminProviderConditional>
+          </div>
         </StreamProvider>
       </SocketProvider>
       <Footer />

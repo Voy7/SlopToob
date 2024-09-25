@@ -3,6 +3,7 @@
 import { useState, useContext, createContext, useEffect } from 'react'
 import { useSocketContext } from '@/contexts/SocketContext'
 import useSocketOn from '@/hooks/useSocketOn'
+import LoadingPage from '@/components/layout/LoaidngPage'
 import { Msg } from '@/lib/enums'
 import type { Viewer, ChatMessage, ViewerStreamInfo, ClientScheduleDisplay } from '@/typings/socket'
 
@@ -72,10 +73,9 @@ export function StreamProvider({ children }: { children: React.ReactNode }) {
     setShowClearChatModal(false)
   }
 
-  if (!isAuthenticated) return null // <LoadingPage text="Authenticating..." />
-  if (!streamInfo) return null // <LoadingPage text="Fetching stream info..." />
-
-  if (scheduleDisplay === undefined) return null // <LoadingPage text="Fetching schedule..." />
+  if (!isAuthenticated) return <LoadingPage text="Authenticating..." />
+  if (!streamInfo) return <LoadingPage text="Fetching stream info..." />
+  if (scheduleDisplay === undefined) return <LoadingPage text="Fetching schedule..." />
 
   const context: ContextProps = {
     viewers,

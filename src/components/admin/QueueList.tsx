@@ -38,7 +38,7 @@ export default function QueueList({ omitDetails = false }: { omitDetails?: boole
           <button
             className="flex shrink-0 items-center gap-0.5 whitespace-nowrap rounded-lg px-2 py-1 text-blue-500 duration-300 hover:underline active:bg-blue-500 active:bg-opacity-50 active:duration-0"
             onClick={() => setShowAddModal(true)}>
-            <Icon name="playlist-add" />
+            <Icon name="queue-play-next" />
             Add Video Manually
           </button>
         </div>

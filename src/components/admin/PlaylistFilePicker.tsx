@@ -347,6 +347,7 @@ function PlaylistFilePickerProvider({ playlist }: { playlist: ClientPlaylist }) 
             value={searchInput}
             onChange={(event) => searchFiles(event.target.value)}
             placeholder="Search files..."
+            autoFocus={true}
           />
           <Icon
             className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 transform text-xl text-gray-500"

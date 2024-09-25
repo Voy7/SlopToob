@@ -4,7 +4,7 @@ import authOptions from '@/lib/authOptions'
 import { SocketProvider } from '@/contexts/SocketContext'
 import { AuthRole } from '@/lib/enums'
 import { AdminProvider } from '@/contexts/AdminContext'
-import AuthExpired from '@/components/stream/AuthExpired'
+import AuthExpired from '@/components/layout/AuthExpired'
 import AdminPanel from '@/components/admin/AdminPanel'
 import RichUsersList from '@/components/admin/RichUsersList'
 

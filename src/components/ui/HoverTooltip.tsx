@@ -22,6 +22,11 @@ export default function HoverTooltip({ placement, offset = 5, children }: Props)
     const showTooltip = () => setShow(true)
     const hideTooltip = () => setShow(false)
 
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key !== 'Escape') return
+      setShow(false)
+    }
+
     parent.addEventListener('mouseenter', showTooltip)
     parent.addEventListener('mouseleave', hideTooltip)
     parent.addEventListener('touchstart', showTooltip)
@@ -29,6 +34,7 @@ export default function HoverTooltip({ placement, offset = 5, children }: Props)
     parent.addEventListener('click', hideTooltip)
     parent.addEventListener('focus', showTooltip)
     parent.addEventListener('blur', hideTooltip)
+    document.addEventListener('keydown', handleKeyDown)
 
     return () => {
       parent.removeEventListener('mouseenter', showTooltip)
@@ -38,6 +44,7 @@ export default function HoverTooltip({ placement, offset = 5, children }: Props)
       parent.removeEventListener('click', hideTooltip)
       parent.removeEventListener('focus', showTooltip)
       parent.removeEventListener('blur', hideTooltip)
+      document.removeEventListener('keydown', handleKeyDown)
     }
   }, [])
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { signIn } from 'next-auth/react'
 import Image from 'next/image'
 import Canvas3D from '@/components/home/3DCanvas'
@@ -10,12 +10,19 @@ import Footer from '@/components/layout/Footer'
 import styles from './Home.module.scss'
 
 export default function Home() {
+  const inputRef = useRef<HTMLInputElement>(null)
+
   const [password, setPassword] = useState<string>('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState<boolean>(false)
   const [success, setSuccess] = useState<boolean>(false)
 
-  // const router = useRouter()
+  // Get input from auto-fill password manager
+  useEffect(() => {
+    if (!inputRef.current) return
+    const password = inputRef.current.value
+    if (password) setPassword(password)
+  }, [inputRef])
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -58,6 +65,7 @@ export default function Home() {
           <p className={styles.blurb}>Enter the password to access infinite slop!</p>
           <div className={styles.password}>
             <input
+              ref={inputRef}
               type="password"
               placeholder="Enter password..."
               value={password}

@@ -24,7 +24,7 @@ export default function HeaderAdminOptions() {
 
   // If pressing CTRL, open /admin in a new tab
   function openAdminPanel(event: React.MouseEvent) {
-    if (event.ctrlKey) {
+    if (event.ctrlKey || event.metaKey) {
       window.open('/admin')
       return
     }

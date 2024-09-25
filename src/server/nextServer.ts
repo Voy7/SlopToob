@@ -32,6 +32,9 @@ async function nextRequestHandler(req: IncomingMessage, res: ServerResponse) {
     if (!req.url) throw new Error('No url')
     const parsedUrl = parse(req.url, true)
 
+    // Ignore socket.io requests
+    if (parsedUrl.pathname?.startsWith('/socket.io/')) return
+
     // Custom handling for thumbnails
     if (parsedUrl.pathname?.startsWith('/thumbnails/')) {
       return await Thumbnails.handleThumbnailRequest(req, res, parsedUrl)

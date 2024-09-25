@@ -12,7 +12,7 @@ type Props = {
 export default function SocketConnecting({ state, retry }: Props) {
   return (
     <div className="flex min-h-[100vh] w-full flex-col items-center justify-center gap-8">
-      <img src="/logo.png" alt="Logo" className="h-[100px]" />
+      <img src="/logo.png" alt="" className="h-[100px]" />
       <p
         key={state}
         className={twMerge(

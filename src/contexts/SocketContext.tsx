@@ -10,6 +10,10 @@ import type { AuthenticatePayload } from '@/typings/socket'
 
 const NicknameModal = dynamic(() => import('@/components/stream/NicknameModal'), { ssr: false })
 
+function initSocket() {
+  return io({ transports: ['websocket'] })
+}
+
 // Stream page context
 type ContextProps = {
   socket: Socket
@@ -27,7 +31,7 @@ type Props = {
 
 // Context provider wrapper component
 export function SocketProvider({ authUser, cookieUsername, children }: Props) {
-  const [socket, setSocket] = useState(io())
+  const [socket, setSocket] = useState(initSocket())
   const [socketState, setSocketState] = useState<
     'connected' | 'connecting' | 'failed' | 'auth-failed'
   >('connecting')
@@ -35,10 +39,7 @@ export function SocketProvider({ authUser, cookieUsername, children }: Props) {
   const [showNicknameModal, setShowNicknameModal] = useState<boolean>(nickname === 'Anonymous')
 
   useEffect(() => {
-    console.log('Connecting socket')
-
     socket.on('connect', () => {
-      console.log('Socket connected')
       socket.emit(Msg.Authenticate, {
         username: cookieUsername,
         password: authUser.password
@@ -54,32 +55,28 @@ export function SocketProvider({ authUser, cookieUsername, children }: Props) {
       console.log('Socket close:', reason, details)
     })
 
+    socket.on('connect_error', () => {
+      setSocketState('failed')
+    })
+
     socket.on(Msg.Authenticate, (isAuthenticated: boolean) => {
       if (isAuthenticated) setSocketState('connected')
       else setSocketState('auth-failed')
     })
 
-    setSocket(socket)
-
-    // If socket fails to connect, set state to failed
-    socket.on('connect_error', () => {
-      console.log('Socket connect error')
-      setSocketState('failed')
-    })
-
     return () => {
-      // socket.off('connect')
-      // socket.off('disconnect')
-      // socket.off('close')
-      // socket.off(Msg.Authenticate)
-      // socket.disconnect()
-      // setSocketState('failed')
+      socket.off('connect')
+      socket.off('disconnect')
+      socket.off('close')
+      socket.off('connect_error')
+      socket.off(Msg.Authenticate)
     }
-  }, [])
+  }, [socket])
 
   function retryConnection() {
-    setSocketState('connecting')
+    setSocket(initSocket())
     socket.connect()
+    setSocketState('connecting')
   }
 
   if (socketState === 'connecting') return <SocketConnecting state="connecting" />

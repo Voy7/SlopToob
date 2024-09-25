@@ -17,8 +17,9 @@ export default function VoteSkipButton() {
 
   useEffect(() => {
     if (streamInfo.voteSkip.allowedInSeconds <= -1) {
+      console.log(streamInfo.voteSkip)
       setAllowedInSeconds(-1)
-      setHasVoted(false)
+      if (!streamInfo.voteSkip.isAllowed) setHasVoted(false)
       return
     }
 
@@ -92,7 +93,7 @@ export default function VoteSkipButton() {
   return (
     <Button
       data-vote-button
-      key="vote"
+      key="voted"
       variant="normal"
       className="border-purple-500 hover:border-purple-500"
       icon="skip"
