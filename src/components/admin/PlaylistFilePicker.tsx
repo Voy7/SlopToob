@@ -75,7 +75,7 @@ function PlaylistFilePickerProvider({ playlist }: { playlist: ClientPlaylist }) 
         getPaths(child)
       }
     }
-    getPaths(tree)
+    getPaths(tree.rootNode)
     return [indexesMap, pathsArray]
   }, [tree])
 
@@ -104,7 +104,7 @@ function PlaylistFilePickerProvider({ playlist }: { playlist: ClientPlaylist }) 
       map.set(item.path, childNode)
       return childNode
     }
-    map.set(tree.path, getPaths(tree))
+    map.set(tree.rootNode.path, getPaths(tree.rootNode))
 
     for (const pathIndex of playlist.videoPaths) {
       const node = map.get(pathsArray[pathIndex])
@@ -282,8 +282,17 @@ function PlaylistFilePickerProvider({ playlist }: { playlist: ClientPlaylist }) 
       setShowMenuData(null)
     }
 
+    function handleMouseDown(event: MouseEvent) {
+      setShowMenuData(null)
+    }
+
     document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
+    document.addEventListener('mousedown', handleMouseDown)
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      document.removeEventListener('mousedown', handleMouseDown)
+    }
   }, [showMenuData])
 
   const context: ContextProps = {
@@ -296,7 +305,7 @@ function PlaylistFilePickerProvider({ playlist }: { playlist: ClientPlaylist }) 
     selectContextMenu
   }
 
-  const rootNode = activeMap.get(tree.path)
+  const rootNode = activeMap.get(tree.rootNode.path)
   if (!rootNode) return null
 
   let rootElement: JSX.Element
@@ -317,13 +326,15 @@ function PlaylistFilePickerProvider({ playlist }: { playlist: ClientPlaylist }) 
         setShow={(show) => setShowMenuData(show ? showMenuData : null)}
         position={showMenuData?.position ?? [0, 0]}
         offset={0}>
-        <div className="animate-fade-in rounded-lg border border-border1 bg-bg1 p-2 shadow-xl [animation-duration:50ms_!important]">
+        <div
+          className="animate-fade-in rounded-lg border border-border1 bg-bg1 p-2 shadow-xl [animation-duration:50ms_!important]"
+          onMouseDown={(event) => event.stopPropagation()}>
           {showMenuData && (
             <VideoPickerContextMenu
               onClick={() => {
                 setShowMenuData(null)
               }}
-              path={showMenuData.selected.path}
+              path={`${tree.rootPath}/${showMenuData.selected.path}`}
             />
           )}
         </div>

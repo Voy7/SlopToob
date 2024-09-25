@@ -15,7 +15,7 @@ import SectionVoteSkip from '@/components/admin/SectionVoteSkip'
 import SectionDebug from '@/components/admin/SectionDebug'
 import SectionCaching from '@/components/admin/SectionCaching'
 import SectionOther from '@/components/admin/SectionOther'
-import type { FileTreeNode } from '@/typings/types'
+import type { FileTreeBase } from '@/typings/types'
 import type {
   AdminStreamInfo,
   ClientBumper,
@@ -127,7 +127,7 @@ type ContextProps = {
   setSection: (sectionName: SectionName) => void
   streamInfo: AdminStreamInfo
   lastStreamUpdateTimestamp: number | null
-  fileTree: FileTreeNode | null
+  fileTree: FileTreeBase | null
   playlists: ClientPlaylist[]
   setPlaylists: React.Dispatch<React.SetStateAction<ClientPlaylist[]>>
   selectedPlaylist: string | null
@@ -152,7 +152,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [section, setSectionState] = useState<(typeof sections)[number]>(sections[0])
   const [streamInfo, setStreamInfo] = useState<AdminStreamInfo | null>(null)
   const [lastStreamUpdateTimestamp, setLastStreamUpdateTimestamp] = useState<number | null>(null)
-  const [fileTree, setFileTree] = useState<FileTreeNode | null>(null)
+  const [fileTree, setFileTree] = useState<FileTreeBase | null>(null)
   const [playlists, setPlaylists] = useState<ClientPlaylist[]>([])
   const [selectedPlaylist, setSelectedPlaylist] = useState<string | null>(null)
   const [lastReceivedPlaylistsDate, setLastReceivedPlaylistsDate] = useState<number>(0)
@@ -181,7 +181,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     setStreamInfo(info)
     setLastStreamUpdateTimestamp(Date.now())
   })
-  useSocketOn(Msg.AdminFileTree, (tree: FileTreeNode) => setFileTree(tree))
+  useSocketOn(Msg.AdminFileTree, (tree: FileTreeBase) => setFileTree(tree))
   useSocketOn(Msg.AdminPlaylists, (playlists: ClientPlaylist[]) => {
     setPlaylists(playlists)
     setLastReceivedPlaylistsDate(Date.now())

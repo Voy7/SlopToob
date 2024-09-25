@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic'
 import { useState, useContext, createContext, useEffect } from 'react'
 import io, { type Socket } from 'socket.io-client'
-import LoadingPage from '@/components/stream/LoadingPage'
+import SocketConnecting from '@/components/layout/SocketConnecting'
 import { Msg } from '@/lib/enums'
 import type { AuthUser } from '@/typings/types'
 import type { AuthenticatePayload } from '@/typings/socket'
@@ -27,38 +27,65 @@ type Props = {
 
 // Context provider wrapper component
 export function SocketProvider({ authUser, cookieUsername, children }: Props) {
-  const [socket, setSocket] = useState<Socket | null | false>(null)
+  const [socket, setSocket] = useState(io())
+  const [socketState, setSocketState] = useState<
+    'connected' | 'connecting' | 'failed' | 'auth-failed'
+  >('connecting')
   const [nickname, setNickname] = useState<string>(cookieUsername)
   const [showNicknameModal, setShowNicknameModal] = useState<boolean>(nickname === 'Anonymous')
 
   useEffect(() => {
-    const socket = io()
+    console.log('Connecting socket')
 
     socket.on('connect', () => {
+      console.log('Socket connected')
       socket.emit(Msg.Authenticate, {
         username: cookieUsername,
         password: authUser.password
       } satisfies AuthenticatePayload)
     })
 
-    socket.on('disconnect', () => setSocket(null))
+    // socket.on('disconnect', () => {
+    //   console.log('Socket disconnected')
+    //   setSocketState('failed')
+    // })
 
     socket.on('close', (reason, details) => {
       console.log('Socket close:', reason, details)
     })
 
     socket.on(Msg.Authenticate, (isAuthenticated: boolean) => {
-      if (isAuthenticated) setSocket(socket)
-      else setSocket(false)
+      if (isAuthenticated) setSocketState('connected')
+      else setSocketState('auth-failed')
+    })
+
+    setSocket(socket)
+
+    // If socket fails to connect, set state to failed
+    socket.on('connect_error', () => {
+      console.log('Socket connect error')
+      setSocketState('failed')
     })
 
     return () => {
-      socket.disconnect()
+      // socket.off('connect')
+      // socket.off('disconnect')
+      // socket.off('close')
+      // socket.off(Msg.Authenticate)
+      // socket.disconnect()
+      // setSocketState('failed')
     }
   }, [])
 
-  if (socket === null) return <LoadingPage text="Connecting..." />
-  if (socket === false) return <LoadingPage text="Authentication failed." />
+  function retryConnection() {
+    setSocketState('connecting')
+    socket.connect()
+  }
+
+  if (socketState === 'connecting') return <SocketConnecting state="connecting" />
+  if (socketState === 'failed') return <SocketConnecting state="failed" retry={retryConnection} />
+  if (socketState === 'auth-failed')
+    return <SocketConnecting state="auth-failed" retry={retryConnection} />
 
   const context: ContextProps = {
     socket,

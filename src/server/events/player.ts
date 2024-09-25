@@ -1,7 +1,4 @@
 import Events from '@/server/socket/Events'
-import path from 'path'
-import parsePartialVideoPath from '@/lib/parsePartialVideoPath'
-import Env from '@/server/EnvVariables'
 import Player from '@/server/stream/Player'
 import Settings from '@/server/Settings'
 import Chat from '@/server/stream/Chat'
@@ -90,9 +87,6 @@ Events.add(Events.Msg.AdminSeekStepBackward, {
 Events.add(Events.Msg.AdminAddQueueVideo, {
   adminOnly: true,
   run: (socket, payload: AddQueueVideoPayload) => {
-    // NOTE: videoPath is a partial one from client-side tree, so we need to get the full path
-    payload.videoPath = parsePartialVideoPath(payload.videoPath, payload.isBumper || false)
-
     const isCurrentPlaying = !!Player.playing
     const video = new Video(payload.videoPath, payload.isBumper, payload.fromPlaylistID)
     console.log(video)

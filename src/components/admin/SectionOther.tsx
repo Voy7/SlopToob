@@ -23,7 +23,6 @@ export default function SectionOther() {
   const errorDisplaySeconds = useNumberOption('errorDisplaySeconds')
   const torrentNameParsing = useToggleOption('torrentNameParsing')
   const showChatMessagesInConsole = useToggleOption('showChatMessagesInConsole')
-  const skipVideoOnInactivePlaylistChange = useToggleOption('skipVideoOnInactivePlaylistChange')
 
   return (
     <>
@@ -48,14 +47,6 @@ export default function SectionOther() {
         <Gap />
         <ToggleOption label="Torrent Name Parsing" {...torrentNameParsing} />
         <Description>Parse common torrent filename patterns into nice video titles.</Description>
-        <Gap />
-        <ToggleOption
-          label="Skip Video on Inactive Playlist Change"
-          {...skipVideoOnInactivePlaylistChange}
-        />
-        <Description>
-          Automatically skip the current video if the playlist changes if no one is watching.
-        </Description>
         <Gap />
         <NumberOption label="Error Display Seconds" type="float" {...errorDisplaySeconds} />
         <Description>How long to display errors on the player for in seconds.</Description>

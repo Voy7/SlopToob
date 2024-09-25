@@ -89,7 +89,7 @@ export default new (class Thumbnails {
     parsedUrl: UrlWithParsedQuery
   ) {
     try {
-      const videoPath = parsedUrl.pathname?.replace('/thumbnails/', '')
+      let videoPath = parsedUrl.pathname?.replace('/thumbnails/', '')
       if (!videoPath) throw new Error(`Could not parse video path from URL (${parsedUrl.pathname})`)
       const thumbnailPath = await this.generate(videoPath)
       if (!thumbnailPath) throw new Error(`No path returned (${videoPath})`)

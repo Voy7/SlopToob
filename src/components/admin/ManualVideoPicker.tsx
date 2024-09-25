@@ -76,7 +76,7 @@ function ManualVideoPickerProvider({ setClose }: { setClose: Function }) {
         map.set(item.path, childNode)
         return childNode
       }
-      map.set(tree.path, getPaths(tree))
+      map.set(tree.rootNode.path, getPaths(tree.rootNode))
       return map
     }
 
@@ -92,6 +92,7 @@ function ManualVideoPickerProvider({ setClose }: { setClose: Function }) {
   }, [tree, bumpers, filesSource])
 
   function selectFile(node: TreeNode, event: React.MouseEvent) {
+    event.stopPropagation()
     event.preventDefault()
     if (showMenuData?.selected === node) {
       setShowMenuData(null)
@@ -168,13 +169,22 @@ function ManualVideoPickerProvider({ setClose }: { setClose: Function }) {
       setShowMenuData(null)
     }
 
+    function handleMouseDown(event: MouseEvent) {
+      setShowMenuData(null)
+    }
+
     document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
+    document.addEventListener('mousedown', handleMouseDown)
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      document.removeEventListener('mousedown', handleMouseDown)
+    }
   }, [showMenuData])
 
   const context: ContextProps = { showMenuData, selectFile, treeMap, searchResults }
 
-  const rootNode = treeMap.get(filesSource === 'videos' ? tree.path : 'bumpers')
+  const rootNode = treeMap.get(filesSource === 'videos' ? tree.rootNode.path : 'bumpers')
   if (!rootNode) return null
 
   let rootElement: JSX.Element
@@ -195,14 +205,21 @@ function ManualVideoPickerProvider({ setClose }: { setClose: Function }) {
         setShow={(show) => setShowMenuData(show ? showMenuData : null)}
         position={showMenuData?.position ?? [0, 0]}
         offset={0}>
-        <div className="animate-fade-in rounded-lg border border-border1 bg-bg1 p-2 shadow-xl [animation-duration:50ms_!important]">
+        <div
+          className="animate-fade-in rounded-lg border border-border1 bg-bg1 p-2 shadow-xl [animation-duration:50ms_!important]"
+          onMouseDown={(event) => event.stopPropagation()}>
           {showMenuData && (
             <VideoPickerContextMenu
+              key={showMenuData.selected.path}
               onClick={() => {
                 setShowMenuData(null)
                 setClose()
               }}
-              path={showMenuData.selected.path}
+              path={
+                filesSource === 'videos'
+                  ? `${tree.rootPath}/${showMenuData.selected.path}`
+                  : showMenuData.selected.path
+              }
               isBumper={filesSource === 'bumpers'}
             />
           )}
@@ -224,6 +241,7 @@ function ManualVideoPickerProvider({ setClose }: { setClose: Function }) {
             value={searchInput}
             onChange={(event) => searchFiles(event.target.value)}
             placeholder="Search files..."
+            autoFocus={true}
           />
           <Icon
             className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 transform text-xl text-gray-500"

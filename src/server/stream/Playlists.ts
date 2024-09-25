@@ -100,7 +100,7 @@ export default new (class Playlists {
           getPaths(child)
         }
     }
-    getPaths(FileTreeHandler.tree)
+    getPaths(FileTreeHandler.tree.rootNode)
 
     const newVideoPaths = newVideoPathsIndex
       .map((index) => pathIndexes[index])

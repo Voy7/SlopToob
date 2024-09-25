@@ -220,9 +220,13 @@ class Player {
     this.queue = [] // Clear queue when playlist changes
     this.populateRandomToQueue()
 
-    if (Settings.skipVideoOnInactivePlaylistChange && SocketUtils.watchingClients.length <= 0) {
+    // Skip current video if below conditions ar met (Mainly for Playlist Scheduler)
+    const skipCurrentVideo = () => {
+      if (Settings.streamIsPaused) return
+      if (SocketUtils.watchingClients.length > 0) return
       this.playing?.end()
     }
+    skipCurrentVideo()
 
     SocketUtils.broadcastAdmin(Msg.AdminPlaylists, this.clientPlaylists)
     SocketUtils.broadcastAdmin(Msg.AdminQueueList, this.clientVideoQueue)

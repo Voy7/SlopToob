@@ -152,7 +152,6 @@ export const settingsList = {
   enableWeeklySchedule: { default: false, onChange: scheduleResync },
   weeklyScheduleUTCOffset: { default: 0, onChange: scheduleResync },
   weekyScheduleInSync: { default: false }, // Not a real setting, just a persistant state
-  skipVideoOnInactivePlaylistChange: { default: true, onChange: scheduleResync },
 
   // Weekly schedule user display settings
   showWeeklySchedule: { default: true, onChange: scheduleDisplayResync },

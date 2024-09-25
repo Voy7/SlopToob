@@ -2,6 +2,7 @@
 
 import { useSocketContext } from '@/contexts/SocketContext'
 import MenuActionButton from '@/components/ui/MenuActionButton'
+import Thumbnail from '@/components/stream/Thumbnail'
 import { Msg } from '@/lib/enums'
 import type { AddQueueVideoPayload } from '@/typings/socket'
 
@@ -40,6 +41,10 @@ export default function VideoPickerContextMenu({ path, isBumper, onClick }: Prop
         className="text-red-500 hover:bg-red-500">
         Play Right Now
       </MenuActionButton>
+      <hr className="my-1 border-border1" />
+      <div className="mt-2 flex w-full justify-center">
+        <Thumbnail src={`/thumbnails/${path}`} height={90} />
+      </div>
     </>
   )
 }

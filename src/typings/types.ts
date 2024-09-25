@@ -16,6 +16,11 @@ export type ProgressInfo = {
   frames: number
 }
 
+export type FileTreeBase = {
+  rootPath: string
+  rootNode: FileTreeNode
+}
+
 export type FileTreeNode = {
   name: string
   path: string

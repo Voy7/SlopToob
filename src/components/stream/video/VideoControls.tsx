@@ -158,7 +158,10 @@ export default function VideoControls({ scrubber, adminControls }: Props) {
                   <HoverTooltip placement="top" offset={22}>
                     Toggle Volume (m)
                   </HoverTooltip>
-                  <Icon name={volume === 0 ? 'no-volume' : 'volume'} />
+                  <Icon
+                    name={volume === 0 ? 'no-volume' : 'volume'}
+                    className={videoElement?.muted ? 'text-red-500' : undefined}
+                  />
                 </ActionButton>
               </div>
               <div>

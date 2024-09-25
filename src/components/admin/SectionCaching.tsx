@@ -90,7 +90,7 @@ function CacheStatus({ label, status }: CacheStatusProps) {
         <Button
           variant="danger"
           icon={status.isDeleting ? 'loading' : 'delete'}
-          disabled={!status.isDeleting}
+          disabled={status.isDeleting}
           onClick={() => setShowDeleteModal(true)}>
           {status.isDeleting ? 'Deleting...' : 'Clear Cache'}
         </Button>

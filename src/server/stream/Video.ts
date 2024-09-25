@@ -141,7 +141,7 @@ export default class Video {
   // Start playing video for FIRST time (not part of seeking or resuming)
   private initPlaying() {
     EventLogger.log(this, `initPlaying()`)
-    Logger.debug(`[Video] Playing video: ${this.name}`)
+    Logger.info(`[Video] Playing video: ${this.name}`)
 
     PlayHistory.add(this)
 

@@ -24,6 +24,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <head>
         <meta property="og:image" content="/logo.png" />
         <meta name="theme-color" content="#5496ff" />
+        <link rel="preload" href="/logo.png" as="image" />
       </head>
       <body className={mainFont.className}>
         <SessionProvider session={session}>
