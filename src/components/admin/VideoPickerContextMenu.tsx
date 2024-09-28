@@ -42,7 +42,7 @@ export default function VideoPickerContextMenu({ path, isBumper, onClick }: Prop
         Play Right Now
       </MenuActionButton>
       <hr className="my-1 border-border1" />
-      <div className="mt-2 flex w-full justify-center">
+      <div className="animate-fade-in mt-2 flex w-full justify-center">
         <Thumbnail src={`/thumbnails/${path}`} height={90} />
       </div>
     </>

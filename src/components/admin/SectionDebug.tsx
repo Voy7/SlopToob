@@ -8,30 +8,36 @@ import {
   Description,
   ToggleOption
 } from '@/components/admin/SettingsComponents'
+import SubSectionSelector from '@/components/ui/SubSectionSelector'
 import StreamControls from '@/components/admin/StreamControls'
 import QueueList from '@/components/admin/QueueList'
 import TranscodeQueue from '@/components/admin/TranscodeQueue'
 import ConsoleLogs from '@/components/admin/ConsoleLogs'
+import { useState } from 'react'
 
 export default function SectionDebug() {
-  const enableVideoEventLogging = useToggleOption('enableVideoEventLogging')
-  const showVideoEventLogsInConsole = useToggleOption('showVideoEventLogsInConsole')
-
+  const [subSection, setSubSection] = useState('queues')
   return (
     <>
       <MainHeader>Developer Debug</MainHeader>
-      <StreamControls />
-      <SettingGroup>
-        <Header icon="admin-panel">Video Event Logger</Header>
-        <ToggleOption label="Enable Video Event Logging" {...enableVideoEventLogging} />
-        <ToggleOption label="Show Video Event Logs in Console" {...showVideoEventLogsInConsole} />
-        <Description>
-          Generate event timeline logs of video instances, used for developer debugging.
-        </Description>
-      </SettingGroup>
-      <QueueList />
-      <TranscodeQueue />
-      <ConsoleLogs />
+      <SubSectionSelector
+        value={subSection}
+        setValue={setSubSection}
+        sections={[
+          { id: 'queues', label: 'Queues', icon: 'list' },
+          { id: 'console', label: 'Console Logs', icon: 'admin-panel' }
+        ]}
+      />
+      <div className="mt-4">
+        {subSection === 'queues' && (
+          <>
+            <StreamControls />
+            <QueueList />
+            <TranscodeQueue />
+          </>
+        )}
+        {subSection === 'console' && <ConsoleLogs />}
+      </div>
     </>
   )
 }

@@ -13,7 +13,7 @@ let io: Server | null = null
 // Socket server must be initialized after Next.js is ready
 export function initializeSocketServer() {
   io = new Server(httpServer, {
-    cors: { origin: '*', methods: ['GET', 'POST'] },
+    transports: ['websocket'],
     maxHttpBufferSize: 100e6 // Max size of HTTP buffer (100MB)
   })
 

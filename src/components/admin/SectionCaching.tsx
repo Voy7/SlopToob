@@ -62,7 +62,7 @@ function CacheStatus({ label, status }: CacheStatusProps) {
 
   return (
     <>
-      <div className="grid grid-cols-[1fr,auto] items-center gap-2 rounded-lg bg-bg2 p-2">
+      <div className="grid grid-cols-[1fr,auto] items-center gap-2 rounded-lg border border-border1 p-2">
         <div className="">
           <h3 className="pb-2 text-lg font-bold">{label} Cache</h3>
           {status.videosCount !== undefined ? (

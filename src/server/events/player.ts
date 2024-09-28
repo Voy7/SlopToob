@@ -89,7 +89,6 @@ Events.add(Events.Msg.AdminAddQueueVideo, {
   run: (socket, payload: AddQueueVideoPayload) => {
     const isCurrentPlaying = !!Player.playing
     const video = new Video(payload.videoPath, payload.isBumper, payload.fromPlaylistID)
-    console.log(video)
     Player.addVideo(video, payload.toStart)
     if (isCurrentPlaying && payload.skipCurrent) {
       Player.skip()

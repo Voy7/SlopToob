@@ -23,7 +23,7 @@
     "hls-server": "^1.5.0",
     "hls.js": "^1.5.7",
     "minidenticons": "^4.2.1",
-    "next": "^14.2.3",
+    "next": "^14.2.13",
     "next-auth": "^4.24.7",
     "react": "^18",
     "react-dom": "^18",

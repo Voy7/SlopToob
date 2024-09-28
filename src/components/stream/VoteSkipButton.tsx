@@ -12,14 +12,26 @@ export default function VoteSkipButton() {
   const { socket } = useSocketContext()
   const { streamInfo } = useStreamContext()
 
+  const [sessionID, setSessionID] = useState<string | null>(null)
   const [hasVoted, setHasVoted] = useState<boolean>(false)
   const [allowedInSeconds, setAllowedInSeconds] = useState<number>(-1)
 
   useEffect(() => {
-    if (streamInfo.voteSkip.allowedInSeconds <= -1) {
-      console.log(streamInfo.voteSkip)
+    if (!streamInfo.voteSkip) {
+      setSessionID(null)
+      setHasVoted(false)
       setAllowedInSeconds(-1)
-      if (!streamInfo.voteSkip.isAllowed) setHasVoted(false)
+      return
+    }
+
+    if (sessionID !== streamInfo.voteSkip.sessionID) {
+      setSessionID(streamInfo.voteSkip.sessionID)
+      setHasVoted(false)
+    }
+
+    if (streamInfo.voteSkip.allowedInSeconds <= -1) {
+      setAllowedInSeconds(-1)
+      // if (!streamInfo.voteSkip.isAllowed) setHasVoted(false)
       return
     }
 
@@ -43,7 +55,7 @@ export default function VoteSkipButton() {
   }
 
   // Vote skipping entirely disabled
-  if (!streamInfo.voteSkip.isEnabled) {
+  if (!streamInfo.voteSkip) {
     return (
       <Button data-vote-button variant="normal" icon="skip" disabled={false}>
         Vote Skipping Disabled

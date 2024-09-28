@@ -306,21 +306,17 @@ class Player {
   }
 
   get clientStreamOptions(): StreamOptions {
-    return {
+    const options: StreamOptions = {
       streamThemes: Themes.activeThemes,
       history: PlayHistory.clientHistory,
       chat: {
         showTimestamps: Settings.showChatTimestamps,
         showIdenticons: Settings.showChatIdenticons
-      },
-      voteSkip: {
-        isEnabled: Settings.enableVoteSkip,
-        isAllowed: VoteSkipHandler.isAllowed,
-        allowedInSeconds: VoteSkipHandler.allowedInSeconds,
-        currentCount: VoteSkipHandler.currentCount,
-        requiredCount: VoteSkipHandler.requiredCount
       }
     }
+    const voteSkipOptions = VoteSkipHandler.voteSkipOptions
+    if (voteSkipOptions) options.voteSkip = voteSkipOptions
+    return options
   }
 
   get clientPlaylists(): ClientPlaylist[] {

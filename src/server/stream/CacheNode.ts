@@ -108,7 +108,7 @@ export default class CacheNode {
       const dirs: string[] = []
       this.fileSizes.forEach((size, file) => {
         const dir = file.split('/').slice(0, -1).join('/')
-        console.log(dir, omitDirs)
+        // console.log(dir, omitDirs)
         if (dirs.includes(dir)) return
         if (omitDirs.includes(dir)) return
         dirs.push(dir)

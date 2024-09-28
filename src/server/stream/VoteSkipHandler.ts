@@ -1,16 +1,20 @@
+import generateSecret from '@/lib/generateSecret'
 import Logger from '@/server/Logger'
 import Settings from '@/server/Settings'
 import Player from '@/server/stream/Player'
 import Chat from '@/server/stream/Chat'
 import { socketClients } from '@/server/socket/socketClients'
 import { VideoState } from '@/lib/enums'
+import type { VoteSkipOptions } from '@/typings/socket'
 
-export default new (class VoteSkipHandler {
+// Main vote skip handler, singleton
+class VoteSkipHandler {
   private _isAllowed: boolean = false
+  private sessionID?: string
   private voterIDs: string[] = []
   private persistVoterIDs: string[] = []
-  private allowedInTimeout: NodeJS.Timeout | null = null
-  private allowedInDate: Date | null = null
+  private allowedInTimeout?: NodeJS.Timeout
+  private allowedInDate?: Date
 
   get isAllowed(): boolean {
     if (Player.playing?.isBumper && !Settings.canVoteSkipIfBumper) return false
@@ -20,20 +24,20 @@ export default new (class VoteSkipHandler {
 
   enable() {
     if (this._isAllowed || this.allowedInTimeout) return
+    this.sessionID = generateSecret()
     this.allowedInDate = new Date()
     this.allowedInTimeout = setTimeout(() => {
       this._isAllowed = true
-      this.allowedInDate = null
+      delete this.allowedInDate
       Player.broadcastStreamInfo()
     }, Settings.voteSkipDelaySeconds * 1000)
   }
 
   disable() {
-    if (this.allowedInTimeout) {
-      clearTimeout(this.allowedInTimeout)
-      this.allowedInTimeout = null
-    }
-    this.allowedInDate = null
+    clearTimeout(this.allowedInTimeout)
+    delete this.allowedInTimeout
+    delete this.sessionID
+    delete this.allowedInDate
     this._isAllowed = false
     this.voterIDs = []
     this.persistVoterIDs = []
@@ -109,4 +113,18 @@ export default new (class VoteSkipHandler {
     if (this.currentCount < this.requiredCount) return
     this.passVote()
   }
-})()
+
+  get voteSkipOptions(): VoteSkipOptions | null {
+    if (!Settings.enableVoteSkip) return null
+    if (!this.sessionID) return null
+    return {
+      sessionID: this.sessionID,
+      isAllowed: this.isAllowed,
+      allowedInSeconds: this.allowedInSeconds,
+      currentCount: this.currentCount,
+      requiredCount: this.requiredCount
+    }
+  }
+}
+
+export default new VoteSkipHandler()

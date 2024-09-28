@@ -7,11 +7,11 @@ import { Msg } from '@/lib/enums'
 import SectionOverview from '@/components/admin/SectionOverview'
 import SectionPlaylists from '@/components/admin/SectionPlaylists'
 import SectionBumpers from '@/components/admin/SectionBumpers'
-import SectionTranscoding from '@/components/admin/SectionTranscoding'
-import SectionChat from '@/components/admin/SectionChat'
+// import SectionTranscoding from '@/components/admin/settings/TranscodingSettings'
+// import SectionChat from '@/components/admin/SectionChat'
 import SectionSchedule from '@/components/admin/SectionSchedule'
-import SectionHistory from '@/components/admin/SectionHistory'
-import SectionVoteSkip from '@/components/admin/SectionVoteSkip'
+// import SectionHistory from '@/components/admin/SectionHistory'
+// import SectionVoteSkip from '@/components/admin/SectionVoteSkip'
 import SectionDebug from '@/components/admin/SectionDebug'
 import SectionCaching from '@/components/admin/SectionCaching'
 import SectionOther from '@/components/admin/SectionOther'
@@ -29,12 +29,12 @@ import type {
   ClientRichUser
 } from '@/typings/socket'
 import type { IconNames } from '@/components/ui/Icon'
+import SectionSettings from '@/components/admin/SectionSettings'
 
 type Section = {
   name: string
   icon: IconNames
   accentColor: string
-  category: number
   component: React.ReactNode
 }
 
@@ -44,78 +44,43 @@ export const sections = [
     name: 'Overview',
     icon: 'stream-settings',
     accentColor: 'bg-gray-500',
-    category: 1,
     component: <SectionOverview />
   },
   {
     name: 'Playlists',
     icon: 'playlist',
     accentColor: 'bg-blue-500',
-    category: 1,
     component: <SectionPlaylists />
   },
   {
     name: 'Bumpers',
     icon: 'bumper',
     accentColor: 'bg-blue-700',
-    category: 1,
     component: <SectionBumpers />
-  },
-  {
-    name: 'Transcoding',
-    icon: 'files',
-    accentColor: 'bg-red-500',
-    category: 1,
-    component: <SectionTranscoding />
-  },
-  {
-    name: 'Chat',
-    icon: 'chat',
-    accentColor: 'bg-green-400',
-    category: 2,
-    component: <SectionChat />
   },
   {
     name: 'Schedule',
     icon: 'calendar',
     accentColor: 'bg-yellow-500',
-    category: 2,
     component: <SectionSchedule />
-  },
-  {
-    name: 'History',
-    icon: 'history',
-    accentColor: 'bg-orange-500',
-    category: 2,
-    component: <SectionHistory />
-  },
-  {
-    name: 'Vote Skip',
-    icon: 'skip',
-    accentColor: 'bg-purple-500',
-    category: 2,
-    component: <SectionVoteSkip />
   },
   {
     name: 'Caching',
     icon: 'cache',
     accentColor: 'bg-purple-700',
-    category: 3,
     component: <SectionCaching />
   },
   {
     name: 'Debug',
     accentColor: 'bg-red-500',
     icon: 'admin-panel',
-    category: 3,
     component: <SectionDebug />
   },
   {
-    name: 'Other',
+    name: 'Settings',
     icon: 'settings',
-    accentColor: 'bg-red-600',
-    category: 3,
-    component: <SectionOther />
+    accentColor: 'bg-red-500',
+    component: <SectionSettings />
   }
 ] as const satisfies Section[]
 

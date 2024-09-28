@@ -17,7 +17,7 @@ export default function SectionTranscoding() {
 
   return (
     <>
-      <MainHeader>Transcoding</MainHeader>
+      {/* <MainHeader>Transcoding</MainHeader> */}
       <SettingGroup>
         <Header icon="settings">Transcoder Settings</Header>
         <NumberOption label="Max Transcoding Jobs" type="integer" {...maxTranscodingJobs} />

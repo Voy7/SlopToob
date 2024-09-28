@@ -11,15 +11,21 @@ export function MainHeader({ children }: { children: React.ReactNode }) {
 }
 
 export function SettingGroup({ children }: { children: React.ReactNode }) {
-  return <div className="mb-1 w-full rounded-lg border border-border1 p-2">{children}</div>
+  // return <div className="mb-1 w-full rounded-lg border border-border1 p-2">{children}</div>
+  return <div className="w-full">{children}</div>
 }
 
 export function Header({ icon, children }: { icon: IconNames; children: React.ReactNode }) {
   return (
-    <h4 className={styles.header}>
-      {icon ? <Icon name={icon} /> : null}
-      {children}
-    </h4>
+    <div className="flex w-full items-center gap-2 py-2">
+      {icon && (
+        <div className="rounded-full bg-bg3 p-1">
+          <Icon name={icon} />
+        </div>
+      )}
+      <h4 className="whitespace-nowrap text-base uppercase text-text3">{children}</h4>
+      <hr className="w-full border-t border-border1" />
+    </div>
   )
 }
 

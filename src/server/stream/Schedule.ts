@@ -127,9 +127,6 @@ class Schedule {
 
     if (nextEntry) {
       const secondsUntil = this.getSecondsUntil(new Date(), nextEntry) || 1
-      console.log(
-        `Timeout (${Player.playlists.find((p) => p.id === nextEntry.playlistID)?.name}): ${secondsUntil}s`
-      )
       this.syncTimeout = setTimeout(() => this.updateCheck(), secondsUntil * 1000)
     }
 

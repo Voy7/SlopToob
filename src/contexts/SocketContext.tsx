@@ -11,7 +11,7 @@ import type { AuthenticatePayload } from '@/typings/socket'
 const NicknameModal = dynamic(() => import('@/components/stream/NicknameModal'), { ssr: false })
 
 function initSocket() {
-  return io({ transports: ['websocket'] })
+  return io({ transports: ['websocket'], upgrade: false, autoConnect: false })
 }
 
 // Stream page context
@@ -39,6 +39,8 @@ export function SocketProvider({ authUser, cookieUsername, children }: Props) {
   const [showNicknameModal, setShowNicknameModal] = useState<boolean>(nickname === 'Anonymous')
 
   useEffect(() => {
+    socket.connect()
+
     socket.on('connect', () => {
       socket.emit(Msg.Authenticate, {
         username: cookieUsername,

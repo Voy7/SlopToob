@@ -33,6 +33,7 @@ async function nextRequestHandler(req: IncomingMessage, res: ServerResponse) {
     const parsedUrl = parse(req.url, true)
 
     // Ignore socket.io requests
+    // console.log(parsedUrl.pathname?.cyan)
     if (parsedUrl.pathname?.startsWith('/socket.io/')) return
 
     // Custom handling for thumbnails

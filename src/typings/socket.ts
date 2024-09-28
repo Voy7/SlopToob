@@ -39,22 +39,6 @@ export type StreamError = {
   error: string
 }
 
-export type StreamOptions = {
-  streamThemes: string[]
-  history: ClientHistoryItem[] | null
-  chat: {
-    showTimestamps: boolean
-    showIdenticons: boolean
-  }
-  voteSkip: {
-    isEnabled: boolean
-    isAllowed: boolean
-    allowedInSeconds: number
-    currentCount: number
-    requiredCount: number
-  }
-}
-
 export type BaseStreamInfo = {
   fromPlaylistName?: string
 } & (StreamPlaying | StreamPaused | StreamLoading | StreamError)
@@ -68,6 +52,24 @@ export type AdminStreamInfo = {
   previousVideoExists: boolean
   appVersion: string
 } & BaseStreamInfo
+
+export type StreamOptions = {
+  streamThemes: string[]
+  history: ClientHistoryItem[] | null
+  chat: {
+    showTimestamps: boolean
+    showIdenticons: boolean
+  }
+  voteSkip?: VoteSkipOptions
+}
+
+export type VoteSkipOptions = {
+  sessionID: string
+  isAllowed: boolean
+  allowedInSeconds: number
+  currentCount: number
+  requiredCount: number
+}
 
 export type SocketClient = {
   socket: Socket
