@@ -1,7 +1,7 @@
 'use client'
 
 import { useAdminContext } from '@/contexts/AdminContext'
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Icon from '../ui/Icon'
 
 const prefixColors: Record<string, string> = {
@@ -15,26 +15,20 @@ const prefixColors: Record<string, string> = {
 export default function ConsoleLogs() {
   const { logs } = useAdminContext()
 
+  const [isAtBottom, setIsAtBottom] = useState<boolean>(true)
+
   const messagesRef = useRef<HTMLDivElement>(null)
 
   // When new message is received, scroll to bottom of container if it's already at the bottom
   useEffect(() => {
-    const messagesContainer = messagesRef.current
-    if (!messagesContainer) return
-    console.log(
-      'height',
-      messagesContainer.scrollHeight,
-      messagesContainer.clientHeight,
-      messagesContainer.scrollTop
-    )
-    const isScrolledToBottom =
-      messagesContainer.scrollHeight - messagesContainer.clientHeight <=
-      messagesContainer.scrollTop + 23
-
-    if (isScrolledToBottom) {
-      messagesContainer.scrollTop = messagesContainer.scrollHeight
-    }
-  }, [logs])
+    if (!isAtBottom) return
+    setTimeout(() => {
+      messagesRef.current?.scrollTo({
+        top: messagesRef.current.scrollHeight,
+        behavior: 'smooth'
+      })
+    }, 50)
+  }, [logs, isAtBottom])
 
   const parsedLogs = useMemo(() => {
     return logs.map((log, index) => {
@@ -54,11 +48,11 @@ export default function ConsoleLogs() {
         </>
       )
     })
-  }, [])
+  }, [logs])
 
   return (
-    <div className="h-[300px] rounded-md border-[1px] border-border1">
-      <header className="flex w-full cursor-default items-center justify-between gap-2 bg-bg3 px-1 text-text3">
+    <div className="h-[350px] rounded-md">
+      <header className="flex w-full cursor-default items-center justify-between gap-2 bg-bg2 px-1 text-text3">
         <p className="flex items-center gap-1">
           <Icon name="admin-panel" />
           CONSOLE LOGS
@@ -68,7 +62,21 @@ export default function ConsoleLogs() {
           {logs.length} Logs
         </p>
       </header>
-      <div ref={messagesRef} className="h-full w-full overflow-y-scroll bg-black pb-2">
+      <div
+        ref={messagesRef}
+        className="h-full w-full overflow-y-scroll border border-border1 bg-black pb-2"
+        onScroll={() => {
+          if (!messagesRef.current) return
+          console.log(
+            messagesRef.current.scrollHeight,
+            messagesRef.current.scrollTop,
+            messagesRef.current.clientHeight
+          )
+          setIsAtBottom(
+            messagesRef.current.scrollHeight - messagesRef.current.clientHeight <=
+              messagesRef.current.scrollTop
+          )
+        }}>
         {parsedLogs.map((log, index) => (
           <div key={index} className="px-2 hover:bg-bg2">
             {log}
