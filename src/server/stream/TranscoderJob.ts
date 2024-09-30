@@ -135,6 +135,7 @@ export default class TranscoderJob {
         this.isUsingCache = true
         this.resolveStreamableReadyCallbacks()
         this.resolveTranscodeFinishedCallback()
+        SocketUtils.broadcastAdmin(Msg.AdminTranscodeQueueList, TranscoderQueue.clientTranscodeList)
         return
       }
 
@@ -232,6 +233,7 @@ export default class TranscoderJob {
     // Remove job from queue
     const index = TranscoderQueue.jobs.findIndex((item) => item === this)
     if (index !== -1) TranscoderQueue.jobs.splice(index, 1)
+    SocketUtils.broadcastAdmin(Msg.AdminTranscodeQueueList, TranscoderQueue.clientTranscodeList)
   }
 
   // Restart the transcoding process from specified time

@@ -49,7 +49,7 @@ export default function QueueList({ omitDetails = false }: { omitDetails?: boole
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center gap-2 p-4 text-text3">
+          <div className="flex flex-col items-center justify-center gap-2 p-4 text-center text-text3">
             <p>No videos in queue.</p>
             <p className="text-sm text-text4">Set the active playlist or add a video manually.</p>
           </div>

@@ -37,7 +37,7 @@ export default function QueueList() {
           ))}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center gap-2 p-4 text-text3">
+        <div className="flex flex-col items-center justify-center gap-2 p-4 text-center text-text3">
           <p>Currently no transcoding jobs.</p>
         </div>
       )}
