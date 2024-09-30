@@ -59,10 +59,14 @@ class FileTreeHandler {
     })
 
     watcher.onDeleteFile((filePath) => {
-      const index = this.paths.indexOf(filePath)
-      if (index === -1) return
+      let didEdit: boolean = false
+      for (let i = this.paths.length - 1; i >= 0; i--) {
+        if (!this.paths[i].startsWith(filePath)) continue
+        this.paths.splice(i, 1)
+        didEdit = true
+      }
+      if (!didEdit) return
 
-      this.paths.splice(index, 1)
       if (this.refreshTimeout) clearTimeout(this.refreshTimeout)
       this.refreshTimeout = setTimeout(() => this.buildTreeObject(true), 1000)
     })

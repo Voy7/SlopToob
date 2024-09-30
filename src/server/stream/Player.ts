@@ -98,12 +98,7 @@ class Player {
   }
 
   private async playNext() {
-    // Play bumper if enough time has passed
-    if (
-      !this.omitBumpersNextPlay &&
-      Settings.bumpersEnabled &&
-      this.lastBumperDate.getTime() + Settings.bumperIntervalMinutes * 60 * 1000 < Date.now()
-    ) {
+    if (this.shouldPlayBumper()) {
       const nextBumper = getNextBumper()
       if (nextBumper) {
         this.queue.unshift(nextBumper)
@@ -135,6 +130,17 @@ class Player {
     await this.playing.play()
     this.playing = null
     this.playNext()
+  }
+
+  // Logic for if should play bumper or not
+  private shouldPlayBumper(): boolean {
+    if (this.omitBumpersNextPlay) return false
+    if (!Settings.bumpersEnabled) return false
+    if (this.lastBumperDate.getTime() + Settings.bumperIntervalMinutes * 60 * 1000 >= Date.now())
+      return false
+    // If next video in queue is a bumper, let it play normally instead of injecting a new one
+    if (this.queue[0]?.isBumper) return false
+    return true
   }
 
   // Add video to queue

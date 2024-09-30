@@ -61,6 +61,13 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
 
     setSourceURL(streamInfo.path)
     hls.loadSource(streamInfo.path)
+
+    // If volume cookie exists, set the volume
+    if (!('id' in streamInfo)) return
+    const volumeCookie = document.cookie
+      .split('; ')
+      .find((row) => row.startsWith(`volume-${streamInfo.id}=`))
+    if (volumeCookie) setVolume(Number(volumeCookie.split('=')[1]))
   }, [streamInfo, sourceURL])
 
   // Handle video element events
@@ -147,6 +154,13 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
     }
     document.title = 'SlopToob'
   }, [streamInfo])
+
+  // Logic for storing volume in cookies for each video
+  useEffect(() => {
+    if (volume == 100 || !videoRef.current) return
+    if (!('id' in streamInfo)) return
+    document.cookie = `volume-${streamInfo.id}=${volume}; max-age=86400; path=/` // 1 day
+  }, [streamInfo, volume])
 
   // Pause/unpause video when background is clicked
   function backgroundClick() {

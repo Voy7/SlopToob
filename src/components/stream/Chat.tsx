@@ -26,7 +26,16 @@ export default function Chat() {
   } = useStreamContext()
 
   const [message, setMessage] = useState<string>('')
-  const [showViewersList, setShowViewersList] = useState<boolean>(false)
+  const [showViewersList, setShowViewersListState] = useState<boolean>(
+    document.cookie.includes('show-viewers-list=true')
+  )
+
+  function setShowViewersList(value: boolean) {
+    document.cookie = value
+      ? 'show-viewers-list=true; max-age=31536000; path=/' // 1 year
+      : 'show-viewers-list=; max-age=0; path=/'
+    setShowViewersListState(value)
+  }
 
   const messagesRef = useRef<HTMLDivElement>(null)
 

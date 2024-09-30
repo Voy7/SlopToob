@@ -1,6 +1,5 @@
-import path from 'path'
 import fs from 'fs'
-import fsAsync from 'fs/promises'
+import Logger from '@/server/Logger'
 
 // Utility to watch directory and emit added & deleted files events
 export default class FsWatcher {
@@ -18,16 +17,33 @@ export default class FsWatcher {
     if (this.isActive) return
     this.isActive = true
 
-    fs.watch(this.dirPath, { recursive: true }, (event, filename) => {
+    fs.watch(this.dirPath, { recursive: true }, async (event, filename) => {
+      console.log(filename, event)
       if (event !== 'rename') return
       if (!filename) return
 
       const fullPath = `${this.dirPath}/${filename}`.replace(/\\/g, '/')
+
       if (fs.existsSync(fullPath)) {
-        if (fs.statSync(fullPath).isDirectory()) return
+        const isDir = fs.statSync(fullPath).isDirectory()
+        if (isDir) {
+          // Crawling entire directory and emitting new file events
+          try {
+            const files = await this.crawlDirectory(fullPath)
+            files.forEach((file) => this.newFileCallback?.(file))
+          } catch (error) {
+            Logger.error('[FsWatcher] Error crawling directory:', error)
+          }
+          return
+        }
         this.newFileCallback?.(fullPath)
         return
       }
+
+      // if (isDir) {
+      //   this.deleteDirectoryCallback?.(fullPath)
+      //   return
+      // }
       this.deleteFileCallback?.(fullPath)
     })
   }
@@ -58,6 +74,36 @@ export default class FsWatcher {
       walk(this.dirPath, (error) => {
         if (error) reject(error)
         else resolve()
+      })
+    })
+  }
+
+  // Crawl entire given directory and return all files
+  private async crawlDirectory(dir: string): Promise<string[]> {
+    return new Promise<string[]>((resolve, reject) => {
+      const results: string[] = []
+      const walk = (dirPath: string, done: (error?: Error) => void) => {
+        fs.readdir(dirPath, { withFileTypes: true }, (error, list) => {
+          if (error) return done(error)
+          let pending = list.length
+          if (!pending) return done()
+          list.forEach((file) => {
+            const filePath = `${dirPath}/${file.name}`
+            if (file.isDirectory()) {
+              return walk(filePath, (error) => {
+                if (error) return done(error)
+                if (!--pending) done()
+              })
+            }
+            results.push(filePath)
+            if (!--pending) done()
+          })
+        })
+      }
+
+      walk(dir, (error) => {
+        if (error) reject(error)
+        else resolve(results)
       })
     })
   }
