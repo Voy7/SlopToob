@@ -110,6 +110,7 @@ class Player {
 
     if (this.queue.length === 0) {
       this.broadcastStreamInfo()
+      SocketUtils.broadcastAdmin(Msg.AdminQueueList, this.clientVideoQueue)
       return
     }
 

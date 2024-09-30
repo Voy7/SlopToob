@@ -13,6 +13,7 @@ const config: Config = {
         text1: 'var(--text-color-1)',
         text2: 'var(--text-color-2)',
         text3: 'var(--text-color-3)',
+        text4: 'var(--text-color-4)',
 
         bg1: 'var(--bg-color-1)',
         bg2: 'var(--bg-color-2)',

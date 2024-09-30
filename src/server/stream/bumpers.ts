@@ -2,6 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import Env from '@/server/EnvVariables'
 import Logger from '@/server/Logger'
+import Settings from '@/server/Settings'
 import Video from '@/server/stream/Video'
 import PlayHistory from '@/server/stream/PlayHistory'
 import SocketUtils from '@/server/socket/SocketUtils'
@@ -80,8 +81,20 @@ export function getNextBumper(): Video | null {
 
 // TODO: Implement 'smart shuffle' algorithm
 function getRandomBumper(): Video | null {
+  if (!Settings.bumpersEnabled) return null
   const randomBumper = PlayHistory.getRandom(bumperPaths)
   if (!randomBumper) return null
   const video = new Video(randomBumper, true)
   return video
+}
+
+// Bumper settings has changed
+export function resyncChanges() {
+  if (Settings.bumpersEnabled) {
+    nextBumper = getRandomBumper()
+    nextBumper?.prepare()
+    return
+  }
+  nextBumper?.end()
+  nextBumper = null
 }

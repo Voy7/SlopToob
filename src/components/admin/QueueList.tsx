@@ -42,11 +42,18 @@ export default function QueueList({ omitDetails = false }: { omitDetails?: boole
             Add Video Manually
           </button>
         </div>
-        <div className="flex flex-col border-l-[1px] border-r-[1px] border-t-[1px] border-border1">
-          {queue.map((video, index) => (
-            <Video key={video.id} video={video} index={index} omitDetails={omitDetails} />
-          ))}
-        </div>
+        {queue.length > 0 ? (
+          <div className="flex flex-col border-l-[1px] border-r-[1px] border-t-[1px] border-border1">
+            {queue.map((video, index) => (
+              <Video key={video.id} video={video} index={index} omitDetails={omitDetails} />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center gap-2 p-4 text-text3">
+            <p>No videos in queue.</p>
+            <p className="text-sm text-text4">Set the active playlist or add a video manually.</p>
+          </div>
+        )}
       </SettingGroup>
 
       <Modal

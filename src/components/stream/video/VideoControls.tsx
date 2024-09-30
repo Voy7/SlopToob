@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useVideoContext } from '@/contexts/VideoContext'
 import { useStreamContext } from '@/contexts/StreamContext'
 import { StreamState } from '@/lib/enums'
 import useStreamTimestamp from '@/hooks/useStreamTimestamp'
+import parseTimestamp from '@/lib/parseTimestamp'
 import Icon from '@/components/ui/Icon'
 import HoverTooltip from '@/components/ui/HoverTooltip'
 import RangeSliderInput from '@/components/ui/RangeSliderInput'
@@ -32,10 +33,21 @@ export default function VideoControls({ scrubber, adminControls }: Props) {
   const controlsContainerRef = useRef<HTMLDivElement>(null)
   const altControlsContainerRef = useRef<HTMLDivElement>(null)
 
-  const { currentTimestamp, totalTimestamp } = useStreamTimestamp(
+  const [altTimestamps, setAltTimestamps] = useState<boolean>(
+    document.cookie.includes('alt-timestamps')
+  )
+
+  const { currentTimestamp, totalTimestamp, currentSeconds, totalSeconds } = useStreamTimestamp(
     streamInfo,
     lastStreamUpdateTimestamp
   )
+
+  function toggleAltTimestamps() {
+    document.cookie = altTimestamps
+      ? 'alt-timestamps=; max-age=0; path=/'
+      : 'alt-timestamps=true; max-age=31536000; path=/' // 1 year
+    setAltTimestamps(!altTimestamps)
+  }
 
   // Show overlay when mouse is moved on it, keep it visible for 3 seconds
   // when mouse is moved out or stops moving, hide it after 3 seconds
@@ -149,9 +161,23 @@ export default function VideoControls({ scrubber, adminControls }: Props) {
         <div className="flex items-center justify-between p-2">
           <div className="flex items-center gap-2">
             <PausePlayButton />
-            <p className="cursor-default whitespace-nowrap text-lg text-slate-200">
-              {currentTimestamp} / {totalTimestamp}
-            </p>
+            <button
+              key={altTimestamps.toString()}
+              className="animate-fade-in whitespace-nowrap text-lg text-slate-200 hover:text-white"
+              onClick={toggleAltTimestamps}>
+              <HoverTooltip placement="top" offset={22}>
+                Timestamp Mode: {altTimestamps ? 'Remaining' : 'Elapsed'}
+              </HoverTooltip>
+              {altTimestamps ? (
+                <>
+                  -{parseTimestamp(totalSeconds - currentSeconds)} / {totalTimestamp}
+                </>
+              ) : (
+                <>
+                  {currentTimestamp} / {totalTimestamp}
+                </>
+              )}
+            </button>
             <div className="group flex items-center pr-8">
               <div>
                 <ActionButton onClick={() => (videoElement.muted = !videoElement.muted)}>

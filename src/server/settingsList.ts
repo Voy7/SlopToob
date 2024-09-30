@@ -69,7 +69,7 @@ export const settingsList = {
   canVoteSkipIfPaused: { default: false, onChange: voteSkipResync },
 
   // Minimum time between bumpers in minutes
-  bumpersEnabled: { default: true },
+  bumpersEnabled: { default: true, onChange: bumpersResync },
   bumperIntervalMinutes: { default: 30 },
 
   // Minimum number of videos to keep in the queue, not including 'manually' added videos
@@ -162,6 +162,11 @@ export const settingsList = {
 async function voteSkipResync() {
   const { default: VoteSkipHandler } = await import('@/server/stream/VoteSkipHandler')
   VoteSkipHandler.resyncChanges()
+}
+
+async function bumpersResync() {
+  const { resyncChanges } = await import('@/server/stream/bumpers')
+  resyncChanges()
 }
 
 async function chatResync() {

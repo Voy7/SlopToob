@@ -30,11 +30,17 @@ export default function QueueList() {
       <div className="mb-1">
         <Header icon="list">Transcoding Jobs ({transcodeQueue.length})</Header>
       </div>
-      <div className="flex flex-col border-l-[1px] border-r-[1px] border-t-[1px] border-border1">
-        {transcodeQueue.map((job, index) => (
-          <Job key={job.id} job={job} index={index} />
-        ))}
-      </div>
+      {transcodeQueue.length > 0 ? (
+        <div className="flex flex-col border-l-[1px] border-r-[1px] border-t-[1px] border-border1">
+          {transcodeQueue.map((job, index) => (
+            <Job key={job.id} job={job} index={index} />
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center gap-2 p-4 text-text3">
+          <p>Currently no transcoding jobs.</p>
+        </div>
+      )}
     </SettingGroup>
   )
 }

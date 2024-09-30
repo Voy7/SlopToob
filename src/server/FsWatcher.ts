@@ -18,7 +18,7 @@ export default class FsWatcher {
     this.isActive = true
 
     fs.watch(this.dirPath, { recursive: true }, async (event, filename) => {
-      console.log(filename, event)
+      // console.log(filename, event)
       if (event !== 'rename') return
       if (!filename) return
 
