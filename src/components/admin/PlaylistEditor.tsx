@@ -4,13 +4,10 @@ import { useEffect, useState } from 'react'
 import { useSocketContext } from '@/contexts/SocketContext'
 import useSocketOn from '@/hooks/useSocketOn'
 import { Msg } from '@/lib/enums'
-import {
-  SettingGroup,
-  Header,
-  Description,
-  StringOption,
-  ButtonOption
-} from '@/components/admin/SettingsComponents'
+import SettingGroup from '@/components/admin/common/SettingGroup'
+import Header from '@/components/admin/common/Header'
+import { StringOption } from '@/components/admin/common/StringOption'
+import ButtonOption from '@/components/admin/common/ButtonOption'
 import Button from '@/components/ui/Button'
 import PlaylistFilePicker from '@/components/admin/PlaylistFilePicker'
 import ActionModal from '@/components/ui/ActionModal'

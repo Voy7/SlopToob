@@ -1,23 +1,16 @@
 'use client'
 
-import useToggleOption from '@/hooks/useToggleOption'
-import useNumberOption from '@/hooks/useNumberOption'
-import {
-  MainHeader,
-  SettingGroup,
-  Description,
-  Header,
-  ToggleOption,
-  NumberOption,
-  Gap
-} from '@/components/admin/SettingsComponents'
+import LoadingBoundary from '@/components/admin/common/LoadingBoundary'
+import SettingGroup from '@/components/admin/common/SettingGroup'
+import Header from '@/components/admin/common/Header'
+import Description from '@/components/admin/common/Description'
+import { NumberOption, useNumberOption } from '@/components/admin/common/NumberOption'
 
-export default function SectionTranscoding() {
+export default function TranscodingSettings() {
   const maxTranscodingJobs = useNumberOption('maxTranscodingJobs')
 
   return (
-    <>
-      {/* <MainHeader>Transcoding</MainHeader> */}
+    <LoadingBoundary>
       <SettingGroup>
         <Header icon="settings">Transcoder Settings</Header>
         <NumberOption label="Max Transcoding Jobs" type="integer" {...maxTranscodingJobs} />
@@ -27,6 +20,6 @@ export default function SectionTranscoding() {
           Recommended: 2 - 3, use 1 if server has performance issues.
         </Description>
       </SettingGroup>
-    </>
+    </LoadingBoundary>
   )
 }

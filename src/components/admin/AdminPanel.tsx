@@ -11,8 +11,8 @@ export default function AdminPanel() {
     <>
       <Navbar />
       <section
-        key={section.name}
-        className="animate-section flex h-full w-full flex-col gap-4 overflow-y-scroll p-2 pb-8">
+        key={section.id}
+        className="flex h-full w-full flex-col gap-4 overflow-y-scroll p-2 pb-8">
         {section.component}
       </section>
     </>

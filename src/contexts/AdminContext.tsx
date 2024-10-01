@@ -4,17 +4,13 @@ import { useState, useContext, createContext, useEffect } from 'react'
 import { useSocketContext } from '@/contexts/SocketContext'
 import useSocketOn from '@/hooks/useSocketOn'
 import { Msg } from '@/lib/enums'
-import SectionOverview from '@/components/admin/SectionOverview'
-import SectionPlaylists from '@/components/admin/SectionPlaylists'
-import SectionBumpers from '@/components/admin/SectionBumpers'
-// import SectionTranscoding from '@/components/admin/settings/TranscodingSettings'
-// import SectionChat from '@/components/admin/SectionChat'
-import SectionSchedule from '@/components/admin/SectionSchedule'
-// import SectionHistory from '@/components/admin/SectionHistory'
-// import SectionVoteSkip from '@/components/admin/SectionVoteSkip'
-import SectionDebug from '@/components/admin/SectionDebug'
-import SectionCaching from '@/components/admin/SectionCaching'
-import SectionOther from '@/components/admin/SectionOther'
+import SectionOverview from '@/components/admin/sections/SectionOverview'
+import SectionPlaylists from '@/components/admin/sections/SectionPlaylists'
+import SectionBumpers from '@/components/admin/sections/SectionBumpers'
+import SectionSchedule from '@/components/admin/sections/SectionSchedule'
+import SectionCaching from '@/components/admin/sections/SectionCaching'
+import SectionDebug from '@/components/admin/sections/SectionDebug'
+import SectionSettings from '@/components/admin/sections/SectionSettings'
 import type { FileTreeBase } from '@/typings/types'
 import type {
   AdminStreamInfo,
@@ -29,9 +25,9 @@ import type {
   ClientRichUser
 } from '@/typings/socket'
 import type { IconNames } from '@/components/ui/Icon'
-import SectionSettings from '@/components/admin/SectionSettings'
 
 type Section = {
+  id: string
   name: string
   icon: IconNames
   accentColor: string
@@ -41,42 +37,49 @@ type Section = {
 // Admin panel sections
 export const sections = [
   {
+    id: 'overview',
     name: 'Overview',
     icon: 'stream-settings',
     accentColor: 'bg-gray-500',
     component: <SectionOverview />
   },
   {
+    id: 'playlists',
     name: 'Playlists',
     icon: 'playlist',
     accentColor: 'bg-blue-500',
     component: <SectionPlaylists />
   },
   {
+    id: 'bumpers',
     name: 'Bumpers',
     icon: 'bumper',
     accentColor: 'bg-blue-700',
     component: <SectionBumpers />
   },
   {
+    id: 'schedule',
     name: 'Schedule',
     icon: 'calendar',
     accentColor: 'bg-yellow-500',
     component: <SectionSchedule />
   },
   {
+    id: 'caching',
     name: 'Caching',
     icon: 'cache',
     accentColor: 'bg-purple-700',
     component: <SectionCaching />
   },
   {
+    id: 'debug',
     name: 'Debug',
     accentColor: 'bg-red-500',
     icon: 'admin-panel',
     component: <SectionDebug />
   },
   {
+    id: 'settings',
     name: 'Settings',
     icon: 'settings',
     accentColor: 'bg-red-500',
@@ -84,12 +87,14 @@ export const sections = [
   }
 ] as const satisfies Section[]
 
-export type SectionName = (typeof sections)[number]['name']
+export type SectionID = (typeof sections)[number]['id']
 
 // Stream page context
 type ContextProps = {
   section: (typeof sections)[number]
-  setSection: (sectionName: SectionName) => void
+  setSection: (sectionName: SectionID) => void
+  settingsSubSection: string
+  setSettingsSubSection: React.Dispatch<React.SetStateAction<string>>
   streamInfo: AdminStreamInfo
   lastStreamUpdateTimestamp: number | null
   fileTree: FileTreeBase | null
@@ -115,6 +120,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const { socket } = useSocketContext()
 
   const [section, setSectionState] = useState<(typeof sections)[number]>(sections[0])
+  const [settingsSubSection, setSettingsSubSection] = useState<string>('transcoding')
   const [streamInfo, setStreamInfo] = useState<AdminStreamInfo | null>(null)
   const [lastStreamUpdateTimestamp, setLastStreamUpdateTimestamp] = useState<number | null>(null)
   const [fileTree, setFileTree] = useState<FileTreeBase | null>(null)
@@ -132,8 +138,8 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [richUsers, setRichUsers] = useState<ClientRichUser[] | null>(null)
   const [logs, setLogs] = useState<string[]>([])
 
-  function setSection(sectionName: SectionName) {
-    const sec = sections.find((s) => s.name === sectionName)
+  function setSection(sectionID: SectionID) {
+    const sec = sections.find((s) => s.id === sectionID)
     if (sec) setSectionState(sec)
   }
 
@@ -189,6 +195,8 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const context: ContextProps = {
     section,
     setSection,
+    settingsSubSection,
+    setSettingsSubSection,
     streamInfo,
     lastStreamUpdateTimestamp,
     fileTree,

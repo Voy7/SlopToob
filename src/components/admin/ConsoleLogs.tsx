@@ -1,8 +1,8 @@
 'use client'
 
-import { useAdminContext } from '@/contexts/AdminContext'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import Icon from '../ui/Icon'
+import { useAdminContext } from '@/contexts/AdminContext'
+import Icon from '@/components/ui/Icon'
 
 const prefixColors: Record<string, string> = {
   INFO: 'cyan',
@@ -15,9 +15,9 @@ const prefixColors: Record<string, string> = {
 export default function ConsoleLogs() {
   const { logs } = useAdminContext()
 
-  const [isAtBottom, setIsAtBottom] = useState<boolean>(true)
-
   const messagesRef = useRef<HTMLDivElement>(null)
+
+  const [isAtBottom, setIsAtBottom] = useState<boolean>(true)
 
   // When new message is received, scroll to bottom of container if it's already at the bottom
   useEffect(() => {

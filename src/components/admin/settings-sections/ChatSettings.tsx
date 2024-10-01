@@ -1,18 +1,13 @@
 'use client'
 
-import useToggleOption from '@/hooks/useToggleOption'
-import useNumberOption from '@/hooks/useNumberOption'
-import {
-  MainHeader,
-  SettingGroup,
-  Header,
-  Description,
-  Gap,
-  ToggleOption,
-  NumberOption
-} from '@/components/admin/SettingsComponents'
+import LoadingBoundary from '@/components/admin/common/LoadingBoundary'
+import SettingGroup from '@/components/admin/common/SettingGroup'
+import Header from '@/components/admin/common/Header'
+import Description from '@/components/admin/common/Description'
+import { ToggleOption, useToggleOption } from '@/components/admin/common/ToggleOption'
+import { NumberOption, useNumberOption } from '@/components/admin/common/NumberOption'
 
-export default function SectionChat() {
+export default function ChatSettings() {
   const chatMaxLength = useNumberOption('chatMaxLength')
 
   const showChatTimestamps = useToggleOption('showChatTimestamps')
@@ -35,8 +30,7 @@ export default function SectionChat() {
   const nicknameMaxLength = useNumberOption('nicknameMaxLength')
 
   return (
-    <>
-      <MainHeader>Chat</MainHeader>
+    <LoadingBoundary>
       <SettingGroup>
         <Header icon="chat">User Chat Messages</Header>
         <NumberOption label="Maximum Message Length" type="integer" {...chatMaxLength} />
@@ -69,11 +63,11 @@ export default function SectionChat() {
         <Description>
           Can nickname only contain letters, numbers, underscores, and spaces.
         </Description>
-        <Gap />
+        <div className="h-4" />
         <NumberOption label="Minimum Length" type="integer" {...nicknameMinLength} />
         <NumberOption label="Maximum Length" type="integer" {...nicknameMaxLength} />
         <Description>Minimum and maximum amount of characters in nicknames.</Description>
       </SettingGroup>
-    </>
+    </LoadingBoundary>
   )
 }

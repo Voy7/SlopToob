@@ -6,6 +6,7 @@ import { daysOfWeek } from '@/lib/daysOfWeek'
 import Icon from '@/components/ui/Icon'
 import SelectDropdown from '@/components/ui/SelectDropdown'
 import SelectItem from '@/components/ui/SelectItem'
+import Checkbox from '@/components/ui/Checkbox'
 import type { ScheduleEntryOptions } from '@/typings/types'
 import type { ClientScheduleEntry } from '@/typings/socket'
 import { twMerge } from 'tailwind-merge'
@@ -52,15 +53,14 @@ export default function ScheduleEntry({ entry, onChange }: Props) {
   const playlistName = playlists.find((p) => p.id === playlistID)?.name || '(Deleted Playlist)'
 
   return (
-    <div className="flex w-full min-w-max items-center gap-2 bg-bg2 px-2">
+    <div className="flex w-full min-w-max items-center gap-2 px-2 py-0.5">
       <div
         className={twMerge(
           'h-[32px] w-0.5 bg-slate-800',
           schedule.activeEntryID === entry?.id && 'bg-lime-700'
         )}
       />
-      <input
-        type="checkbox"
+      <Checkbox
         checked={isEnabled}
         onChange={(e) => setIsEnabled(e.target.checked)}
         className="ml-2.5 mr-3 h-4 w-4"

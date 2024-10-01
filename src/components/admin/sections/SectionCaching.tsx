@@ -3,21 +3,17 @@
 import { useState } from 'react'
 import { useSocketContext } from '@/contexts/SocketContext'
 import { useAdminContext } from '@/contexts/AdminContext'
-import useToggleOption from '@/hooks/useToggleOption'
-import {
-  MainHeader,
-  SettingGroup,
-  Header,
-  Description,
-  ToggleOption,
-  ButtonOption,
-  Gap
-} from '@/components/admin/SettingsComponents'
+import { Msg } from '@/lib/enums'
+import LoadingBoundary from '@/components/admin/common/LoadingBoundary'
+import MainHeader from '@/components/admin/common/MainHeader'
+import SettingGroup from '@/components/admin/common/SettingGroup'
+import Header from '@/components/admin/common/Header'
+import Description from '@/components/admin/common/Description'
+import { ToggleOption, useToggleOption } from '@/components/admin/common/ToggleOption'
 import Icon from '@/components/ui/Icon'
 import Button from '@/components/ui/Button'
-import ActionModal from '../ui/ActionModal'
+import ActionModal from '@/components/ui/ActionModal'
 import type { ClientCacheStatus } from '@/typings/socket'
-import { Msg } from '@/lib/enums'
 
 export default function SectionStream() {
   const { videosCacheStatus, bumpersCacheStatus, thumbnailsCacheStatus } = useAdminContext()
@@ -26,7 +22,7 @@ export default function SectionStream() {
   const cacheBumpers = useToggleOption('cacheBumpers')
 
   return (
-    <>
+    <LoadingBoundary>
       <MainHeader>Caching</MainHeader>
       <SettingGroup>
         <Header icon="cache">Cache Settings</Header>
@@ -37,12 +33,12 @@ export default function SectionStream() {
       <SettingGroup>
         <Header icon="files">Cache Storage</Header>
         <CacheStatus label="Videos" status={videosCacheStatus} />
-        <Gap />
+        <div className="h-4" />
         <CacheStatus label="Bumpers" status={bumpersCacheStatus} />
-        <Gap />
+        <div className="h-4" />
         <CacheStatus label="Thumbnails" status={thumbnailsCacheStatus} />
       </SettingGroup>
-    </>
+    </LoadingBoundary>
   )
 }
 

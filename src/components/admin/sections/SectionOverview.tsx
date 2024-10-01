@@ -1,16 +1,13 @@
 'use client'
 
 import { useAdminContext } from '@/contexts/AdminContext'
-import useListOption from '@/hooks/useListOption'
-import useMultiListOption from '@/hooks/useMultiListOption'
-import {
-  MainHeader,
-  SettingGroup,
-  Header,
-  Description,
-  ListOption,
-  MultiListOption
-} from '@/components/admin/SettingsComponents'
+import LoadingBoundary from '@/components/admin/common/LoadingBoundary'
+import MainHeader from '@/components/admin/common/MainHeader'
+import SettingGroup from '@/components/admin/common/SettingGroup'
+import Header from '@/components/admin/common/Header'
+import Description from '@/components/admin/common/Description'
+import { ListOption, useListOption } from '@/components/admin/common/ListOption'
+import { MultiListOption, useMultiListOption } from '@/components/admin/common/MultiListOption'
 import StreamControls from '@/components/admin/StreamControls'
 import QueueList from '@/components/admin/QueueList'
 import ScheduleSyncer from '@/components/admin/ScheduleSyncer'
@@ -22,7 +19,7 @@ export default function SectionOverview() {
   const activeThemes = useMultiListOption('activeThemes')
 
   return (
-    <>
+    <LoadingBoundary>
       <MainHeader>Stream Overview</MainHeader>
       <StreamControls />
       <QueueList omitDetails={true} />
@@ -41,6 +38,6 @@ export default function SectionOverview() {
         <MultiListOption {...activeThemes} />
         <Description>Enable a funny theme for the stream.</Description>
       </SettingGroup>
-    </>
+    </LoadingBoundary>
   )
 }

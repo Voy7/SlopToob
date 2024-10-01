@@ -1,24 +1,18 @@
 'use client'
 
-import useToggleOption from '@/hooks/useToggleOption'
-import {
-  MainHeader,
-  SettingGroup,
-  Header,
-  Description,
-  ToggleOption
-} from '@/components/admin/SettingsComponents'
+import { useState } from 'react'
+import LoadingBoundary from '@/components/admin/common/LoadingBoundary'
+import MainHeader from '@/components/admin/common/MainHeader'
 import SubSectionSelector from '@/components/ui/SubSectionSelector'
 import StreamControls from '@/components/admin/StreamControls'
 import QueueList from '@/components/admin/QueueList'
 import TranscodeQueue from '@/components/admin/TranscodeQueue'
 import ConsoleLogs from '@/components/admin/ConsoleLogs'
-import { useState } from 'react'
 
 export default function SectionDebug() {
   const [subSection, setSubSection] = useState('queues')
   return (
-    <>
+    <LoadingBoundary>
       <MainHeader>Developer Debug</MainHeader>
       <SubSectionSelector
         value={subSection}
@@ -38,6 +32,6 @@ export default function SectionDebug() {
         )}
         {subSection === 'console' && <ConsoleLogs />}
       </div>
-    </>
+    </LoadingBoundary>
   )
 }

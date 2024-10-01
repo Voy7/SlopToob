@@ -1,17 +1,13 @@
 'use client'
 
-import useToggleOption from '@/hooks/useToggleOption'
-import useNumberOption from '@/hooks/useNumberOption'
 import { timezones } from '@/lib/timezones'
-import {
-  MainHeader,
-  SettingGroup,
-  Description,
-  Header,
-  ToggleOption,
-  NumberOption,
-  Gap
-} from '@/components/admin/SettingsComponents'
+import LoadingBoundary from '@/components/admin/common/LoadingBoundary'
+import MainHeader from '@/components/admin/common/MainHeader'
+import SettingGroup from '@/components/admin/common/SettingGroup'
+import Header from '@/components/admin/common/Header'
+import Description from '@/components/admin/common/Description'
+import { ToggleOption, useToggleOption } from '@/components/admin/common/ToggleOption'
+import { useNumberOption } from '@/components/admin/common/NumberOption'
 import SelectDropdown from '@/components/ui/SelectDropdown'
 import SelectItem from '@/components/ui/SelectItem'
 import ScheduleEditor from '@/components/admin/ScheduleEditor'
@@ -25,7 +21,7 @@ export default function SectionSchedule() {
   const showWeeklyScheduleTimemarks = useToggleOption('showWeeklyScheduleTimemarks')
 
   return (
-    <>
+    <LoadingBoundary>
       <MainHeader>Weekly Schedule</MainHeader>
       <SettingGroup>
         <Header icon="settings">Schedule Settings</Header>
@@ -33,7 +29,7 @@ export default function SectionSchedule() {
         <Description>
           Enable a weekly schedule to automatically play playlists at specific times.
         </Description>
-        <Gap />
+        <div className="h-4" />
         <SelectDropdown
           label={`Timezone: ${timezones.find((t) => t.offset === weeklyScheduleUTCOffset.value)?.name || 'Unknown'}`}
           icon="history">
@@ -57,16 +53,16 @@ export default function SectionSchedule() {
         <Header icon="display">Scheduler Display Settings</Header>
         <ToggleOption label="Show Weekly Schedule" {...showWeeklySchedule} />
         <Description>Display the playlist schedule below the video.</Description>
-        <Gap />
+        <div className="h-4" />
         <ToggleOption label="Show Weekly Schedule If Unsynced" {...showWeeklyScheduleIfUnsynced} />
         <Description>Display the playlist schedule even if it is not synced.</Description>
-        <Gap />
+        <div className="h-4" />
         <ToggleOption label="Show Weekly Schedule Timemarks" {...showWeeklyScheduleTimemarks} />
         <Description>
           Show timestamps on playlist schedule display. Will only show the day if disabled.
         </Description>
       </SettingGroup>
-    </>
+    </LoadingBoundary>
   )
 }
 

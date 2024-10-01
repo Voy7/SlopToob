@@ -5,7 +5,8 @@ import { useSocketContext } from '@/contexts/SocketContext'
 import { useAdminContext } from '@/contexts/AdminContext'
 import { Msg } from '@/lib/enums'
 import useSocketOn from '@/hooks/useSocketOn'
-import { MainHeader } from '@/components/admin/SettingsComponents'
+import LoadingBoundary from '@/components/admin/common/LoadingBoundary'
+import MainHeader from '@/components/admin/common/MainHeader'
 import Icon from '@/components/ui/Icon'
 import Button from '@/components/ui/Button'
 import ActionModal from '@/components/ui/ActionModal'
@@ -44,7 +45,7 @@ export default function SectionPlaylists() {
   const activePlaylist = playlists.find((playlist) => playlist.id === selectedPlaylist)
 
   return (
-    <>
+    <LoadingBoundary>
       {!playlists || !selectedPlaylist ? (
         <div className="mb-2 flex h-full w-full cursor-default flex-col items-center justify-center gap-4 p-4 text-xl text-text3">
           <Icon name="playlist-add" className="text-4xl" />
@@ -101,6 +102,6 @@ export default function SectionPlaylists() {
           <input type="text" name="playlistName" placeholder="New Playlist..." autoFocus />
         </label>
       </ActionModal>
-    </>
+    </LoadingBoundary>
   )
 }

@@ -59,10 +59,10 @@ export default function Navbar() {
             </div>
             <div className="h-2" />
             {sections.map((sec) => {
-              const isActive = sec.name === section.name
+              const isActive = sec.id === section.id
               return (
                 <button
-                  key={sec.name}
+                  key={sec.id}
                   className={twMerge(
                     'flex h-12 cursor-pointer items-center gap-2 whitespace-nowrap rounded-lg bg-transparent pl-3 text-lg text-text2 lg:mx-8',
                     isActive && sec.accentColor,
@@ -71,7 +71,7 @@ export default function Navbar() {
                       : 'transition-[background-color] duration-500 hover:text-white hover:underline active:bg-bg3 active:duration-0'
                   )}
                   onClick={() => {
-                    setSection(sec.name)
+                    setSection(sec.id)
                     setMobileOpen(false)
                   }}>
                   <Icon

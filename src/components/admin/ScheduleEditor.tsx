@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { useAdminContext } from '@/contexts/AdminContext'
 import { useSocketContext } from '@/contexts/SocketContext'
 import { Msg } from '@/lib/enums'
-import { SettingGroup, Header } from '@/components/admin/SettingsComponents'
+import SettingGroup from '@/components/admin/common/SettingGroup'
+import Header from '@/components/admin/common/Header'
 import Icon from '@/components/ui/Icon'
 import Button from '@/components/ui/Button'
 import Modal from '@/components/ui/Modal'
@@ -33,7 +34,7 @@ export default function ScheduleEditor() {
   return (
     <>
       <SettingGroup>
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-2">
           <Header icon="calendar">Weekly Schedule</Header>
           <button
             className="flex shrink-0 items-center gap-0.5 whitespace-nowrap rounded-lg px-2 py-1 text-blue-500 duration-300 hover:underline active:bg-blue-500 active:bg-opacity-50 active:duration-0"
@@ -49,12 +50,12 @@ export default function ScheduleEditor() {
                 <ScheduleSyncer />
               </div>
             )}
-            <div className="w-full overflow-x-auto bg-bg2">
+            <div className="w-full overflow-x-auto">
               <ScheduleHeader />
               {schedule.entries.map((entry, index) => (
                 <div
-                  key={`${index}-${entry.id}`}
-                  className="animate-fade-in flex w-full min-w-max items-center justify-between gap-4 border-t-[1px] border-border1 bg-bg2 pr-1">
+                  key={JSON.stringify(entry)}
+                  className="animate-fade-in flex w-full min-w-max items-center justify-between gap-4 border-t-[1px] border-border1 pr-1">
                   <ScheduleEntry
                     entry={entry}
                     onChange={(options) => {
@@ -102,9 +103,9 @@ export default function ScheduleEditor() {
           <p className="mb-8 text-center text-text2">
             Enter the details for the new schedule entry below.
           </p>
-          <div className="w-full overflow-x-auto bg-bg2">
+          <div className="w-full overflow-x-auto">
             <ScheduleHeader />
-            <div className="bg-bg2 py-2">
+            <div className="py-2">
               <ScheduleEntry onChange={(options) => setAddOptions(options)} />
             </div>
           </div>

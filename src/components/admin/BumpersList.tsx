@@ -5,7 +5,9 @@ import { useSocketContext } from '@/contexts/SocketContext'
 import { useAdminContext } from '@/contexts/AdminContext'
 import useSocketOn from '@/hooks/useSocketOn'
 import { Msg } from '@/lib/enums'
-import { SettingGroup, Header, ButtonOption, Gap } from '@/components/admin/SettingsComponents'
+import SettingGroup from '@/components/admin/common/SettingGroup'
+import Header from '@/components/admin/common/Header'
+import ButtonOption from '@/components/admin/common/ButtonOption'
 import Icon from '@/components/ui/Icon'
 import Button from '@/components/ui/Button'
 import ActionModal from '@/components/ui/ActionModal'
@@ -71,7 +73,7 @@ export default function BumpersList() {
             Upload Bumper
           </Button>
         </ButtonOption>
-        <Gap />
+        <div className="h-4" />
         <Header icon="list">Bumpers List ({bumpers.length.toLocaleString()})</Header>
         <div className={styles.list}>
           {bumpers.map((bumper, index) => (
