@@ -12,7 +12,7 @@ type ToggleOptionProps = {
 }
 
 export function ToggleOption({ label, value, setValue }: ToggleOptionProps) {
-  if (value === null) return null
+  if (value === null) return <div data-loading />
 
   return (
     <label className="flex cursor-pointer items-center justify-between gap-4 bg-bg2 px-1.5 py-0.5 hover:bg-bg3">
@@ -40,9 +40,7 @@ export function useToggleOption(settingKey: keyof SettingsList) {
     socket.emit(settingID)
 
     socket.on(settingID, (value: boolean) => {
-      setTimeout(() => {
-        setValueState(value)
-      }, 1500)
+      setValueState(value)
     })
 
     return () => {

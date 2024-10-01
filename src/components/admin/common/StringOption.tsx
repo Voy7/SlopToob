@@ -12,7 +12,7 @@ type StringOptionProps = {
 }
 
 export function StringOption({ label, value, setValue, error }: StringOptionProps) {
-  if (value === null) return null
+  if (value === null) return <div data-loading />
 
   const [input, setInput] = useState<string>(`${value}`)
   const [isEditing, setIsEditing] = useState<boolean>(false)

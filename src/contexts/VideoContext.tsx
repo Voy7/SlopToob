@@ -67,7 +67,11 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
     const volumeCookie = document.cookie
       .split('; ')
       .find((row) => row.startsWith(`volume-${streamInfo.id}=`))
-    if (volumeCookie) setVolume(Number(volumeCookie.split('=')[1]))
+    if (!volumeCookie) return
+    if (!videoRef.current) return
+    const volume = Number(volumeCookie.split('=')[1])
+    videoRef.current.volume = volume / 100
+    setVolume(volume)
   }, [streamInfo, sourceURL])
 
   // Handle video element events

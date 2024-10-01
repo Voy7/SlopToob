@@ -7,15 +7,17 @@ import SubSectionSelector from '@/components/ui/SubSectionSelector'
 import TranscodingSettings from '@/components/admin/settings-sections/TranscodingSettings'
 import BumpersSettings from '@/components/admin/settings-sections/BumpersSettings'
 import ChatSettings from '@/components/admin/settings-sections/ChatSettings'
+import ScheduleSettings from '@/components/admin/settings-sections/ScheduleSettings'
 import HistorySettings from '@/components/admin/settings-sections/HistorySettings'
 import VoteSkipSettings from '@/components/admin/settings-sections/VoteSkipSettings'
+import CachingSettings from '@/components/admin/settings-sections/CachingSettings'
 import AdvancedSettings from '@/components/admin/settings-sections/AdvancedSettings'
 
 export default function SectionSettings() {
   const { settingsSubSection, setSettingsSubSection } = useAdminContext()
 
   return (
-    <LoadingBoundary>
+    <>
       <MainHeader>Settings</MainHeader>
       <SubSectionSelector
         value={settingsSubSection}
@@ -24,17 +26,21 @@ export default function SectionSettings() {
           { id: 'transcoding', label: 'Transcoding', icon: 'files' },
           { id: 'bumpers', label: 'Bumpers', icon: 'bumper' },
           { id: 'chat', label: 'Chat', icon: 'chat' },
+          { id: 'schedule', label: 'Schedule', icon: 'calendar' },
           { id: 'history', label: 'History', icon: 'history' },
           { id: 'voteSkip', label: 'Vote Skip', icon: 'skip' },
+          { id: 'caching', label: 'Caching', icon: 'cache' },
           { id: 'advanced', label: 'Advanced', icon: 'settings' }
         ]}
       />
       {settingsSubSection === 'transcoding' && <TranscodingSettings />}
       {settingsSubSection === 'bumpers' && <BumpersSettings />}
       {settingsSubSection === 'chat' && <ChatSettings />}
+      {settingsSubSection === 'schedule' && <ScheduleSettings />}
       {settingsSubSection === 'history' && <HistorySettings />}
       {settingsSubSection === 'voteSkip' && <VoteSkipSettings />}
+      {settingsSubSection === 'caching' && <CachingSettings />}
       {settingsSubSection === 'advanced' && <AdvancedSettings />}
-    </LoadingBoundary>
+    </>
   )
 }

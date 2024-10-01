@@ -13,7 +13,7 @@ type ListOptionProps = {
 }
 
 export function ListOption({ value, setValue }: ListOptionProps) {
-  if (value === null) return null
+  if (value === null) return <div data-loading />
 
   return (
     <>
@@ -53,9 +53,7 @@ export function useListOption(settingKey: keyof SettingsList) {
     socket.emit(settingID)
 
     socket.on(settingID, (payload: ListOption) => {
-      setTimeout(() => {
-        setValueState(payload)
-      }, 1500)
+      setValueState(payload)
     })
 
     return () => {

@@ -12,12 +12,6 @@ type Setting<T = string | number | boolean> = {
   setter?: (value: any) => T | Promise<T>
 }
 
-// type Setting = {
-//   default: string | number | boolean
-//   clientValue?: () => any
-//   onChange?: (value: any) => void
-// }
-
 export const settingsList = {
   // Current active playlist, client uses the setting as a ListOption
   activePlaylistID: {
@@ -57,6 +51,19 @@ export const settingsList = {
     // },
     // onChange: chatResync
   },
+
+  // Max video quality, value is index of videoQualities
+  // 2 = 1080p
+  maxVideoQuality: { default: 2, onChange: transcoderResync },
+
+  // Max audio quality (bit rate), value is index of audioQualities
+  // 2 = 192k
+  maxAudioQuality: { default: 2, onChange: transcoderResync },
+
+  enableVolumeNormalization: { default: false, onChange: transcoderResync },
+  loudnormTargetIntegrated: { default: -24, onChange: transcoderResync },
+  loudnormTargetPeak: { default: -2, onChange: transcoderResync },
+  loudnormRange: { default: 7, onChange: transcoderResync },
 
   // Is not a normal setting, just a persistant state for if the server restarts
   streamIsPaused: { default: false },
@@ -158,6 +165,10 @@ export const settingsList = {
   showWeeklyScheduleIfUnsynced: { default: true, onChange: scheduleDisplayResync },
   showWeeklyScheduleTimemarks: { default: true, onChange: scheduleDisplayResync }
 } satisfies Record<string, Setting>
+
+async function transcoderResync() {
+  // const { default: Transcoder } = await import('@/server/stream
+}
 
 async function voteSkipResync() {
   const { default: VoteSkipHandler } = await import('@/server/stream/VoteSkipHandler')

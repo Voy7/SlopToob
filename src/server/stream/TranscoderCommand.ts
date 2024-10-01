@@ -1,10 +1,12 @@
 import fs from 'fs'
 import fsAsync from 'fs/promises'
 import path from 'path'
-import ffmpeg, { TRANSCODE_ARGS } from '@/lib/ffmpeg'
+import ffmpeg, { BASE_TRANSCODE_ARGS, VIDEO_QUALITY_ARGS, AUDIO_QUALITY_ARGS } from '@/lib/ffmpeg'
+import { videoQualities } from '@/lib/videoQualities'
+import { audioQualities } from '@/lib/audioQualities'
 import parseHlsManifest from '@/lib/parseHlsManifest'
-import parseTimestamp from '@/lib/parseTimestamp'
 import timestampToSeconds from '@/lib/timestampToSeconds'
+import Settings from '@/server/Settings'
 import EventLogger from '@/server/stream/VideoEventLogger'
 import type { FfmpegCommand } from 'fluent-ffmpeg'
 import type { ProgressInfo } from '@/typings/types'
@@ -36,8 +38,29 @@ export default class TranscoderCommand {
     }
     EventLogger.log(this, `Initializing command 2`)
 
-    this.ffmpegCommand = ffmpeg(this.job.video.inputPath).addOptions(TRANSCODE_ARGS)
-    this.ffmpegCommand.inputOptions([`-ss ${this.job.transcodedStartSeconds}`])
+    this.ffmpegCommand = ffmpeg(this.job.video.inputPath)
+    this.ffmpegCommand.addInputOptions([`-ss ${this.job.transcodedStartSeconds}`])
+    this.ffmpegCommand.addOutputOptions(BASE_TRANSCODE_ARGS)
+
+    const videoQualityNodeID = videoQualities[Settings.maxVideoQuality]?.id
+    if (videoQualityNodeID) {
+      const ffmpegVideoQualityArgs = VIDEO_QUALITY_ARGS[videoQualityNodeID]
+      if (ffmpegVideoQualityArgs) this.ffmpegCommand.addOutputOptions(ffmpegVideoQualityArgs)
+    }
+
+    const audioQualityNodeID = audioQualities[Settings.maxAudioQuality]?.id
+    if (audioQualityNodeID) {
+      const ffmpegAudioQualityArgs = AUDIO_QUALITY_ARGS[audioQualityNodeID]
+      if (ffmpegAudioQualityArgs) this.ffmpegCommand.addOutputOptions(ffmpegAudioQualityArgs)
+    }
+
+    if (Settings.enableVolumeNormalization) {
+      const I = Settings.loudnormTargetIntegrated
+      const TP = Settings.loudnormTargetPeak
+      const LRA = Settings.loudnormRange
+      this.ffmpegCommand.addOutputOptions([`-filter:a loudnorm=I=${I}:TP=${TP}:LRA=${LRA}`])
+    }
+
     this.ffmpegCommand.output(path.join(this.job.m3u8Path))
 
     let firstChunkReady = false

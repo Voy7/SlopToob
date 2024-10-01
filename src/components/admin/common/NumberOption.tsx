@@ -14,7 +14,7 @@ type NumberOptionProps = {
 }
 
 export function NumberOption({ label, type, value, setValue }: NumberOptionProps) {
-  if (value === null) return null
+  if (value === null) return <div data-loading />
 
   const [input, setInput] = useState<string>(`${value}`)
   const [isValid, setIsValid] = useState<true | null | string>(null)

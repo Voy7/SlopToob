@@ -34,8 +34,10 @@ export default function SelectDropdown({ label, icon, children, className, ...pr
     const containerRect = containerRef.current.getBoundingClientRect()
     const contentRect = contentRef.current.getBoundingClientRect()
 
-    let left = 0
-    let top = 0
+    let left: number
+    let top: number
+    let height: number
+    let isAbove: boolean
 
     // If content goes off screen to the right, move it left
     if (contentRect.right > window.innerWidth) {
@@ -44,20 +46,19 @@ export default function SelectDropdown({ label, icon, children, className, ...pr
       left = containerRect.left
     }
 
-    top = window.scrollY + containerRect.bottom + 1
-
     const spaceBelowContainer = window.innerHeight - containerRect.bottom - MARGIN_PX
-    let isAbove = false
 
     // If specific condiitions are met, move the dropdown above the button
     if (containerRect.top > window.innerHeight / 2 && contentRect.height > spaceBelowContainer) {
-      top = window.scrollY + containerRect.top - contentRect.height - 1
       isAbove = true
+      top = Math.max(window.scrollY + containerRect.top - contentRect.height - 1, MARGIN_PX)
+      height = containerRect.top - MARGIN_PX
+    } else {
+      isAbove = false
+      top = window.scrollY + containerRect.bottom + 1
+      height = window.innerHeight - containerRect.bottom - MARGIN_PX
     }
 
-    let height = isAbove
-      ? containerRect.top - MARGIN_PX
-      : window.innerHeight - containerRect.bottom - MARGIN_PX
     if (height > contentRect.height) height = contentRect.height
 
     // For transition animation

@@ -13,7 +13,7 @@ type MultiListOptionProps = {
 }
 
 export function MultiListOption({ value, setValue }: MultiListOptionProps) {
-  if (value === null) return null
+  if (value === null) return <div data-loading />
 
   function toggleOption(option: string) {
     if (!value) return
