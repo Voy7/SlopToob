@@ -20,6 +20,7 @@ export default function useStreamTimestamp(
   useEffect(() => {
     let interval: NodeJS.Timeout | undefined
 
+    console.log('streamInfo', streamInfo)
     function updateTimestamp() {
       if (!('currentSeconds' in streamInfo) || !('totalSeconds' in streamInfo))
         return setTimeStamp(0)
@@ -32,7 +33,6 @@ export default function useStreamTimestamp(
     updateTimestamp()
 
     if (streamInfo.state === StreamState.Playing) interval = setInterval(updateTimestamp, 1000)
-    else clearInterval(interval)
 
     return () => clearInterval(interval)
   }, [streamInfo, lastStreamUpdateTimestamp])

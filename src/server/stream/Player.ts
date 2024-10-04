@@ -264,6 +264,7 @@ class Player {
       return {
         state: StreamState.Error,
         name: this.playing.name,
+        isBumper: this.playing.isBumper || undefined,
         fromPlaylistName: this.playing.fromPlaylistName || undefined,
         error: this.playing.error || 'Unknown error occurred.' // Should never be null, but just in case
       }
@@ -274,9 +275,9 @@ class Player {
         state: this.playing.state === VideoState.Playing ? StreamState.Playing : StreamState.Paused,
         id: this.playing.id,
         name: this.playing.name,
+        isBumper: this.playing.isBumper,
         fromPlaylistName: this.playing.fromPlaylistName || undefined,
         path: `/stream-data/${this.playing.job.streamID}/video.m3u8`,
-        isBumper: this.playing.isBumper,
         currentSeconds: this.playing.currentSeconds,
         totalSeconds: this.playing.durationSeconds,
         trueCurrentSeconds: this.playing.currentSeconds - this.playing.job.transcodedStartSeconds,
@@ -284,9 +285,21 @@ class Player {
       }
     }
 
+    if (this.playing.state === VideoState.Seeking) {
+      return {
+        state: StreamState.Seeking,
+        name: this.playing.name,
+        isBumper: this.playing.isBumper,
+        fromPlaylistName: this.playing.fromPlaylistName || undefined,
+        currentSeconds: this.playing.currentSeconds,
+        totalSeconds: this.playing.durationSeconds
+      }
+    }
+
     return {
       state: StreamState.Loading,
       name: this.playing.name,
+      isBumper: this.playing.isBumper,
       fromPlaylistName: this.playing.fromPlaylistName || undefined
     }
   }

@@ -152,7 +152,7 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
 
   // Sync video title with document title
   useEffect(() => {
-    if (streamInfo.state === StreamState.Playing || streamInfo.state === StreamState.Paused) {
+    if (streamInfo.state !== StreamState.Error && 'name' in streamInfo) {
       document.title = streamInfo.name
       return
     }

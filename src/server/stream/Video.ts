@@ -92,14 +92,25 @@ export default class Video {
       // Video is being played & new files/stream is ready (aka seeking to new time)
       if (this.state === State.Seeking) {
         if (this.playAfterSeek) {
-          this.state = State.Playing
           this.startFinishTimeout()
+          this.state = State.Playing
           this.resolveReadyCallbacks()
           return
         }
         this.state = State.Paused
         this.resolveReadyCallbacks()
       }
+    })
+
+    // Fires when job is seeking (temporarily pausing playback)
+    this.job.onSeeking(() => {
+      EventLogger.log(this, `Job callback - onSeeking()`)
+      if (Player.playing !== this) return
+
+      this.playAfterSeek = this.state === State.Playing
+      if (this.finishedTimeout) clearTimeout(this.finishedTimeout)
+      this.passedDurationSeconds = this.currentSeconds
+      this.state = State.Seeking
     })
   }
 
@@ -227,11 +238,8 @@ export default class Video {
 
     // If seek target is not transcoded yet, update transcoder job
     if (seconds < this.job.transcodedStartSeconds || seconds > this.job.availableSeconds) {
-      this.playAfterSeek = this.state === State.Playing
-      this.state = State.Seeking
-      if (this.finishedTimeout) clearTimeout(this.finishedTimeout)
-      this.job.seekTranscodeTo(seconds)
-      return
+      this.playingDate = new Date()
+      return this.job.seekTranscodeTo(seconds)
     }
     // Seek target is already transcoded
     if (this.state === State.Playing) {
@@ -277,6 +285,7 @@ export default class Video {
   get currentSeconds(): number {
     if (!this.playingDate) return 0
     if (this.state === State.Paused) return this.passedDurationSeconds
+    if (this.state === State.Seeking) return this.passedDurationSeconds
     return (new Date().getTime() - this.playingDate.getTime()) / 1000 + this.passedDurationSeconds
   }
 

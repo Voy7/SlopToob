@@ -61,13 +61,15 @@ export enum Msg {
   AdminScheduleDeleteEntry = 'admin-schedule-delete-entry',
   AdminScheduleUpdateEntry = 'admin-schedule-update-entry',
   AdminRichUsers = 'admin-rich-users',
-  AdminKickUser = 'admin-kick-user'
+  AdminKickUser = 'admin-kick-user',
+  AdminApplyTranscoderChanges = 'admin-apply-transcoder-changes'
 }
 
 export const enum StreamState {
   Playing,
   Paused,
   Loading,
+  Seeking,
   Error
 }
 

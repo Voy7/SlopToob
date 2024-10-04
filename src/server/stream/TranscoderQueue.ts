@@ -8,11 +8,11 @@ import { JobState, Msg } from '@/lib/enums'
 import type { TranscodeClientVideo } from '@/typings/socket'
 import type Video from '@/server/stream/Video'
 
-// Handles all transcoding operations
+// Handles all transcoding operations, singleton
 // The reason why this logic is not in the Video class is because there can be
 // multiple of the same video, videos that are deleted while transcoding, etc.
-// Also allows for a queue system to prevent multiple transcodes of the same video
-export default new (class TranscoderQueue {
+// Also allows for a queue system to prevent multiple jobs of the same video
+class TranscoderQueue {
   jobs: TranscoderJob[] = []
 
   // Create a new job if it doesn't exist, otherwise return the existing job
@@ -40,6 +40,14 @@ export default new (class TranscoderQueue {
     this.processQueue()
   }
 
+  // Reset all active jobs, used for applying new transcoding settings
+  refreshAllActiveJobs() {
+    for (const job of this.jobs) {
+      // if (job.state !== JobState.Transcoding) continue
+      job.resetTranscode()
+    }
+  }
+
   get clientTranscodeList(): TranscodeClientVideo[] {
     const list: TranscodeClientVideo[] = []
     for (const job of this.jobs) {
@@ -64,4 +72,6 @@ export default new (class TranscoderQueue {
     }
     return list
   }
-})()
+}
+
+export default new TranscoderQueue()

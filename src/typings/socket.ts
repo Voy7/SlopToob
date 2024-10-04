@@ -31,17 +31,27 @@ export type StreamPaused = {
 export type StreamLoading = {
   state: StreamState.Loading
   name: string
+  isBumper: boolean
+}
+
+export type StreamSeeking = {
+  state: StreamState.Seeking
+  name: string
+  isBumper: boolean
+  currentSeconds: number
+  totalSeconds: number
 }
 
 export type StreamError = {
   state: StreamState.Error
   name?: string
+  isBumper?: boolean
   error: string
 }
 
 export type BaseStreamInfo = {
   fromPlaylistName?: string
-} & (StreamPlaying | StreamPaused | StreamLoading | StreamError)
+} & (StreamPlaying | StreamPaused | StreamLoading | StreamSeeking | StreamError)
 
 export type ViewerStreamInfo = BaseStreamInfo & StreamOptions
 

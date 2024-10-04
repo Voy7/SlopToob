@@ -31,10 +31,11 @@ export default class TranscoderJob {
 
   private command: TranscoderCommand
   private onInitializedCallback?: () => void
+  private onErrorCallbacks: Array<(error: string) => void> = []
   private onStreamableReadyCallbacks: Array<() => void> = []
+  private onSeekingCallbacks: Array<() => void> = []
   private onTranscodeFinishedCallback?: () => void
   private cleanUpCallback?: () => void
-  private onErrorCallbacks: Array<(error: string) => void> = []
 
   private _state: JobState = JobState.Initializing
   get state() {
@@ -245,7 +246,10 @@ export default class TranscoderJob {
     if (this.state !== JobState.Transcoding && this.state !== JobState.Finished) return
     this.state = JobState.Transcoding
     this.isStreamableReady = false
+    this.resolveSeekingCallbacks()
+
     this.command.kill()
+
     try {
       await rmDirRetry(this.video.outputPath)
       this.streamID = generateSecret()
@@ -256,18 +260,20 @@ export default class TranscoderJob {
     }
   }
 
+  // Reset transcoding process, used for applying new transcoding settings
+  resetTranscode() {
+    if (Player.playing?.job === this) {
+      this.seekTranscodeTo(Player.playing.currentSeconds)
+      return
+    }
+    this.seekTranscodeTo(this.transcodedStartSeconds)
+  }
+
   // Force kill job and transcoding process
   forceKill() {
     EventLogger.log(this, `forceKill()`)
 
     this.command.forceKill()
-  }
-
-  // Called when the video has been transcoded enough to start playing while the rest is still transcoding
-  onStreamableReady(callback: () => void) {
-    EventLogger.log(this, `onStreamableReady()`)
-    if (this.isStreamableReady) return callback()
-    this.onStreamableReadyCallbacks.push(callback)
   }
 
   // Called if an error occurs during transcoding, no other callbacks will be called
@@ -277,10 +283,29 @@ export default class TranscoderJob {
     this.onErrorCallbacks.push(callback)
   }
 
+  // Called when the video has been transcoded enough to start playing while the rest is still transcoding
+  onStreamableReady(callback: () => void) {
+    EventLogger.log(this, `onStreamableReady()`)
+    if (this.isStreamableReady) return callback()
+    this.onStreamableReadyCallbacks.push(callback)
+  }
+
+  // Called when transcoding process is 'reseting' (aka, seeking)
+  onSeeking(callback: () => void) {
+    EventLogger.log(this, `onSeeking()`)
+    this.onSeekingCallbacks.push(callback)
+  }
+
   private resolveInitializedCallback() {
     EventLogger.log(this, `resolveInitializedCallback()`)
     this.onInitializedCallback?.()
     delete this.onInitializedCallback
+  }
+
+  private resolveErrorCallbacks() {
+    EventLogger.log(this, `resolveErrorCallbacks()`)
+    for (const callback of this.onErrorCallbacks) callback(this.error || 'Unknown error occurred.')
+    this.onErrorCallbacks = []
   }
 
   private resolveStreamableReadyCallbacks() {
@@ -288,16 +313,15 @@ export default class TranscoderJob {
     for (const callback of this.onStreamableReadyCallbacks) callback()
   }
 
+  private resolveSeekingCallbacks() {
+    EventLogger.log(this, `resolveSeekingCallbacks()`)
+    for (const callback of this.onSeekingCallbacks) callback()
+  }
+
   private resolveTranscodeFinishedCallback() {
     EventLogger.log(this, `resolveTranscodeFinishedCallback()`)
     this.onTranscodeFinishedCallback?.()
     delete this.onTranscodeFinishedCallback
-  }
-
-  private resolveErrorCallbacks() {
-    EventLogger.log(this, `resolveErrorCallbacks()`)
-    for (const callback of this.onErrorCallbacks) callback(this.error || 'Unknown error occurred.')
-    this.onErrorCallbacks = []
   }
 
   // Throw a fatal error to Video
