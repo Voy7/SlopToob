@@ -42,10 +42,7 @@ class TranscoderQueue {
 
   // Reset all active jobs, used for applying new transcoding settings
   refreshAllActiveJobs() {
-    for (const job of this.jobs) {
-      // if (job.state !== JobState.Transcoding) continue
-      job.resetTranscode()
-    }
+    for (const job of this.jobs) job.resetTranscode()
   }
 
   get clientTranscodeList(): TranscodeClientVideo[] {

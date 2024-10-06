@@ -6,7 +6,6 @@ import Icon from '@/components/ui/Icon'
 // If any node in the tree has a props.value of null, return true
 function containsAnyLoading(node: React.ReactNode): boolean {
   if (typeof node !== 'object') return false
-  // console.log(node)
 
   if (Array.isArray(node)) {
     return node.some(containsAnyLoading)
@@ -14,11 +13,7 @@ function containsAnyLoading(node: React.ReactNode): boolean {
 
   if (node === null) return true
 
-  if ('props' in node) {
-    // if (node.props.value === null) return true
-    console.log(node.props)
-    return containsAnyLoading(node.props.children)
-  }
+  if ('props' in node) return containsAnyLoading(node.props.children)
 
   return false
 }

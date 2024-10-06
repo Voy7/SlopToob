@@ -35,6 +35,8 @@ export default class Video {
   private readyCallbacks: Array<() => void> = []
   private finishedPlayingCallback?: () => void
   private playAfterSeek: boolean = true
+  private bufferingTimeout?: NodeJS.Timeout
+  isBuffering: boolean = false
 
   private _state: State = State.NotReady
   get state() {
@@ -111,6 +113,11 @@ export default class Video {
       if (this.finishedTimeout) clearTimeout(this.finishedTimeout)
       this.passedDurationSeconds = this.currentSeconds
       this.state = State.Seeking
+    })
+
+    this.job.onProgress(() => {
+      if (!this.isBuffering) return
+      this.bufferingCheck()
     })
   }
 
@@ -257,6 +264,26 @@ export default class Video {
       () => this.end(),
       (this.durationSeconds - this.passedDurationSeconds + Settings.videoPaddingSeconds) * 1000
     )
+    this.bufferingCheck()
+  }
+
+  private bufferingCheck() {
+    EventLogger.log(this, `bufferingCheck()`)
+
+    const diff = this.job.availableSeconds - this.currentSeconds
+    console.log(`${this.job.availableSeconds} - ${this.currentSeconds} = ${diff}`)
+    if (diff > 2000) {
+      this.bufferingTimeout = setTimeout(() => this.bufferingCheck(), diff * 1000)
+      if (!this.isBuffering) return
+      this.isBuffering = false
+      Player.broadcastStreamInfo()
+      return
+    }
+    if (this.isBuffering) return
+    this.isBuffering = true
+    this.passedDurationSeconds = this.currentSeconds
+    clearTimeout(this.finishedTimeout)
+    Player.broadcastStreamInfo()
   }
 
   // Start video playing timer for error display
@@ -284,6 +311,7 @@ export default class Video {
   // Current time of whole video in seconds (not considering transcoded video time)
   get currentSeconds(): number {
     if (!this.playingDate) return 0
+    if (this.isBuffering) return this.passedDurationSeconds
     if (this.state === State.Paused) return this.passedDurationSeconds
     if (this.state === State.Seeking) return this.passedDurationSeconds
     return (new Date().getTime() - this.playingDate.getTime()) / 1000 + this.passedDurationSeconds

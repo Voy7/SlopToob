@@ -67,11 +67,6 @@ export default function ConsoleLogs() {
         className="h-full w-full overflow-y-scroll border border-border1 bg-black pb-2"
         onScroll={() => {
           if (!messagesRef.current) return
-          console.log(
-            messagesRef.current.scrollHeight,
-            messagesRef.current.scrollTop,
-            messagesRef.current.clientHeight
-          )
           setIsAtBottom(
             messagesRef.current.scrollHeight - messagesRef.current.clientHeight <=
               messagesRef.current.scrollTop

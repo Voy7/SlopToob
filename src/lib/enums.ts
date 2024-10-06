@@ -70,6 +70,7 @@ export const enum StreamState {
   Paused,
   Loading,
   Seeking,
+  Buffering,
   Error
 }
 

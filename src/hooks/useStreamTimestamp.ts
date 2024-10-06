@@ -20,7 +20,6 @@ export default function useStreamTimestamp(
   useEffect(() => {
     let interval: NodeJS.Timeout | undefined
 
-    console.log('streamInfo', streamInfo)
     function updateTimestamp() {
       if (!('currentSeconds' in streamInfo) || !('totalSeconds' in streamInfo))
         return setTimeStamp(0)

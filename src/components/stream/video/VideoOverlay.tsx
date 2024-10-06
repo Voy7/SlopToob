@@ -64,6 +64,15 @@ function StateOverlay() {
     )
   }
 
+  if (streamInfo.state === StreamState.Buffering) {
+    return (
+      <p className="animate-fade-in absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 transform cursor-default items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-black bg-opacity-50 p-4 text-xl tracking-wide text-text2">
+        <Icon name="loading" />
+        SERVER BUFFERING...
+      </p>
+    )
+  }
+
   if (streamInfo.state === StreamState.Error) {
     return (
       <div className="animate-video-error absolute left-0 top-0 flex h-full w-full cursor-default flex-col items-center justify-center gap-4 bg-black">

@@ -107,7 +107,7 @@ export default class TranscoderCommand {
           100,
         processedSeconds: timestampToSeconds(progress.timemark) || 0,
         processedTimestamp: progress.timemark,
-        availableSeconds: availableSeconds,
+        availableSeconds: availableSeconds / 30,
         averageFpsRate: Math.round(fpsRates.reduce((a, b) => a + b, 0) / fpsRates.length),
         currentFpsRate: progress.currentFps || 0,
         frames: progress.frames || 0

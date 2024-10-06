@@ -42,6 +42,18 @@ export type StreamSeeking = {
   totalSeconds: number
 }
 
+export type StreamBuffering = {
+  state: StreamState.Buffering
+  id: string
+  name: string
+  path: string
+  isBumper: boolean
+  currentSeconds: number
+  totalSeconds: number
+  trueCurrentSeconds: number
+  trueTotalSeconds: number
+}
+
 export type StreamError = {
   state: StreamState.Error
   name?: string
@@ -51,7 +63,7 @@ export type StreamError = {
 
 export type BaseStreamInfo = {
   fromPlaylistName?: string
-} & (StreamPlaying | StreamPaused | StreamLoading | StreamSeeking | StreamError)
+} & (StreamPlaying | StreamPaused | StreamLoading | StreamSeeking | StreamBuffering | StreamError)
 
 export type ViewerStreamInfo = BaseStreamInfo & StreamOptions
 

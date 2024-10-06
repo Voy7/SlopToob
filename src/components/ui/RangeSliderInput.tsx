@@ -42,7 +42,6 @@ export default function RangeSliderInput({
       const x = event.clientX - left
       const value = Math.min(max, Math.max(min, (x / width) * max))
       const roundedValue = Math.round(value / step) * step
-      console.log(roundedValue)
       onChange(roundedValue)
     }
 

@@ -25,7 +25,6 @@ export default function ScheduleEditor() {
   const [addOptions, setAddOptions] = useState<ScheduleEntryOptions | null>(null)
 
   function addEntry() {
-    console.log(addOptions)
     if (!addOptions) return
     socket.emit(Msg.AdminScheduleAddEntry, addOptions)
     setShowAddModal(false)

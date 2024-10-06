@@ -271,6 +271,21 @@ class Player {
     }
 
     if (this.playing.state === VideoState.Playing || this.playing.state === VideoState.Paused) {
+      if (this.playing.isBuffering) {
+        return {
+          state: StreamState.Buffering,
+          id: this.playing.id,
+          name: this.playing.name,
+          isBumper: this.playing.isBumper,
+          fromPlaylistName: this.playing.fromPlaylistName || undefined,
+          path: `/stream-data/${this.playing.job.streamID}/video.m3u8`,
+          currentSeconds: this.playing.currentSeconds,
+          totalSeconds: this.playing.durationSeconds,
+          trueCurrentSeconds: this.playing.currentSeconds - this.playing.job.transcodedStartSeconds,
+          trueTotalSeconds: this.playing.durationSeconds - this.playing.job.transcodedStartSeconds
+        }
+      }
+
       return {
         state: this.playing.state === VideoState.Playing ? StreamState.Playing : StreamState.Paused,
         id: this.playing.id,

@@ -34,6 +34,7 @@ export default class TranscoderJob {
   private onErrorCallbacks: Array<(error: string) => void> = []
   private onStreamableReadyCallbacks: Array<() => void> = []
   private onSeekingCallbacks: Array<() => void> = []
+  private onProgressCallbacks: Array<(progress: ProgressInfo) => void> = []
   private onTranscodeFinishedCallback?: () => void
   private cleanUpCallback?: () => void
 
@@ -78,6 +79,7 @@ export default class TranscoderJob {
       EventLogger.log(this, `Command callback - onProgress(${progress})`)
 
       this.lastProgressInfo = progress
+      this.resolveProgressCallbacks(progress)
       SocketUtils.broadcastAdmin(Msg.AdminStreamInfo, Player.adminStreamInfo)
       SocketUtils.broadcastAdmin(Msg.AdminTranscodeQueueList, TranscoderQueue.clientTranscodeList)
     })
@@ -95,7 +97,7 @@ export default class TranscoderJob {
 
   // Initialize the job, check if transcoded files exist and are complete
   // Can be called multiple times, typically when 2+ videos are on this job and previous one finishes
-  async initialize() {
+  async initialize(forceDeleteCache: boolean = false) {
     EventLogger.log(this, `initialize()`)
 
     this.state = JobState.Initializing
@@ -129,7 +131,7 @@ export default class TranscoderJob {
     // Check if partial/incomplete transcoded files exist & delete them if so
     // If total duration in existing m3u8 file is not within 1s of the video duration, it's partial
     try {
-      const isFullCache = await this.checkIfCacheComplete()
+      const isFullCache = forceDeleteCache ? false : await this.checkIfCacheComplete()
       if (isFullCache) {
         this.state = JobState.Finished
         this.isStreamableReady = true
@@ -246,10 +248,9 @@ export default class TranscoderJob {
     if (this.state !== JobState.Transcoding && this.state !== JobState.Finished) return
     this.state = JobState.Transcoding
     this.isStreamableReady = false
+    this.isUsingCache = false
     this.resolveSeekingCallbacks()
-
     this.command.kill()
-
     try {
       await rmDirRetry(this.video.outputPath)
       this.streamID = generateSecret()
@@ -261,12 +262,17 @@ export default class TranscoderJob {
   }
 
   // Reset transcoding process, used for applying new transcoding settings
-  resetTranscode() {
+  async resetTranscode() {
+    EventLogger.log(this, `resetTranscode()`)
+
     if (Player.playing?.job === this) {
       this.seekTranscodeTo(Player.playing.currentSeconds)
       return
     }
-    this.seekTranscodeTo(this.transcodedStartSeconds)
+    if (this.state !== JobState.Transcoding && this.state !== JobState.Finished) return
+    this.command.kill()
+    this.initialize(true)
+    this.activate()
   }
 
   // Force kill job and transcoding process
@@ -296,6 +302,12 @@ export default class TranscoderJob {
     this.onSeekingCallbacks.push(callback)
   }
 
+  onProgress(callback: (progress: ProgressInfo) => void) {
+    EventLogger.log(this, `onProgress()`)
+    if (this.lastProgressInfo) callback(this.lastProgressInfo)
+    this.onProgressCallbacks.push(callback)
+  }
+
   private resolveInitializedCallback() {
     EventLogger.log(this, `resolveInitializedCallback()`)
     this.onInitializedCallback?.()
@@ -318,6 +330,11 @@ export default class TranscoderJob {
     for (const callback of this.onSeekingCallbacks) callback()
   }
 
+  private resolveProgressCallbacks(info: ProgressInfo) {
+    EventLogger.log(this, `resolveProgressCallbacks()`)
+    for (const callback of this.onProgressCallbacks) callback(info)
+  }
+
   private resolveTranscodeFinishedCallback() {
     EventLogger.log(this, `resolveTranscodeFinishedCallback()`)
     this.onTranscodeFinishedCallback?.()
@@ -330,6 +347,7 @@ export default class TranscoderJob {
     this.error = error || 'No error message provided.'
     this.state = JobState.Errored
     this.resolveErrorCallbacks()
+    TranscoderQueue.processQueue()
   }
 
   // See if existing transcoded files are full or partial
