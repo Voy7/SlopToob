@@ -3,7 +3,7 @@
 import { useState, useContext, createContext, useEffect } from 'react'
 import { useSocketContext } from '@/contexts/SocketContext'
 import useSocketOn from '@/hooks/useSocketOn'
-import LoadingPage from '@/components/layout/LoaidngPage'
+import LoadingPage from '@/components/layout/LoadingPage'
 import { Msg } from '@/lib/enums'
 import type { Viewer, ChatMessage, ViewerStreamInfo, ClientScheduleDisplay } from '@/typings/socket'
 

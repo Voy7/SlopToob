@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { useAdminContext, sections } from '@/contexts/AdminContext'
+import { useAdminContext } from '@/contexts/AdminContext'
+import { adminSections } from '@/app/admin/adminSections'
 import Image from 'next/image'
 import Icon from '@/components/ui/Icon'
 import { twMerge } from 'tailwind-merge'
@@ -58,7 +59,7 @@ export default function Navbar() {
               </span>
             </div>
             <div className="h-2" />
-            {sections.map((sec) => {
+            {adminSections.map((sec) => {
               const isActive = sec.id === section.id
               return (
                 <button

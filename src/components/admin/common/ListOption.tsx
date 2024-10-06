@@ -66,5 +66,5 @@ export function useListOption(settingKey: keyof SettingsList) {
     if (value) setValueState({ ...value, selectedID })
   }
 
-  return { value, setValue } as const
+  return { value, setValue }
 }

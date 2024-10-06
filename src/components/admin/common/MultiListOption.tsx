@@ -75,5 +75,5 @@ export function useMultiListOption(settingKey: keyof SettingsList) {
     if (value) setValueState({ ...value, selectedIDs })
   }
 
-  return { value, setValue } as const
+  return { value, setValue }
 }

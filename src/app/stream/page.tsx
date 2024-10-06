@@ -30,8 +30,8 @@ export default async function StreamPage() {
     <>
       <SocketProvider authUser={authUser} cookieUsername={cookieUsername}>
         <StreamProvider>
-          <div className="animate-fade-in">
-            <AdminProviderConditional authRole={authUser.role}>
+          <AdminProviderConditional authRole={authUser.role}>
+            <div className="animate-fade-in">
               <Header />
               <div className="flex flex-col md:h-[calc((100vw-var(--chat-width))*9/16)] md:max-h-[calc(100vh-var(--header-height)-var(--info-body-height)-0.5rem)] md:flex-row">
                 <Video />
@@ -40,8 +40,8 @@ export default async function StreamPage() {
               <InfoBody />
               <ScheduleDisplay />
               <History />
-            </AdminProviderConditional>
-          </div>
+            </div>
+          </AdminProviderConditional>
         </StreamProvider>
       </SocketProvider>
       <Footer />

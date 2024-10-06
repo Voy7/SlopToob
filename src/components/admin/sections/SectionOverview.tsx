@@ -13,10 +13,7 @@ import QueueList from '@/components/admin/QueueList'
 import ScheduleSyncer from '@/components/admin/ScheduleSyncer'
 
 export default function SectionOverview() {
-  const { schedule } = useAdminContext()
-
-  const activePlaylist = useListOption('activePlaylistID')
-  const activeThemes = useMultiListOption('activeThemes')
+  const { activePlaylist, activeThemes, schedule } = useAdminContext()
 
   return (
     <LoadingBoundary>

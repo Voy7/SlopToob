@@ -2,10 +2,10 @@
 
 import { useAdminContext } from '@/contexts/AdminContext'
 import Icon, { type IconNames } from '@/components/ui/Icon'
-import type { SectionID } from '@/contexts/AdminContext'
+import { type AdminSectionID } from '@/app/admin/adminSections'
 
 type Props = {
-  section?: SectionID
+  section?: AdminSectionID
   settingsSection?: string
   icon?: IconNames
   children: string | React.ReactNode

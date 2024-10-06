@@ -69,8 +69,6 @@ export type ViewerStreamInfo = BaseStreamInfo & StreamOptions
 
 export type AdminStreamInfo = {
   transcodedSeconds?: number
-  activePlaylistID: string
-  activeThemeID: string
   previousVideoExists: boolean
   appVersion: string
 } & BaseStreamInfo

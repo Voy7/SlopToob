@@ -329,8 +329,6 @@ class Player {
   get adminStreamInfo(): AdminStreamInfo {
     const info: AdminStreamInfo = {
       ...this.baseStreamInfo,
-      activePlaylistID: this.activePlaylist?.id || 'None',
-      activeThemeID: Settings.streamTheme,
       previousVideoExists: this.previousVideos.length > 0,
       appVersion: packageJSON.version
     }

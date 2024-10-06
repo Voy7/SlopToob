@@ -14,13 +14,12 @@ import { twMerge } from 'tailwind-merge'
 
 export default function HeaderAdminOptions() {
   const { setShowAdminModal } = useStreamContext()
-  const { playlists, streamInfo, schedule } = useAdminContext()
+  const { playlists, activePlaylist, activeThemes, streamInfo, schedule } = useAdminContext()
   const { socket } = useSocketContext()
 
-  const activeThemeName =
-    themes.find((theme) => theme.id === streamInfo.activeThemeID)?.name || 'None'
+  const activeThemeName = 'PLACEHOLDER'
   const activePlaylistName =
-    playlists.find((playlist) => playlist.id === streamInfo.activePlaylistID)?.name || 'None'
+    playlists.find((playlist) => playlist.id === activePlaylist.value.selectedID)?.name || 'None'
 
   // If pressing CTRL, open /admin in a new tab
   function openAdminPanel(event: React.MouseEvent) {
@@ -36,7 +35,7 @@ export default function HeaderAdminOptions() {
       <div className="flex">
         <HeaderAdminDropdown title="Active Theme" subtitle={activeThemeName} icon="list">
           {themes.map((theme) => {
-            const isActive = theme.id === streamInfo.activeThemeID
+            const isActive = activeThemes.value.selectedIDs.includes(theme.id)
             return (
               <div
                 key={theme.id}
@@ -62,7 +61,7 @@ export default function HeaderAdminOptions() {
           )}
           <div className="h-full w-full overflow-y-auto overflow-x-hidden">
             {playlists.map((playlist) => {
-              const isActive = playlist.id === streamInfo.activePlaylistID
+              const isActive = playlist.id === activePlaylist.value.selectedID
               return (
                 <div
                   key={playlist.id}
@@ -70,7 +69,7 @@ export default function HeaderAdminOptions() {
                     'flex w-full cursor-pointer items-center justify-between gap-4 bg-bg1 p-2 text-lg',
                     isActive ? 'bg-blue-500 text-white' : 'hover:bg-bg2'
                   )}
-                  onClick={() => socket.emit('setting.activePlaylistID', playlist.id)}>
+                  onClick={() => activePlaylist.setValue(playlist.id)}>
                   <div className="flex items-center gap-2 overflow-hidden">
                     <Icon
                       name={isActive ? 'radio-checked' : 'radio-unchecked'}

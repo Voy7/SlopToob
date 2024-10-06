@@ -67,5 +67,5 @@ export function useToggleOption(settingKey: keyof SettingsList) {
     setValueState(value)
   }
 
-  return { value, setValue } as const
+  return { value, setValue }
 }

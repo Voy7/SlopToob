@@ -2,16 +2,13 @@
 
 import { useState, useContext, createContext, useEffect } from 'react'
 import { useSocketContext } from '@/contexts/SocketContext'
+import { useListOption } from '@/components/admin/common/ListOption'
+import { useMultiListOption } from '@/components/admin/common/MultiListOption'
 import useSocketOn from '@/hooks/useSocketOn'
 import { Msg } from '@/lib/enums'
-import SectionOverview from '@/components/admin/sections/SectionOverview'
-import SectionPlaylists from '@/components/admin/sections/SectionPlaylists'
-import SectionBumpers from '@/components/admin/sections/SectionBumpers'
-import SectionSchedule from '@/components/admin/sections/SectionSchedule'
-import SectionCaching from '@/components/admin/sections/SectionCaching'
-import SectionDebug from '@/components/admin/sections/SectionDebug'
-import SectionSettings from '@/components/admin/sections/SectionSettings'
-import type { FileTreeBase } from '@/typings/types'
+import LoadingPage from '@/components/layout/LoadingPage'
+import { adminSections, type AdminSectionID } from '@/app/admin/adminSections'
+import type { FileTreeBase, ListOption, MultiListOption } from '@/typings/types'
 import type {
   AdminStreamInfo,
   ClientBumper,
@@ -24,75 +21,11 @@ import type {
   ClientSchedule,
   ClientRichUser
 } from '@/typings/socket'
-import type { IconNames } from '@/components/ui/Icon'
-
-type Section = {
-  id: string
-  name: string
-  icon: IconNames
-  accentColor: string
-  component: React.ReactNode
-}
-
-// Admin panel sections
-export const sections = [
-  {
-    id: 'overview',
-    name: 'Overview',
-    icon: 'stream-settings',
-    accentColor: 'bg-gray-500',
-    component: <SectionOverview />
-  },
-  {
-    id: 'playlists',
-    name: 'Playlists',
-    icon: 'playlist',
-    accentColor: 'bg-blue-500',
-    component: <SectionPlaylists />
-  },
-  {
-    id: 'bumpers',
-    name: 'Bumpers',
-    icon: 'bumper',
-    accentColor: 'bg-blue-700',
-    component: <SectionBumpers />
-  },
-  {
-    id: 'schedule',
-    name: 'Schedule',
-    icon: 'calendar',
-    accentColor: 'bg-yellow-500',
-    component: <SectionSchedule />
-  },
-  {
-    id: 'caching',
-    name: 'Caching',
-    icon: 'cache',
-    accentColor: 'bg-purple-700',
-    component: <SectionCaching />
-  },
-  {
-    id: 'debug',
-    name: 'Debug',
-    accentColor: 'bg-red-500',
-    icon: 'admin-panel',
-    component: <SectionDebug />
-  },
-  {
-    id: 'settings',
-    name: 'Settings',
-    icon: 'settings',
-    accentColor: 'bg-red-500',
-    component: <SectionSettings />
-  }
-] as const satisfies Section[]
-
-export type SectionID = (typeof sections)[number]['id']
 
 // Stream page context
 type ContextProps = {
-  section: (typeof sections)[number]
-  setSection: (sectionName: SectionID) => void
+  section: (typeof adminSections)[number]
+  setSection: (sectionName: AdminSectionID) => void
   settingsSubSection: string
   setSettingsSubSection: React.Dispatch<React.SetStateAction<string>>
   streamInfo: AdminStreamInfo
@@ -113,13 +46,21 @@ type ContextProps = {
   schedule: ClientSchedule
   richUsers: ClientRichUser[]
   logs: string[]
+  activePlaylist: {
+    value: ListOption
+    setValue: (selectedID: string) => void
+  }
+  activeThemes: {
+    value: MultiListOption
+    setValue: (selectedIDs: string[]) => void
+  }
 }
 
 // Context provider wrapper component
 export function AdminProvider({ children }: { children: React.ReactNode }) {
   const { socket } = useSocketContext()
 
-  const [section, setSectionState] = useState<(typeof sections)[number]>(sections[0])
+  const [section, setSectionState] = useState<(typeof adminSections)[number]>(adminSections[0])
   const [settingsSubSection, setSettingsSubSection] = useState<string>('transcoding')
   const [streamInfo, setStreamInfo] = useState<AdminStreamInfo | null>(null)
   const [lastStreamUpdateTimestamp, setLastStreamUpdateTimestamp] = useState<number | null>(null)
@@ -138,8 +79,11 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [richUsers, setRichUsers] = useState<ClientRichUser[] | null>(null)
   const [logs, setLogs] = useState<string[]>([])
 
-  function setSection(sectionID: SectionID) {
-    const sec = sections.find((s) => s.id === sectionID)
+  const activePlaylist = useListOption('activePlaylistID')
+  const activeThemes = useMultiListOption('activeThemes')
+
+  function setSection(sectionID: AdminSectionID) {
+    const sec = adminSections.find((s) => s.id === sectionID)
     if (sec) setSectionState(sec)
   }
 
@@ -183,14 +127,16 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     if (!isPlaylistSelected && playlists[0]) setSelectedPlaylist(playlists[0].id)
   }, [selectedPlaylist, playlists])
 
-  // TODO: Add meaningful loading state
-  if (!streamInfo) return null
-  if (!historyStatus) return null
-  if (!videosCacheStatus) return null
-  if (!bumpersCacheStatus) return null
-  if (!thumbnailsCacheStatus) return null
-  if (!schedule) return null
-  if (!richUsers) return null
+  if (!streamInfo) return <LoadingPage text="Fetching admin info - Stream Info" />
+  if (!historyStatus) return <LoadingPage text="Fetching admin info - History Status" />
+  if (!videosCacheStatus) return <LoadingPage text="Fetching admin info - Videos Cache Status" />
+  if (!bumpersCacheStatus) return <LoadingPage text="Fetching admin info - Bumpers Cache Status" />
+  if (!thumbnailsCacheStatus)
+    return <LoadingPage text="Fetching admin info - Thumbnails Cache Status" />
+  if (!schedule) return <LoadingPage text="Fetching admin info - Schedule" />
+  if (!richUsers) return <LoadingPage text="Fetching admin info - Rich Users" />
+  if (!activePlaylist.value) return <LoadingPage text="Fetching admin info - Active Playlist" />
+  if (!activeThemes.value) return <LoadingPage text="Fetching admin info - Active Themes" />
 
   const context: ContextProps = {
     section,
@@ -214,7 +160,11 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     thumbnailsCacheStatus,
     schedule,
     richUsers,
-    logs
+    logs,
+    // @ts-ignore, activePlaylist.value is checked above, no clue why TS is complaining
+    activePlaylist,
+    // @ts-ignore, activeThemes.value is checked above, no clue why TS is complaining
+    activeThemes
   }
 
   return <AdminContext.Provider value={context}>{children}</AdminContext.Provider>
