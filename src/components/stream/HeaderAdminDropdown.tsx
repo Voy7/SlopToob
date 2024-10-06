@@ -1,12 +1,13 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import SelectDropdwon from '@/components/ui/SelectDropdown'
 import Icon, { IconNames } from '@/components/ui/Icon'
 import { twMerge } from 'tailwind-merge'
 import { createPortal } from 'react-dom'
 
 type Props = {
+  isOpen: boolean
+  setIsOpen: (isOpen: boolean) => void
   title: string
   subtitle: string
   icon: IconNames
@@ -14,8 +15,14 @@ type Props = {
 }
 
 // Custom dropdown element
-export default function HeaderAdminDropdown({ title, subtitle, icon, children }: Props) {
-  const [open, setOpen] = useState(false)
+export default function HeaderAdminDropdown({
+  isOpen,
+  setIsOpen,
+  title,
+  subtitle,
+  icon,
+  children
+}: Props) {
   const [left, setLeft] = useState<number>(0)
 
   const containerRef = useRef<HTMLDivElement>(null)
@@ -33,35 +40,33 @@ export default function HeaderAdminDropdown({ title, subtitle, icon, children }:
     else if (contentRect.width > window.innerWidth - x_MARGIN * 2) setLeft(x_MARGIN)
     else setLeft(containerRect.left)
 
-    function handleClick(event: MouseEvent) {
+    function handleClickOutside(event: MouseEvent) {
       if (containerRef.current?.contains(event.target as Node)) return
-      setOpen(false)
+      setIsOpen(false)
     }
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key !== 'Escape') return
-      setOpen(false)
+      setIsOpen(false)
     }
 
-    window.addEventListener('click', handleClick)
+    window.addEventListener('click', handleClickOutside)
     window.addEventListener('keydown', handleKeyDown)
 
     return () => {
-      window.removeEventListener('click', handleClick)
+      window.removeEventListener('click', handleClickOutside)
       window.removeEventListener('keydown', handleKeyDown)
     }
-  }, [open])
+  }, [isOpen])
 
   return (
-    <div
-      ref={containerRef}
-      className="relative h-[var(--header-height)] w-[200px]"
-      onClick={() => setOpen(!open)}>
+    <div ref={containerRef} className="relative h-[var(--header-height)] w-[200px]">
       <button
         className={twMerge(
           'flex h-full w-full items-center justify-between gap-1 p-2 text-lg',
-          open ? 'bg-bg3' : 'hover:bg-bg3'
-        )}>
+          isOpen ? 'bg-bg3' : 'hover:bg-bg3'
+        )}
+        onClick={() => setIsOpen(!isOpen)}>
         <div className="flex items-center gap-1 overflow-hidden">
           {icon && <Icon name={icon} className="shrink-0 text-sm text-text3" />}
           <div className="flex h-full flex-col overflow-hidden">
@@ -79,16 +84,17 @@ export default function HeaderAdminDropdown({ title, subtitle, icon, children }:
           name="down-chevron"
           className={twMerge(
             'shrink-0 transform text-text3 transition-transform duration-150',
-            open && 'rotate-180'
+            isOpen && 'rotate-180'
           )}
         />
       </button>
       {createPortal(
         <div
           ref={contentRef}
+          onClick={(event) => event.stopPropagation()}
           className={twMerge(
-            'animate-dropdown absolute top-[var(--header-height)] z-10 max-h-[calc(100vh-var(--header-height)-1rem)] w-auto max-w-[calc(100vw-1rem)] flex-col overflow-x-hidden overflow-y-hidden rounded-md border border-border1 bg-bg1 shadow-xl',
-            !open && 'hidden'
+            'animate-dropdown absolute top-[var(--header-height)] z-10 max-h-[calc(100vh-var(--header-height)-1rem)] w-auto max-w-[calc(100vw-1rem)] flex-col overflow-y-auto overflow-x-hidden rounded-md border border-border1 bg-bg1 shadow-xl',
+            !isOpen && 'hidden'
           )}
           style={{
             left,

@@ -6,20 +6,21 @@ import { useSocketContext } from '@/contexts/SocketContext'
 import Button from '@/components/ui/Button'
 import HeaderAdminDropdown from '@/components/stream/HeaderAdminDropdown'
 import Icon from '@/components/ui/Icon'
-import Checkbox from '@/components/ui/Checkbox'
 import HoverTooltip from '@/components/ui/HoverTooltip'
 import ScheduleSyncer from '@/components/admin/ScheduleSyncer'
+import SelectItem from '@/components/ui/SelectItem'
+import SelectItemCheckbox from '@/components/ui/SelectItemCheckbox'
 import { themes } from '@/lib/themes'
 import { twMerge } from 'tailwind-merge'
+import { useState } from 'react'
 
 export default function HeaderAdminOptions() {
   const { setShowAdminModal } = useStreamContext()
   const { playlists, activePlaylist, activeThemes, streamInfo, schedule } = useAdminContext()
   const { socket } = useSocketContext()
 
-  const activeThemeName = 'PLACEHOLDER'
-  const activePlaylistName =
-    playlists.find((playlist) => playlist.id === activePlaylist.value.selectedID)?.name || 'None'
+  const [themesIsOpen, setThemesIsOpen] = useState<boolean>(false)
+  const [playlistsIsOpen, setPlaylistsIsOpen] = useState<boolean>(false)
 
   // If pressing CTRL, open /admin in a new tab
   function openAdminPanel(event: React.MouseEvent) {
@@ -33,58 +34,55 @@ export default function HeaderAdminOptions() {
   return (
     <>
       <div className="flex">
-        <HeaderAdminDropdown title="Active Theme" subtitle={activeThemeName} icon="list">
-          {themes.map((theme) => {
-            const isActive = activeThemes.value.selectedIDs.includes(theme.id)
-            return (
-              <div
+        <HeaderAdminDropdown
+          isOpen={themesIsOpen}
+          setIsOpen={setThemesIsOpen}
+          title="Active Theme"
+          subtitle={
+            activeThemes.value.selectedIDs.length
+              ? `${activeThemes.value.selectedIDs.length} Active`
+              : 'None Active'
+          }
+          icon="list">
+          <div className="my-2">
+            {themes.map((theme) => (
+              <SelectItemCheckbox
                 key={theme.id}
-                className={twMerge(
-                  'flex cursor-pointer items-center justify-between gap-4 bg-bg1 p-2 text-lg',
-                  isActive ? 'bg-bg2 text-white' : 'hover:bg-bg2'
-                )}
-                onClick={() => socket.emit('setting.streamTheme', theme.id)}>
-                <div className="flex items-center gap-2 overflow-hidden">
-                  <Checkbox checked={isActive} />
-                  <p className="overflow-hidden text-ellipsis whitespace-nowrap">{theme.name}</p>
-                </div>
-              </div>
-            )
-          })}
+                label={theme.name}
+                active={activeThemes.value.selectedIDs.includes(theme.id)}
+                onClick={() => activeThemes.toggle(theme.id)}
+              />
+            ))}
+          </div>
         </HeaderAdminDropdown>
-        <HeaderAdminDropdown title="Active Playlist" subtitle={activePlaylistName} icon="playlist">
+        <HeaderAdminDropdown
+          isOpen={playlistsIsOpen}
+          setIsOpen={setPlaylistsIsOpen}
+          title="Active Playlist"
+          subtitle={
+            playlists.find((playlist) => playlist.id === activePlaylist.value.selectedID)?.name ||
+            'None'
+          }
+          icon="playlist">
           {schedule.canBeSynced && (
-            <div className="sticky top-0 w-full bg-bg1 p-2">
+            <div className="mr-4 w-full bg-bg1 p-2">
               <ScheduleSyncer />
               <hr className="my-2 mb-0 border-border1" />
             </div>
           )}
-          <div className="h-full w-full overflow-y-auto overflow-x-hidden">
-            {playlists.map((playlist) => {
-              const isActive = playlist.id === activePlaylist.value.selectedID
-              return (
-                <div
-                  key={playlist.id}
-                  className={twMerge(
-                    'flex w-full cursor-pointer items-center justify-between gap-4 bg-bg1 p-2 text-lg',
-                    isActive ? 'bg-blue-500 text-white' : 'hover:bg-bg2'
-                  )}
-                  onClick={() => activePlaylist.setValue(playlist.id)}>
-                  <div className="flex items-center gap-2 overflow-hidden">
-                    <Icon
-                      name={isActive ? 'radio-checked' : 'radio-unchecked'}
-                      className={twMerge('shrink-0 text-sm text-text3', isActive && 'text-white')}
-                    />
-                    <p className="overflow-hidden text-ellipsis whitespace-nowrap">
-                      {playlist.name}
-                    </p>
-                  </div>
-                  <p className={twMerge('shrink-0 text-sm text-text3', isActive && 'text-white')}>
-                    {playlist.videoPaths.length.toLocaleString()} Videos
-                  </p>
-                </div>
-              )
-            })}
+          <div className="mb-2 w-full">
+            {playlists.map((playlist) => (
+              <SelectItem
+                key={playlist.id}
+                active={playlist.id === activePlaylist.value.selectedID}
+                label={playlist.name}
+                subLabel={`${playlist.videoPaths.length.toLocaleString()} Videos`}
+                onClick={() => {
+                  activePlaylist.setValue(playlist.id)
+                  setPlaylistsIsOpen(false)
+                }}
+              />
+            ))}
           </div>
         </HeaderAdminDropdown>
       </div>

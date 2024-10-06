@@ -48,11 +48,11 @@ type ContextProps = {
   logs: string[]
   activePlaylist: {
     value: ListOption
-    setValue: (selectedID: string) => void
+    setValue: (id: string) => void
   }
   activeThemes: {
     value: MultiListOption
-    setValue: (selectedIDs: string[]) => void
+    toggle: (id: string) => void
   }
 }
 

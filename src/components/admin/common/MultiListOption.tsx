@@ -9,20 +9,11 @@ import type { SettingsList } from '@/server/Settings'
 
 type MultiListOptionProps = {
   value: MultiListOption | null
-  setValue: (value: string[]) => void
+  toggle: (id: string) => void
 }
 
-export function MultiListOption({ value, setValue }: MultiListOptionProps) {
+export function MultiListOption({ value, toggle }: MultiListOptionProps) {
   if (value === null) return <div data-loading />
-
-  function toggleOption(option: string) {
-    if (!value) return
-    setValue(
-      value.selectedIDs.includes(option)
-        ? value.selectedIDs.filter((id) => id !== option)
-        : [...value.selectedIDs, option]
-    )
-  }
 
   return (
     <>
@@ -33,7 +24,7 @@ export function MultiListOption({ value, setValue }: MultiListOptionProps) {
             'flex cursor-pointer items-center justify-between gap-4 bg-bg2 px-1.5 py-0.5 hover:bg-bg3',
             value.selectedIDs.includes(option.id) && ''
           )}
-          onClick={() => toggleOption(option.id)}>
+          onClick={() => toggle(option.id)}>
           {option.name}
           <div className="flex items-center gap-2">
             {value.selectedIDs.includes(option.id) ? (
@@ -70,10 +61,15 @@ export function useMultiListOption(settingKey: keyof SettingsList) {
     }
   }, [socket])
 
-  function setValue(selectedIDs: string[]) {
-    socket.emit(settingID, selectedIDs)
-    if (value) setValueState({ ...value, selectedIDs })
+  function toggle(id: string) {
+    if (!value) return
+    setValueState({
+      ...value,
+      selectedIDs: value.selectedIDs.includes(id)
+        ? value.selectedIDs.filter((selectedID) => selectedID !== id)
+        : [...value.selectedIDs, id]
+    })
   }
 
-  return { value, setValue }
+  return { value, toggle }
 }
