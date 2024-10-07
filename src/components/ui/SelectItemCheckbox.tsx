@@ -19,7 +19,7 @@ export default function SelectItemCheckbox({
     <button
       className={twMerge(
         'flex w-full items-center gap-1.5 overflow-hidden bg-bg1 p-2 text-white',
-        active ? 'bg-blue-500' : 'hover:bg-bg2',
+        active ? 'bg-bg3' : 'hover:bg-bg2',
         className
       )}
       {...props}>

@@ -5,6 +5,7 @@ import LoadingBoundary from '@/components/admin/common/LoadingBoundary'
 import SettingGroup from '@/components/admin/common/SettingGroup'
 import Header from '@/components/admin/common/Header'
 import Description from '@/components/admin/common/Description'
+import JumpTo from '@/components/admin/common/JumpTo'
 import { ToggleOption, useToggleOption } from '@/components/admin/common/ToggleOption'
 import { useNumberOption } from '@/components/admin/common/NumberOption'
 import SelectDropdown from '@/components/ui/SelectDropdown'
@@ -20,6 +21,9 @@ export default function ScheduleSettings() {
 
   return (
     <LoadingBoundary>
+      <JumpTo section="schedule" icon="arrow-left">
+        Go to Schedule Entries
+      </JumpTo>
       <SettingGroup>
         <Header icon="settings">Schedule Settings</Header>
         <ToggleOption label="Enable Weekly Schedule" {...enableWeeklySchedule} />

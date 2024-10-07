@@ -12,6 +12,7 @@ export default function SectionBumpers() {
       <JumpTo settingsSection="bumpers" icon="settings">
         Go to Bumpers Settings
       </JumpTo>
+      <div className="h-4" />
       <BumpersList />
     </LoadingBoundary>
   )

@@ -66,9 +66,11 @@ export default function HistorySettings() {
           </ActionModal>
         </ButtonOption>
       </SettingGroup>
+      <div className="h-4" />
       <SettingGroup>
         <Header icon="history">History Display Settings</Header>
         <ToggleOption label="Enable History Display" {...historyDisplayEnabled} />
+        <Description>Show a list of previously played videos under the video player.</Description>
         <div className="h-4" />
         <NumberOption label="History Display Items" type="integer" {...historyDisplayItems} />
         <Description>Number of videos to display in the stream history list.</Description>

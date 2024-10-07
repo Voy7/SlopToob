@@ -14,6 +14,7 @@ import InfoBody from '@/components/stream/InfoBody'
 import ScheduleDisplay from '@/components/stream/ScheduleDisplay'
 import History from '@/components/stream/History'
 import Footer from '@/components/layout/Footer'
+import SpaceBallsThemeBackground from '@/components/stream/themes/SpaceBallsThemeBackground'
 
 const AdminModal = dynamic(() => import('@/components/admin/AdminModal'), { ssr: true })
 
@@ -31,6 +32,7 @@ export default async function StreamPage() {
       <SocketProvider authUser={authUser} cookieUsername={cookieUsername}>
         <StreamProvider>
           <AdminProviderConditional authRole={authUser.role}>
+            <SpaceBallsThemeBackground />
             <div className="animate-fade-in">
               <Header />
               <div className="flex flex-col md:h-[calc((100vw-var(--chat-width))*9/16)] md:max-h-[calc(100vh-var(--header-height)-var(--info-body-height)-0.5rem)] md:flex-row">

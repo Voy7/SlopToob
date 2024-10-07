@@ -47,6 +47,7 @@ export default function AdvancedSettings() {
         <ToggleOption label="Show Chat Messages in Console" {...showChatMessagesInConsole} />
         <Description>Show all chat messages in the server console.</Description>
       </SettingGroup>
+      <div className="h-8" />
       <SettingGroup>
         <Header icon="admin-panel">Video Event Logger</Header>
         <ToggleOption label="Enable Video Event Logging" {...enableVideoEventLogging} />

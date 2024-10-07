@@ -10,14 +10,13 @@ import ChatSettings from '@/components/admin/settings-sections/ChatSettings'
 import ScheduleSettings from '@/components/admin/settings-sections/ScheduleSettings'
 import HistorySettings from '@/components/admin/settings-sections/HistorySettings'
 import VoteSkipSettings from '@/components/admin/settings-sections/VoteSkipSettings'
-import CachingSettings from '@/components/admin/settings-sections/CachingSettings'
 import AdvancedSettings from '@/components/admin/settings-sections/AdvancedSettings'
 
 export default function SectionSettings() {
   const { settingsSubSection, setSettingsSubSection } = useAdminContext()
 
   return (
-    <>
+    <div className="animate-section">
       <MainHeader>Settings</MainHeader>
       <SubSectionSelector
         value={settingsSubSection}
@@ -29,7 +28,6 @@ export default function SectionSettings() {
           { id: 'schedule', label: 'Schedule', icon: 'calendar' },
           { id: 'history', label: 'History', icon: 'history' },
           { id: 'voteSkip', label: 'Vote Skip', icon: 'skip' },
-          { id: 'caching', label: 'Caching', icon: 'cache' },
           { id: 'advanced', label: 'Advanced', icon: 'settings' }
         ]}
       />
@@ -39,8 +37,7 @@ export default function SectionSettings() {
       {settingsSubSection === 'schedule' && <ScheduleSettings />}
       {settingsSubSection === 'history' && <HistorySettings />}
       {settingsSubSection === 'voteSkip' && <VoteSkipSettings />}
-      {settingsSubSection === 'caching' && <CachingSettings />}
       {settingsSubSection === 'advanced' && <AdvancedSettings />}
-    </>
+    </div>
   )
 }

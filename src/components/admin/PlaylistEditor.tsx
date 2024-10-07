@@ -63,7 +63,7 @@ export default function PlaylistEditor({ playlist }: { playlist: ClientPlaylist 
   }
 
   return (
-    <div className="animate-fade-in flex flex-col gap-4">
+    <div className="animate-fade-in mt-4 flex flex-col gap-4">
       <SettingGroup>
         <Header icon="playlist">Playlist Details</Header>
         <StringOption

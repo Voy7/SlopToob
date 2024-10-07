@@ -34,7 +34,7 @@ export default function ScheduleEditor() {
     <>
       <SettingGroup>
         <div className="flex items-center justify-between gap-2">
-          <Header icon="calendar">Weekly Schedule</Header>
+          <Header icon="calendar">Weekly Schedule Entries</Header>
           <button
             className="flex shrink-0 items-center gap-0.5 whitespace-nowrap rounded-lg px-2 py-1 text-blue-500 duration-300 hover:underline active:bg-blue-500 active:bg-opacity-50 active:duration-0"
             onClick={() => setShowAddModal(true)}>

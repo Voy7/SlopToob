@@ -22,11 +22,12 @@ export default function SectionDebug() {
           { id: 'console', label: 'Console Logs', icon: 'admin-panel' }
         ]}
       />
-      <div className="mt-4">
+      <div className="mt-6">
         {subSection === 'queues' && (
           <>
             <StreamControls />
             <QueueList />
+            <div className="h-4" />
             <TranscodeQueue />
           </>
         )}

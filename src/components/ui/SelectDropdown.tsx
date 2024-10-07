@@ -73,7 +73,10 @@ export default function SelectDropdown({ label, icon, children, className, ...pr
       setOpen(false)
     }
 
-    window.addEventListener('click', close)
+    // Close dropdown when pressing escape
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') setOpen(false)
+    }
 
     let scrollTop = contentRef.current?.scrollTop || 0
     // Prevent scrolling except inside the dropdown content
@@ -104,13 +107,16 @@ export default function SelectDropdown({ label, icon, children, className, ...pr
       })
     }
 
+    window.addEventListener('click', close)
     window.addEventListener('wheel', preventScroll, { passive: false })
     window.addEventListener('touchmove', preventScroll, { passive: false })
+    window.addEventListener('keydown', handleKeyDown)
 
     return () => {
       window.removeEventListener('click', close)
       window.removeEventListener('wheel', preventScroll)
       window.removeEventListener('touchmove', preventScroll)
+      window.removeEventListener('keydown', handleKeyDown)
     }
   }, [open])
 
@@ -142,7 +148,7 @@ export default function SelectDropdown({ label, icon, children, className, ...pr
         <div
           ref={contentRef}
           className={twMerge(
-            'absolute z-50 overflow-y-auto border border-border2 bg-bg2 opacity-0 shadow-2xl transition-none duration-150 ease-in-out',
+            'absolute z-50 overflow-y-auto border border-border2 bg-bg1 py-2 opacity-0 shadow-2xl transition-none duration-150 ease-in-out',
             !open && 'hidden',
             !contentPosition ? 'invisible' : 'opacity-100 transition-[transform,opacity]'
           )}

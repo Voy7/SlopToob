@@ -1,18 +1,15 @@
 'use client'
 
+import { useState } from 'react'
 import { useStreamContext } from '@/contexts/StreamContext'
 import { useAdminContext } from '@/contexts/AdminContext'
 import { useSocketContext } from '@/contexts/SocketContext'
 import Button from '@/components/ui/Button'
 import HeaderAdminDropdown from '@/components/stream/HeaderAdminDropdown'
-import Icon from '@/components/ui/Icon'
 import HoverTooltip from '@/components/ui/HoverTooltip'
 import ScheduleSyncer from '@/components/admin/ScheduleSyncer'
 import SelectItem from '@/components/ui/SelectItem'
 import SelectItemCheckbox from '@/components/ui/SelectItemCheckbox'
-import { themes } from '@/lib/themes'
-import { twMerge } from 'tailwind-merge'
-import { useState } from 'react'
 
 export default function HeaderAdminOptions() {
   const { setShowAdminModal } = useStreamContext()
@@ -45,7 +42,7 @@ export default function HeaderAdminOptions() {
           }
           icon="list">
           <div className="my-2">
-            {themes.map((theme) => (
+            {activeThemes.value.list.map((theme) => (
               <SelectItemCheckbox
                 key={theme.id}
                 label={theme.name}

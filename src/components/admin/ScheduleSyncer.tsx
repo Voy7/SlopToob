@@ -19,7 +19,7 @@ export default function ScheduleSyncer() {
         <div className="flex w-full items-center gap-2">
           <div className="shrink-0 rounded-full bg-bg2 p-1 text-xl text-lime-700">
             <Icon name="calendar" />
-            <HoverTooltip placement="bottom">Playlist Scheduler Status: Synced</HoverTooltip>
+            <HoverTooltip placement="top">Playlist Scheduler Status: Synced</HoverTooltip>
           </div>
           <p className="overflow-hidden text-ellipsis whitespace-nowrap text-text2">
             <span className="block sm:hidden">Is synced.</span>
@@ -38,7 +38,7 @@ export default function ScheduleSyncer() {
       <div className="flex w-full items-center gap-2">
         <div className="shrink-0 rounded-full bg-bg2 p-1 text-xl text-red-400">
           <Icon name="calendar" />
-          <HoverTooltip placement="bottom">Playlist Scheduler Status: Not Synced</HoverTooltip>
+          <HoverTooltip placement="top">Playlist Scheduler Status: Not Synced</HoverTooltip>
         </div>
         <p className="overflow-hidden text-ellipsis whitespace-nowrap text-text2">
           <span className="block sm:hidden">Not synced.</span>

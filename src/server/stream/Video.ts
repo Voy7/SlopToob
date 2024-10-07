@@ -268,6 +268,7 @@ export default class Video {
   }
 
   private bufferingCheck() {
+    return
     EventLogger.log(this, `bufferingCheck()`)
 
     const diff = this.job.availableSeconds - this.currentSeconds

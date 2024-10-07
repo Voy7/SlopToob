@@ -35,7 +35,7 @@ export default function LoadingBoundary({ children }: { children: React.ReactNod
 
   return (
     <>
-      <div ref={containerRef} className={isReady ? 'animate-section h-full w-full' : 'hidden'}>
+      <div ref={containerRef} className={isReady ? 'animate-section' : 'hidden'}>
         {children}
       </div>
       {!isReady && (

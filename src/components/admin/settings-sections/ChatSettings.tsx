@@ -36,12 +36,14 @@ export default function ChatSettings() {
         <NumberOption label="Maximum Message Length" type="integer" {...chatMaxLength} />
         <Description>Maximum amount of characters in a chat message.</Description>
       </SettingGroup>
+      <div className="h-4" />
       <SettingGroup>
         <Header icon="view">Chat Elements</Header>
         <ToggleOption label="Display Timestamps" {...showChatTimestamps} />
         <ToggleOption label="Display Identicons" {...showChatIdenticons} />
         <Description>Display timestamps and identicons in chat.</Description>
       </SettingGroup>
+      <div className="h-4" />
       <SettingGroup>
         <Header icon="list">Event Messages</Header>
         <ToggleOption label="User Joined Stream" {...sendJoinedStream} />
@@ -57,6 +59,7 @@ export default function ChatSettings() {
         <ToggleOption label="Admin Synced Playlist Scheduler" {...snedAdminSyncedSchedule} />
         <Description>Send a message when an event occurs.</Description>
       </SettingGroup>
+      <div className="h-4" />
       <SettingGroup>
         <Header icon="user">Chat Nicknames</Header>
         <ToggleOption label="Only Alphanumeric" {...nicknameOnlyAlphanumeric} />

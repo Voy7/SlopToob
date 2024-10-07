@@ -63,12 +63,11 @@ export function useMultiListOption(settingKey: keyof SettingsList) {
 
   function toggle(id: string) {
     if (!value) return
-    setValueState({
-      ...value,
-      selectedIDs: value.selectedIDs.includes(id)
-        ? value.selectedIDs.filter((selectedID) => selectedID !== id)
-        : [...value.selectedIDs, id]
-    })
+    const newValues = value.selectedIDs.includes(id)
+      ? value.selectedIDs.filter((selectedID) => selectedID !== id)
+      : [...value.selectedIDs, id]
+    socket.emit(settingID, newValues)
+    setValueState({ ...value, selectedIDs: newValues })
   }
 
   return { value, toggle }
