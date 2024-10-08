@@ -1,6 +1,6 @@
 import CacheNode from '@/server/stream/CacheNode'
-import Env from '@/server/EnvVariables'
-import Logger from '@/server/Logger'
+import Env from '@/server/core/EnvVariables'
+import Logger from '@/server/core/Logger'
 import TranscoderQueue from '@/server/stream/TranscoderQueue'
 import type { ClientCacheStatus } from '@/typings/socket'
 

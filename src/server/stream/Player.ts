@@ -1,17 +1,17 @@
-import Logger from '@/server/Logger'
-import Checklist from '@/server/Checklist'
+import Logger from '@/server/core/Logger'
+import Checklist from '@/server/core/Checklist'
 import Playlists from '@/server/stream/Playlists'
 import Video from '@/server/stream/Video'
 import PlayHistory from '@/server/stream/PlayHistory'
 import VoteSkipHandler from '@/server/stream/VoteSkipHandler'
-import FileTreeHandler from '@/server/FileTreeHandler'
-import Settings from '@/server/Settings'
-import SocketUtils from '@/server/socket/SocketUtils'
+import FileTreeHandler from '@/server/stream/FileTreeHandler'
+import Settings from '@/server/core/Settings'
+import SocketUtils from '@/server/network/SocketUtils'
 import Chat from '@/server/stream/Chat'
 import Schedule from '@/server/stream/Schedule'
 import Themes from '@/server/stream/Themes'
 import { getNextBumper } from '@/server/stream/bumpers'
-import { StreamState, Msg, VideoState } from '@/lib/enums'
+import { StreamState, Msg, VideoState } from '@/shared/enums'
 import type { RichPlaylist, ListOption } from '@/typings/types'
 import type {
   SocketClient,
@@ -22,7 +22,7 @@ import type {
   ClientPlaylist,
   ClientVideo
 } from '@/typings/socket'
-import packageJSON from '@package' assert { type: 'json' }
+import packageJSON from '@/root/package.json'
 
 // Main video player handler, singleton
 class Player {

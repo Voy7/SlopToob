@@ -2,12 +2,12 @@
   "name": "sloptoob",
   "version": "1.6.1",
   "scripts": {
-    "start": "cross-env NODE_ENV=production tsx src/index.ts",
-    "dev": "tsx src/index.ts",
-    "build": "next build",
+    "start": "cross-env NODE_ENV=production tsx --tsconfig src/tsconfig.json src/server/index.ts",
+    "dev": "tsx --tsconfig src/tsconfig.json src/server/index.ts",
+    "build": "next build src/client",
     "lint": "next lint",
     "prettier": "prettier --write .",
-    "test-name-parser": "tsx src/lib/testTorrentNameParser.ts"
+    "test-name-parser": "tsx --tsconfig src/tsconfig.json src/lib/testTorrentNameParser.ts"
   },
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.1.0",

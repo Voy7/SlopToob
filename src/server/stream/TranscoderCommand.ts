@@ -1,12 +1,16 @@
 import fs from 'fs'
 import fsAsync from 'fs/promises'
 import path from 'path'
-import ffmpeg, { BASE_TRANSCODE_ARGS, VIDEO_QUALITY_ARGS, AUDIO_QUALITY_ARGS } from '@/lib/ffmpeg'
-import { videoQualities } from '@/lib/videoQualities'
-import { audioQualities } from '@/lib/audioQualities'
-import parseHlsManifest from '@/lib/parseHlsManifest'
-import timestampToSeconds from '@/lib/timestampToSeconds'
-import Settings from '@/server/Settings'
+import ffmpeg, {
+  BASE_TRANSCODE_ARGS,
+  VIDEO_QUALITY_ARGS,
+  AUDIO_QUALITY_ARGS
+} from '@/server/lib/ffmpeg'
+import { videoQualities } from '@/shared/data/videoQualities'
+import { audioQualities } from '@/shared/data/audioQualities'
+import parseHlsManifest from '@/server/utils/parseHlsManifest'
+import timestampToSeconds from '@/server/utils/timestampToSeconds'
+import Settings from '@/server/core/Settings'
 import EventLogger from '@/server/stream/VideoEventLogger'
 import type { FfmpegCommand } from 'fluent-ffmpeg'
 import type { ProgressInfo } from '@/typings/types'

@@ -1,9 +1,9 @@
-import Settings from '@/server/Settings'
-import Logger from '@/server/Logger'
-import SocketUtils from '@/server/socket/SocketUtils'
+import Settings from '@/server/core/Settings'
+import Logger from '@/server/core/Logger'
+import SocketUtils from '@/server/network/SocketUtils'
 import Player from '@/server/stream/Player'
-import { socketClients } from '@/server/socket/socketClients'
-import { ChatType, Msg } from '@/lib/enums'
+import { socketClients } from '@/server/network/socketClients'
+import { ChatType, Msg } from '@/shared/enums'
 import type { ChatMessage, SocketClient } from '@/typings/socket'
 
 export default new (class Chat {

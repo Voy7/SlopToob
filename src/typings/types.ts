@@ -1,4 +1,4 @@
-import { AuthRole, VideoState } from '@/lib/enums'
+import { AuthRole, VideoState } from '@/shared/enums'
 import type { Playlist } from '@prisma/client'
 
 export type AuthUser = {

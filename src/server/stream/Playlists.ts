@@ -1,10 +1,10 @@
-import prisma from '@/lib/prisma'
-import Env from '@/server/EnvVariables'
-import Logger from '@/server/Logger'
+import prisma from '@/server/lib/prisma'
+import Env from '@/server/core/EnvVariables'
+import Logger from '@/server/core/Logger'
 import Player from '@/server/stream/Player'
-import SocketUtils from '@/server/socket/SocketUtils'
-import FileTreeHandler from '@/server/FileTreeHandler'
-import { Msg } from '@/lib/enums'
+import SocketUtils from '@/server/network/SocketUtils'
+import FileTreeHandler from '@/server/stream/FileTreeHandler'
+import { Msg } from '@/shared/enums'
 import type { FileTreeNode } from '@/typings/types'
 
 // Mainly utility functions for playlists, singleton

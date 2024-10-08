@@ -1,10 +1,10 @@
-import generateSecret from '@/lib/generateSecret'
-import Logger from '@/server/Logger'
-import Settings from '@/server/Settings'
+import generateSecret from '@/server/utils/generateSecret'
+import Logger from '@/server/core/Logger'
+import Settings from '@/server/core/Settings'
 import Player from '@/server/stream/Player'
 import Chat from '@/server/stream/Chat'
-import { socketClients } from '@/server/socket/socketClients'
-import { VideoState } from '@/lib/enums'
+import { socketClients } from '@/server/network/socketClients'
+import { VideoState } from '@/shared/enums'
 import type { VoteSkipOptions } from '@/typings/socket'
 
 // Main vote skip handler, singleton

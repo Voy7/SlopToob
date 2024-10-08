@@ -1,11 +1,11 @@
 import fs from 'fs'
-import Env from '@/server/EnvVariables'
-import Logger from '@/server/Logger'
-import Settings from '@/server/Settings'
+import Env from '@/server/core/EnvVariables'
+import Logger from '@/server/core/Logger'
+import Settings from '@/server/core/Settings'
 import Video from '@/server/stream/Video'
 import TranscoderJob from '@/server/stream/TranscoderJob'
 import TranscoderCommand from '@/server/stream/TranscoderCommand'
-import { VideoState, JobState } from '@/lib/enums'
+import { VideoState, JobState } from '@/shared/enums'
 
 let statesText = '(V) Video States:\n'
 for (const [index, state] of Object.entries(VideoState)) {

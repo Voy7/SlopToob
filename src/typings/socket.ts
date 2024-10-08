@@ -1,6 +1,6 @@
 import type { Socket } from 'socket.io'
 import type { CacheID } from '@/server/stream/CacheHandler'
-import type { AuthRole, StreamState, VideoState, JobState, ChatType } from '@/lib/enums'
+import type { AuthRole, StreamState, VideoState, JobState, ChatType } from '@/shared/enums'
 
 export type { CacheID }
 
