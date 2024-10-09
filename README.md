@@ -1,5 +1,5 @@
 <p align="center">
-  <img height="150px" src="/public/logo-alt.png" />
+  <img height="150px" src="src/client/public/logo-alt.png" />
 </p>
 <h1 align="center">SlopToob</h1>
 <p align="center">
