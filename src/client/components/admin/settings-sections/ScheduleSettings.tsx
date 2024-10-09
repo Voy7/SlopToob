@@ -26,7 +26,11 @@ export default function ScheduleSettings() {
       </JumpTo>
       <SettingGroup>
         <Header icon="settings">Schedule Settings</Header>
-        <ToggleOption label="Enable Weekly Schedule" {...enableWeeklySchedule} />
+        <ToggleOption
+          label="Enable Weekly Schedule"
+          defaultValue={true}
+          {...enableWeeklySchedule}
+        />
         <Description>
           Enable a weekly schedule to automatically play playlists at specific times.
         </Description>
@@ -49,15 +53,24 @@ export default function ScheduleSettings() {
           {currentTimeDisplay(weeklyScheduleUTCOffset.value || 0)})
         </Description>
       </SettingGroup>
+      <div className="h-4" />
       <SettingGroup>
         <Header icon="display">Scheduler Display Settings</Header>
-        <ToggleOption label="Show Weekly Schedule" {...showWeeklySchedule} />
+        <ToggleOption label="Show Weekly Schedule" defaultValue={true} {...showWeeklySchedule} />
         <Description>Display the playlist schedule below the video.</Description>
         <div className="h-4" />
-        <ToggleOption label="Show Weekly Schedule If Unsynced" {...showWeeklyScheduleIfUnsynced} />
+        <ToggleOption
+          label="Show Weekly Schedule If Unsynced"
+          defaultValue={true}
+          {...showWeeklyScheduleIfUnsynced}
+        />
         <Description>Display the playlist schedule even if it is not synced.</Description>
         <div className="h-4" />
-        <ToggleOption label="Show Weekly Schedule Timemarks" {...showWeeklyScheduleTimemarks} />
+        <ToggleOption
+          label="Show Weekly Schedule Timemarks"
+          defaultValue={false}
+          {...showWeeklyScheduleTimemarks}
+        />
         <Description>
           Show timestamps on playlist schedule display. Will only show the day if disabled.
         </Description>

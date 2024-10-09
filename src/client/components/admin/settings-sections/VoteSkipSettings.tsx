@@ -18,21 +18,39 @@ export default function VoteSkipSettings() {
     <LoadingBoundary>
       <SettingGroup>
         <Header icon="skip">Vote Skipping</Header>
-        <ToggleOption label="Enable Vote Skipping" {...voteSkipEnabled} />
+        <ToggleOption label="Enable Vote Skipping" defaultValue={true} {...voteSkipEnabled} />
         <Description>Allow users to vote to skip the current video.</Description>
         <div className="h-4" />
-        <NumberOption label="Vote Skip Percentage" type="percentage" {...voteSkipPercentage} />
+        <NumberOption
+          label="Vote Skip Percentage"
+          type="percentage"
+          defaultValue={50}
+          {...voteSkipPercentage}
+        />
         <Description>Percentage of users needed for vote to pass.</Description>
         <div className="h-4" />
-        <NumberOption label="Vote Skip Delay in Seconds" type="integer" {...voteSkipDelaySeconds} />
+        <NumberOption
+          label="Vote Skip Delay in Seconds"
+          type="integer"
+          defaultValue={10}
+          {...voteSkipDelaySeconds}
+        />
         <Description>
           How long video needs to be playing for before vote skipping is allowed.
         </Description>
         <div className="h-4" />
-        <ToggleOption label="Allow Vote Skipping if Bumper" {...canVoteSkipIfBumper} />
+        <ToggleOption
+          label="Allow Vote Skipping if Bumper"
+          defaultValue={false}
+          {...canVoteSkipIfBumper}
+        />
         <Description>Allow vote skipping during bumper videos.</Description>
         <div className="h-4" />
-        <ToggleOption label="Allow Vote Skipping if Paused" {...canVoteSkipIfPaused} />
+        <ToggleOption
+          label="Allow Vote Skipping if Paused"
+          defaultValue={false}
+          {...canVoteSkipIfPaused}
+        />
         <Description>Allow vote skipping while stream is paused.</Description>
       </SettingGroup>
     </LoadingBoundary>

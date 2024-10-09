@@ -11,14 +11,6 @@ import type { ScheduleEntryOptions } from '@/typings/types'
 import type { ClientScheduleEntry } from '@/typings/socket'
 import { twMerge } from 'tailwind-merge'
 
-// function parseNumberInput(value: number, max: number): string {
-//   if (value > max) value = max
-//   const str = value.toString()
-//   if (str.length > 2) return str.slice(0, 2)
-//   if (str.length === 1) return `0${str}`
-//   return str
-// }
-
 type Props = {
   entry?: ClientScheduleEntry
   onChange: (options: ScheduleEntryOptions) => void

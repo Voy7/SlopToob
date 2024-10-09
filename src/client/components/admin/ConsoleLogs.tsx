@@ -51,7 +51,7 @@ export default function ConsoleLogs() {
   }, [logs])
 
   return (
-    <div className="h-[350px] rounded-md">
+    <div className="h-[450px] rounded-md">
       <header className="flex w-full cursor-default items-center justify-between gap-2 bg-bg2 px-1 text-text3">
         <p className="flex items-center gap-1">
           <Icon name="admin-panel" />

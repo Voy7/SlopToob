@@ -37,6 +37,7 @@ class Player {
   // Get all playlists on startup
   async initialize() {
     Logger.debug('[Player] Initializing player handler...')
+    Checklist.running('playerReady', 'Initializing stream player...')
     await Playlists.populatePlaylists()
     await this.setActivePlaylistID(Settings.activePlaylistID)
     Checklist.pass('playerReady', 'Stream player handler ready.')

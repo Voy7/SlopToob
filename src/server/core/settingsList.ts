@@ -26,6 +26,7 @@ export const settingsList = {
     }
   },
 
+  // Current active themes, client uses the setting as a MultiListOption
   activeThemes: {
     default: '',
     setter: async (value: string[]) => {
@@ -35,21 +36,7 @@ export const settingsList = {
     clientValue: async (): Promise<MultiListOption> => {
       const { default: Themes } = await import('@/server/stream/Themes')
       return Themes.multiListOptionThemes
-    },
-    onChange: async (value: string[]) => {
-      const { default: Themes } = await import('@/server/stream/Themes')
-      // Themes.setActiveThemes(value)
     }
-  },
-
-  // DELETE AFTER THEME UPDATE:
-  streamTheme: {
-    default: 'None'
-    // clientValue: async (): Promise<ListOption> => {
-    //   const { default: Player } = await import('@/server/stream/Player')
-    //   return Player.listOptionThemes
-    // },
-    // onChange: chatResync
   },
 
   // Max video quality, value is index of videoQualities
@@ -165,7 +152,7 @@ export const settingsList = {
   // Weekly schedule user display settings
   showWeeklySchedule: { default: true, onChange: scheduleDisplayResync },
   showWeeklyScheduleIfUnsynced: { default: true, onChange: scheduleDisplayResync },
-  showWeeklyScheduleTimemarks: { default: true, onChange: scheduleDisplayResync }
+  showWeeklyScheduleTimemarks: { default: false, onChange: scheduleDisplayResync }
 } satisfies Record<string, Setting>
 
 async function transcoderResync() {

@@ -22,36 +22,63 @@ export default function AdvancedSettings() {
     <LoadingBoundary>
       <SettingGroup>
         <Header icon="settings">Advanced Settings</Header>
-        <ToggleOption label="Pause When Inactive" {...pauseWhenInactive} />
+        <ToggleOption label="Pause When Inactive" defaultValue={true} {...pauseWhenInactive} />
         <Description>
           Pause the stream when no one is watching, will automatically resume when someone joins.
         </Description>
         <div className="h-4" />
-        <NumberOption label="Target Queue Size" type="integer" {...targetQueueSize} />
+        <NumberOption
+          label="Target Queue Size"
+          type="integer"
+          defaultValue={3}
+          {...targetQueueSize}
+        />
         <Description>
           Amount of videos from the active playlist to populate the queue with.
         </Description>
         <div className="h-4" />
-        <NumberOption label="Video Padding Seconds" type="float" {...videoPaddingSeconds} />
+        <NumberOption
+          label="Video Padding Seconds"
+          type="float"
+          defaultValue={1}
+          {...videoPaddingSeconds}
+        />
         <Description>
           Amount of seconds to pad the end of videos by. Can help with videos being cut off early
           due to client latency.
         </Description>
         <div className="h-4" />
-        <ToggleOption label="Torrent Name Parsing" {...torrentNameParsing} />
+        <ToggleOption label="Torrent Name Parsing" defaultValue={false} {...torrentNameParsing} />
         <Description>Parse common torrent filename patterns into nice video titles.</Description>
         <div className="h-4" />
-        <NumberOption label="Error Display Seconds" type="float" {...errorDisplaySeconds} />
+        <NumberOption
+          label="Error Display Seconds"
+          type="float"
+          defaultValue={5}
+          {...errorDisplaySeconds}
+        />
         <Description>How long to display errors on the player for in seconds.</Description>
         <div className="h-4" />
-        <ToggleOption label="Show Chat Messages in Console" {...showChatMessagesInConsole} />
+        <ToggleOption
+          label="Show Chat Messages in Console"
+          defaultValue={true}
+          {...showChatMessagesInConsole}
+        />
         <Description>Show all chat messages in the server console.</Description>
       </SettingGroup>
       <div className="h-8" />
       <SettingGroup>
         <Header icon="admin-panel">Video Event Logger</Header>
-        <ToggleOption label="Enable Video Event Logging" {...enableVideoEventLogging} />
-        <ToggleOption label="Show Video Event Logs in Console" {...showVideoEventLogsInConsole} />
+        <ToggleOption
+          label="Enable Video Event Logging"
+          defaultValue={true}
+          {...enableVideoEventLogging}
+        />
+        <ToggleOption
+          label="Show Video Event Logs in Console"
+          defaultValue={false}
+          {...showVideoEventLogsInConsole}
+        />
         <Description>
           Generate event timeline logs of video instances, used for developer debugging.
         </Description>

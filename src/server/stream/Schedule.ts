@@ -240,8 +240,9 @@ class Schedule {
     if (!Settings.showWeeklyScheduleIfUnsynced && !Settings.weekyScheduleInSync) return null
     return {
       inSync: Settings.weekyScheduleInSync,
-      activeEntryIndex:
-        this.entries.findIndex((e) => e.playlistID === Player.activePlaylist?.id) || null,
+      activeEntryIndex: Settings.weekyScheduleInSync
+        ? this.entries.findIndex((e) => e.playlistID === Player.activePlaylist?.id) || null
+        : null,
       entries: this.entries.map((entry) => {
         const playlist = Player.playlists.find((p) => p.id === entry.playlistID)
         const realHour = Math.floor(entry.secondsIn / 3600)

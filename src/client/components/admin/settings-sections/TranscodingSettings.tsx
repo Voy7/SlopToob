@@ -185,7 +185,7 @@ export default function TranscodingSettings() {
         <Header icon="settings">Thumbnail Settings</Header>
         <ToggleOption
           label="Enable Smart Thumbnails"
-          defaultValue={false}
+          defaultValue={true}
           {...enableSmartThumbnails}
         />
         <Description>

@@ -34,7 +34,12 @@ export default function HistorySettings() {
     <LoadingBoundary>
       <SettingGroup>
         <Header icon="video-file">Shuffle History Settings</Header>
-        <NumberOption label="Shuffle History Max Items" type="integer" {...historyMaxItems} />
+        <NumberOption
+          label="Shuffle History Max Items"
+          type="integer"
+          defaultValue={1000}
+          {...historyMaxItems}
+        />
         <Description>
           Maximum number of videos to keep in internal history for smart-shuffle logic.
         </Description>
@@ -69,13 +74,26 @@ export default function HistorySettings() {
       <div className="h-4" />
       <SettingGroup>
         <Header icon="history">History Display Settings</Header>
-        <ToggleOption label="Enable History Display" {...historyDisplayEnabled} />
+        <ToggleOption
+          label="Enable History Display"
+          defaultValue={true}
+          {...historyDisplayEnabled}
+        />
         <Description>Show a list of previously played videos under the video player.</Description>
         <div className="h-4" />
-        <NumberOption label="History Display Items" type="integer" {...historyDisplayItems} />
+        <NumberOption
+          label="History Display Items"
+          type="integer"
+          defaultValue={5}
+          {...historyDisplayItems}
+        />
         <Description>Number of videos to display in the stream history list.</Description>
         <div className="h-4" />
-        <ToggleOption label="Display Bumpers in History" {...historyDisplayBumpers} />
+        <ToggleOption
+          label="Display Bumpers in History"
+          defaultValue={false}
+          {...historyDisplayBumpers}
+        />
         <Description>Includes bumpers in the history list.</Description>
       </SettingGroup>
     </LoadingBoundary>

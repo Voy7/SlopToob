@@ -19,8 +19,15 @@ export default function BumperSettings() {
       </JumpTo>
       <SettingGroup>
         <Header icon="bumper">Bumper Settings</Header>
-        <ToggleOption label="Bumpers Enabled" {...bumpersEnabled} />
-        <NumberOption label="Bumper Interval in Minutes" type="float" {...bumperInterval} />
+        <ToggleOption label="Bumpers Enabled" defaultValue={true} {...bumpersEnabled} />
+        <Description>Play a random "Bumper" video between normal videos.</Description>
+        <div className="h-4" />
+        <NumberOption
+          label="Bumper Interval in Minutes"
+          type="float"
+          defaultValue={30}
+          {...bumperInterval}
+        />
         <Description>Minimum time between bumpers in minutes.</Description>
       </SettingGroup>
     </LoadingBoundary>
