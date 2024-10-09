@@ -10,8 +10,7 @@
 /coverage
 
 # next.js
-/.next/
-/out/
+/src/client/.next/
 
 # production
 /build
@@ -41,6 +40,6 @@ output/
 
 prisma/database.sqlite
 
-/public/theme-assets/zoomer-1.mp4
-/public/theme-assets/zoomer-2.mp4
-/public/theme-assets/zoomer-3.mp4
+src/client/public/theme-assets/zoomer-1.mp4
+src/client/public/theme-assets/zoomer-2.mp4
+src/client/public/theme-assets/zoomer-3.mp4

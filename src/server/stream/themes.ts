@@ -1,5 +1,5 @@
-import { themes } from '@/lib/themes'
-import Settings from '@/server/Settings'
+import { themes } from '@/shared/data/themes'
+import Settings from '@/server/core/Settings'
 import Player from '@/server/stream/Player'
 import type { MultiListOption } from '@/typings/types'
 

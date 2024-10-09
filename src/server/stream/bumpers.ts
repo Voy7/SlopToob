@@ -1,12 +1,12 @@
 import fs from 'fs'
 import path from 'path'
-import Env from '@/server/EnvVariables'
-import Logger from '@/server/Logger'
-import Settings from '@/server/Settings'
+import Env from '@/server/core/EnvVariables'
+import Logger from '@/server/core/Logger'
+import Settings from '@/server/core/Settings'
 import Video from '@/server/stream/Video'
 import PlayHistory from '@/server/stream/PlayHistory'
-import SocketUtils from '@/server/socket/SocketUtils'
-import { Msg } from '@/lib/enums'
+import SocketUtils from '@/server/network/SocketUtils'
+import { Msg } from '@/shared/enums'
 import type { ClientBumper } from '@/typings/socket'
 
 const bumperPaths: string[] = []

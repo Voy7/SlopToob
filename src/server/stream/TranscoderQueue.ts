@@ -1,18 +1,18 @@
-import parseTimestamp from '@/lib/parseTimestamp'
-import Logger from '@/server/Logger'
-import Settings from '@/server/Settings'
+import parseTimestamp from '@/shared/parseTimestamp'
+import Logger from '@/server/core/Logger'
+import Settings from '@/server/core/Settings'
 import TranscoderJob from '@/server/stream/TranscoderJob'
-import SocketUtils from '@/server/socket/SocketUtils'
+import SocketUtils from '@/server/network/SocketUtils'
 import Thumbnails from '@/server/stream/Thumbnails'
-import { JobState, Msg } from '@/lib/enums'
+import { JobState, Msg } from '@/shared/enums'
 import type { TranscodeClientVideo } from '@/typings/socket'
 import type Video from '@/server/stream/Video'
 
-// Handles all transcoding operations
+// Handles all transcoding operations, singleton
 // The reason why this logic is not in the Video class is because there can be
 // multiple of the same video, videos that are deleted while transcoding, etc.
-// Also allows for a queue system to prevent multiple transcodes of the same video
-export default new (class TranscoderQueue {
+// Also allows for a queue system to prevent multiple jobs of the same video
+class TranscoderQueue {
   jobs: TranscoderJob[] = []
 
   // Create a new job if it doesn't exist, otherwise return the existing job
@@ -40,6 +40,11 @@ export default new (class TranscoderQueue {
     this.processQueue()
   }
 
+  // Reset all active jobs, used for applying new transcoding settings
+  refreshAllActiveJobs() {
+    for (const job of this.jobs) job.resetTranscode()
+  }
+
   get clientTranscodeList(): TranscodeClientVideo[] {
     const list: TranscodeClientVideo[] = []
     for (const job of this.jobs) {
@@ -48,7 +53,7 @@ export default new (class TranscoderQueue {
         state: job.state,
         name: job.video.name,
         inputPath: job.video.inputPath,
-        thumbnailURL: Thumbnails.getURL(job.video.inputPath),
+        thumbnailURL: Thumbnails.getVideoURL(job.video.inputPath),
         isUsingCache: job.isUsingCache,
         targetSection: `${parseTimestamp(job.transcodedStartSeconds)} - ${parseTimestamp(job.duration)}`,
         totalSeconds: job.duration,
@@ -64,4 +69,6 @@ export default new (class TranscoderQueue {
     }
     return list
   }
-})()
+}
+
+export default new TranscoderQueue()

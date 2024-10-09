@@ -1,0 +1,12 @@
+.animation {
+  animation: spaceBallsBackgroundAnimation 100s forwards;
+
+  @keyframes spaceBallsBackgroundAnimation {
+    0% {
+      opacity: 0;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+}

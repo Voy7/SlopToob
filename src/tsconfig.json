@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "ESNext",
+    "target": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "incremental": true,
+    "jsx": "preserve",
+    "paths": {
+      "@/server/*": ["./server/*"],
+      "@/shared/*": ["./shared/*"],
+      "@/typings/*": ["./typings/*"],
+      "@/root/*": ["../*"],
+      "@/*": ["./client/*"]
+    }
+  },
+  "include": ["./typings/**/*.d.ts", "./**/*.ts", "./**/*.tsx"],
+  "exclude": ["../node_modules", "../output", "./client/.next"]
+}

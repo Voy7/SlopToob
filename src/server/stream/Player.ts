@@ -1,17 +1,17 @@
-import Logger from '@/server/Logger'
-import Checklist from '@/server/Checklist'
+import Logger from '@/server/core/Logger'
+import Checklist from '@/server/core/Checklist'
 import Playlists from '@/server/stream/Playlists'
 import Video from '@/server/stream/Video'
 import PlayHistory from '@/server/stream/PlayHistory'
 import VoteSkipHandler from '@/server/stream/VoteSkipHandler'
-import FileTreeHandler from '@/server/FileTreeHandler'
-import Settings from '@/server/Settings'
-import SocketUtils from '@/server/socket/SocketUtils'
+import FileTreeHandler from '@/server/stream/FileTreeHandler'
+import Settings from '@/server/core/Settings'
+import SocketUtils from '@/server/network/SocketUtils'
 import Chat from '@/server/stream/Chat'
 import Schedule from '@/server/stream/Schedule'
 import Themes from '@/server/stream/Themes'
 import { getNextBumper } from '@/server/stream/bumpers'
-import { StreamState, Msg, VideoState } from '@/lib/enums'
+import { StreamState, Msg, VideoState } from '@/shared/enums'
 import type { RichPlaylist, ListOption } from '@/typings/types'
 import type {
   SocketClient,
@@ -22,7 +22,7 @@ import type {
   ClientPlaylist,
   ClientVideo
 } from '@/typings/socket'
-import packageJSON from '@package' assert { type: 'json' }
+import packageJSON from '@/root/package.json'
 
 // Main video player handler, singleton
 class Player {
@@ -37,6 +37,7 @@ class Player {
   // Get all playlists on startup
   async initialize() {
     Logger.debug('[Player] Initializing player handler...')
+    Checklist.running('playerReady', 'Initializing stream player...')
     await Playlists.populatePlaylists()
     await this.setActivePlaylistID(Settings.activePlaylistID)
     Checklist.pass('playerReady', 'Stream player handler ready.')
@@ -264,19 +265,35 @@ class Player {
       return {
         state: StreamState.Error,
         name: this.playing.name,
+        isBumper: this.playing.isBumper || undefined,
         fromPlaylistName: this.playing.fromPlaylistName || undefined,
         error: this.playing.error || 'Unknown error occurred.' // Should never be null, but just in case
       }
     }
 
     if (this.playing.state === VideoState.Playing || this.playing.state === VideoState.Paused) {
+      if (this.playing.isBuffering) {
+        return {
+          state: StreamState.Buffering,
+          id: this.playing.id,
+          name: this.playing.name,
+          isBumper: this.playing.isBumper,
+          fromPlaylistName: this.playing.fromPlaylistName || undefined,
+          path: `/stream-data/${this.playing.job.streamID}/video.m3u8`,
+          currentSeconds: this.playing.currentSeconds,
+          totalSeconds: this.playing.durationSeconds,
+          trueCurrentSeconds: this.playing.currentSeconds - this.playing.job.transcodedStartSeconds,
+          trueTotalSeconds: this.playing.durationSeconds - this.playing.job.transcodedStartSeconds
+        }
+      }
+
       return {
         state: this.playing.state === VideoState.Playing ? StreamState.Playing : StreamState.Paused,
         id: this.playing.id,
         name: this.playing.name,
+        isBumper: this.playing.isBumper,
         fromPlaylistName: this.playing.fromPlaylistName || undefined,
         path: `/stream-data/${this.playing.job.streamID}/video.m3u8`,
-        isBumper: this.playing.isBumper,
         currentSeconds: this.playing.currentSeconds,
         totalSeconds: this.playing.durationSeconds,
         trueCurrentSeconds: this.playing.currentSeconds - this.playing.job.transcodedStartSeconds,
@@ -284,9 +301,21 @@ class Player {
       }
     }
 
+    if (this.playing.state === VideoState.Seeking) {
+      return {
+        state: StreamState.Seeking,
+        name: this.playing.name,
+        isBumper: this.playing.isBumper,
+        fromPlaylistName: this.playing.fromPlaylistName || undefined,
+        currentSeconds: this.playing.currentSeconds,
+        totalSeconds: this.playing.durationSeconds
+      }
+    }
+
     return {
       state: StreamState.Loading,
       name: this.playing.name,
+      isBumper: this.playing.isBumper,
       fromPlaylistName: this.playing.fromPlaylistName || undefined
     }
   }
@@ -301,8 +330,6 @@ class Player {
   get adminStreamInfo(): AdminStreamInfo {
     const info: AdminStreamInfo = {
       ...this.baseStreamInfo,
-      activePlaylistID: this.activePlaylist?.id || 'None',
-      activeThemeID: Settings.streamTheme,
       previousVideoExists: this.previousVideos.length > 0,
       appVersion: packageJSON.version
     }

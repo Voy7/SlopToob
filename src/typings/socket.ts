@@ -1,6 +1,6 @@
 import type { Socket } from 'socket.io'
 import type { CacheID } from '@/server/stream/CacheHandler'
-import type { AuthRole, StreamState, VideoState, JobState, ChatType } from '@/lib/enums'
+import type { AuthRole, StreamState, VideoState, JobState, ChatType } from '@/shared/enums'
 
 export type { CacheID }
 
@@ -31,24 +31,44 @@ export type StreamPaused = {
 export type StreamLoading = {
   state: StreamState.Loading
   name: string
+  isBumper: boolean
+}
+
+export type StreamSeeking = {
+  state: StreamState.Seeking
+  name: string
+  isBumper: boolean
+  currentSeconds: number
+  totalSeconds: number
+}
+
+export type StreamBuffering = {
+  state: StreamState.Buffering
+  id: string
+  name: string
+  path: string
+  isBumper: boolean
+  currentSeconds: number
+  totalSeconds: number
+  trueCurrentSeconds: number
+  trueTotalSeconds: number
 }
 
 export type StreamError = {
   state: StreamState.Error
   name?: string
+  isBumper?: boolean
   error: string
 }
 
 export type BaseStreamInfo = {
   fromPlaylistName?: string
-} & (StreamPlaying | StreamPaused | StreamLoading | StreamError)
+} & (StreamPlaying | StreamPaused | StreamLoading | StreamSeeking | StreamBuffering | StreamError)
 
 export type ViewerStreamInfo = BaseStreamInfo & StreamOptions
 
 export type AdminStreamInfo = {
   transcodedSeconds?: number
-  activePlaylistID: string
-  activeThemeID: string
   previousVideoExists: boolean
   appVersion: string
 } & BaseStreamInfo

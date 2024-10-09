@@ -1,14 +1,14 @@
-import prisma from '@/lib/prisma'
-import parseVideoName from '@/lib/parseVideoName'
-import parseTimestamp from '@/lib/parseTimestamp'
-import Env from '@/server/EnvVariables'
-import Logger from '@/server/Logger'
-import Settings from '@/server/Settings'
+import prisma from '@/server/lib/prisma'
+import parseVideoName from '@/server/utils/parseVideoName'
+import parseTimestamp from '@/shared/parseTimestamp'
+import Env from '@/server/core/EnvVariables'
+import Logger from '@/server/core/Logger'
+import Settings from '@/server/core/Settings'
 import Player from '@/server/stream/Player'
 import TranscoderQueue from '@/server/stream/TranscoderQueue'
 import Thumbnails from '@/server/stream/Thumbnails'
-import SocketUtils from '@/server/socket/SocketUtils'
-import { Msg } from '@/lib/enums'
+import SocketUtils from '@/server/network/SocketUtils'
+import { Msg } from '@/shared/enums'
 import type { PlayHistory as DBPlayHistory } from '@prisma/client'
 import type { ClientHistoryItem, ClientHistoryStatus } from '@/typings/socket'
 import type Video from '@/server/stream/Video'
@@ -140,7 +140,7 @@ export default new (class PlayHistory {
     return items.map((item) => ({
       name: parseVideoName(item.path),
       totalDuration: parseTimestamp(item.totalDuration),
-      thumbnailURL: Thumbnails.getURL(item.path),
+      thumbnailURL: Thumbnails.getVideoURL(item.path),
       isBumper: item.path.startsWith(Env.BUMPERS_PATH)
     }))
   }

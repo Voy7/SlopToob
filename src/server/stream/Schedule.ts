@@ -1,12 +1,12 @@
-import prisma from '@/lib/prisma'
-import Checklist from '@/server/Checklist'
-import Settings from '@/server/Settings'
+import prisma from '@/server/lib/prisma'
+import Checklist from '@/server/core/Checklist'
+import Settings from '@/server/core/Settings'
 import Player from '@/server/stream/Player'
 import Chat from '@/server/stream/Chat'
 import Thumbnails from '@/server/stream/Thumbnails'
-import SocketUtils from '../socket/SocketUtils'
-import { Msg } from '@/lib/enums'
-import { daysOfWeek } from '@/lib/daysOfWeek'
+import SocketUtils from '@/server/network/SocketUtils'
+import { Msg } from '@/shared/enums'
+import { daysOfWeek } from '@/shared/data/daysOfWeek'
 import type { WeeklySchedule as DBScheduleEntry } from '@prisma/client'
 import type { ClientSchedule, ClientScheduleDisplay, SocketClient } from '@/typings/socket'
 import type { ScheduleEntryOptions } from '@/typings/types'
@@ -240,17 +240,16 @@ class Schedule {
     if (!Settings.showWeeklyScheduleIfUnsynced && !Settings.weekyScheduleInSync) return null
     return {
       inSync: Settings.weekyScheduleInSync,
-      activeEntryIndex:
-        this.entries.findIndex((e) => e.playlistID === Player.activePlaylist?.id) || null,
+      activeEntryIndex: Settings.weekyScheduleInSync
+        ? this.entries.findIndex((e) => e.playlistID === Player.activePlaylist?.id) || null
+        : null,
       entries: this.entries.map((entry) => {
         const playlist = Player.playlists.find((p) => p.id === entry.playlistID)
         const realHour = Math.floor(entry.secondsIn / 3600)
         const obj: ClientScheduleDisplay['entries'][0] = {
           day: daysOfWeek[entry.dayOfWeek] || 'Invalid Day',
           playlist: playlist ? playlist.name : '(Deleted Playlist)',
-          thumbnailURL: Thumbnails.getURL(
-            playlist?.videos[Math.round(playlist.videos.length / 2)] || 'unknown'
-          )
+          thumbnailURL: Thumbnails.getPlaylistURL(entry.playlistID)
         }
         if (Settings.showWeeklyScheduleTimemarks) {
           const minute = Math.floor((entry.secondsIn % 3600) / 60)

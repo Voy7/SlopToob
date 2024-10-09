@@ -1,20 +1,20 @@
 import path from 'path'
-import generateSecret from '@/lib/generateSecret'
-import videoInputToOutputPath from '@/lib/videoInputToOutputPath'
-import parseVideoName from '@/lib/parseVideoName'
-import parseTimestamp from '@/lib/parseTimestamp'
-import Logger from '@/server/Logger'
+import generateSecret from '@/server/utils/generateSecret'
+import videoInputToOutputPath from '@/server/utils/videoInputToOutputPath'
+import parseVideoName from '@/server/utils/parseVideoName'
+import parseTimestamp from '@/shared/parseTimestamp'
+import Logger from '@/server/core/Logger'
 import Player from '@/server/stream/Player'
 import TranscoderJob from '@/server/stream/TranscoderJob'
 import TranscoderQueue from '@/server/stream/TranscoderQueue'
-import Settings from '@/server/Settings'
-import SocketUtils from '@/server/socket/SocketUtils'
+import Settings from '@/server/core/Settings'
+import SocketUtils from '@/server/network/SocketUtils'
 import PlayHistory from '@/server/stream/PlayHistory'
 import VoteSkipHandler from '@/server/stream/VoteSkipHandler'
 import Thumbnails from '@/server/stream/Thumbnails'
 import EventLogger from '@/server/stream/VideoEventLogger'
-import { socketClients } from '@/server/socket/socketClients'
-import { Msg, VideoState as State } from '@/lib/enums'
+import { socketClients } from '@/server/network/socketClients'
+import { Msg, VideoState as State } from '@/shared/enums'
 import type { ClientVideo } from '@/typings/socket'
 
 // Main video class (for both normal and bumpers)
@@ -35,6 +35,8 @@ export default class Video {
   private readyCallbacks: Array<() => void> = []
   private finishedPlayingCallback?: () => void
   private playAfterSeek: boolean = true
+  private bufferingTimeout?: NodeJS.Timeout
+  isBuffering: boolean = false
 
   private _state: State = State.NotReady
   get state() {
@@ -92,14 +94,30 @@ export default class Video {
       // Video is being played & new files/stream is ready (aka seeking to new time)
       if (this.state === State.Seeking) {
         if (this.playAfterSeek) {
-          this.state = State.Playing
           this.startFinishTimeout()
+          this.state = State.Playing
           this.resolveReadyCallbacks()
           return
         }
         this.state = State.Paused
         this.resolveReadyCallbacks()
       }
+    })
+
+    // Fires when job is seeking (temporarily pausing playback)
+    this.job.onSeeking(() => {
+      EventLogger.log(this, `Job callback - onSeeking()`)
+      if (Player.playing !== this) return
+
+      this.playAfterSeek = this.state === State.Playing
+      if (this.finishedTimeout) clearTimeout(this.finishedTimeout)
+      this.passedDurationSeconds = this.currentSeconds
+      this.state = State.Seeking
+    })
+
+    this.job.onProgress(() => {
+      if (!this.isBuffering) return
+      this.bufferingCheck()
     })
   }
 
@@ -227,11 +245,8 @@ export default class Video {
 
     // If seek target is not transcoded yet, update transcoder job
     if (seconds < this.job.transcodedStartSeconds || seconds > this.job.availableSeconds) {
-      this.playAfterSeek = this.state === State.Playing
-      this.state = State.Seeking
-      if (this.finishedTimeout) clearTimeout(this.finishedTimeout)
-      this.job.seekTranscodeTo(seconds)
-      return
+      this.playingDate = new Date()
+      return this.job.seekTranscodeTo(seconds)
     }
     // Seek target is already transcoded
     if (this.state === State.Playing) {
@@ -249,6 +264,27 @@ export default class Video {
       () => this.end(),
       (this.durationSeconds - this.passedDurationSeconds + Settings.videoPaddingSeconds) * 1000
     )
+    this.bufferingCheck()
+  }
+
+  private bufferingCheck() {
+    return
+    EventLogger.log(this, `bufferingCheck()`)
+
+    const diff = this.job.availableSeconds - this.currentSeconds
+    console.log(`${this.job.availableSeconds} - ${this.currentSeconds} = ${diff}`)
+    if (diff > 2000) {
+      this.bufferingTimeout = setTimeout(() => this.bufferingCheck(), diff * 1000)
+      if (!this.isBuffering) return
+      this.isBuffering = false
+      Player.broadcastStreamInfo()
+      return
+    }
+    if (this.isBuffering) return
+    this.isBuffering = true
+    this.passedDurationSeconds = this.currentSeconds
+    clearTimeout(this.finishedTimeout)
+    Player.broadcastStreamInfo()
   }
 
   // Start video playing timer for error display
@@ -276,7 +312,9 @@ export default class Video {
   // Current time of whole video in seconds (not considering transcoded video time)
   get currentSeconds(): number {
     if (!this.playingDate) return 0
+    if (this.isBuffering) return this.passedDurationSeconds
     if (this.state === State.Paused) return this.passedDurationSeconds
+    if (this.state === State.Seeking) return this.passedDurationSeconds
     return (new Date().getTime() - this.playingDate.getTime()) / 1000 + this.passedDurationSeconds
   }
 
@@ -288,7 +326,7 @@ export default class Video {
       name: this.name,
       isBumper: this.isBumper,
       path: this.inputPath,
-      thumbnailURL: Thumbnails.getURL(this.inputPath),
+      thumbnailURL: Thumbnails.getVideoURL(this.inputPath),
       isPlaying: Player.playing === this,
       error: this.error
     }
