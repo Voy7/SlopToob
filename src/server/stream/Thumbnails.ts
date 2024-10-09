@@ -6,6 +6,7 @@ import Logger from '@/server/core/Logger'
 import TranscoderJob from '@/server/stream/TranscoderJob'
 import type { IncomingMessage, ServerResponse } from 'http'
 import type { UrlWithParsedQuery } from 'url'
+import Settings from '../core/Settings'
 
 export default new (class Thumbnails {
   private generateCallbacks: Record<string, Array<(thumbnailPath: string | null) => void>> = {}
@@ -52,8 +53,13 @@ export default new (class Thumbnails {
       } catch (error) {}
 
       const command = ffmpeg(videoPath)
-      command.inputOptions([`-ss ${seekSeconds}`])
-      command.outputOptions([...THUMBNAIL_ARGS])
+      // command.inputOptions([`-ss ${seekSeconds}`])
+      if (!Settings.enableSmartThumbnails) command.inputOptions([`-ss ${seekSeconds}`])
+      command.outputOptions(
+        Settings.enableSmartThumbnails
+          ? ['-vf thumbnail,scale=-1:480', ...THUMBNAIL_ARGS]
+          : ['-vf scale=-1:480', ...THUMBNAIL_ARGS]
+      )
       command.output(thumbnailPath)
 
       command.on('end', () => {

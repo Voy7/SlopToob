@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useSocketContext } from '@/contexts/SocketContext'
+import { useAdminContext } from '@/contexts/AdminContext'
 import { videoQualities } from '@/shared/data/videoQualities'
 import { audioQualities } from '@/shared/data/audioQualities'
 import LoadingBoundary from '@/components/admin/common/LoadingBoundary'
@@ -18,6 +19,7 @@ import { Msg } from '@/shared/enums'
 
 export default function TranscodingSettings() {
   const { socket } = useSocketContext()
+  const { setSection } = useAdminContext()
 
   const [showRefreshModal, setShowRefreshModal] = useState<boolean>(false)
   const [autoShown, setAutoShown] = useState<boolean>(false)
@@ -48,6 +50,9 @@ export default function TranscodingSettings() {
   const loudnormTargetPeak = useNumberOption('loudnormTargetPeak')
   const loudnormRange = useNumberOption('loudnormRange')
 
+  const enableSmartThumbnails = useToggleOption('enableSmartThumbnails')
+
+  // Because these are using custom dropdowns rather than NumberOption, we need to handle loading display
   if (maxVideoQuality.value === null) return <div data-loading />
   if (maxAudioQuality.value === null) return <div data-loading />
 
@@ -175,6 +180,31 @@ export default function TranscodingSettings() {
           Advanced volume normalization parameters, default values should work for most cases.
         </Description>
       </SettingGroup>
+      <div className="h-4" />
+      <SettingGroup>
+        <Header icon="settings">Thumbnail Settings</Header>
+        <ToggleOption
+          label="Enable Smart Thumbnails"
+          defaultValue={false}
+          {...enableSmartThumbnails}
+        />
+        <Description>
+          Uses an algorithm that looks for representative frames to generate the video thumbnails.
+          If disabled, that thumbnail will be a frame from the middle of the video. <br />
+          This will make thumbnails take roughly 5x longer to generate, this means users could see
+          delays of more than a second, rather than hundreds of milliseconds when generating a
+          thumbnail for the first time.
+          <br />
+          Note:{' '}
+          <a
+            onClick={() => setSection('caching')}
+            className="cursor-pointer text-blue-500 hover:underline">
+            Clear the Thumbnails Cache
+          </a>{' '}
+          to apply changes to existing thumbnails.
+        </Description>
+      </SettingGroup>
+
       <Modal
         title="Apply Transcoding Changes"
         isOpen={showRefreshModal}

@@ -65,6 +65,8 @@ export const settingsList = {
   loudnormTargetPeak: { default: -2, onChange: transcoderResync },
   loudnormRange: { default: 7, onChange: transcoderResync },
 
+  enableSmartThumbnails: { default: true },
+
   // Is not a normal setting, just a persistant state for if the server restarts
   streamIsPaused: { default: false },
 

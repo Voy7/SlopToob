@@ -25,7 +25,6 @@ export const BASE_TRANSCODE_ARGS = [
 ]
 
 export const THUMBNAIL_ARGS = [
-  '-vf scale=-1:480', // Scale to 420p height
   '-vframes 1', // Only 1 frame
   '-q:v 2' // Quality level
 ]
