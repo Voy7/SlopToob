@@ -6,7 +6,7 @@ import type { MultiListOption } from '@/typings/types'
 type ThemeID = (typeof themes)[number]['id']
 
 // Main themes handling class, singleton
-class Themes {
+class ThemesHandler {
   activeThemes: ThemeID[] = []
 
   constructor() {
@@ -34,4 +34,4 @@ class Themes {
   }
 }
 
-export default new Themes()
+export default new ThemesHandler()

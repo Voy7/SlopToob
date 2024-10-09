@@ -1,4 +1,6 @@
-<img align="center" height="50px" src="/public/logo-alt.png" />
+<p align="center">
+  <img height="150px" src="/public/logo-alt.png" />
+</p>
 <h1 align="center">SlopToob</h1>
 <p align="center">
 SlopToob is a dynamic web app that provides the ability to host a 24/7 video stream of all your local videos. It also includes many features like live chat, vote skipping, and themes, while providing administrators with versatile control over playlists, file management, stream settings, and much more.
