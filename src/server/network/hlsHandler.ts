@@ -1,12 +1,12 @@
 // @ts-ignore
 import Hls from 'hls-server'
 import fs from 'fs'
-import { httpServer } from '@/server/network/httpServer'
 import Logger from '@/server/core/Logger'
 import Player from '@/server/stream/Player'
+import type { Server as HTTPServer } from 'http'
 
 // HLS handler must be initialized after Next.js is ready
-export function initializeHlsHandler() {
+export function initializeHlsHandler(httpServer: HTTPServer) {
   new Hls(httpServer, {
     provider: {
       exists: (req: any, cb: any) => {

@@ -1,6 +1,7 @@
 import next from 'next'
+import { Server } from 'http'
 import { parse } from 'url'
-import { httpServer } from '@/server/network/httpServer'
+// import { httpServer } from '@/server/network/httpServer'
 import { initializeSocketServer } from '@/server/network/socket'
 import { initializeHlsHandler } from '@/server/network/hlsHandler'
 import Env from '@/server/core/EnvVariables'
@@ -22,9 +23,23 @@ const handle = app.getRequestHandler()
 
 app.prepare().then(() => {
   Checklist.pass('nextAppReady', 'Next.js app ready.')
-  httpServer.on('request', nextRequestHandler)
-  initializeSocketServer()
-  initializeHlsHandler()
+
+  const server = new Server((req, res) => {
+    nextRequestHandler(req, res)
+  })
+  // httpServer.on('request', nextRequestHandler)
+  initializeSocketServer(server)
+  initializeHlsHandler(server)
+
+  server.listen(Env.SERVER_PORT, () => {
+    Checklist.pass('httpServerReady', `Ready on: http://localhost:${Env.SERVER_PORT}`)
+  })
+
+  server.once('error', (error) => {
+    Checklist.fail('httpServerReady', error.message)
+    console.error(error)
+  })
+
   Player.initialize()
 })
 

@@ -1,16 +1,17 @@
 import { Server, type Socket } from 'socket.io'
-import { httpServer } from '@/server/network/httpServer'
+// import { httpServer } from '@/server/network/httpServer'
 import Logger from '@/server/core/Logger'
 import Checklist from '@/server/core/Checklist'
 import Events from '@/server/network/Events'
 import Settings, { settingsList } from '@/server/core/Settings'
 import { socketClients } from '@/server/network/socketClients'
 import { AuthRole } from '@/shared/enums'
+import type { Server as HTTPServer } from 'http'
 
 let io: Server | null = null
 
 // Socket server must be initialized after Next.js is ready
-export function initializeSocketServer() {
+export function initializeSocketServer(httpServer: HTTPServer) {
   io = new Server(httpServer, {
     transports: ['websocket'],
     maxHttpBufferSize: 100e6 // Max size of HTTP buffer (100MB)
