@@ -13,7 +13,7 @@ const NicknameModal = dynamic(() => import('@/components/stream/NicknameModal'),
 })
 
 function initSocket() {
-  return io({ transports: ['websocket'], upgrade: false, autoConnect: false })
+  return io({ transports: ['websocket'], upgrade: true, autoConnect: false })
 }
 
 // Stream page context
