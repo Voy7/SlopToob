@@ -140,7 +140,7 @@ export default new (class PlayHistory {
     return items.map((item) => ({
       name: parseVideoName(item.path),
       totalDuration: parseTimestamp(item.totalDuration),
-      thumbnailURL: Thumbnails.getURL(item.path),
+      thumbnailURL: Thumbnails.getVideoURL(item.path),
       isBumper: item.path.startsWith(Env.BUMPERS_PATH)
     }))
   }

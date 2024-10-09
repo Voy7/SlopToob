@@ -53,7 +53,7 @@ class TranscoderQueue {
         state: job.state,
         name: job.video.name,
         inputPath: job.video.inputPath,
-        thumbnailURL: Thumbnails.getURL(job.video.inputPath),
+        thumbnailURL: Thumbnails.getVideoURL(job.video.inputPath),
         isUsingCache: job.isUsingCache,
         targetSection: `${parseTimestamp(job.transcodedStartSeconds)} - ${parseTimestamp(job.duration)}`,
         totalSeconds: job.duration,

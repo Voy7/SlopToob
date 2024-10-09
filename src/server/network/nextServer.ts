@@ -39,7 +39,10 @@ async function nextRequestHandler(req: IncomingMessage, res: ServerResponse) {
 
     // Custom handling for thumbnails
     if (parsedUrl.pathname?.startsWith('/thumbnails/')) {
-      return await Thumbnails.handleThumbnailRequest(req, res, parsedUrl)
+      return await Thumbnails.handleVideoThumbnailRequest(req, res, parsedUrl)
+    }
+    if (parsedUrl.pathname?.startsWith('/playlist-thumbnails/')) {
+      return await Thumbnails.handlePlaylistThumbnailRequest(req, res, parsedUrl)
     }
 
     await handle(req, res, parsedUrl)

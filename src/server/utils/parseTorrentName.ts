@@ -18,7 +18,8 @@ const SUFFIX_SEPERATORS = [
   'hdtv',
   'xvid',
   'ac3',
-  'hdrip'
+  'hdrip',
+  'repack'
 ]
 
 // Parse common torrent file name patterns to nice video titles

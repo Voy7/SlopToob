@@ -326,7 +326,7 @@ export default class Video {
       name: this.name,
       isBumper: this.isBumper,
       path: this.inputPath,
-      thumbnailURL: Thumbnails.getURL(this.inputPath),
+      thumbnailURL: Thumbnails.getVideoURL(this.inputPath),
       isPlaying: Player.playing === this,
       error: this.error
     }

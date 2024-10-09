@@ -248,9 +248,7 @@ class Schedule {
         const obj: ClientScheduleDisplay['entries'][0] = {
           day: daysOfWeek[entry.dayOfWeek] || 'Invalid Day',
           playlist: playlist ? playlist.name : '(Deleted Playlist)',
-          thumbnailURL: Thumbnails.getURL(
-            playlist?.videos[Math.round(playlist.videos.length / 2)] || 'unknown'
-          )
+          thumbnailURL: Thumbnails.getPlaylistURL(entry.playlistID)
         }
         if (Settings.showWeeklyScheduleTimemarks) {
           const minute = Math.floor((entry.secondsIn % 3600) / 60)
