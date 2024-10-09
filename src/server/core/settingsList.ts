@@ -30,11 +30,11 @@ export const settingsList = {
   activeThemes: {
     default: '',
     setter: async (value: string[]) => {
-      const { default: Themes } = await import('@/server/stream/Themes')
+      const { default: Themes } = await import('@/server/stream/ThemesHandler')
       return Themes.setActiveThemes(value)
     },
     clientValue: async (): Promise<MultiListOption> => {
-      const { default: Themes } = await import('@/server/stream/Themes')
+      const { default: Themes } = await import('@/server/stream/ThemesHandler')
       return Themes.multiListOptionThemes
     }
   },

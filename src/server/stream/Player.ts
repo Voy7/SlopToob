@@ -9,7 +9,7 @@ import Settings from '@/server/core/Settings'
 import SocketUtils from '@/server/network/SocketUtils'
 import Chat from '@/server/stream/Chat'
 import Schedule from '@/server/stream/Schedule'
-import Themes from '@/server/stream/Themes'
+import ThemesHandler from '@/server/stream/ThemesHandler'
 import { getNextBumper } from '@/server/stream/bumpers'
 import { StreamState, Msg, VideoState } from '@/shared/enums'
 import type { RichPlaylist, ListOption } from '@/typings/types'
@@ -341,7 +341,7 @@ class Player {
 
   get clientStreamOptions(): StreamOptions {
     const options: StreamOptions = {
-      streamThemes: Themes.activeThemes,
+      streamThemes: ThemesHandler.activeThemes,
       history: PlayHistory.clientHistory,
       chat: {
         showTimestamps: Settings.showChatTimestamps,
