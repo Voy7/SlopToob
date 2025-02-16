@@ -109,6 +109,7 @@ function updateProgressLine() {
 
 let loadingStep = 0
 let loadingInterval = setInterval(() => {
+  if (!canPrint) return
   process.stdout.write('\u001b[s')
   process.stdout.cursorTo(LOADING_DOTS_POS, STATUS_LINE)
   if (loadingStep === 0) process.stdout.write('   ')
