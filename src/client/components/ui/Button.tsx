@@ -5,8 +5,8 @@ import { twMerge } from 'tailwind-merge'
 
 const variants = {
   main: 'bg-blue-600 hover:bg-blue-500 border-blue-600',
-  normal: 'bg-gray-900 hover:bg-gray-800 border-gray-800 disabled:bg-gray-900',
-  danger: 'text-red-400 bg-gray-900 hover:bg-red-500 border-gray-800 hover:border-red-6z00'
+  normal: 'bg-bg2 hover:bg-bg3 border-gray-800 disabled:bg-bg1',
+  danger: 'text-red-400 bg-bg2 hover:bg-red-500 border-gray-800 hover:border-red-6z00'
 }
 
 type ButtonVariant = keyof typeof variants

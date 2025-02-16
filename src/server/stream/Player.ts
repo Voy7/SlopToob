@@ -1,28 +1,29 @@
-import Logger from '@/server/core/Logger'
+import packageJSON from '@/root/package.json'
 import Checklist from '@/server/core/Checklist'
-import Playlists from '@/server/stream/Playlists'
-import Video from '@/server/stream/Video'
-import PlayHistory from '@/server/stream/PlayHistory'
-import VoteSkipHandler from '@/server/stream/VoteSkipHandler'
-import FileTreeHandler from '@/server/stream/FileTreeHandler'
+import Logger from '@/server/core/Logger'
 import Settings from '@/server/core/Settings'
 import SocketUtils from '@/server/network/SocketUtils'
 import Chat from '@/server/stream/Chat'
+import FileTreeHandler from '@/server/stream/FileTreeHandler'
+import PlayHistory from '@/server/stream/PlayHistory'
+import Playlists from '@/server/stream/Playlists'
 import Schedule from '@/server/stream/Schedule'
 import ThemesHandler from '@/server/stream/ThemesHandler'
+import Video from '@/server/stream/Video'
+import VoteSkipHandler from '@/server/stream/VoteSkipHandler'
 import { getNextBumper } from '@/server/stream/bumpers'
-import { StreamState, Msg, VideoState } from '@/shared/enums'
-import type { RichPlaylist, ListOption } from '@/typings/types'
+import { Msg, StreamState, VideoState } from '@/shared/enums'
 import type {
-  SocketClient,
-  BaseStreamInfo,
-  ViewerStreamInfo,
   AdminStreamInfo,
-  StreamOptions,
+  BaseStreamInfo,
   ClientPlaylist,
-  ClientVideo
+  ClientVideo,
+  SocketClient,
+  StreamOptions,
+  ViewerStreamInfo
 } from '@/typings/socket'
-import packageJSON from '@/root/package.json'
+import type { ListOption, RichPlaylist } from '@/typings/types'
+import { socketClients } from '../network/socketClients'
 
 // Main video player handler, singleton
 class Player {
@@ -138,6 +139,7 @@ class Player {
   private shouldPlayBumper(): boolean {
     if (this.omitBumpersNextPlay) return false
     if (!Settings.bumpersEnabled) return false
+    if (socketClients.filter((client) => client.isWatching).length === 0) return false
     if (this.lastBumperDate.getTime() + Settings.bumperIntervalMinutes * 60 * 1000 >= Date.now())
       return false
     // If next video in queue is a bumper, let it play normally instead of injecting a new one
