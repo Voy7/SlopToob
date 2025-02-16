@@ -1,6 +1,6 @@
-import 'colors'
-import Logger from '@/server/core/Logger'
 import packageJSON from '@/root/package.json'
+import Logger from '@/server/core/Logger'
+import 'colors'
 
 const HEADER_MSG = `Starting up SlopToob v${packageJSON.version}...`.cyan
 
@@ -37,6 +37,8 @@ const HEADER_LINES = HEADER_MSG.split('\n').length + 2 // +2 for padding
 const START_TIME = Date.now()
 const LOADING_DOTS_POS = 32
 
+const canPrint = ("cursorTo" in process.stdout)
+
 // Methods to update check status and print to console
 export default new (class Checklist {
   running(check: CheckKey, message: string = '') {
@@ -72,15 +74,18 @@ export default new (class Checklist {
   }
 })()
 
-console.clear()
-console.log(
-  `\n  ${HEADER_MSG}\n\n` +
-    `${Object.values(CHECKS)
-      .map((check) => `  ○ `.gray + check.padEnd(MAX_CHECK_LENGTH, ' ') + ' | '.gray)
-      .join('\n')}\n\n\n`
-)
+if (canPrint) {
+  console.clear()
+  console.log(
+    `\n  ${HEADER_MSG}\n\n` +
+      `${Object.values(CHECKS)
+        .map((check) => `  ○ `.gray + check.padEnd(MAX_CHECK_LENGTH, ' ') + ' | '.gray)
+        .join('\n')}\n\n\n`
+    )
+}
 
 function updateCheckLine(check: CheckKey, text: string) {
+  if (!canPrint) return
   const index = Object.keys(CHECKS).indexOf(check)
   process.stdout.write('\u001b[s')
   // clear line
@@ -95,6 +100,7 @@ function updateCheckLine(check: CheckKey, text: string) {
 const STATUS_LINE = HEADER_LINES + Object.keys(CHECKS).length + 1
 
 function updateProgressLine() {
+  if (!canPrint) return
   process.stdout.write('\u001b[s')
   process.stdout.cursorTo(0, STATUS_LINE)
   process.stdout.write(`  Running initialization checks`.gray)
@@ -115,11 +121,12 @@ let loadingInterval = setInterval(() => {
 }, 250)
 
 function printStatus(message: string) {
+  clearInterval(loadingInterval)
+  if (!canPrint) return
   process.stdout.write('\u001b[s')
   process.stdout.cursorTo(0, STATUS_LINE)
   process.stdout.write(' '.repeat(100)) // Clear line
   process.stdout.cursorTo(0, STATUS_LINE)
   process.stdout.write(`  ${message}`)
   process.stdout.write('\u001b[u')
-  clearInterval(loadingInterval)
 }
