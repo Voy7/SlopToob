@@ -30,6 +30,8 @@ class EnvVariables {
   readonly THUMBNAILS_OUTPUT_PATH = parsePath(env?.OUTPUT_PATH, 'output', 'thumbnails')
   readonly VIDEO_LOGGER_OUTPUT_PATH = parsePath(env?.OUTPUT_PATH, 'output', 'video-logs')
   readonly DEV_FILE_TREE_TEST = env?.FILE_TREE_TEST === 'true'
+  // Polling interval in ms for file watching (0 = use native fs.watch instead)
+  readonly WATCH_POLLING = parseInt(env?.WATCH_POLLING || '0') || 0
 }
 
 export default new EnvVariables()
