@@ -1,0 +1,7 @@
+.git
+.gitignore
+node_modules
+output
+.env
+*.md
+src/client/.next
