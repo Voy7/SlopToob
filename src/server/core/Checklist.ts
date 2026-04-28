@@ -82,10 +82,17 @@ if (canPrint) {
         .map((check) => `  ○ `.gray + check.padEnd(MAX_CHECK_LENGTH, ' ') + ' | '.gray)
         .join('\n')}\n\n\n`
     )
+} else {
+  console.log(`
+  ${HEADER_MSG}
+`)
 }
 
 function updateCheckLine(check: CheckKey, text: string) {
-  if (!canPrint) return
+  if (!canPrint) {
+    console.log(text)
+    return
+  }
   const index = Object.keys(CHECKS).indexOf(check)
   process.stdout.write('\u001b[s')
   // clear line
@@ -123,7 +130,10 @@ let loadingInterval = setInterval(() => {
 
 function printStatus(message: string) {
   clearInterval(loadingInterval)
-  if (!canPrint) return
+  if (!canPrint) {
+    console.log(`  ${message}`)
+    return
+  }
   process.stdout.write('\u001b[s')
   process.stdout.cursorTo(0, STATUS_LINE)
   process.stdout.write(' '.repeat(100)) // Clear line
