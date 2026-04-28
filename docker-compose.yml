@@ -1,0 +1,21 @@
+services:
+  sloptoob:
+    build: .
+    ports:
+      - "${SERVER_PORT:-3000}:3000"
+    env_file:
+      - .env
+    environment:
+      # Override VIDEOS_PATH to the in-container mount point
+      VIDEOS_PATH: /videos
+      # Poll for new/deleted files every 10s (fs.watch doesn't work reliably with Docker bind mounts)
+      WATCH_POLLING: 10000
+    volumes:
+      # Set HOST_VIDEOS_PATH in your .env to the path of your video library on the host
+      - ${HOST_VIDEOS_PATH}:/videos:ro
+      # Persist database, transcoded files, thumbnails, etc.
+      - sloptoob-output:/app/output
+    restart: unless-stopped
+
+volumes:
+  sloptoob-output:

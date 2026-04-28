@@ -31,13 +31,25 @@ The app is meant for use in private groups, with a no-account system, using a si
 
 ## Setup
 
-To get the application running on a server, follow the steps below.
+### Docker (recommended)
 
-1. Install [Node.js](https://nodejs.org/en) >= v20
-2. Download the source code either manually, or with `git clone https://github.com/Voy7/SlopToob.git`.
-3. Create a `.env` file in the root of the project, this will hold some important options. You can copy the `.env.example` file, which has all the variables listed for you.
-4. For the first time, you must `npm run build` in the root of the project.
-5. Then run `npm start` to start the app!
+Requires [Docker](https://docs.docker.com/get-docker/) with the Compose plugin.
+
+1. Clone the repo: `git clone https://github.com/Voy7/SlopToob.git`
+2. Copy `.env.example` to `.env` and fill in your values.
+3. Set `HOST_VIDEOS_PATH` in `.env` to the path of your video library on the host machine.
+4. Run `docker compose up --build -d`
+
+The app will be available at the `SERVER_URL` you configured. The database, transcoded files, and thumbnails are stored in a named Docker volume (`sloptoob-output`) so they persist across restarts and rebuilds.
+
+### Manual
+
+Requires [Node.js](https://nodejs.org/en) >= v20.
+
+1. Clone the repo: `git clone https://github.com/Voy7/SlopToob.git`
+2. Copy `.env.example` to `.env` and fill in your values.
+3. Run `npm run build` to build the Next.js client.
+4. Run `npm start` to start the app.
 
 ## Technical Details
 

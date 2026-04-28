@@ -1,5 +1,6 @@
 import fs from 'fs'
 import Logger from '@/server/core/Logger'
+import Env from '@/server/core/EnvVariables'
 
 // Utility to watch directory and emit added & deleted files events
 export default class FsWatcher {
@@ -12,10 +13,40 @@ export default class FsWatcher {
     this.dirPath = dirPath
   }
 
+  // Poll the directory on an interval and emit add/delete events on changes
+  private async startPolling(intervalMs: number) {
+    let knownFiles = new Set(await this.crawlDirectory(this.dirPath))
+
+    setInterval(async () => {
+      try {
+        const currentFiles = await this.crawlDirectory(this.dirPath)
+        const currentSet = new Set(currentFiles)
+
+        for (const file of currentFiles) {
+          if (!knownFiles.has(file)) this.newFileCallback?.(file)
+        }
+
+        for (const file of knownFiles) {
+          if (!currentSet.has(file)) this.deleteFileCallback?.(file)
+        }
+
+        knownFiles = currentSet
+      } catch (error) {
+        Logger.error('[FsWatcher] Polling error:', error)
+      }
+    }, intervalMs)
+  }
+
   // Start watching directory, run this after event listeners are set
   activate() {
     if (this.isActive) return
     this.isActive = true
+
+    if (Env.WATCH_POLLING > 0) {
+      Logger.debug(`[FsWatcher] Using polling mode (interval: ${Env.WATCH_POLLING}ms)`)
+      this.startPolling(Env.WATCH_POLLING)
+      return
+    }
 
     fs.watch(this.dirPath, { recursive: true }, async (event, filename) => {
       // console.log(filename, event)
